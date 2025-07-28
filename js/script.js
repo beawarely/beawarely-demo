@@ -1,0 +1,1 @@
+console.log('BeAwarely demo loaded.');
