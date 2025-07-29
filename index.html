@@ -25,18 +25,9 @@
       color: #000;
     }
 
-    .mode-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      cursor: pointer;
-      font-size: 1.3rem;
-    }
-
     header {
       text-align: center;
       padding: 80px 20px 40px;
-      position: relative;
     }
 
     .logo-placeholder {
@@ -117,6 +108,11 @@
       font-size: 1.4rem;
     }
 
+    .mode-toggle {
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -146,7 +142,6 @@
 <body>
 
   <header>
-    <div class="mode-toggle" onclick="toggleMode()" title="Toggle light/dark">🌗</div>
     <div class="logo-placeholder"></div>
     <h1>Let’s make people<br>aware of the impact of AI</h1>
     <button class="scroll-btn" onclick="document.getElementById('form').scrollIntoView({behavior: 'smooth'})">Join the Mission</button>
@@ -195,6 +190,7 @@
       <span title="Website">🌐</span>
       <span title="Instagram">📸</span>
       <span title="Mind">🧠</span>
+      <span class="mode-toggle" onclick="toggleMode()" title="Toggle light/dark">🌓</span>
     </div>
     <p>© 2025 BeAwarely. All rights reserved. Demo version – not final.</p>
   </footer>
