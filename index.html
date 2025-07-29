@@ -152,14 +152,21 @@
 </head>
 <body>
 
-  <header>
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <div class="logo-placeholder"></div>
-    <span class="mode-toggle" onclick="toggleMode()" title="Toggle light/dark" id="modeIcon">🌙</span>
-  </div>
+  <header style="position: relative;">
+  <!-- Ikona trybu w prawym górnym rogu -->
+  <span class="mode-toggle" onclick="toggleMode()" title="Toggle light/dark" id="modeIcon"
+        style="position: absolute; top: 20px; right: 20px; font-size: 1.5rem; cursor: pointer;">
+    🌙
+  </span>
+
+  <!-- Logo + tekst -->
+  <div class="logo-placeholder" style="margin: 0 auto;"></div>
   <h1>Let’s make people<br>aware of the impact of AI</h1>
-  <button class="scroll-btn" onclick="document.getElementById('form').scrollIntoView({behavior: 'smooth'})">Join the Mission</button>
+  <button class="scroll-btn" onclick="document.getElementById('form').scrollIntoView({behavior: 'smooth'})">
+    Join the Mission
+  </button>
 </header>
+
 
 
 
