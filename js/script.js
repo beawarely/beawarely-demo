@@ -1,1 +1,1 @@
-console.log('BeAwarely demo loaded.');
+console.log('BeAwarely Demo Loaded');
