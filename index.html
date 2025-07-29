@@ -121,15 +121,26 @@
   <script>
     // Load preferred theme
     document.addEventListener('DOMContentLoaded', () => {
-      const mode = localStorage.getItem('mode');
-      if (mode === 'light') document.body.classList.add('light-mode');
-    });
+  const mode = localStorage.getItem('mode');
+  if (mode === 'light') {
+    document.body.classList.add('light-mode');
+    const icon = document.getElementById('modeIcon');
+    if (icon) icon.textContent = '🌞';
+  } else {
+    const icon = document.getElementById('modeIcon');
+    if (icon) icon.textContent = '🌙';
+  }
+});
+
 
     // Toggle mode and save
     function toggleMode() {
-      document.body.classList.toggle('light-mode');
-      localStorage.setItem('mode', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-    }
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('mode', isLight ? 'light' : 'dark');
+  const icon = document.getElementById('modeIcon');
+  if (icon) icon.textContent = isLight ? '🌞' : '🌙';
+}
+
 
     // Form submit confirmation
     function showConfirmation() {
@@ -142,10 +153,15 @@
 <body>
 
   <header>
+  <div style="display: flex; justify-content: space-between; align-items: center;">
     <div class="logo-placeholder"></div>
-    <h1>Let’s make people<br>aware of the impact of AI</h1>
-    <button class="scroll-btn" onclick="document.getElementById('form').scrollIntoView({behavior: 'smooth'})">Join the Mission</button>
-  </header>
+    <span class="mode-toggle" onclick="toggleMode()" title="Toggle light/dark" id="modeIcon">🌙</span>
+  </div>
+  <h1>Let’s make people<br>aware of the impact of AI</h1>
+  <button class="scroll-btn" onclick="document.getElementById('form').scrollIntoView({behavior: 'smooth'})">Join the Mission</button>
+</header>
+
+
 
   <section>
     <h2>About BeAwarely</h2>
@@ -190,7 +206,6 @@
       <span title="Website">🌐</span>
       <span title="Instagram">📸</span>
       <span title="Mind">🧠</span>
-      <span class="mode-toggle" onclick="toggleMode()" title="Toggle light/dark">🌓</span>
     </div>
     <p>© 2025 BeAwarely. All rights reserved. Demo version – not final.</p>
   </footer>
