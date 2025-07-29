@@ -1,1 +1,135 @@
-<!DOCTYPE html><html><head><title>BeAwarely</title></head><body><h1>BeAwarely Demo</h1></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BeAwarely – Join the Mission</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      color: #222;
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      text-align: center;
+      padding: 80px 20px;
+      background: linear-gradient(to bottom right, #007BFF, #66B2FF, #B3D9FF);
+      color: white;
+    }
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    #joinBtn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      background: #ffffff;
+      color: #007BFF;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    #joinBtn:hover {
+      background: #0056b3;
+      color: white;
+    }
+    section {
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    footer {
+      background: #222;
+      color: #ccc;
+      text-align: center;
+      padding: 20px;
+    }
+    footer a {
+      color: #66B2FF;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .dark-mode {
+      background: #121212;
+      color: #eaeaea;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="BeAwarely Logo" style="max-height: 60px; margin-bottom: 20px;">
+    <h1>BeAwarely – Join the Mission</h1>
+    <button id="joinBtn" onclick="scrollToForm()">Join the Mission</button>
+  </header>
+
+  <section id="about">
+    <h2>About the Project</h2>
+    <p>BeAwarely is a mission-driven platform designed to empower people with truth, knowledge, and verified information – combining AI precision with human passion.</p>
+  </section>
+
+  <section id="why">
+    <h2>Why Join?</h2>
+    <ul>
+      <li>🌍 Be part of something meaningful – truth matters.</li>
+      <li>💬 Help shape open, respectful conversations.</li>
+      <li>🧠 Support verified facts over empty opinions.</li>
+      <li>🤝 Collaborate with like-minded individuals.</li>
+      <li>🚀 Gain early access to future AI tools & features.</li>
+    </ul>
+  </section>
+
+  <section id="contact">
+    <h2>Join Us</h2>
+    <form action="https://formsubmit.co/youremail@example.com" method="POST">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" name="name" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" name="email" required />
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea name="message" rows="4"></textarea>
+      </div>
+      <button type="submit">Send</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>
+      <a href="#">Privacy Policy</a> |
+      <a href="#">Contact</a> |
+      <a href="#">Project Principles</a>
+    </p>
+    <p>© 2025 BeAwarely. All rights reserved.</p>
+    <p><em>This is a demo version – not final.</em></p>
+  </footer>
+
+  <script>
+    function scrollToForm() {
+      document.getElementById("contact").scrollIntoView({ behavior: "smooth" });
+    }
+
+    const joinBtn = document.getElementById("joinBtn");
+    joinBtn.addEventListener("mouseover", () => joinBtn.innerText = "Leave your email");
+    joinBtn.addEventListener("mouseout", () => joinBtn.innerText = "Join the Mission");
+  </script>
+</body>
+</html>
