@@ -194,10 +194,24 @@
 
   <header style="position: relative;">
   <!-- Ikona trybu w prawym górnym rogu -->
-  <span class="mode-toggle" onclick="toggleMode()" title="Toggle light/dark" id="modeIcon"
-        style="position: absolute; top: 20px; right: 20px; font-size: 1.5rem; cursor: pointer;">
-    🌙
-  </span>
+  <span id="modeIcon"
+      onclick="toggleMode()"
+      title="Toggle light/dark mode"
+      style="
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 1.6rem;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.3s, transform 0.3s;
+      "
+      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
+      onmouseout="this.style.backgroundColor='transparent'">
+  🌙
+</span>
+
 
   <!-- Logo + tekst -->
   <div class="logo-placeholder" style="margin: 0 auto;"></div>
