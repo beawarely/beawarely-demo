@@ -159,6 +159,14 @@
     const icon = document.getElementById('modeIcon');
     if (icon) icon.textContent = '🌙';
   }
+
+  // Hide loader
+  const loader = document.getElementById('loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.visibility = 'hidden';
+    setTimeout(() => loader.remove(), 500);
+  }
 });
 
 
