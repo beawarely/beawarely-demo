@@ -119,17 +119,33 @@
     }
 
     /* Spinner loading screen */
-    #loader {
-      ...
-    }
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0e0e0e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
 
-    .spinner {
-      ...
-    }
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #fff;
+  border-top: 5px solid var(--blue1);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
 
-    @keyframes spin {
-      ...
-    }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
   </style>
   <script>
     // Load preferred theme
