@@ -79,11 +79,27 @@
     }
 
     input, textarea {
-      padding: 12px;
-      border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
+  padding: 12px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #1a1a1a;
+  color: #fff;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+body.light-mode input,
+body.light-mode textarea {
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #ccc;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--blue2);
+  outline: none;
+  box-shadow: 0 0 8px var(--blue2);
+}
 
     .send-btn {
       background-color: var(--blue1);
@@ -279,7 +295,7 @@
       <textarea name="message" placeholder="Message" rows="4"></textarea>
       <input type="hidden" name="_captcha" value="false">
       <input type="hidden" name="_next" value="https://beawarely.github.io/beawarely-demo/">
-      <button type="submit" class="send-btn">Send</button>
+      <button type="submit" class="send-btn" title="Submit your message to join the mission 🚀">Send</button>
       <div id="confirmation" class="confirmation" style="display: none;">
   ✅ Message received! <br>
   We'll reach out soon with updates from the BeAwarely mission. 🌍
