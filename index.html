@@ -321,5 +321,21 @@
     <p>© 2025 BeAwarely. All rights reserved. Demo version – not final.</p>
   </footer>
 
+  <!-- 🔽 Google Translate dropdown in bottom-right corner -->
+  <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+
+  <!-- 🔽 Google Translate script -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {pageLanguage: 'en'},
+        'google_translate_element'
+      );
+    }
+  </script>
+  <script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+  </script>
+
 </body>
 </html>
