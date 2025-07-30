@@ -33,12 +33,14 @@
     }
 
     .logo-placeholder {
-      width: 100px;
-      height: 100px;
-      background-color: #ccc;
-      border-radius: 12px;
-      margin: 0 auto 20px;
-    }
+  width: 100px;
+  height: 100px;
+  background-color: #ccc;
+  border-radius: 12px;
+  margin: 0 auto 20px;
+  animation: pulse 3s infinite;
+  transition: background-color 0.3s, transform 0.3s;
+}
 
     h1 {
       font-size: 2.3rem;
@@ -125,6 +127,12 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 10px 10px rgba(0, 123, 255, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
     }
 
     /* Spinner loading screen */
