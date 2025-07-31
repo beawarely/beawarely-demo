@@ -264,9 +264,12 @@ input:focus, textarea:focus {
     Let’s make people<br>aware of the impact of AI
   </h1>
 
-  <button class="scroll-btn" onclick="document.getElementById('form').scrollIntoView({behavior: 'smooth'})">
-    Join the Mission
-  </button>
+  <button class="scroll-btn" 
+        onmouseover="this.textContent='Leave your email'" 
+        onmouseout="this.textContent='Join the Mission'" 
+        onclick="document.getElementById('form').scrollIntoView({behavior: 'smooth'})">
+  Join the Mission
+</button>
 </header>
 
 
