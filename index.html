@@ -192,7 +192,16 @@ input:focus, textarea:focus {
   transform: scale(1.05);
   background-color: rgba(255, 255, 255, 0.08);
 }
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
 
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
   </style>
   <script>
     // Load preferred theme
@@ -271,13 +280,13 @@ input:focus, textarea:focus {
 
 
 
-  <section>
-    <h2>About BeAwarely</h2>
+  <section class="scroll-reveal">
+  <h2>About BeAwarely</h2>
     <p>BeAwarely is a project dedicated to raising awareness about the influence of artificial intelligence on our lives and choices.</p>
   </section>
 
-  <section>
-    <h2>Why Join?</h2>
+  <section class="scroll-reveal">
+  <h2>Why Join?</h2>
     <ul class="reasons">
       <li>Inform and educate others</li>
       <li>Support responsible AI development</li>
@@ -287,7 +296,7 @@ input:focus, textarea:focus {
     </ul>
   </section>
 
-  <section id="form">
+  <section id="form" class="scroll-reveal">
     <h2>Leave your e-mail</h2>
     <form action="https://formsubmit.co/beawarely@proton.me" method="POST" onsubmit="showConfirmation();">
       <input type="email" name="email" placeholder="Email" required>
@@ -304,7 +313,7 @@ input:focus, textarea:focus {
     </form>
   </section>
 
-  <section id="ai-tools" style="margin-top: 60px; text-align: center;">
+  <section id="ai-tools" class="scroll-reveal" style="margin-top: 60px; text-align: center;">
   <h2>Coming Soon: AI Tools</h2>
   <p style="margin-bottom: 30px;">Exciting features to support your awareness mission:</p>
   <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
@@ -360,6 +369,23 @@ input:focus, textarea:focus {
   <script type="text/javascript"
     src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
   </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const elements = document.querySelectorAll('.scroll-reveal');
 
+      const reveal = () => {
+        const windowHeight = window.innerHeight;
+        elements.forEach(el => {
+          const top = el.getBoundingClientRect().top;
+          if (top < windowHeight - 100) {
+            el.classList.add('revealed');
+          }
+        });
+      };
+
+      window.addEventListener('scroll', reveal);
+      reveal();
+    });
+  </script>
 </body>
 </html>
