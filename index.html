@@ -294,9 +294,9 @@ input:focus, textarea:focus {
   <section id="form" class="scroll-reveal">
     <h2>Leave your e-mail</h2>
     <form action="https://formsubmit.co/beawarely@proton.me" method="POST" onsubmit="showConfirmation();">
-      <input type="email" name="email" placeholder="Email" required>
-      <input type="text" name="name" placeholder="Name" required>
-      <textarea name="message" placeholder="Message" rows="4"></textarea>
+      <input type="email" name="email" placeholder="Your best email" title="We’ll never spam you" required>
+<input type="text" name="name" placeholder="Your name or nickname" title="Just something we can call you" required>
+<textarea name="message" placeholder="What’s on your mind?" title="Tell us anything you'd like" rows="4"></textarea>
       <input type="hidden" name="_captcha" value="false">
       <input type="hidden" name="_next" value="https://beawarely.github.io/beawarely-demo/">
       <button type="submit" class="send-btn" title="Submit your message to join the mission 🚀">Send</button>
