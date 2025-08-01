@@ -326,28 +326,52 @@ input:focus, textarea:focus {
   </div>
 </section>
 
-  <footer>
-    <p>
-      <a href="#">Privacy Policy</a> • 
-      <a href="#">Contact</a> • 
-      <a href="#">Project Principles</a>
-    </p>
-    <div class="social-icons">
-      <span title="Website">🌐</span>
-      <span title="Instagram">📸</span>
-      <span title="Mind">🧠</span>
-    </div>
-    <div style="text-align: center; margin-top: 2rem;">
-  <a href="https://ko-fi.com/beawarely" target="_blank" style="text-decoration: none;">
-    <img src="https://storage.ko-fi.com/cdn/kofi5.png?v=3" alt="Support Me on Ko-fi" style="height: 45px; border: none;">
-  </a>
-  <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #555;">
-  Every coffee fuels both the mission and my brain ☕<br>
-  Thanks for supporting a guy with a vision (and a serious love for caffeine).
-</p>
-</div>
-    <p>© 2025 BeAwarely. All rights reserved. Demo version – not final.</p>
-  </footer>
+  <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
+  <div class="social-icons" style="margin-bottom: 10px;">
+    <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
+    <a href="#" title="Instagram" style="margin: 0 10px; font-size: 20px;">📸</a>
+    <a href="#" title="Mind" style="margin: 0 10px; font-size: 20px;">🧠</a>
+    <a href="https://discord.gg/a73WKd6DAZ" target="_blank" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
+      <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
+    </a>
+  </div>
+  <div style="margin-bottom: 5px;">
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Privacy Policy</a> |
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Contact</a> |
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Project Principles</a>
+  </div>
+  <div style="margin-top: 5px;">
+    © 2025 BeAwarely. All rights reserved.
+  </div>
+  <div style="margin-top: 3px; font-size: 12px; color: #777;">
+    This is a demo version – not final.
+  </div>
+</footer>
+
+<style>
+  .discord-icon {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+    transition: transform 0.3s ease;
+  }
+  .discord-icon:hover {
+    transform: rotate(10deg) scale(1.1);
+  }
+
+  @media (max-width: 500px) {
+    footer {
+      font-size: 13px;
+    }
+    .social-icons a {
+      margin: 0 6px;
+    }
+    .discord-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+</style>
 
   <!-- 🔽 Google Translate dropdown in bottom-right corner -->
   <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
