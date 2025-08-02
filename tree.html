@@ -122,4 +122,26 @@ body.light-mode {
     © 2025 BeAwarely — Tree of Knowledge (demo concept)
   </footer>
 </body>
+<script>
+  // Ustaw preferowany tryb z localStorage
+  document.addEventListener('DOMContentLoaded', () => {
+    const mode = localStorage.getItem('mode');
+    if (mode === 'light') {
+      document.body.classList.add('light-mode');
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = '🌞';
+    } else {
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = '🌙';
+    }
+  });
+
+  // Przełącznik trybu
+  function toggleMode() {
+    const isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    const icon = document.getElementById('modeIcon');
+    if (icon) icon.textContent = isLight ? '🌞' : '🌙';
+  }
+</script>
 </html>
