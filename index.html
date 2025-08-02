@@ -250,10 +250,18 @@ footer {
     // Load preferred theme
     document.addEventListener('DOMContentLoaded', () => {
   const mode = localStorage.getItem('mode') || 'dark';
-document.body.classList.toggle('light-mode', mode === 'light');
-const icon = document.getElementById('modeIcon');
-if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
-}
+  document.body.classList.toggle('light-mode', mode === 'light');
+  const icon = document.getElementById('modeIcon');
+  if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
+
+  // ✅ Hide loader
+  const loader = document.getElementById('loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.visibility = 'hidden';
+    setTimeout(() => loader.remove(), 500);
+  }
+});
 
   // Hide loader
   const loader = document.getElementById('loader');
