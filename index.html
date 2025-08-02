@@ -276,7 +276,24 @@ footer {
   const icon = document.getElementById('modeIcon');
   if (icon) icon.textContent = isLight ? '🌞' : '🌙';
 }
+function toggleGalaxyMode() {
+  const bg = document.getElementById('rotating-bg');
+  if (!bg) return;
 
+  const body = document.body;
+
+  if (body.classList.contains('light-mode')) {
+    body.classList.remove('light-mode');
+    localStorage.setItem('mode', 'dark');
+    const icon = document.getElementById('modeIcon');
+    if (icon) icon.textContent = '🌙';
+  } else {
+    body.classList.add('light-mode');
+    localStorage.setItem('mode', 'light');
+    const icon = document.getElementById('modeIcon');
+    if (icon) icon.textContent = '🌞';
+  }
+}
 
     
   </script>
