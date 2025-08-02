@@ -285,6 +285,7 @@ footer {
 }
 function toggleLightDarkMode() {
   const isLight = document.body.classList.toggle('light-mode');
+  document.body.classList.toggle('dark-mode', !isLight); // <-- to dodajemy
   localStorage.setItem('mode', isLight ? 'light' : 'dark');
 
   const icon = document.getElementById('modeIcon');
