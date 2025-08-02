@@ -277,8 +277,16 @@ footer {
 function toggleLightDarkMode() {
   const isLight = document.body.classList.toggle('light-mode');
   localStorage.setItem('mode', isLight ? 'light' : 'dark');
+
   const icon = document.getElementById('modeIcon');
   if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+
+  const bg = document.getElementById('rotating-bg');
+  if (bg) {
+    bg.style.backgroundImage = isLight
+      ? 'url("images/galaxy-light.png")'
+      : 'url("images/galaxy-dark.png")';
+  }
 }
 
     
