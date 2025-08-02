@@ -7,6 +7,29 @@
   <title>Knowledge Tree - BeAwarely</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
+:root {
+  --blue1: #007bff;
+  --blue2: #66b2ff;
+  --blue3: #b3d9ff;
+}
+
+body.light-mode {
+  background: radial-gradient(ellipse at center, #e0e0f0 0%, #f9f9ff 100%);
+  color: #111;
+}
+
+body.light-mode p {
+  color: #333;
+}
+
+body.light-mode .back-btn {
+  background-color: var(--blue2);
+  color: black;
+}
+
+body.light-mode .back-btn:hover {
+  background-color: var(--blue1);
+}
     body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
