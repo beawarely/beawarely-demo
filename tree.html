@@ -8,13 +8,29 @@
   <link rel="stylesheet" href="css/style.css" />
   <style>
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(ellipse at center, #0e0e1a 0%, #05050a 100%);
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-    }
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at center, #1a0033, #000b1a, #000000);
+  background-size: 400% 400%;
+  animation: animatedGradient 20s ease infinite;
+  color: white;
+  text-align: center;
+  padding: 40px 20px;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Tryb jasny */
+body.light-mode {
+  background: linear-gradient(to bottom, #ffffff, #eeeeee);
+  color: #000;
+}
+
+/* Animacja tła */
+@keyframes animatedGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
     .tree-image {
       max-width: 100%;
