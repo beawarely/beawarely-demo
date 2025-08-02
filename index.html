@@ -251,8 +251,17 @@ footer {
     document.addEventListener('DOMContentLoaded', () => {
   const mode = localStorage.getItem('mode') || 'dark';
   document.body.classList.toggle('light-mode', mode === 'light');
+
   const icon = document.getElementById('modeIcon');
   if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
+
+  const bg = document.getElementById('rotating-bg');
+  if (bg) {
+    bg.style.backgroundImage = mode === 'light'
+      ? 'url("images/galaxy-light.png")'
+      : 'url("images/galaxy-dark.png")';
+  }
+});
 
   // ✅ Hide loader
   
