@@ -26,6 +26,12 @@ body.light-mode {
   background-color: rgba(255, 255, 255, 0.85) !important;
   color: #000;
 }
+
+body.dark-mode {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  color: #fff;
+}
+
     header,
 section,
 footer {
@@ -245,62 +251,51 @@ section li,
 footer {
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
 }
-</style>
-  <script>
-    // Load preferred theme
-    document.addEventListener('DOMContentLoaded', () => {
-  const mode = localStorage.getItem('mode') || 'dark';
-  document.body.classList.toggle('light-mode', mode === 'light');
+<script>
+  // ✅ Załaduj preferowany tryb przy starcie
+  document.addEventListener('DOMContentLoaded', () => {
+    const mode = localStorage.getItem('mode') || 'dark';
 
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
+    document.body.classList.toggle('light-mode', mode === 'light');
+    document.body.classList.toggle('dark-mode', mode === 'dark');
 
-  const bg = document.getElementById('rotating-bg');
-  if (bg) {
-    bg.style.backgroundImage = mode === 'light'
-      ? 'url("images/galaxy-light.png")'
-      : 'url("images/galaxy-dark.png")';
+    const icon = document.getElementById('modeIcon');
+    if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
+
+    const bg = document.getElementById('rotating-bg');
+    if (bg) {
+      bg.style.backgroundImage = mode === 'light'
+        ? 'url("images/galaxy-light.png")'
+        : 'url("images/galaxy-dark.png")';
+    }
+
+    // ukryj loader
+    const loader = document.getElementById('loader');
+    if (loader) {
+      loader.style.opacity = '0';
+      loader.style.visibility = 'hidden';
+      setTimeout(() => loader.remove(), 500);
+    }
+  });
+
+  // ✅ Funkcja przełączania trybu
+  function toggleLightDarkMode() {
+    const isLight = document.body.classList.toggle('light-mode');
+    document.body.classList.toggle('dark-mode', !isLight);
+    localStorage.setItem('mode', isLight ? 'light' : 'dark');
+
+    const icon = document.getElementById('modeIcon');
+    if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+
+    const bg = document.getElementById('rotating-bg');
+    if (bg) {
+      bg.style.backgroundImage = isLight
+        ? 'url("images/galaxy-light.png")'
+        : 'url("images/galaxy-dark.png")';
+    }
   }
-});
+</script>
 
-  // ✅ Hide loader
-
-
-  // Hide loader
-  const loader = document.getElementById('loader');
-  if (loader) {
-    loader.style.opacity = '0';
-    loader.style.visibility = 'hidden';
-    setTimeout(() => loader.remove(), 500);
-  }
-});
-
-
-    // Toggle mode and save
-    function toggleMode() {
-  const isLight = document.body.classList.toggle('light-mode');
-  localStorage.setItem('mode', isLight ? 'light' : 'dark');
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = isLight ? '🌞' : '🌙';
-}
-function toggleLightDarkMode() {
-  const isLight = document.body.classList.toggle('light-mode');
-  document.body.classList.toggle('dark-mode', !isLight); // <-- to dodajemy
-  localStorage.setItem('mode', isLight ? 'light' : 'dark');
-
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = isLight ? '🌞' : '🌛';
-
-  const bg = document.getElementById('rotating-bg');
-  if (bg) {
-    bg.style.backgroundImage = isLight
-      ? 'url("images/galaxy-light.png")'
-      : 'url("images/galaxy-dark.png")';
-  }
-}
-
-
-  </script>
 </head>
 <body>
   <div id="rotating-bg"></div>
