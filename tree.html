@@ -118,11 +118,25 @@ body:not(.light-mode) #matrix-bg {
 body.light-mode #matrix-bg {
   display: none;
 }
+/* Efekt sieci neuronowej (tylko w trybie jasnym) */
+#neuron-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  display: none; /* domyślnie ukryty */
+}
+body.light-mode #neuron-bg {
+  display: block;
+}
   </style>
 </head>
 <body>
 
  <canvas id="matrix-bg"></canvas>
+ <canvas id="neuron-bg"></canvas>
   <span id="modeIcon"
         onclick="toggleMode()"
         title="Toggle light/dark mode"
@@ -207,5 +221,55 @@ body.light-mode #matrix-bg {
 
     setInterval(drawMatrix, 35);
   </script>
+
+<script>
+// --- NEURON NETWORK EFFECT (tylko w trybie jasnym) --- //
+const neuronCanvas = document.getElementById("neuron-bg");
+const neuronCtx = neuronCanvas.getContext("2d");
+let neurons = [];
+
+function resizeNeuronCanvas() {
+  neuronCanvas.width = window.innerWidth;
+  neuronCanvas.height = window.innerHeight;
+}
+resizeNeuronCanvas();
+window.addEventListener("resize", resizeNeuronCanvas);
+
+function createNeuron() {
+  const colors = ["#ffffff", "#00f0ff", "#00ff8f", "#ff4fcb", "#ff9900"];
+  return {
+    x: Math.random() * neuronCanvas.width,
+    y: Math.random() * neuronCanvas.height,
+    dx: (Math.random() - 0.5) * 1.5,
+    dy: (Math.random() - 0.5) * 1.5,
+    radius: Math.random() * 1.8 + 0.8,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    opacity: Math.random() * 0.4 + 0.3
+  };
+}
+
+function drawNeurons() {
+  if (!document.body.classList.contains("light-mode")) return;
+
+  neuronCtx.clearRect(0, 0, neuronCanvas.width, neuronCanvas.height);
+  neurons.forEach(n => {
+    neuronCtx.beginPath();
+    neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
+    neuronCtx.fillStyle = n.color;
+    neuronCtx.globalAlpha = n.opacity;
+    neuronCtx.fill();
+    neuronCtx.globalAlpha = 1;
+
+    n.x += n.dx;
+    n.y += n.dy;
+
+    if (n.x < 0 || n.x > neuronCanvas.width) n.dx *= -1;
+    if (n.y < 0 || n.y > neuronCanvas.height) n.dy *= -1;
+  });
+}
+
+for (let i = 0; i < 120; i++) neurons.push(createNeuron());
+setInterval(drawNeurons, 50);
+</script>
 </body>
 </html>
