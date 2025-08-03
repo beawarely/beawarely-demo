@@ -455,26 +455,26 @@ function toggleLightDarkMode() {
     src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
   </script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const elements = document.querySelectorAll('.scroll-reveal');
+  document.addEventListener('DOMContentLoaded', () => {
+    const elements = document.querySelectorAll('.scroll-reveal');
 
-      const reveal = () => {
-        const windowHeight = window.innerHeight;
-        elements.forEach(el => {
-          const top = el.getBoundingClientRect().top;
-          if (top < windowHeight - 100) {
-            el.classList.add('revealed');
-          }
-        });
-      };
+    const reveal = () => {
+      const windowHeight = window.innerHeight;
+      elements.forEach(el => {
+        const top = el.getBoundingClientRect().top;
+        if (top < windowHeight - 100) {
+          el.classList.add('revealed');
+        }
+      });
+    };
 
-      window.addEventListener('scroll', reveal);
-      reveal();
-    });
-  <script>
+    window.addEventListener('scroll', reveal);
+    reveal();
+  });
+
   function toggleGalaxyMode() {
     alert("Galaxy brightness toggle coming soon!");
   }
- </script>
+</script>
 </body>
 </html>
