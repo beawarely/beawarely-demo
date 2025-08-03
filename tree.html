@@ -223,10 +223,13 @@ body.light-mode #neuron-bg {
   </script>
 
 <script>
-// --- NEURON NETWORK EFFECT (tylko w trybie jasnym) --- //
+// --- NEURON NETWORK EFFECT v2 (sieć z połączeniami) --- //
 const neuronCanvas = document.getElementById("neuron-bg");
 const neuronCtx = neuronCanvas.getContext("2d");
+
 let neurons = [];
+const neuronCount = 100;
+const maxDistance = 120;
 
 function resizeNeuronCanvas() {
   neuronCanvas.width = window.innerWidth;
@@ -240,9 +243,9 @@ function createNeuron() {
   return {
     x: Math.random() * neuronCanvas.width,
     y: Math.random() * neuronCanvas.height,
-    dx: (Math.random() - 0.5) * 1.5,
-    dy: (Math.random() - 0.5) * 1.5,
-    radius: Math.random() * 1.8 + 0.8,
+    dx: (Math.random() - 0.5) * 0.8,
+    dy: (Math.random() - 0.5) * 0.8,
+    radius: Math.random() * 1.5 + 0.5,
     color: colors[Math.floor(Math.random() * colors.length)],
     opacity: Math.random() * 0.4 + 0.3
   };
@@ -252,24 +255,57 @@ function drawNeurons() {
   if (!document.body.classList.contains("light-mode")) return;
 
   neuronCtx.clearRect(0, 0, neuronCanvas.width, neuronCanvas.height);
-  neurons.forEach(n => {
+
+  // Kropki (neurony)
+  for (let i = 0; i < neurons.length; i++) {
+    const n = neurons[i];
     neuronCtx.beginPath();
     neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
     neuronCtx.fillStyle = n.color;
     neuronCtx.globalAlpha = n.opacity;
+    neuronCtx.shadowBlur = 10;
+    neuronCtx.shadowColor = n.color;
     neuronCtx.fill();
     neuronCtx.globalAlpha = 1;
+    neuronCtx.shadowBlur = 0;
 
+    // Ruch
     n.x += n.dx;
     n.y += n.dy;
 
     if (n.x < 0 || n.x > neuronCanvas.width) n.dx *= -1;
     if (n.y < 0 || n.y > neuronCanvas.height) n.dy *= -1;
-  });
+  }
+
+  // Połączenia między neuronami
+  for (let i = 0; i < neurons.length; i++) {
+    for (let j = i + 1; j < neurons.length; j++) {
+      const a = neurons[i];
+      const b = neurons[j];
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < maxDistance) {
+        const gradient = neuronCtx.createLinearGradient(a.x, a.y, b.x, b.y);
+        gradient.addColorStop(0, a.color);
+        gradient.addColorStop(1, b.color);
+        neuronCtx.strokeStyle = gradient;
+        neuronCtx.globalAlpha = 1 - dist / maxDistance;
+        neuronCtx.lineWidth = 0.6;
+        neuronCtx.beginPath();
+        neuronCtx.moveTo(a.x, a.y);
+        neuronCtx.lineTo(b.x, b.y);
+        neuronCtx.stroke();
+        neuronCtx.globalAlpha = 1;
+      }
+    }
+  }
 }
 
-for (let i = 0; i < 120; i++) neurons.push(createNeuron());
-setInterval(drawNeurons, 50);
+// Inicjalizacja neuronów
+neurons = Array.from({ length: neuronCount }, createNeuron);
+setInterval(drawNeurons, 33);
 </script>
 </body>
 </html>
