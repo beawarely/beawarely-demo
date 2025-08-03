@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>BeAwarely</title>
+  <style>
+    :root {
+      --blue1: #007bff;
+      --blue2: #66b2ff;
+      --blue3: #b3d9ff;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.light-mode {
+      background-color: rgba(255, 255, 255, 0.85);
+      color: #000;
+    }
+    header, section, footer {
+      background-color: transparent;
+    }
+    header {
+      text-align: center;
+      padding: 80px 20px 40px;
+    }
+    .logo-placeholder {
+      width: 100px;
+      height: 100px;
+      background-color: #ccc;
+      border-radius: 12px;
+      margin: 0 auto 20px;
+      animation: pulse 3s infinite;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    button.scroll-btn {
+      background-color: var(--blue1);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    section {
+      padding: 40px 20px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .reasons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+      list-style-type: disc;
+      margin-left: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    input, textarea {
+      padding: 12px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      font-size: 1rem;
+      background-color: #1a1a1a;
+      color: #fff;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    body.light-mode input,
+    body.light-mode textarea {
+      background-color: #fff;
+      color: #000;
+      border: 2px solid #ccc;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--blue2);
+      outline: none;
+      box-shadow: 0 0 8px var(--blue2);
+      transform: scale(1.02);
+    }
+    .send-btn {
+      background-color: var(--blue1);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 60px;
+      padding: 30px 10px;
+      color: #999;
+    }
+    .mode-toggle {
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #rotating-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200vw;
+      height: 200vh;
+      transform: translate(-25vw, -25vh);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      animation: rotateBackground 240s linear infinite;
+      z-index: -1;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+    body.light-mode #rotating-bg {
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/NGC_4414_%28NASA-med%29.jpg/1920px-NGC_4414_%28NASA-med%29.jpg');
+    }
+    body.dark-mode #rotating-bg {
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/84/Milky_Way_Galaxy.jpg');
+    }
+    @keyframes rotateBackground {
+      0%   { transform: rotate(0deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1.1); }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mode = localStorage.getItem('mode') || 'dark';
+      document.body.classList.toggle('light-mode', mode === 'light');
+    });
+
+    function toggleLightDarkMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    }
+  </script>
+</head>
+<body>
+  <div id="rotating-bg"></div>
+  <header>
+    <span onclick="toggleLightDarkMode()" title="Toggle mode" style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer;">🌗</span>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/512px-Apple_logo_black.svg.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
+    <h1>Let’s make people<br>aware of the impact of AI</h1>
+    <button class="scroll-btn">Explore the Tree</button>
+  </header>
+  <section>
+    <h2>About BeAwarely</h2>
+    <p>BeAwarely is a project dedicated to raising awareness about the influence of artificial intelligence on our lives and choices.</p>
+  </section>
+  <section>
+    <h2>Why Join?</h2>
+    <ul class="reasons">
+      <li>Inform and educate others</li>
+      <li>Support responsible AI development</li>
+      <li>Contribute to a safer AI future</li>
+      <li>Be part of a global community</li>
+      <li>Stay updated on AI advancements</li>
+    </ul>
+  </section>
+  <footer>
+    <p>© 2025 BeAwarely. All rights reserved.</p>
+  </footer>
+</body>
+</html>
