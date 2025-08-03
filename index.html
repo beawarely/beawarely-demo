@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
 <title>BeAwarely</title>
-  <title>BeAwarely</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
     :root {
@@ -261,12 +260,8 @@ footer {
       ? 'url("images/galaxy-light.png")'
       : 'url("images/galaxy-dark.png")';
   }
-});
 
-  // ✅ Hide loader
-
-
-  // Hide loader
+  // ✅ Hide loader inside DOMContentLoaded
   const loader = document.getElementById('loader');
   if (loader) {
     loader.style.opacity = '0';
