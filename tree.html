@@ -223,89 +223,78 @@ body.light-mode #neuron-bg {
   </script>
 
 <script>
-// --- NEURON NETWORK EFFECT v2 (sieć z połączeniami) --- //
-const neuronCanvas = document.getElementById("neuron-bg");
-const neuronCtx = neuronCanvas.getContext("2d");
+// --- IMPULSE NEURON EFFECT --- //
+const canvas = document.getElementById("neuron-bg");
+const ctx = canvas.getContext("2d");
 
-let neurons = [];
-const neuronCount = 100;
-const maxDistance = 120;
-
-function resizeNeuronCanvas() {
-  neuronCanvas.width = window.innerWidth;
-  neuronCanvas.height = window.innerHeight;
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
-resizeNeuronCanvas();
-window.addEventListener("resize", resizeNeuronCanvas);
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-function createNeuron() {
-  const colors = ["#ffffff", "#00f0ff", "#00ff8f", "#ff4fcb", "#ff9900"];
+let impulses = [];
+
+function createImpulse() {
+  const colors = [
+    ["#ffffff", "#00ccff"],
+    ["#ffffff", "#00ff99"],
+    ["#ffffff", "#ff0099"],
+    ["#ffffff", "#ff6600"],
+    ["#ffffff", "#cc00ff"]
+  ];
+  const pair = colors[Math.floor(Math.random() * colors.length)];
+
   return {
-    x: Math.random() * neuronCanvas.width,
-    y: Math.random() * neuronCanvas.height,
-    dx: (Math.random() - 0.5) * 0.8,
-    dy: (Math.random() - 0.5) * 0.8,
-    radius: Math.random() * 1.5 + 0.5,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    opacity: Math.random() * 0.4 + 0.3
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    radius: 0,
+    maxRadius: Math.random() * 40 + 30,
+    growth: Math.random() * 1.2 + 0.5,
+    life: 0,
+    maxLife: 40 + Math.random() * 20,
+    innerColor: pair[0],
+    outerColor: pair[1]
   };
 }
 
-function drawNeurons() {
-  if (!document.body.classList.contains("light-mode")) return;
-
-  neuronCtx.clearRect(0, 0, neuronCanvas.width, neuronCanvas.height);
-
-  // Kropki (neurony)
-  for (let i = 0; i < neurons.length; i++) {
-    const n = neurons[i];
-    neuronCtx.beginPath();
-    neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
-    neuronCtx.fillStyle = n.color;
-    neuronCtx.globalAlpha = n.opacity;
-    neuronCtx.shadowBlur = 10;
-    neuronCtx.shadowColor = n.color;
-    neuronCtx.fill();
-    neuronCtx.globalAlpha = 1;
-    neuronCtx.shadowBlur = 0;
-
-    // Ruch
-    n.x += n.dx;
-    n.y += n.dy;
-
-    if (n.x < 0 || n.x > neuronCanvas.width) n.dx *= -1;
-    if (n.y < 0 || n.y > neuronCanvas.height) n.dy *= -1;
-  }
-
-  // Połączenia między neuronami
-  for (let i = 0; i < neurons.length; i++) {
-    for (let j = i + 1; j < neurons.length; j++) {
-      const a = neurons[i];
-      const b = neurons[j];
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist < maxDistance) {
-        const gradient = neuronCtx.createLinearGradient(a.x, a.y, b.x, b.y);
-        gradient.addColorStop(0, a.color);
-        gradient.addColorStop(1, b.color);
-        neuronCtx.strokeStyle = gradient;
-        neuronCtx.globalAlpha = 1 - dist / maxDistance;
-        neuronCtx.lineWidth = 0.6;
-        neuronCtx.beginPath();
-        neuronCtx.moveTo(a.x, a.y);
-        neuronCtx.lineTo(b.x, b.y);
-        neuronCtx.stroke();
-        neuronCtx.globalAlpha = 1;
-      }
-    }
-  }
+function drawImpulse(i) {
+  const im = impulses[i];
+  const grad = ctx.createRadialGradient(im.x, im.y, 0, im.x, im.y, im.radius);
+  grad.addColorStop(0, im.innerColor);
+  grad.addColorStop(1, im.outerColor);
+  ctx.beginPath();
+  ctx.fillStyle = grad;
+  ctx.globalAlpha = 1 - im.life / im.maxLife;
+  ctx.arc(im.x, im.y, im.radius, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.globalAlpha = 1;
 }
 
-// Inicjalizacja neuronów
-neurons = Array.from({ length: neuronCount }, createNeuron);
-setInterval(drawNeurons, 33);
+function animateImpulses() {
+  if (!document.body.classList.contains("light-mode")) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return;
+  }
+
+  ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  impulses.forEach((impulse, i) => {
+    impulse.radius += impulse.growth;
+    impulse.life++;
+    drawImpulse(i);
+  });
+
+  impulses = impulses.filter((impulse) => impulse.life < impulse.maxLife);
+
+  if (Math.random() < 0.3) impulses.push(createImpulse());
+
+  requestAnimationFrame(animateImpulses);
+}
+
+animateImpulses();
 </script>
 </body>
 </html>
