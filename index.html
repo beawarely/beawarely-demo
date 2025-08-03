@@ -228,7 +228,7 @@ body.light-mode #rotating-bg {
   opacity: 0.4;
   filter: brightness(1.2);
 }
-body.dark-mode #rotating-bg {
+body:not(.light-mode) #rotating-bg {
   background-image: url("images/galaxy-dark.png");
   opacity: 0.25;
   filter: brightness(0.9);
