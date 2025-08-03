@@ -107,10 +107,26 @@ body.light-mode {
   50% { background-position: 100% 100%; }
   100% { background-position: 0% 0%; }
 }
+
+/* Efekt Matrix tylko w trybie ciemnym */
+body:not(.light-mode) #matrix-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+}
+
+body.light-mode #matrix-bg {
+  display: none;
+}
   </style>
 </head>
 <body>
 
+ <canvas id="matrix-bg"></canvas>
   <span id="modeIcon"
         onclick="toggleMode()"
         title="Toggle light/dark mode"
@@ -134,25 +150,66 @@ body.light-mode {
   </footer>
 </body>
 <script>
-  // Ustaw preferowany tryb z localStorage
-  document.addEventListener('DOMContentLoaded', () => {
-    const mode = localStorage.getItem('mode');
-    if (mode === 'light') {
-      document.body.classList.add('light-mode');
-      const icon = document.getElementById('modeIcon');
-      if (icon) icon.textContent = '🌞';
-    } else {
-      const icon = document.getElementById('modeIcon');
-      if (icon) icon.textContent = '🌙';
-    }
-  });
+    // Ustaw preferowany tryb z localStorage
+    document.addEventListener('DOMContentLoaded', () => {
+      const mode = localStorage.getItem('mode');
+      if (mode === 'light') {
+        document.body.classList.add('light-mode');
+        const icon = document.getElementById('modeIcon');
+        if (icon) icon.textContent = '🌞';
+      } else {
+        const icon = document.getElementById('modeIcon');
+        if (icon) icon.textContent = '🌙';
+      }
+    });
 
-  // Przełącznik trybu
-  function toggleMode() {
-    const isLight = document.body.classList.toggle('light-mode');
-    localStorage.setItem('mode', isLight ? 'light' : 'dark');
-    const icon = document.getElementById('modeIcon');
-    if (icon) icon.textContent = isLight ? '🌞' : '🌙';
-  }
-</script>
+    // Przełącznik trybu
+    function toggleMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌙';
+    }
+  </script>
+
+  <script>
+    // --- MATRIX BACKGROUND ANIMATION --- //
+    const canvas = document.getElementById("matrix-bg");
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const letters = 'アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array.from({ length: columns }, () => Math.random() * canvas.height / fontSize);
+
+    function drawMatrix() {
+      if (document.body.classList.contains('light-mode')) return;
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#0F0';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 35);
+  </script>
+</body>
 </html>
