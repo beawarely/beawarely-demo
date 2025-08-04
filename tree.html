@@ -218,8 +218,8 @@ body.light-mode #neuron-bg {
     setInterval(drawMatrix, 35);
   </script>
 
+<!-- NEURON BACKGROUND LIGHT MODE -->
 <canvas id="neuronCanvas"></canvas>
-
 <style>
   #neuronCanvas {
     position: fixed;
@@ -228,68 +228,72 @@ body.light-mode #neuron-bg {
     height: 100vh;
     z-index: -1;
     pointer-events: none;
-    display: none;
   }
-  body.light-mode #neuronCanvas {
+
+  .light-mode #neuronCanvas {
     display: block;
   }
-</style><script>
-  const neuronCanvas = document.getElementById('neuronCanvas');
-  const ctxN = neuronCanvas.getContext('2d');
-  let wN, hN;
 
-  function resizeNeuronCanvas() {
-    wN = neuronCanvas.width = window.innerWidth;
-    hN = neuronCanvas.height = window.innerHeight;
+  .dark-mode #neuronCanvas {
+    display: none;
   }
-  resizeNeuronCanvas();
-  window.addEventListener('resize', resizeNeuronCanvas);
+</style>
 
-  class Particle {
-    constructor() {
-      this.reset();
-    }
-    reset() {
-      this.x = Math.random() * wN;
-      this.y = Math.random() * hN;
-      this.angle = Math.random() * 2 * Math.PI;
-      this.speed = 0.5 + Math.random() * 1.2;
-      this.radius = 0.5 + Math.random() * 1.5;
-      this.life = 0;
-      this.maxLife = 200 + Math.random() * 100;
-      this.hue = Math.floor(Math.random() * 360);
-    }
-    update() {
-      this.x += Math.cos(this.angle) * this.speed;
-      this.y += Math.sin(this.angle) * this.speed;
-      this.life++;
-      if (this.x < 0 || this.x > wN || this.y < 0 || this.y > hN || this.life > this.maxLife) {
-        this.reset();
+<script>
+  const canvas = document.getElementById('neuronCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const nodes = Array.from({ length: 25 }, () => ({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    radius: 2 + Math.random() * 4,
+    color: `hsl(${Math.random() * 360}, 100%, 75%)`,
+    vx: (Math.random() - 0.5) * 1,
+    vy: (Math.random() - 0.5) * 1
+  }));
+
+  function draw() {
+    // Tworzymy smugę
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    ctx.fillRect(0, 0, width, height);
+
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+
+      // Losowa zmiana kierunku (mała szansa)
+      if (Math.random() < 0.02) {
+        n.vx += (Math.random() - 0.5) * 0.3;
+        n.vy += (Math.random() - 0.5) * 0.3;
       }
-    }
-    draw(ctx) {
-      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 6);
-      gradient.addColorStop(0, `hsla(${this.hue}, 100%, 85%, 1)`);
-      gradient.addColorStop(1, `hsla(${this.hue}, 100%, 50%, 0)`);
 
+      n.x += n.vx;
+      n.y += n.vy;
+
+      // Odbijanie od krawędzi
+      if (n.x < 0 || n.x > width) n.vx *= -1;
+      if (n.y < 0 || n.y > height) n.vy *= -1;
+
+      // Rysowanie
       ctx.beginPath();
-      ctx.fillStyle = gradient;
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = n.color;
+      ctx.shadowColor = n.color;
+      ctx.shadowBlur = 10;
       ctx.fill();
     }
+
+    requestAnimationFrame(draw);
   }
 
-  const particles = Array.from({ length: 100 }, () => new Particle());
-
-  function animateNeurons() {
-    ctxN.clearRect(0, 0, wN, hN);
-    particles.forEach(p => {
-      p.update();
-      p.draw(ctxN);
-    });
-    requestAnimationFrame(animateNeurons);
-  }
-  animateNeurons();
+  draw();
 </script>
 </body>
 </html>
