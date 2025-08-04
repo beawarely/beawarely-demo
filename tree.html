@@ -33,9 +33,7 @@ body.light-mode .back-btn:hover {
     body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(120deg, #f6d365, #fda085, #ff9a9e, #fad0c4);
-background-size: 300% 300%;
-animation: gradientMove 15s ease infinite;
+  background: #f0f0f5; /* nowy kolor – jasny, nieanimowany */
   color: white;
   text-align: center;
   padding: 40px 20px;
@@ -251,40 +249,45 @@ body.light-mode #neuron-bg {
   resizeNeuronCanvas();
   window.addEventListener('resize', resizeNeuronCanvas);
 
-  const nodes = Array.from({ length: 25 }, () => ({
+  const nodes = Array.from({ length: 40 }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    radius: 2 + Math.random() * 4,
+    radius: 3 + Math.random() * 5,
     color: `hsl(${Math.random() * 360}, 100%, 75%)`,
-    vx: (Math.random() - 0.5) * 1,
-    vy: (Math.random() - 0.5) * 1
+    vx: (Math.random() - 0.5) * 1.5,
+    vy: (Math.random() - 0.5) * 1.5
   }));
 
   function drawNeurons() {
-    // Smuga
-    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    // Dłuższa smuga
+    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.04)';
     neuronCtx.fillRect(0, 0, width, height);
 
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
 
-      // Losowa zmiana kierunku
-      if (Math.random() < 0.02) {
-        n.vx += (Math.random() - 0.5) * 0.3;
-        n.vy += (Math.random() - 0.5) * 0.3;
+      // Dynamiczne, nieregularne zmiany kierunku
+      if (Math.random() < 0.015) {
+        n.vx += (Math.random() - 0.5) * 0.6;
+        n.vy += (Math.random() - 0.5) * 0.6;
       }
+
+      n.vx *= 0.99; // delikatne tłumienie
+      n.vy *= 0.99;
 
       n.x += n.vx;
       n.y += n.vy;
 
+      // odbicia od krawędzi
       if (n.x < 0 || n.x > width) n.vx *= -1;
       if (n.y < 0 || n.y > height) n.vy *= -1;
 
+      // rysuj
       neuronCtx.beginPath();
       neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
       neuronCtx.fillStyle = n.color;
       neuronCtx.shadowColor = n.color;
-      neuronCtx.shadowBlur = 10;
+      neuronCtx.shadowBlur = 20;
       neuronCtx.fill();
     }
 
