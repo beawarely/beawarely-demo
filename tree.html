@@ -240,16 +240,16 @@ body.light-mode #neuron-bg {
 </style>
 
 <script>
-  const canvas = document.getElementById('neuronCanvas');
-  const ctx = canvas.getContext('2d');
+  const neuronCanvas = document.getElementById('neuronCanvas');
+  const neuronCtx = neuronCanvas.getContext('2d');
   let width, height;
 
-  function resizeCanvas() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+  function resizeNeuronCanvas() {
+    width = neuronCanvas.width = window.innerWidth;
+    height = neuronCanvas.height = window.innerHeight;
   }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  resizeNeuronCanvas();
+  window.addEventListener('resize', resizeNeuronCanvas);
 
   const nodes = Array.from({ length: 25 }, () => ({
     x: Math.random() * width,
@@ -260,15 +260,15 @@ body.light-mode #neuron-bg {
     vy: (Math.random() - 0.5) * 1
   }));
 
-  function draw() {
-    // Tworzymy smugę
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-    ctx.fillRect(0, 0, width, height);
+  function drawNeurons() {
+    // Smuga
+    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    neuronCtx.fillRect(0, 0, width, height);
 
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
 
-      // Losowa zmiana kierunku (mała szansa)
+      // Losowa zmiana kierunku
       if (Math.random() < 0.02) {
         n.vx += (Math.random() - 0.5) * 0.3;
         n.vy += (Math.random() - 0.5) * 0.3;
@@ -277,23 +277,21 @@ body.light-mode #neuron-bg {
       n.x += n.vx;
       n.y += n.vy;
 
-      // Odbijanie od krawędzi
       if (n.x < 0 || n.x > width) n.vx *= -1;
       if (n.y < 0 || n.y > height) n.vy *= -1;
 
-      // Rysowanie
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
-      ctx.fillStyle = n.color;
-      ctx.shadowColor = n.color;
-      ctx.shadowBlur = 10;
-      ctx.fill();
+      neuronCtx.beginPath();
+      neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
+      neuronCtx.fillStyle = n.color;
+      neuronCtx.shadowColor = n.color;
+      neuronCtx.shadowBlur = 10;
+      neuronCtx.fill();
     }
 
-    requestAnimationFrame(draw);
+    requestAnimationFrame(drawNeurons);
   }
 
-  draw();
+  drawNeurons();
 </script>
 </body>
 </html>
