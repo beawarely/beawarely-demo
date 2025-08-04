@@ -242,7 +242,7 @@ class Particle {
   draw(ctx) {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 4);
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 8);
     gradient.addColorStop(0, this.color);
     gradient.addColorStop(1, 'transparent');
     ctx.fillStyle = gradient;
@@ -255,12 +255,12 @@ function getGlowColor() {
   return `hsl(${hue}, 100%, 85%)`;
 }
 
-const particles = Array.from({ length: 100 }, () => new Particle());
+const particles = Array.from({ length: 120 }, () => new Particle());
 
 function drawNeuronCloud() {
   if (!document.body.classList.contains('light-mode')) return;
 
-  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
   neuronCtx.fillRect(0, 0, width, height);
 
   for (let p of particles) {
@@ -268,7 +268,6 @@ function drawNeuronCloud() {
     p.draw(neuronCtx);
   }
 
-  // Dynamiczne połączenia
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const a = particles[i];
@@ -277,12 +276,12 @@ function drawNeuronCloud() {
       const dy = a.y - b.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < 100) {
+      if (dist < 120) {
         neuronCtx.beginPath();
         neuronCtx.moveTo(a.x, a.y);
         neuronCtx.lineTo(b.x, b.y);
-        neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 100})`;
-        neuronCtx.lineWidth = 0.3;
+        neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 120})`;
+        neuronCtx.lineWidth = 0.25;
         neuronCtx.stroke();
       }
     }
