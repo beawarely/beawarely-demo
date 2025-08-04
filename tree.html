@@ -128,15 +128,15 @@ body.light-mode #neuron-bg {
 }
   </style>
 </head>
-<body>
-
- <canvas id="matrix-bg"></canvas>
+<body class="light-mode">
+  <canvas id="matrix-bg"></canvas>
+  <canvas id="neuronCanvas"></canvas>
   <span id="modeIcon"
         onclick="toggleMode()"
         title="Toggle light/dark mode"
         style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s; z-index: 999;"
         onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-        onmouseout="this.style.backgroundColor='transparent'">🌙</span>
+        onmouseout="this.style.backgroundColor='transparent'">🌞</span>
 
   <h1>Welcome to the Knowledge Tree</h1>
   <p>
