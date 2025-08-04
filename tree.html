@@ -133,7 +133,6 @@ body.light-mode #neuron-bg {
 <body>
 
  <canvas id="matrix-bg"></canvas>
-<canvas id="neuronCanvas"></canvas>
   <span id="modeIcon"
         onclick="toggleMode()"
         title="Toggle light/dark mode"
@@ -219,84 +218,91 @@ body.light-mode #neuron-bg {
     setInterval(drawMatrix, 35);
   </script>
 
-<!-- NEURON BACKGROUND LIGHT MODE -->
 <canvas id="neuronCanvas"></canvas>
 <style>
   #neuronCanvas {
     position: fixed;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: -1;
+    z-index: -2;
+    display: none;
     pointer-events: none;
   }
 
-  .light-mode #neuronCanvas {
+  body.light-mode #neuronCanvas {
     display: block;
   }
 
-  .dark-mode #neuronCanvas {
+  body:not(.light-mode) #neuronCanvas {
     display: none;
   }
 </style>
 
 <script>
-  const canvas = document.getElementById('neuronCanvas');
-  const ctx = canvas.getContext('2d');
-  let width, height;
+  const neuronCanvas = document.getElementById('neuronCanvas');
+  const nctx = neuronCanvas.getContext('2d');
+  let w, h;
 
-  function resizeCanvas() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+  function resizeNeuronCanvas() {
+    w = neuronCanvas.width = window.innerWidth;
+    h = neuronCanvas.height = window.innerHeight;
   }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  resizeNeuronCanvas();
+  window.addEventListener('resize', resizeNeuronCanvas);
 
-  const nodes = Array.from({ length: 15 }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    radius: 2 + Math.random() * 3,
-    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
-    vx: (Math.random() - 0.5) * 0.6,
-    vy: (Math.random() - 0.5) * 0.6
+  const nodes = Array.from({ length: 20 }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: 2 + Math.random() * 4,
+    vx: (Math.random() - 0.5) * 0.5,
+    vy: (Math.random() - 0.5) * 0.5,
+    color: `hsl(${Math.random() * 360}, 100%, 75%)`
   }));
 
-  function draw() {
-    ctx.clearRect(0, 0, width, height);
+  function drawNeurons() {
+    if (!document.body.classList.contains('light-mode')) {
+      requestAnimationFrame(drawNeurons);
+      return;
+    }
+
+    nctx.clearRect(0, 0, w, h);
     for (let i = 0; i < nodes.length; i++) {
-      const n1 = nodes[i];
+      let n1 = nodes[i];
       n1.x += n1.vx;
       n1.y += n1.vy;
+      if (n1.x < 0 || n1.x > w) n1.vx *= -1;
+      if (n1.y < 0 || n1.y > h) n1.vy *= -1;
 
-      if (n1.x < 0 || n1.x > width) n1.vx *= -1;
-      if (n1.y < 0 || n1.y > height) n1.vy *= -1;
-
-      ctx.beginPath();
-      ctx.arc(n1.x, n1.y, n1.radius, 0, 2 * Math.PI);
-      ctx.fillStyle = n1.color;
-      ctx.shadowColor = n1.color;
-      ctx.shadowBlur = 10;
-      ctx.fill();
+      nctx.beginPath();
+      nctx.arc(n1.x, n1.y, n1.r, 0, 2 * Math.PI);
+      nctx.fillStyle = n1.color;
+      nctx.shadowColor = n1.color;
+      nctx.shadowBlur = 15;
+      nctx.fill();
 
       for (let j = i + 1; j < nodes.length; j++) {
         const n2 = nodes[j];
-        const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
-        if (dist < 150) {
-          ctx.beginPath();
-          ctx.moveTo(n1.x, n1.y);
-          ctx.lineTo(n2.x, n2.y);
-          ctx.strokeStyle = n1.color;
-          ctx.globalAlpha = 1 - dist / 150;
-          ctx.stroke();
-          ctx.globalAlpha = 1;
+        const dx = n1.x - n2.x;
+        const dy = n1.y - n2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 140) {
+          nctx.beginPath();
+          nctx.moveTo(n1.x, n1.y);
+          nctx.lineTo(n2.x, n2.y);
+          nctx.strokeStyle = n1.color;
+          nctx.globalAlpha = 1 - dist / 140;
+          nctx.lineWidth = 1;
+          nctx.stroke();
+          nctx.globalAlpha = 1;
         }
       }
     }
-
-    requestAnimationFrame(draw);
+    requestAnimationFrame(drawNeurons);
   }
 
-  draw();
+  drawNeurons();
 </script>
 </body>
 </html>
