@@ -202,10 +202,11 @@
   </script>
 
   <script>
+// 🌞 NEURON CLOUD BACKGROUND
 const neuronCanvas = document.getElementById('neuronCanvas');
 const neuronCtx = neuronCanvas.getContext('2d');
-let width, height;
 
+let width, height;
 function resizeNeuronCanvas() {
   width = neuronCanvas.width = window.innerWidth;
   height = neuronCanvas.height = window.innerHeight;
@@ -213,7 +214,7 @@ function resizeNeuronCanvas() {
 resizeNeuronCanvas();
 window.addEventListener('resize', resizeNeuronCanvas);
 
-class Neuron {
+class Particle {
   constructor() {
     this.reset();
   }
@@ -221,82 +222,76 @@ class Neuron {
   reset() {
     this.x = Math.random() * width;
     this.y = Math.random() * height;
-    this.radius = 2 + Math.random() * 3;
-    this.vx = (Math.random() - 0.5) * 0.8;
-    this.vy = (Math.random() - 0.5) * 0.8;
+    this.radius = 1 + Math.random() * 2;
+    this.vx = (Math.random() - 0.5) * 0.6;
+    this.vy = (Math.random() - 0.5) * 0.6;
+    this.life = Math.random() * 500 + 300;
     this.color = getGlowColor();
-    this.connections = new Set();
   }
 
   update() {
-    if (Math.random() < 0.01) {
-      this.vx += (Math.random() - 0.5) * 0.3;
-      this.vy += (Math.random() - 0.5) * 0.3;
-    }
-
-    this.vx *= 0.99;
-    this.vy *= 0.99;
-
     this.x += this.vx;
     this.y += this.vy;
+    this.life--;
 
-    if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+    if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) {
       this.reset();
     }
   }
 
   draw(ctx) {
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = this.color;
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 20 + Math.random() * 10;
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 4);
+    gradient.addColorStop(0, this.color);
+    gradient.addColorStop(1, 'transparent');
+    ctx.fillStyle = gradient;
     ctx.fill();
   }
 }
 
 function getGlowColor() {
   const hue = Math.floor(Math.random() * 360);
-  return `hsl(${hue}, 100%, 75%)`;
+  return `hsl(${hue}, 100%, 85%)`;
 }
 
-const neurons = Array.from({ length: 70 }, () => new Neuron());
+const particles = Array.from({ length: 100 }, () => new Particle());
 
-function drawNeurons() {
+function drawNeuronCloud() {
   if (!document.body.classList.contains('light-mode')) return;
 
-  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
   neuronCtx.fillRect(0, 0, width, height);
 
-  // Update and draw neurons
-  for (const neuron of neurons) {
-    neuron.update();
-    neuron.draw(neuronCtx);
+  for (let p of particles) {
+    p.update();
+    p.draw(neuronCtx);
   }
 
-  // Connect neurons dynamically
-  for (let i = 0; i < neurons.length; i++) {
-    for (let j = i + 1; j < neurons.length; j++) {
-      const n1 = neurons[i];
-      const n2 = neurons[j];
-      const dx = n1.x - n2.x;
-      const dy = n1.y - n2.y;
+  // Dynamiczne połączenia
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const a = particles[i];
+      const b = particles[j];
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
+
       if (dist < 100) {
         neuronCtx.beginPath();
-        neuronCtx.moveTo(n1.x, n1.y);
-        neuronCtx.lineTo(n2.x, n2.y);
-        neuronCtx.strokeStyle = `rgba(255, 255, 255, ${1 - dist / 100})`;
-        neuronCtx.lineWidth = 0.5;
+        neuronCtx.moveTo(a.x, a.y);
+        neuronCtx.lineTo(b.x, b.y);
+        neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 100})`;
+        neuronCtx.lineWidth = 0.3;
         neuronCtx.stroke();
       }
     }
   }
 
-  requestAnimationFrame(drawNeurons);
+  requestAnimationFrame(drawNeuronCloud);
 }
 
-drawNeurons();
+drawNeuronCloud();
 </script>
 </body>
 </html>
