@@ -228,38 +228,53 @@
   }
 
   function drawNeurons() {
-    if (!document.body.classList.contains('light-mode')) return;
+  if (!document.body.classList.contains('light-mode')) return;
 
-    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.06)';
-    neuronCtx.fillRect(0, 0, width, height);
+  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.03)';
+  neuronCtx.fillRect(0, 0, width, height);
 
-    for (let i = 0; i < nodes.length; i++) {
-      const n = nodes[i];
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i];
 
-      if (Math.random() < 0.02) {
-        n.vx += (Math.random() - 0.5) * 0.5;
-        n.vy += (Math.random() - 0.5) * 0.5;
-      }
-
-      n.vx *= 0.985;
-      n.vy *= 0.985;
-
-      n.x += n.vx;
-      n.y += n.vy;
-
-      if (n.x < 0 || n.x > width) n.vx *= -1;
-      if (n.y < 0 || n.y > height) n.vy *= -1;
-
-      neuronCtx.beginPath();
-      neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
-      neuronCtx.fillStyle = n.color;
-      neuronCtx.shadowColor = n.color;
-      neuronCtx.shadowBlur = 30;
-      neuronCtx.fill();
+    if (Math.random() < 0.05) {
+      n.vx += (Math.random() - 0.5) * 1.5;
+      n.vy += (Math.random() - 0.5) * 1.5;
+      n.color = getGlowColor(); // zmiana koloru
     }
 
-    requestAnimationFrame(drawNeurons);
+    n.vx *= 0.97;
+    n.vy *= 0.97;
+
+    n.x += n.vx;
+    n.y += n.vy;
+
+    if (n.x < 0 || n.x > width) n.vx *= -1;
+    if (n.y < 0 || n.y > height) n.vy *= -1;
+
+    // Główna kula (rdzeń neuronu)
+    neuronCtx.beginPath();
+    neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
+    neuronCtx.fillStyle = n.color;
+    neuronCtx.shadowColor = n.color;
+    neuronCtx.shadowBlur = 60;
+    neuronCtx.fill();
+
+    // Smuga za neuronem
+    const trailLength = 20;
+    for (let j = 1; j < trailLength; j++) {
+      const tx = n.x - n.vx * j * 1.2;
+      const ty = n.y - n.vy * j * 1.2;
+      const alpha = 1 - j / trailLength;
+
+      neuronCtx.beginPath();
+      neuronCtx.arc(tx, ty, n.radius * (1 - j / trailLength), 0, 2 * Math.PI);
+      neuronCtx.fillStyle = `rgba(255,255,255,${alpha * 0.2})`;
+      neuronCtx.fill();
+    }
   }
+
+  requestAnimationFrame(drawNeurons);
+}
 
   drawNeurons();
 </script>
