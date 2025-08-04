@@ -202,81 +202,101 @@
   </script>
 
   <script>
-  const neuronCanvas = document.getElementById('neuronCanvas');
-  const neuronCtx = neuronCanvas.getContext('2d');
-  let width, height;
+const neuronCanvas = document.getElementById('neuronCanvas');
+const neuronCtx = neuronCanvas.getContext('2d');
+let width, height;
 
-  function resizeNeuronCanvas() {
-    width = neuronCanvas.width = window.innerWidth;
-    height = neuronCanvas.height = window.innerHeight;
-  }
-  resizeNeuronCanvas();
-  window.addEventListener('resize', resizeNeuronCanvas);
+function resizeNeuronCanvas() {
+  width = neuronCanvas.width = window.innerWidth;
+  height = neuronCanvas.height = window.innerHeight;
+}
+resizeNeuronCanvas();
+window.addEventListener('resize', resizeNeuronCanvas);
 
-  const nodes = Array.from({ length: 50 }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    radius: 3 + Math.random() * 4,
-    color: getGlowColor(),
-    vx: (Math.random() - 0.5) * 1.2,
-    vy: (Math.random() - 0.5) * 1.2
-  }));
-
-  function getGlowColor() {
-    const hue = Math.floor(Math.random() * 360);
-    return `hsl(${hue}, 100%, 75%)`;
+class Neuron {
+  constructor() {
+    this.reset();
   }
 
-  function drawNeurons() {
-  if (!document.body.classList.contains('light-mode')) return;
+  reset() {
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    this.radius = 2 + Math.random() * 3;
+    this.vx = (Math.random() - 0.5) * 0.8;
+    this.vy = (Math.random() - 0.5) * 0.8;
+    this.color = getGlowColor();
+    this.connections = new Set();
+  }
 
-  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.03)';
-  neuronCtx.fillRect(0, 0, width, height);
-
-  for (let i = 0; i < nodes.length; i++) {
-    const n = nodes[i];
-
-    if (Math.random() < 0.05) {
-      n.vx += (Math.random() - 0.5) * 1.5;
-      n.vy += (Math.random() - 0.5) * 1.5;
-      n.color = getGlowColor(); // zmiana koloru
+  update() {
+    if (Math.random() < 0.01) {
+      this.vx += (Math.random() - 0.5) * 0.3;
+      this.vy += (Math.random() - 0.5) * 0.3;
     }
 
-    n.vx *= 0.97;
-    n.vy *= 0.97;
+    this.vx *= 0.99;
+    this.vy *= 0.99;
 
-    n.x += n.vx;
-    n.y += n.vy;
+    this.x += this.vx;
+    this.y += this.vy;
 
-    if (n.x < 0 || n.x > width) n.vx *= -1;
-    if (n.y < 0 || n.y > height) n.vy *= -1;
+    if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+      this.reset();
+    }
+  }
 
-    // Główna kula (rdzeń neuronu)
-    neuronCtx.beginPath();
-    neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
-    neuronCtx.fillStyle = n.color;
-    neuronCtx.shadowColor = n.color;
-    neuronCtx.shadowBlur = 60;
-    neuronCtx.fill();
+  draw(ctx) {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = 20 + Math.random() * 10;
+    ctx.fill();
+  }
+}
 
-    // Smuga za neuronem
-    const trailLength = 20;
-    for (let j = 1; j < trailLength; j++) {
-      const tx = n.x - n.vx * j * 1.2;
-      const ty = n.y - n.vy * j * 1.2;
-      const alpha = 1 - j / trailLength;
+function getGlowColor() {
+  const hue = Math.floor(Math.random() * 360);
+  return `hsl(${hue}, 100%, 75%)`;
+}
 
-      neuronCtx.beginPath();
-      neuronCtx.arc(tx, ty, n.radius * (1 - j / trailLength), 0, 2 * Math.PI);
-      neuronCtx.fillStyle = `rgba(255,255,255,${alpha * 0.2})`;
-      neuronCtx.fill();
+const neurons = Array.from({ length: 70 }, () => new Neuron());
+
+function drawNeurons() {
+  if (!document.body.classList.contains('light-mode')) return;
+
+  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+  neuronCtx.fillRect(0, 0, width, height);
+
+  // Update and draw neurons
+  for (const neuron of neurons) {
+    neuron.update();
+    neuron.draw(neuronCtx);
+  }
+
+  // Connect neurons dynamically
+  for (let i = 0; i < neurons.length; i++) {
+    for (let j = i + 1; j < neurons.length; j++) {
+      const n1 = neurons[i];
+      const n2 = neurons[j];
+      const dx = n1.x - n2.x;
+      const dy = n1.y - n2.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        neuronCtx.beginPath();
+        neuronCtx.moveTo(n1.x, n1.y);
+        neuronCtx.lineTo(n2.x, n2.y);
+        neuronCtx.strokeStyle = `rgba(255, 255, 255, ${1 - dist / 100})`;
+        neuronCtx.lineWidth = 0.5;
+        neuronCtx.stroke();
+      }
     }
   }
 
   requestAnimationFrame(drawNeurons);
 }
 
-  drawNeurons();
+drawNeurons();
 </script>
 </body>
 </html>
