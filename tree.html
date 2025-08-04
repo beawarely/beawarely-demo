@@ -269,13 +269,15 @@ function drawImpulse(i) {
   ctxNeuron.globalAlpha = 1;
 }
 
-function animateImpulses() {
+function animateLoop() {
+  requestAnimationFrame(animateLoop);
+
   if (!document.body.classList.contains("light-mode")) {
     ctxNeuron.clearRect(0, 0, neuronCanvas.width, neuronCanvas.height);
     return;
   }
 
-  ctxNeuron.fillStyle = "rgba(0, 0, 0, 0.1)";
+  ctxNeuron.fillStyle = "rgba(255, 255, 255, 0.05)";
   ctxNeuron.fillRect(0, 0, neuronCanvas.width, neuronCanvas.height);
 
   impulses.forEach((impulse, i) => {
@@ -287,11 +289,9 @@ function animateImpulses() {
   impulses = impulses.filter((impulse) => impulse.life < impulse.maxLife);
 
   if (Math.random() < 0.3) impulses.push(createImpulse());
-
-  requestAnimationFrame(animateImpulses);
 }
 
-animateImpulses();
+animateLoop();
 </script>
 </body>
 </html>
