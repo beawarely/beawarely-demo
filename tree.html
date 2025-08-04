@@ -221,15 +221,15 @@ body.light-mode #neuron-bg {
 
 <script>
 // --- IMPULSE NEURON EFFECT --- //
-const canvas = document.getElementById("neuron-bg");
-const ctx = canvas.getContext("2d");
+const neuronCanvas = document.getElementById("neuron-bg");
+const ctxNeuron = neuronCanvas.getContext("2d");
 
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+function resizeCanvasNeuron() {
+  neuronCanvas.width = window.innerWidth;
+  neuronCanvas.height = window.innerHeight;
 }
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+resizeCanvasNeuron();
+window.addEventListener("resize", resizeCanvasNeuron);
 
 let impulses = [];
 
@@ -244,8 +244,8 @@ function createImpulse() {
   const pair = colors[Math.floor(Math.random() * colors.length)];
 
   return {
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
+    x: Math.random() * neuronCanvas.width,
+    y: Math.random() * neuronCanvas.height,
     radius: 0,
     maxRadius: Math.random() * 40 + 30,
     growth: Math.random() * 1.2 + 0.5,
@@ -258,25 +258,25 @@ function createImpulse() {
 
 function drawImpulse(i) {
   const im = impulses[i];
-  const grad = ctx.createRadialGradient(im.x, im.y, 0, im.x, im.y, im.radius);
+  const grad = ctxNeuron.createRadialGradient(im.x, im.y, 0, im.x, im.y, im.radius);
   grad.addColorStop(0, im.innerColor);
   grad.addColorStop(1, im.outerColor);
-  ctx.beginPath();
-  ctx.fillStyle = grad;
-  ctx.globalAlpha = 1 - im.life / im.maxLife;
-  ctx.arc(im.x, im.y, im.radius, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.globalAlpha = 1;
+  ctxNeuron.beginPath();
+  ctxNeuron.fillStyle = grad;
+  ctxNeuron.globalAlpha = 1 - im.life / im.maxLife;
+  ctxNeuron.arc(im.x, im.y, im.radius, 0, 2 * Math.PI);
+  ctxNeuron.fill();
+  ctxNeuron.globalAlpha = 1;
 }
 
 function animateImpulses() {
   if (!document.body.classList.contains("light-mode")) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctxNeuron.clearRect(0, 0, neuronCanvas.width, neuronCanvas.height);
     return;
   }
 
-  ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctxNeuron.fillStyle = "rgba(0, 0, 0, 0.1)";
+  ctxNeuron.fillRect(0, 0, neuronCanvas.width, neuronCanvas.height);
 
   impulses.forEach((impulse, i) => {
     impulse.radius += impulse.growth;
