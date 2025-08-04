@@ -259,8 +259,10 @@ function createImpulse() {
 function drawImpulse(i) {
   const im = impulses[i];
   const grad = ctxNeuron.createRadialGradient(im.x, im.y, 0, im.x, im.y, im.radius);
-  grad.addColorStop(0, im.innerColor);
-  grad.addColorStop(1, im.outerColor);
+  grad.addColorStop(0, `rgba(255, 255, 255, 0.9)`); // jasny środek
+  grad.addColorStop(0.3, im.outerColor + "88");     // poświata koloru
+  grad.addColorStop(1, "transparent");              // zanik do przezroczystości
+
   ctxNeuron.beginPath();
   ctxNeuron.fillStyle = grad;
   ctxNeuron.globalAlpha = 1 - im.life / im.maxLife;
