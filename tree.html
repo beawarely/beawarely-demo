@@ -219,81 +219,84 @@ body.light-mode #neuron-bg {
     setInterval(drawMatrix, 35);
   </script>
 
-<script>
-// --- IMPULSE NEURON EFFECT --- //
-const neuronCanvas = document.getElementById("neuron-bg");
-const ctxNeuron = neuronCanvas.getContext("2d");
-
-function resizeCanvasNeuron() {
-  neuronCanvas.width = window.innerWidth;
-  neuronCanvas.height = window.innerHeight;
-}
-resizeCanvasNeuron();
-window.addEventListener("resize", resizeCanvasNeuron);
-
-let impulses = [];
-
-function createImpulse() {
-  const colors = [
-    ["#ffffff", "#00ccff"],
-    ["#ffffff", "#00ff99"],
-    ["#ffffff", "#ff0099"],
-    ["#ffffff", "#ff6600"],
-    ["#ffffff", "#cc00ff"]
-  ];
-  const pair = colors[Math.floor(Math.random() * colors.length)];
-
-  return {
-    x: Math.random() * neuronCanvas.width,
-    y: Math.random() * neuronCanvas.height,
-    radius: 0,
-    maxRadius: Math.random() * 40 + 30,
-    growth: Math.random() * 1.2 + 0.5,
-    life: 0,
-    maxLife: 40 + Math.random() * 20,
-    innerColor: pair[0],
-    outerColor: pair[1]
-  };
-}
-
-function drawImpulse(i) {
-  const im = impulses[i];
-  const grad = ctxNeuron.createRadialGradient(im.x, im.y, 0, im.x, im.y, im.radius);
-  grad.addColorStop(0, `rgba(255, 255, 255, 0.9)`); // jasny środek
-  grad.addColorStop(0.3, im.outerColor + "88");     // poświata koloru
-  grad.addColorStop(1, "transparent");              // zanik do przezroczystości
-
-  ctxNeuron.beginPath();
-  ctxNeuron.fillStyle = grad;
-  ctxNeuron.globalAlpha = 1 - im.life / im.maxLife;
-  ctxNeuron.arc(im.x, im.y, im.radius, 0, 2 * Math.PI);
-  ctxNeuron.fill();
-  ctxNeuron.globalAlpha = 1;
-}
-
-function animateLoop() {
-  requestAnimationFrame(animateLoop);
-
-  if (!document.body.classList.contains("light-mode")) {
-    ctxNeuron.clearRect(0, 0, neuronCanvas.width, neuronCanvas.height);
-    return;
+<!-- NEURON BACKGROUND LIGHT MODE -->
+<canvas id="neuronCanvas"></canvas>
+<style>
+  #neuronCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
   }
 
-  ctxNeuron.fillStyle = "rgba(255, 255, 255, 0.05)";
-  ctxNeuron.fillRect(0, 0, neuronCanvas.width, neuronCanvas.height);
+  .light-mode #neuronCanvas {
+    display: block;
+  }
 
-  impulses.forEach((impulse, i) => {
-    impulse.radius += impulse.growth;
-    impulse.life++;
-    drawImpulse(i);
-  });
+  .dark-mode #neuronCanvas {
+    display: none;
+  }
+</style>
 
-  impulses = impulses.filter((impulse) => impulse.life < impulse.maxLife);
+<script>
+  const canvas = document.getElementById('neuronCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
 
-  if (Math.random() < 0.3) impulses.push(createImpulse());
-}
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
-animateLoop();
+  const nodes = Array.from({ length: 15 }, () => ({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    radius: 2 + Math.random() * 3,
+    color: `hsl(${Math.random() * 360}, 100%, 70%)`,
+    vx: (Math.random() - 0.5) * 0.6,
+    vy: (Math.random() - 0.5) * 0.6
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    for (let i = 0; i < nodes.length; i++) {
+      const n1 = nodes[i];
+      n1.x += n1.vx;
+      n1.y += n1.vy;
+
+      if (n1.x < 0 || n1.x > width) n1.vx *= -1;
+      if (n1.y < 0 || n1.y > height) n1.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(n1.x, n1.y, n1.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = n1.color;
+      ctx.shadowColor = n1.color;
+      ctx.shadowBlur = 10;
+      ctx.fill();
+
+      for (let j = i + 1; j < nodes.length; j++) {
+        const n2 = nodes[j];
+        const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
+        if (dist < 150) {
+          ctx.beginPath();
+          ctx.moveTo(n1.x, n1.y);
+          ctx.lineTo(n2.x, n2.y);
+          ctx.strokeStyle = n1.color;
+          ctx.globalAlpha = 1 - dist / 150;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
 </script>
 </body>
 </html>
