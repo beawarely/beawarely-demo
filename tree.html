@@ -7,48 +7,39 @@
   <title>Knowledge Tree - BeAwarely</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-:root {
-  --blue1: #007bff;
-  --blue2: #66b2ff;
-  --blue3: #b3d9ff;
-}
+    :root {
+      --blue1: #007bff;
+      --blue2: #66b2ff;
+      --blue3: #b3d9ff;
+    }
 
-body.light-mode {
-  background: radial-gradient(ellipse at center, #000000 0%, #0a0a23 100%) !important;
-  color: #eee !important;
-}
+    body.light-mode {
+      background: black !important;
+      color: #eee !important;
+    }
 
-body.light-mode p {
-  color: #333;
-}
+    body.light-mode p {
+      color: #333;
+    }
 
-body.light-mode .back-btn {
-  background-color: var(--blue2);
-  color: black;
-}
+    body.light-mode .back-btn {
+      background-color: var(--blue2);
+      color: black;
+    }
 
-body.light-mode .back-btn:hover {
-  background-color: var(--blue1);
-}
+    body.light-mode .back-btn:hover {
+      background-color: var(--blue1);
+    }
+
     body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: black; /* tło kosmiczne */
-  color: white;
-  text-align: center;
-  padding: 40px 20px;
-  transition: background-color 0.5s ease, color 0.5s ease;
-}
-
-/* Tryb jasny */
-
-
-/* Animacja tła */
-@keyframes animatedGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: black;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
 
     .tree-image {
       max-width: 100%;
@@ -92,45 +83,40 @@ body.light-mode .back-btn:hover {
       color: #777;
     }
 
+    body:not(.light-mode) #matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+    }
 
-@keyframes gradientMove {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
-  100% { background-position: 0% 0%; }
-}
+    body.light-mode #matrix-bg {
+      display: none;
+    }
 
-/* Efekt Matrix tylko w trybie ciemnym */
-body:not(.light-mode) #matrix-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -1;
-  width: 100vw;
-  height: 100vh;
-  background: black;
-}
+    #neuronCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+      display: none;
+    }
 
-body.light-mode #matrix-bg {
-  display: none;
-}
-/* Efekt sieci neuronowej (tylko w trybie jasnym) */
-#neuron-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
-  display: none; /* domyślnie ukryty */
-}
-body.light-mode #neuron-bg {
-  display: block;
-}
+    body.light-mode #neuronCanvas {
+      display: block;
+    }
   </style>
 </head>
 <body class="light-mode">
   <canvas id="matrix-bg"></canvas>
   <canvas id="neuronCanvas"></canvas>
+
   <span id="modeIcon"
         onclick="toggleMode()"
         title="Toggle light/dark mode"
@@ -152,23 +138,21 @@ body.light-mode #neuron-bg {
   <footer>
     © 2025 BeAwarely — Tree of Knowledge (demo concept)
   </footer>
-</body>
-<script>
-    // Ustaw preferowany tryb z localStorage
+
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
       const mode = localStorage.getItem('mode');
       const icon = document.getElementById('modeIcon');
 
-if (mode === 'light') {
-  document.body.classList.add('light-mode');
-  if (icon) icon.textContent = '🌞';
-} else {
-  document.body.classList.remove('light-mode');
-  if (icon) icon.textContent = '🌙';
-}
+      if (mode === 'light') {
+        document.body.classList.add('light-mode');
+        if (icon) icon.textContent = '🌞';
+      } else {
+        document.body.classList.remove('light-mode');
+        if (icon) icon.textContent = '🌙';
+      }
     });
 
-    // Przełącznik trybu
     function toggleMode() {
       const isLight = document.body.classList.toggle('light-mode');
       localStorage.setItem('mode', isLight ? 'light' : 'dark');
@@ -178,7 +162,7 @@ if (mode === 'light') {
   </script>
 
   <script>
-    // --- MATRIX BACKGROUND ANIMATION --- //
+    // --- MATRIX BACKGROUND --- //
     const canvas = document.getElementById("matrix-bg");
     const ctx = canvas.getContext('2d');
 
@@ -217,85 +201,63 @@ if (mode === 'light') {
     setInterval(drawMatrix, 35);
   </script>
 
-<!-- NEURON BACKGROUND LIGHT MODE -->
-<canvas id="neuronCanvas"></canvas>
-<style>
-  #neuronCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    pointer-events: none;
-  }
+  <script>
+    // --- NEURON BACKGROUND (light mode only) --- //
+    const neuronCanvas = document.getElementById('neuronCanvas');
+    const neuronCtx = neuronCanvas.getContext('2d');
+    let width, height;
 
-  .light-mode #neuronCanvas {
-    display: block;
-  }
+    function resizeNeuronCanvas() {
+      width = neuronCanvas.width = window.innerWidth;
+      height = neuronCanvas.height = window.innerHeight;
+    }
+    resizeNeuronCanvas();
+    window.addEventListener('resize', resizeNeuronCanvas);
 
-  .dark-mode #neuronCanvas {
-    display: none;
-  }
-</style>
+    const nodes = Array.from({ length: 40 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      radius: 3 + Math.random() * 5,
+      color: `hsl(${Math.random() * 360}, 100%, 75%)`,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5
+    }));
 
-<script>
-  const neuronCanvas = document.getElementById('neuronCanvas');
-  const neuronCtx = neuronCanvas.getContext('2d');
-  let width, height;
+    function drawNeurons() {
+      if (!document.body.classList.contains('light-mode')) return;
 
-  function resizeNeuronCanvas() {
-    width = neuronCanvas.width = window.innerWidth;
-    height = neuronCanvas.height = window.innerHeight;
-  }
-  resizeNeuronCanvas();
-  window.addEventListener('resize', resizeNeuronCanvas);
+      neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+      neuronCtx.fillRect(0, 0, width, height);
 
-  const nodes = Array.from({ length: 40 }, () => ({
-    x: Math.random() * width,
-    y: Math.random() * height,
-    radius: 3 + Math.random() * 5,
-    color: `hsl(${Math.random() * 360}, 100%, 75%)`,
-    vx: (Math.random() - 0.5) * 1.5,
-    vy: (Math.random() - 0.5) * 1.5
-  }));
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
 
-  function drawNeurons() {
-    // Dłuższa smuga
-    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.04)';
-    neuronCtx.fillRect(0, 0, width, height);
+        if (Math.random() < 0.015) {
+          n.vx += (Math.random() - 0.5) * 0.6;
+          n.vy += (Math.random() - 0.5) * 0.6;
+        }
 
-    for (let i = 0; i < nodes.length; i++) {
-      const n = nodes[i];
+        n.vx *= 0.99;
+        n.vy *= 0.99;
 
-      // Dynamiczne, nieregularne zmiany kierunku
-      if (Math.random() < 0.015) {
-        n.vx += (Math.random() - 0.5) * 0.6;
-        n.vy += (Math.random() - 0.5) * 0.6;
+        n.x += n.vx;
+        n.y += n.vy;
+
+        if (n.x < 0 || n.x > width) n.vx *= -1;
+        if (n.y < 0 || n.y > height) n.vy *= -1;
+
+        neuronCtx.beginPath();
+        neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
+        neuronCtx.fillStyle = n.color;
+        neuronCtx.shadowColor = n.color;
+        neuronCtx.shadowBlur = 20;
+        neuronCtx.fill();
       }
 
-      n.vx *= 0.99; // delikatne tłumienie
-      n.vy *= 0.99;
-
-      n.x += n.vx;
-      n.y += n.vy;
-
-      // odbicia od krawędzi
-      if (n.x < 0 || n.x > width) n.vx *= -1;
-      if (n.y < 0 || n.y > height) n.vy *= -1;
-
-      // rysuj
-      neuronCtx.beginPath();
-      neuronCtx.arc(n.x, n.y, n.radius, 0, 2 * Math.PI);
-      neuronCtx.fillStyle = n.color;
-      neuronCtx.shadowColor = n.color;
-      neuronCtx.shadowBlur = 20;
-      neuronCtx.fill();
+      requestAnimationFrame(drawNeurons);
     }
 
-    requestAnimationFrame(drawNeurons);
-  }
-
-  drawNeurons();
-</script>
+    drawNeurons();
+  </script>
 </body>
 </html>
