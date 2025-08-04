@@ -154,11 +154,13 @@
     });
 
     function toggleMode() {
-      const isLight = document.body.classList.toggle('light-mode');
-      localStorage.setItem('mode', isLight ? 'light' : 'dark');
-      const icon = document.getElementById('modeIcon');
-      if (icon) icon.textContent = isLight ? '🌞' : '🌙';
-    }
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('mode', isLight ? 'light' : 'dark');
+  const icon = document.getElementById('modeIcon');
+  if (icon) icon.textContent = isLight ? '🌞' : '🌙';
+
+  if (isLight) drawNeuronCloud(); // ✅ dodane
+}
   </script>
 
   <script>
