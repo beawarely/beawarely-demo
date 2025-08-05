@@ -147,10 +147,10 @@
 
       if (mode === 'light') {
   document.body.classList.add('light-mode');
-  if (icon) icon.src = 'images/ikona-neural-orange.svg';
+  if (icon) icon.src = 'images/icon-neural-orange.svg';
 } else {
   document.body.classList.remove('light-mode');
-  if (icon) icon.src = 'images/ikona-tryb-ciemny-matrix-pills.svg';
+  if (icon) icon.src = 'images/icon-darkmode-matrix-pills.svg';
 }
     });
 
@@ -159,8 +159,8 @@
   localStorage.setItem('mode', isLight ? 'light' : 'dark');
   const icon = document.getElementById('modeIcon');
   if (icon) icon.src = isLight 
-  ? 'images/ikona-neural-orange.svg' 
-  : 'images/ikona-tryb-ciemny-matrix-pills.svg';
+  ? 'images/icon-neural-orange.svg' 
+  : 'images/icon-darkmode-matrix-pills.svg';
 
   if (isLight) drawNeuronCloud(); // ✅ dodane
 }
