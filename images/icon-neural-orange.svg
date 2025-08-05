@@ -1,0 +1,34 @@
+
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <style>
+    .node { fill: #ffcc33; stroke: #ffcc33; stroke-width: 2; }
+    .link { stroke: #ffcc33; stroke-width: 2; }
+  </style>
+
+  <!-- Linie łączące punkty -->
+  <line x1="100" y1="20" x2="150" y2="50" class="link"/>
+  <line x1="100" y1="20" x2="50" y2="50" class="link"/>
+  <line x1="150" y1="50" x2="170" y2="100" class="link"/>
+  <line x1="150" y1="50" x2="100" y2="100" class="link"/>
+  <line x1="50" y1="50" x2="30" y2="100" class="link"/>
+  <line x1="50" y1="50" x2="100" y2="100" class="link"/>
+  <line x1="100" y1="100" x2="170" y2="100" class="link"/>
+  <line x1="100" y1="100" x2="30" y2="100" class="link"/>
+  <line x1="100" y1="100" x2="100" y2="180" class="link"/>
+  <line x1="30" y1="100" x2="70" y2="150" class="link"/>
+  <line x1="170" y1="100" x2="130" y2="150" class="link"/>
+  <line x1="130" y1="150" x2="100" y2="180" class="link"/>
+  <line x1="70" y1="150" x2="100" y2="180" class="link"/>
+  <line x1="70" y1="150" x2="130" y2="150" class="link"/>
+
+  <!-- Punkty (neurony) -->
+  <circle cx="100" cy="20" r="5" class="node"/>
+  <circle cx="150" cy="50" r="5" class="node"/>
+  <circle cx="50" cy="50" r="5" class="node"/>
+  <circle cx="100" cy="100" r="5" class="node"/>
+  <circle cx="170" cy="100" r="5" class="node"/>
+  <circle cx="30" cy="100" r="5" class="node"/>
+  <circle cx="70" cy="150" r="5" class="node"/>
+  <circle cx="130" cy="150" r="5" class="node"/>
+  <circle cx="100" cy="180" r="5" class="node"/>
+</svg>
