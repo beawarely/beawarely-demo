@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+	<style>
+@keyframes morph {
+  0%   { d: path('M 256,106 L 406,406 L 106,406 Z'); stroke: #FFFF00; fill: #FF00FF; }
+  25%  { d: path('M 156,106 L 356,106 L 356,406 L 156,406 Z'); stroke: #00FF00; fill: #0000FF; }
+  50%  { d: path('M 256,56 L 356,256 L 256,356 L 156,256 Z'); stroke: #00FFFF; fill: #FF0000; }
+  75%  { d: path('M 256,56 L 356,156 L 320,356 L 192,356 L 156,156 Z'); stroke: #FF9900; fill: #9900FF; }
+  100% { d: path('M 256,106 L 406,406 L 106,406 Z'); stroke: #FFFF00; fill: #FF00FF; }
+}
+path {
+  stroke-width: 4;
+  stroke-linejoin: round;
+  animation: morph 12s linear infinite;
+  fill-opacity: 0.2;
+}
+circle {
+  r: 6;
+  stroke-width: 2;
+}
+</style>
+	<path d="M 256,106 L 406,406 L 106,406 Z" stroke="#FFFF00" fill="#FF00FF"/>
+	<circle cx="256" cy="106" fill="#FFFF00" stroke="#FF00FF"/>
+	<circle cx="406" cy="406" fill="#FFFF00" stroke="#FF00FF"/>
+	<circle cx="106" cy="406" fill="#FFFF00" stroke="#FF00FF"/>
+</svg>
