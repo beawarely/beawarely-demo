@@ -117,12 +117,13 @@
   <canvas id="matrix-bg"></canvas>
   <canvas id="neuronCanvas"></canvas>
 
-  <span id="modeIcon"
-        onclick="toggleMode()"
-        title="Toggle light/dark mode"
-        style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s; z-index: 999;"
-        onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-        onmouseout="this.style.backgroundColor='transparent'">🌞</span>
+  <img id="modeIcon"
+     src="images/icon-neural-orange.svg"
+     onclick="toggleMode()"
+     title="Toggle light/dark mode"
+     style="position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; cursor: pointer; padding: 6px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s; object-fit: contain; z-index: 999;"
+     onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
+     onmouseout="this.style.backgroundColor='transparent'" />
 
   <h1>Welcome to the Knowledge Tree</h1>
   <p>
