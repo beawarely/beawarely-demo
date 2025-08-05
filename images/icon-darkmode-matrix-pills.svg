@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+	<rect width="100%" height="100%" fill="black"/>
+	<style>
+@keyframes fall {
+  0% { transform: translateY(-100%); opacity: 0; }
+  100% { transform: translateY(100%); opacity: 1; }
+}
+text {
+  font-family: monospace;
+  font-size: 16px;
+  animation: fall 3s linear infinite;
+}
+</style>
+	<text x="10" y="128" fill="#ebec24">01</text>
+	<text x="10" y="256" fill="#6fdd12">01</text>
+	<text x="10" y="384" fill="#7592c6">01</text>
+	<text x="61" y="128" fill="#373107">01</text>
+	<text x="61" y="256" fill="#5525e9">01</text>
+	<text x="61" y="384" fill="#3ac558">01</text>
+	<text x="112" y="128" fill="#8011bd">01</text>
+	<text x="112" y="256" fill="#a80220">01</text>
+	<text x="112" y="384" fill="#df7355">01</text>
+	<text x="163" y="128" fill="#fbbc4c">01</text>
+	<text x="163" y="256" fill="#031bf8">01</text>
+	<text x="163" y="384" fill="#7658fd">01</text>
+	<text x="214" y="128" fill="#0903e5">01</text>
+	<text x="214" y="256" fill="#b27293">01</text>
+	<text x="214" y="384" fill="#96cb93">01</text>
+	<text x="265" y="128" fill="#aab556">01</text>
+	<text x="265" y="256" fill="#094255">01</text>
+	<text x="265" y="384" fill="#583aa9">01</text>
+	<text x="316" y="128" fill="#4260a0">01</text>
+	<text x="316" y="256" fill="#d6334f">01</text>
+	<text x="316" y="384" fill="#140140">01</text>
+	<text x="367" y="128" fill="#d4a564">01</text>
+	<text x="367" y="256" fill="#72ea74">01</text>
+	<text x="367" y="384" fill="#1548dc">01</text>
+	<text x="418" y="128" fill="#5e3ea4">01</text>
+	<text x="418" y="256" fill="#c30fec">01</text>
+	<text x="418" y="384" fill="#7e815b">01</text>
+	<text x="469" y="128" fill="#371af5">01</text>
+	<text x="469" y="256" fill="#d228a0">01</text>
+	<text x="469" y="384" fill="#999aaa">01</text>
+</svg>
