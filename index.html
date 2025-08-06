@@ -325,13 +325,14 @@ function toggleLightDarkMode() {
         style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
         onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
         onmouseout="this.style.backgroundColor='transparent'">🌙</span>
-<!-- Ikona zmiany tła galaktyki ✨ -->
-<span id="bgModeIcon"
-      onclick="toggleGalaxyMode()"
-      title="Toggle galaxy brightness"
-      style="position: absolute; top: 20px; right: 60px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
-      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-      onmouseout="this.style.backgroundColor='transparent'">✨</span>
+<!-- Przycisk Log In -->
+<span id="loginBtn"
+      onclick="openLoginModal()"
+      title="Log in to your account"
+      style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
+      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
+      onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">Log In</span>
+
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
@@ -489,5 +490,30 @@ function toggleLightDarkMode() {
     alert("Galaxy brightness toggle coming soon!");
   }
 </script>
+
+  <script>
+function openLoginModal() {
+  document.getElementById('loginModal').style.display = 'flex';
+}
+function closeLoginModal() {
+  document.getElementById('loginModal').style.display = 'none';
+}
+</script>
+
+
+  <!-- Modal Logowania -->
+<div id="loginModal" style="display: none; position: fixed; z-index: 99999; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); display: flex; justify-content: center; align-items: center;">
+  <div style="background: #222; padding: 30px 20px; border-radius: 10px; width: 320px; box-shadow: 0 0 15px rgba(0,0,0,0.6);">
+    <h2 style="text-align: center; margin-bottom: 20px; color: #fff;">Log In</h2>
+    <input type="email" placeholder="Email" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: none; font-size: 1rem;" />
+    <input type="password" placeholder="Password" style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 6px; border: none; font-size: 1rem;" />
+    <button style="width: 100%; padding: 10px; background: var(--blue1); color: white; border: none; border-radius: 6px; cursor: pointer;">Log In</button>
+    <p style="text-align: center; font-size: 0.9rem; margin-top: 12px; color: #bbb;">
+      Don’t have an account? <a href="#" style="color: var(--blue2); text-decoration: none;">Sign up</a>
+    </p>
+    <div onclick="closeLoginModal()" style="position: absolute; top: 20px; right: 30px; font-size: 1.5rem; cursor: pointer; color: white;">✖</div>
+  </div>
+</div>
+
 </body>
 </html>
