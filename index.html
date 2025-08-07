@@ -538,10 +538,10 @@ function toggleLightDarkMode() {
   const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
 
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   async function signInWithGoogle() {
-  const { data, error } = await supabase.auth.signInWithOAuth({
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: 'https://beawarely.github.io/beawarely-demo'
@@ -560,7 +560,7 @@ function toggleLightDarkMode() {
 <!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabaseClient.auth.getUser();
 
     if (error) {
       console.error("❌ Błąd pobierania użytkownika:", error.message);
@@ -578,7 +578,7 @@ function toggleLightDarkMode() {
   });
 
   async function logoutUser() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
     if (error) {
       alert("Error signing out");
       console.error("❌ Błąd podczas wylogowywania:", error.message);
