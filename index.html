@@ -556,6 +556,30 @@ function toggleLightDarkMode() {
 }
 </script>
 
+<!-- 🔽 Obsługa logowania i wylogowania użytkownika -->
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      document.getElementById('loginBtn').textContent = 'Hello 👋';
+      document.getElementById('loginBtn').onclick = logoutUser;
+    } else {
+      document.getElementById('loginBtn').textContent = 'Log In';
+      document.getElementById('loginBtn').onclick = openLoginModal;
+    }
+  });
+
+  async function logoutUser() {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      alert("Error signing out");
+    } else {
+      location.reload();
+    }
+  }
+</script>
+
 <!-- 🔽 Dodaj to przed </body> -->
 <div id="loginModal" style="
   display: none;
