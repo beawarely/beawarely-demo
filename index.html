@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>BeAwarely</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>BeAwarely</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
     :root {
@@ -14,35 +14,36 @@
     }
 
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: rgba(0, 0, 0, 0.85) !important;
-      color: #fff;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    body.light-mode {
-      background-color: rgba(255, 255, 255, 0.85) !important;
-      color: #000;
-    }
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  color: #fff;
+  transition: background-color 0.3s, color 0.3s;
+}
 
-    header, section, footer {
-      background-color: transparent !important;
+body.light-mode {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  color: #000;
+}
+    header,
+section,
+footer {
+  background-color: transparent !important;
     }
-
     header {
       text-align: center;
       padding: 80px 20px 40px;
     }
 
     .logo-placeholder {
-      width: 100px;
-      height: 100px;
-      background-color: #ccc;
-      border-radius: 12px;
-      margin: 0 auto 20px;
-      animation: pulse 3s infinite;
-      transition: background-color 0.3s, transform 0.3s;
-    }
+  width: 100px;
+  height: 100px;
+  background-color: #ccc;
+  border-radius: 12px;
+  margin: 0 auto 20px;
+  animation: pulse 3s infinite;
+  transition: background-color 0.3s, transform 0.3s;
+}
 
     h1 {
       font-size: 2.3rem;
@@ -81,26 +82,28 @@
     }
 
     input, textarea {
-      padding: 12px;
-      border: 2px solid #333;
-      border-radius: 8px;
-      font-size: 1rem;
-      background-color: #1a1a1a;
-      color: #fff;
-      transition: border-color 0.3s, box-shadow 0.3s, transform 0.1s;
-    }
-    body.light-mode input,
-    body.light-mode textarea {
-      background-color: #fff;
-      color: #000;
-      border: 2px solid #ccc;
-    }
-    input:focus, textarea:focus {
-      border-color: var(--blue2);
-      outline: none;
-      box-shadow: 0 0 8px var(--blue2);
-      transform: scale(1.02);
-    }
+  padding: 12px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #1a1a1a;
+  color: #fff;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+body.light-mode input,
+body.light-mode textarea {
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #ccc;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--blue2);
+  outline: none;
+  box-shadow: 0 0 8px var(--blue2);
+  transform: scale(1.02);
+}
 
     .send-btn {
       background-color: var(--blue1);
@@ -112,16 +115,17 @@
     }
 
     .confirmation {
-      text-align: center;
-      color: #00cc66;
-      margin-top: 10px;
-      font-weight: bold;
-      background-color: rgba(0, 204, 102, 0.1);
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0, 204, 102, 0.3);
-      transition: opacity 0.5s ease;
-    }
+  text-align: center;
+  color: #00cc66;
+  margin-top: 10px;
+  font-weight: bold;
+  background-color: rgba(0, 204, 102, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 204, 102, 0.3);
+  transition: opacity 0.5s ease;
+}
+
 
     footer {
       text-align: center;
@@ -146,209 +150,212 @@
     }
 
     @keyframes pulse {
-      0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
-      70%  { transform: scale(1.05); box-shadow: 0 0 10px 10px rgba(0, 123, 255, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 10px 10px rgba(0, 123, 255, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
     }
 
     /* Spinner loading screen */
-    #loader {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background-color: #0e0e0e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease, visibility 0.5s;
-    }
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 5px solid #fff;
-      border-top: 5px solid var(--blue1);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0e0e0e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
 
-    .ai-tool-box {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 20px;
-      width: 220px;
-      transition: transform 0.3s ease, background-color 0.3s ease;
-      animation: fadeIn 0.6s ease-in-out both;
-    }
-    .ai-tool-box:hover {
-      transform: scale(1.05);
-      background-color: rgba(255, 255, 255, 0.08);
-    }
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #fff;
+  border-top: 5px solid var(--blue1);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
 
-    .scroll-reveal {
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-    .scroll-reveal.revealed {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
-    /* Rotating background */
-    #rotating-bg {
-      position: fixed;
-      top: 50%; left: 50%;
-      width: 300vw; height: 300vh;
-      transform: translate(-50%, -50%);
-      z-index: -1;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    #rotating-bg img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      animation: rotateBackground 240s linear infinite;
-      opacity: 0.3;
-      filter: brightness(1);
-      transition: opacity 0.6s ease, filter 0.6s ease;
-    }
-    body.light-mode #rotating-bg img {
-      /* bez content:url — steruje JS przez .src */
-      opacity: 0.4;
-      filter: brightness(1.2);
-    }
-    body:not(.light-mode) #rotating-bg img {
-      opacity: 0.25;
-      filter: brightness(0.9);
-    }
-    @keyframes rotateBackground {
-      0%   { transform: rotate(0deg) scale(1.1); }
-      100% { transform: rotate(360deg) scale(1.1); }
-    }
+.ai-tool-box {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  width: 220px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  animation: fadeIn 0.6s ease-in-out both;
+}
 
-    header h1, section h2, section p, section li, footer {
-      text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-    }
+.ai-tool-box:hover {
+  transform: scale(1.05);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
 
-    .discord-icon {
-      width: 26px;
-      height: 26px;
-      vertical-align: middle;
-      transition: transform 0.3s ease;
-    }
-    .discord-icon:hover { transform: rotate(10deg) scale(1.1); }
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+  #rotating-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300vw;
+  height: 300vh;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
 
-    #loginBtn:hover { transform: scale(1.05); }
+#rotating-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: rotateBackground 240s linear infinite;
+  opacity: 0.3;
+  filter: brightness(1);
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
 
-    @media (max-width: 500px) {
-      footer { font-size: 13px; }
-      .social-icons a { margin: 0 6px; }
-      .discord-icon { width: 24px; height: 24px; }
+body.light-mode #rotating-bg img {
+  content: url("images/galaxy-light.png");
+  opacity: 0.4;
+  filter: brightness(1.2);
+}
 
-      #modeIcon, #loginBtn {
-        top: 10px;
-        font-size: 1.1rem;
-        padding: 4px 10px;
-      }
-      #loginBtn { right: 50px; }
-      #modeIcon { right: 10px; }
-    }
-  </style>
+body:not(.light-mode) #rotating-bg img {
+  content: url("images/galaxy-dark.png");
+  opacity: 0.25;
+  filter: brightness(0.9);
+}
 
-  <!-- Tryb + loader + obraz tła: ustawienia startowe -->
+@keyframes rotateBackground {
+  0%   { transform: rotate(0deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1.1); }
+}
+header h1,
+section h2,
+section p,
+section li,
+footer {
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+}
+</style>
   <script>
+    // Load preferred theme
     document.addEventListener('DOMContentLoaded', () => {
-      const mode = localStorage.getItem('mode') || 'dark';
-      document.body.classList.toggle('light-mode', mode === 'light');
+  const mode = localStorage.getItem('mode') || 'dark';
+  document.body.classList.toggle('light-mode', mode === 'light');
 
-      const icon = document.getElementById('modeIcon');
-      if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌙';
+  const icon = document.getElementById('modeIcon');
+  if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
 
-      const bgImg = document.querySelector('#rotating-bg img');
-      if (bgImg) {
-        bgImg.src = (mode === 'light')
-          ? 'images/galaxy-light.png'
-          : 'images/galaxy-dark.png';
-      }
+  const bg = document.getElementById('rotating-bg');
+  if (bg) {
+    bg.style.backgroundImage = mode === 'light'
+      ? 'url("images/galaxy-light.png")'
+      : 'url("images/galaxy-dark.png")';
+  }
 
-      // Ukrycie loadera
-      const loader = document.getElementById('loader');
-      if (loader) {
-        loader.style.opacity = '0';
-        loader.style.visibility = 'hidden';
-        setTimeout(() => loader.remove(), 500);
-      }
-    });
+  // ✅ Hide loader inside DOMContentLoaded
+  const loader = document.getElementById('loader');
+  if (loader) {
+    loader.style.opacity = '0';
+    loader.style.visibility = 'hidden';
+    setTimeout(() => loader.remove(), 500);
+  }
+});
 
-    // Przełącznik light/dark + podmiana grafiki
-    function toggleLightDarkMode() {
-      const isLight = document.body.classList.toggle('light-mode');
-      localStorage.setItem('mode', isLight ? 'light' : 'dark');
 
-      const icon = document.getElementById('modeIcon');
-      if (icon) icon.textContent = isLight ? '🌞' : '🌙';
+    // Toggle mode and save
+    function toggleMode() {
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('mode', isLight ? 'light' : 'dark');
+  const icon = document.getElementById('modeIcon');
+  if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+}
+function toggleLightDarkMode() {
+  const isLight = document.body.classList.toggle('light-mode');
+  document.body.classList.toggle('dark-mode', !isLight); // <-- to dodajemy
+  localStorage.setItem('mode', isLight ? 'light' : 'dark');
 
-      const bgImg = document.querySelector('#rotating-bg img');
-      if (bgImg) {
-        bgImg.src = isLight
-          ? 'images/galaxy-light.png'
-          : 'images/galaxy-dark.png';
-      }
-    }
+  const icon = document.getElementById('modeIcon');
+  if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+
+  const bg = document.getElementById('rotating-bg');
+  if (bg) {
+    bg.style.backgroundImage = isLight
+      ? 'url("images/galaxy-light.png")'
+      : 'url("images/galaxy-dark.png")';
+  }
+}
+
+
   </script>
-</head>
 
+
+</head>
 <body>
   <div id="rotating-bg">
-    <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
-  </div>
+  <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
+</div>
 
   <div id="loader">
     <div class="spinner"></div>
   </div>
 
   <header style="position: relative;">
-    <!-- Ikona trybu w prawym górnym rogu -->
-    <span id="modeIcon"
-      onclick="toggleLightDarkMode()"
-      title="Toggle light/dark mode"
-      style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
-      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-      onmouseout="this.style.backgroundColor='transparent'">🌙</span>
-
-    <!-- Przycisk Log In -->
-    <span id="loginBtn"
+  <!-- Ikona trybu w prawym górnym rogu -->
+  <span id="modeIcon"
+        onclick="toggleLightDarkMode()"
+        title="Toggle light/dark mode"
+        style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
+        onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
+        onmouseout="this.style.backgroundColor='transparent'">🌙</span>
+<!-- Przycisk Log In -->
+<span id="loginBtn"
       onclick="openLoginModal()"
       title="Log in to your account"
       style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
       onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
       onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">Log In</span>
 
-    <!-- Logo + tekst -->
-    <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
+  <!-- Logo + tekst -->
+<img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
-    <h1 class="scroll-reveal" style="transition-delay: 0.3s;">
-      Let’s make people<br>aware of the impact of AI
-    </h1>
+  <h1 class="scroll-reveal" style="transition-delay: 0.3s;">
+    Let’s make people<br>aware of the impact of AI
+  </h1>
 
-    <button class="scroll-btn"
-      onmouseover="this.textContent='Go to Tree...'"
-      onmouseout="this.textContent='Explore the Tree'"
-      onclick="window.location.href='tree.html'">
-      Explore the Tree
-    </button>
-  </header>
+  <button class="scroll-btn"
+        onmouseover="this.textContent='Go to Tree...'" 
+        onmouseout="this.textContent='Explore the Tree'" 
+        onclick="window.location.href='tree.html'">
+  Explore the Tree
+</button>
+</header>
+
+
+
 
   <section class="scroll-reveal">
-    <h2>About BeAwarely</h2>
+  <h2>About BeAwarely</h2>
     <p>BeAwarely is a project dedicated to raising awareness about the influence of artificial intelligence on our lives and choices.</p>
   </section>
 
   <section class="scroll-reveal">
-    <h2>Why Join?</h2>
+  <h2>Why Join?</h2>
     <ul class="reasons">
       <li>Inform and educate others</li>
       <li>Support responsible AI development</li>
@@ -359,61 +366,111 @@
   </section>
 
   <section id="ai-chat" class="scroll-reveal">
-    <h2>AI Chat Coming Soon</h2>
-    <p style="margin-bottom: 20px;">
-      We're working hard on integrating an interactive AI assistant.<br>
-      Soon you'll be able to ask questions, explore ideas, and get support in real time.
-    </p>
-    <div style="background-color: rgba(255,255,255,0.05); border-radius: 10px; padding: 30px; text-align: center;">
-      <span style="font-size: 2.5rem;">🤖</span>
-      <p style="font-size: 1rem; color: #ccc; margin-top: 10px;">Your future AI companion will live here. Stay tuned!</p>
-    </div>
-  </section>
+  <h2>AI Chat Coming Soon</h2>
+  <p style="margin-bottom: 20px;">
+    We're working hard on integrating an interactive AI assistant.<br>
+    Soon you'll be able to ask questions, explore ideas, and get support in real time.
+  </p>
+  <div style="background-color: rgba(255,255,255,0.05); border-radius: 10px; padding: 30px; text-align: center;">
+    <span style="font-size: 2.5rem;">🤖</span>
+    <p style="font-size: 1rem; color: #ccc; margin-top: 10px;">Your future AI companion will live here. Stay tuned!</p>
+  </div>
+</section>
 
   <section id="ai-tools" class="scroll-reveal" style="margin-top: 60px; text-align: center;">
-    <h2>Coming Soon: AI Tools</h2>
-    <p style="margin-bottom: 30px;">Exciting features to support your awareness mission:</p>
-    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-      <div class="ai-tool-box">
-        <span style="font-size: 2rem;">🔍</span>
-        <h3 style="margin: 10px 0 5px;">Fact Checker</h3>
-        <p style="font-size: 0.9rem;">Verify news and claims with AI-backed research.</p>
-      </div>
-      <div class="ai-tool-box">
-        <span style="font-size: 2rem;">🧠</span>
-        <h3 style="margin: 10px 0 5px;">AI Assistant</h3>
-        <p style="font-size: 0.9rem;">Ask anything, anytime. Get instant AI support.</p>
-      </div>
-      <div class="ai-tool-box">
-        <span style="font-size: 2rem;">📊</span>
-        <h3 style="margin: 10px 0 5px;">Analytics</h3>
-        <p style="font-size: 0.9rem;">Visual insights about what matters most.</p>
-      </div>
-      <div class="ai-tool-box">
-        <span style="font-size: 2rem;">✍️</span>
-        <h3 style="margin: 10px 0 5px;">Summary Gen</h3>
-        <p style="font-size: 0.9rem;">Auto-generate summaries of complex topics.</p>
-      </div>
+  <h2>Coming Soon: AI Tools</h2>
+  <p style="margin-bottom: 30px;">Exciting features to support your awareness mission:</p>
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+    <div class="ai-tool-box">
+      <span style="font-size: 2rem;">🔍</span>
+      <h3 style="margin: 10px 0 5px;">Fact Checker</h3>
+      <p style="font-size: 0.9rem;">Verify news and claims with AI-backed research.</p>
     </div>
-  </section>
+    <div class="ai-tool-box">
+      <span style="font-size: 2rem;">🧠</span>
+      <h3 style="margin: 10px 0 5px;">AI Assistant</h3>
+      <p style="font-size: 0.9rem;">Ask anything, anytime. Get instant AI support.</p>
+    </div>
+    <div class="ai-tool-box">
+      <span style="font-size: 2rem;">📊</span>
+      <h3 style="margin: 10px 0 5px;">Analytics</h3>
+      <p style="font-size: 0.9rem;">Visual insights about what matters most.</p>
+    </div>
+    <div class="ai-tool-box">
+      <span style="font-size: 2rem;">✍️</span>
+      <h3 style="margin: 10px 0 5px;">Summary Gen</h3>
+      <p style="font-size: 0.9rem;">Auto-generate summaries of complex topics.</p>
+    </div>
+  </div>
+</section>
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
-    <div class="social-icons" style="margin-bottom: 10px;">
-      <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
-      <a href="#" title="Instagram" style="margin: 0 10px; font-size: 20px;">📸</a>
-      <a href="#" title="Mind" style="margin: 0 10px; font-size: 20px;">🧠</a>
-      <a href="https://discord.gg/a73WKd6DAZ" target="_blank" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
-        <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
-      </a>
-    </div>
-    <div style="margin-bottom: 5px;">
-      <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Privacy Policy</a> |
-      <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Contact</a> |
-      <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Project Principles</a>
-    </div>
-    <div style="margin-top: 5px;">© 2025 BeAwarely. All rights reserved.</div>
-    <div style="margin-top: 3px; font-size: 12px; color: #777;">This is a demo version – not final.</div>
-  </footer>
+  <div class="social-icons" style="margin-bottom: 10px;">
+    <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
+    <a href="#" title="Instagram" style="margin: 0 10px; font-size: 20px;">📸</a>
+    <a href="#" title="Mind" style="margin: 0 10px; font-size: 20px;">🧠</a>
+    <a href="https://discord.gg/a73WKd6DAZ" target="_blank" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
+      <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
+    </a>
+  </div>
+  <div style="margin-bottom: 5px;">
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Privacy Policy</a> |
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Contact</a> |
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Project Principles</a>
+  </div>
+  <div style="margin-top: 5px;">
+    © 2025 BeAwarely. All rights reserved.
+  </div>
+  <div style="margin-top: 3px; font-size: 12px; color: #777;">
+    This is a demo version – not final.
+  </div>
+</footer>
+
+<style>
+  .discord-icon {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+    transition: transform 0.3s ease;
+  }
+  .discord-icon:hover {
+    transform: rotate(10deg) scale(1.1);
+  }
+
+  #loginBtn:hover {
+  transform: scale(1.05);
+}
+
+
+  @media (max-width: 500px) {
+    footer {
+      font-size: 13px;
+    }
+    .social-icons a {
+      margin: 0 6px;
+    }
+    .discord-icon {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  @media (max-width: 500px) {
+  #modeIcon, #loginBtn {
+    top: 10px;
+    font-size: 1.1rem;
+    padding: 4px 10px;
+  }
+
+  #loginBtn {
+    right: 50px;
+  }
+
+  #modeIcon {
+    right: 10px;
+  }
+}
+
+</style>
 
   <!-- 🔽 Google Translate dropdown in bottom-right corner -->
   <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
@@ -421,135 +478,158 @@
   <!-- 🔽 Google Translate script -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
-      new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+      new google.translate.TranslateElement(
+        {pageLanguage: 'en'},
+        'google_translate_element'
+      );
     }
   </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
-  <!-- Scroll reveal -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const elements = document.querySelectorAll('.scroll-reveal');
-      const reveal = () => {
-        const windowHeight = window.innerHeight;
-        elements.forEach(el => {
-          const top = el.getBoundingClientRect().top;
-          if (top < windowHeight - 100) el.classList.add('revealed');
-        });
-      };
-      window.addEventListener('scroll', reveal);
-      reveal();
-    });
-
-    function toggleGalaxyMode() {
-      alert("Galaxy brightness toggle coming soon!");
-    }
+  <script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
   </script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const elements = document.querySelectorAll('.scroll-reveal');
 
-  <!-- Modal: otwieranie/zamykanie -->
-  <script>
-    function openLoginModal() {
-      const m = document.getElementById("loginModal");
-      m.style.display = "flex"; /* było block */
-    }
-    function closeLoginModal() {
-      document.getElementById("loginModal").style.display = "none";
-    }
-    // Zamknij modal po kliknięciu poza okno
-    window.onclick = function(event) {
-      const modal = document.getElementById("loginModal");
-      if (event.target == modal) modal.style.display = "none";
-    }
-  </script>
-
-  <!-- 🔽 Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script>
-    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function signInWithGoogle() {
-      const { data, error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'https://beawarely.github.io/beawarely-demo'
+    const reveal = () => {
+      const windowHeight = window.innerHeight;
+      elements.forEach(el => {
+        const top = el.getBoundingClientRect().top;
+        if (top < windowHeight - 100) {
+          el.classList.add('revealed');
         }
       });
-      if (error) {
-        console.error("OAuth error:", error.message);
-      } else if (data?.url) {
-        window.location.href = data.url;
-      }
+    };
+
+    window.addEventListener('scroll', reveal);
+    reveal();
+  });
+
+  function toggleGalaxyMode() {
+    alert("Galaxy brightness toggle coming soon!");
+  }
+</script>
+
+
+ <script>
+  function openLoginModal() {
+    document.getElementById("loginModal").style.display = "block";
+  }
+
+  function closeLoginModal() {
+    document.getElementById("loginModal").style.display = "none";
+  }
+
+  // Zamknij modal po kliknięciu poza okno
+  window.onclick = function(event) {
+    const modal = document.getElementById("loginModal");
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+</script>
+
+
+  <!-- 🔽 Najpierw ładujemy bibliotekę Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<!-- 🔽 Potem tworzymy klienta -->
+<script>
+  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function signInWithGoogle() {
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: 'https://beawarely.github.io/beawarely-demo'
+
+    }
+  });
+
+  if (error) {
+    console.error("OAuth error:", error.message);
+  } else if (data?.url) {
+    window.location.href = data.url;
+  }
+}
+</script>
+
+<!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user }, error } = await supabaseClient.auth.getUser();
+
+    if (error) {
+      console.error("❌ Błąd pobierania użytkownika:", error.message);
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { user }, error } = await supabaseClient.auth.getUser();
-      if (error) console.error("❌ Błąd pobierania użytkownika:", error.message);
-
-      if (user) {
-        console.log("✅ Użytkownik zalogowany:", user);
-        document.getElementById('loginBtn').textContent = 'Hello 👋';
-        document.getElementById('loginBtn').onclick = logoutUser;
-      } else {
-        console.log("ℹ️ Użytkownik niezalogowany");
-        document.getElementById('loginBtn').textContent = 'Log In';
-        document.getElementById('loginBtn').onclick = openLoginModal;
-      }
-    });
-
-    async function logoutUser() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
-        alert("Error signing out");
-        console.error("❌ Błąd podczas wylogowywania:", error.message);
-      } else {
-        console.log("👋 Wylogowano pomyślnie");
-        location.reload();
-      }
+    if (user) {
+      console.log("✅ Użytkownik zalogowany:", user);
+      document.getElementById('loginBtn').textContent = 'Hello 👋';
+      document.getElementById('loginBtn').onclick = logoutUser;
+    } else {
+      console.log("ℹ️ Użytkownik niezalogowany");
+      document.getElementById('loginBtn').textContent = 'Log In';
+      document.getElementById('loginBtn').onclick = openLoginModal;
     }
-  </script>
+  });
 
-  <!-- Modal -->
-  <div id="loginModal" style="
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
+  async function logoutUser() {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      alert("Error signing out");
+      console.error("❌ Błąd podczas wylogowywania:", error.message);
+    } else {
+      console.log("👋 Wylogowano pomyślnie");
+      location.reload();
+    }
+  }
+</script>
+
+<!-- 🔽 Dodaj to przed </body> -->
+<div id="loginModal" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+">
+  <div style="
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    color: black;
   ">
-    <div style="
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
-      max-width: 400px;
-      color: black;
+    <h2>Sign In</h2>
+    <button onclick="signInWithGoogle()" style="
+      margin-top: 10px;
+      background-color: #4285F4;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     ">
-      <h2>Sign In</h2>
-      <button onclick="signInWithGoogle()" style="
-        margin-top: 10px;
-        background-color: #4285F4;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      ">
-        Continue with Google
-      </button>
-      <br><br>
-      <button onclick="closeLoginModal()" style="
-        background-color: #999;
-        color: white;
-        padding: 6px 14px;
-        border: none;
-        border-radius: 4px;
-      ">Close</button>
-    </div>
+      Continue with Google
+    </button>
+    <br><br>
+    <button onclick="closeLoginModal()" style="
+      background-color: #999;
+      color: white;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+    ">Close</button>
   </div>
+</div>
+
 </body>
 </html>
