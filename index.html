@@ -541,14 +541,19 @@ function toggleLightDarkMode() {
   const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.href
-      }
-    });
-    if (error) console.error("OAuth error:", error.message);
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.href
+    }
+  });
+
+  if (error) {
+    console.error("OAuth error:", error.message);
+  } else if (data?.url) {
+    window.location.href = data.url;
   }
+}
 </script>
 
 <!-- 🔽 Dodaj to przed </body> -->
