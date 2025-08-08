@@ -214,7 +214,7 @@ if (meta.avatar_url) {
   document.getElementById("user-email").textContent = user.email || "Unknown";
   document.querySelector(".stats .stat:nth-child(1) strong").textContent = meta.role || "User";
   document.querySelector(".stats .stat:nth-child(2) strong span")?.remove();
-  document.querySelector(".stats .stat:nth-child(2) strong").innerHTML = `<span id="trust-score">${meta.trust_score || 0}</span> / 100`;
+  document.querySelector(".stats .stat:nth-child(2) strong").textContent = `${meta.trust_score || 0} / 100`;
   document.querySelector(".trust-fill").style.width = `${meta.trust_score || 0}%`;
   document.querySelector(".stats .stat:nth-child(3) strong").textContent = meta.points || 0;
 
