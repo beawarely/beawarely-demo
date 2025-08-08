@@ -331,6 +331,16 @@ function toggleLightDarkMode() {
       onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
       onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">Log In</span>
 
+    <!-- Przycisk "Your Profile" widoczny po zalogowaniu -->
+<a id="yourProfileBtn"
+   href="profile.html"
+   style="display: none; position: absolute; top: 20px; left: 20px; font-size: 0.9rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; color: white; text-decoration: none; transition: background-color 0.3s;"
+   onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
+   onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">
+   Your Profile
+</a>
+
+    
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
@@ -560,7 +570,8 @@ function toggleLightDarkMode() {
   const { data, error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://beawarely.github.io/beawarely-demo/profile.html'
+      redirectTo: 'https://beawarely.github.io/beawarely-demo/index.html'
+
 
     }
   });
@@ -584,24 +595,34 @@ function toggleLightDarkMode() {
 
   const user = data?.user;
 
-  if (user) {
-  console.log("✅ Użytkownik zalogowany:", user);
-  document.getElementById('loginBtn').textContent = 'Hello 👋';
-  document.getElementById('loginBtn').onclick = logoutUser;
+    if (user) {
+    console.log("✅ Użytkownik zalogowany:", user);
+    document.getElementById('loginBtn').textContent = 'Hello 👋';
+    document.getElementById('loginBtn').onclick = logoutUser;
 
-  // 🔽 Pokaż przycisk do profilu
-  const profileBtn = document.getElementById('profileRedirect');
-  if (profileBtn) profileBtn.style.display = 'block';
+    // 🔽 Pokaż przycisk do profilu
+    const profileBtn = document.getElementById('profileRedirect');
+    if (profileBtn) profileBtn.style.display = 'block';
 
-} else {
-  console.log("ℹ️ Użytkownik niezalogowany");
-  document.getElementById('loginBtn').textContent = 'Log In';
-  document.getElementById('loginBtn').onclick = openLoginModal;
+    // 🔽 Pokaż przycisk "Your Profile" (w lewym górnym rogu)
+    const yourProfileBtn = document.getElementById('yourProfileBtn');
+    if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
 
-  // 🔽 Ukryj przycisk do profilu
-  const profileBtn = document.getElementById('profileRedirect');
-  if (profileBtn) profileBtn.style.display = 'none';
-}
+  
+  } else {
+    console.log("ℹ️ Użytkownik niezalogowany");
+    document.getElementById('loginBtn').textContent = 'Log In';
+    document.getElementById('loginBtn').onclick = openLoginModal;
+
+    // 🔽 Ukryj przycisk do profilu
+    const profileBtn = document.getElementById('profileRedirect');
+    if (profileBtn) profileBtn.style.display = 'none';
+
+    // 🔽 Ukryj przycisk "Your Profile"
+    const yourProfileBtn = document.getElementById('yourProfileBtn');
+    if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+  }
+
 
 
 
