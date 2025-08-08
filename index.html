@@ -404,13 +404,20 @@ function toggleLightDarkMode() {
   </div>
 </section>
 
-  <section id="user-profile" class="scroll-reveal" style="display: none; text-align: center; margin-top: 60px;">
+<!--  <section id="user-profile" class="scroll-reveal" style="display: none; text-align: center; margin-top: 60px;">
   <h2>Your Profile</h2>
   <p><strong>Email:</strong> <span id="user-email">loading...</span></p>
   <p><strong>ID:</strong> <span id="user-id">loading...</span></p>
   <p><strong>Status:</strong> Logged In ✅</p>
   <button onclick="logoutUser()" class="send-btn" style="margin-top: 20px;">Log Out</button>
-</section>
+</section>-->
+  
+<!-- 🔽 Przycisk do profilu (widoczny tylko po zalogowaniu) -->
+<div id="profileRedirect" class="scroll-reveal" style="display: none; text-align: center; margin-top: 40px;">
+  <a href="profile.html" style="background-color: var(--blue1); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+    Go to My Profile
+  </a>
+</div>
 
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
@@ -578,29 +585,26 @@ function toggleLightDarkMode() {
   const user = data?.user;
 
   if (user) {
-    console.log("✅ Użytkownik zalogowany:", user);
-    document.getElementById('loginBtn').textContent = 'Hello 👋';
-    document.getElementById('loginBtn').onclick = logoutUser;
+  console.log("✅ Użytkownik zalogowany:", user);
+  document.getElementById('loginBtn').textContent = 'Hello 👋';
+  document.getElementById('loginBtn').onclick = logoutUser;
 
-    // 🔽 Pokaż sekcję profilu
-    const profileSection = document.getElementById('user-profile');
-    if (profileSection) {
-      profileSection.style.display = 'block';
-      document.getElementById('user-email').textContent = user.email || 'no email';
-      document.getElementById('user-id').textContent = user.id || 'unknown';
-    }
-  } else {
-    console.log("ℹ️ Użytkownik niezalogowany");
-    document.getElementById('loginBtn').textContent = 'Log In';
-    document.getElementById('loginBtn').onclick = openLoginModal;
+  // 🔽 Pokaż przycisk do profilu
+  const profileBtn = document.getElementById('profileRedirect');
+  if (profileBtn) profileBtn.style.display = 'block';
+}
 
-    // 🔽 Ukryj profil
-    const profileSection = document.getElementById('user-profile');
-    if (profileSection) {
-      profileSection.style.display = 'none';
-    }
-  }
-});
+} else {
+  console.log("ℹ️ Użytkownik niezalogowany");
+  document.getElementById('loginBtn').textContent = 'Log In';
+  document.getElementById('loginBtn').onclick = openLoginModal;
+
+  // 🔽 Ukryj przycisk do profilu
+  const profileBtn = document.getElementById('profileRedirect');
+  if (profileBtn) profileBtn.style.display = 'none';
+}
+
+
 
 
   async function logoutUser() {
