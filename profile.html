@@ -4,45 +4,176 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Your Profile – BeAwarely</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #0e0e0e;
-      color: #fff;
       margin: 0;
       padding: 40px 20px;
+      background: radial-gradient(ellipse at top, #0d0d2b 0%, #000000 100%);
+      color: #fff;
       text-align: center;
     }
 
     .profile-box {
-      max-width: 500px;
+      max-width: 600px;
       margin: 0 auto;
-      background-color: #1e1e1e;
+      background-color: rgba(30, 30, 30, 0.9);
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
     }
 
-    .send-btn {
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #007bff;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    .email {
+      font-size: 1rem;
+      color: #ccc;
+      margin-bottom: 25px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+
+    .stat {
+      flex: 1;
+      min-width: 120px;
+      margin: 10px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.3rem;
+      margin-top: 4px;
+    }
+
+    .badges {
+      margin: 15px 0 25px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .badge {
+      background: rgba(0, 123, 255, 0.1);
+      border: 1px solid #007bff;
+      color: #66b2ff;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
       background-color: #007bff;
       color: white;
-      padding: 12px 20px;
       border: none;
+      padding: 10px 20px;
       border-radius: 6px;
-      margin-top: 20px;
       cursor: pointer;
+      font-size: 0.95rem;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #005fcc;
+      transform: scale(1.05);
+    }
+
+    .btn.secondary {
+      background-color: #444;
+    }
+
+    .trust-bar {
+      background-color: #333;
+      border-radius: 20px;
+      height: 10px;
+      width: 80%;
+      margin: 5px auto 10px;
+      position: relative;
+    }
+
+    .trust-fill {
+      background-color: #00cc66;
+      height: 100%;
+      border-radius: 20px;
+    }
+
+    @media (max-width: 500px) {
+      .stats {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stat {
+        margin-bottom: 16px;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
     }
   </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
-  <h1>Your Profile</h1>
   <div class="profile-box">
-    <p><strong>Email:</strong> <span id="user-email">loading...</span></p>
-    <p><strong>ID:</strong> <span id="user-id">loading...</span></p>
-    <p><strong>Status:</strong> Logged In ✅</p>
-    <button class="send-btn" onclick="logoutUser()">Log Out</button>
+    <img src="https://i.imgur.com/0y0y0y0.png" alt="Profile Photo" class="profile-pic" />
+    <h1 id="user-name">Michał Nowak</h1>
+    <div class="email" id="user-email">cichy260591@gmail.com</div>
+
+    <div class="stats">
+      <div class="stat">
+        Role
+        <strong>Specialist</strong>
+      </div>
+      <div class="stat">
+        Trust Score
+        <div class="trust-bar">
+          <div class="trust-fill" style="width: 87%;"></div>
+        </div>
+        <strong>87 / 100</strong>
+      </div>
+      <div class="stat">
+        Activity Points
+        <strong>320</strong>
+      </div>
+    </div>
+
+    <div class="badges">
+      <div class="badge">🎓 Verified Expert</div>
+      <div class="badge">💬 100+ Posts</div>
+      <div class="badge">🤖 15 AI-Verified Answers</div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn secondary" onclick="alert('Edit profile – coming soon')">Edit Profile</button>
+      <button class="btn secondary" onclick="alert('Report – coming soon')">Report Issue</button>
+      <button class="btn" onclick="logoutUser()">Log Out</button>
+    </div>
   </div>
 
   <script>
@@ -53,16 +184,16 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const { data, error } = await supabaseClient.auth.getUser();
-
       const user = data?.user;
+
       if (!user) {
         alert("You are not logged in.");
         window.location.href = "index.html";
         return;
       }
 
-      document.getElementById('user-email').textContent = user.email || 'No email';
-      document.getElementById('user-id').textContent = user.id || 'Unknown';
+      document.getElementById("user-email").textContent = user.email || "Unknown";
+      document.getElementById("user-name").textContent = user.user_metadata?.name || "BeAwarely User";
     });
 
     async function logoutUser() {
@@ -71,9 +202,10 @@
         alert("Error signing out");
         console.error(error.message);
       } else {
-        location.href = "index.html";
+        window.location.href = "index.html";
       }
     }
   </script>
 </body>
 </html>
+
