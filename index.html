@@ -404,6 +404,15 @@ function toggleLightDarkMode() {
   </div>
 </section>
 
+  <section id="user-profile" class="scroll-reveal" style="display: none; text-align: center; margin-top: 60px;">
+  <h2>Your Profile</h2>
+  <p><strong>Email:</strong> <span id="user-email">loading...</span></p>
+  <p><strong>ID:</strong> <span id="user-id">loading...</span></p>
+  <p><strong>Status:</strong> Logged In ✅</p>
+  <button onclick="logoutUser()" class="send-btn" style="margin-top: 20px;">Log Out</button>
+</section>
+
+
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
   <div class="social-icons" style="margin-bottom: 10px;">
     <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
@@ -560,22 +569,39 @@ function toggleLightDarkMode() {
 <!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { user }, error } = await supabaseClient.auth.getUser();
+  const { data, error } = await supabaseClient.auth.getUser();
 
-    if (error) {
-      console.error("❌ Błąd pobierania użytkownika:", error.message);
-    }
+  if (error) {
+    console.error("❌ Błąd pobierania użytkownika:", error.message);
+  }
 
-    if (user) {
-      console.log("✅ Użytkownik zalogowany:", user);
-      document.getElementById('loginBtn').textContent = 'Hello 👋';
-      document.getElementById('loginBtn').onclick = logoutUser;
-    } else {
-      console.log("ℹ️ Użytkownik niezalogowany");
-      document.getElementById('loginBtn').textContent = 'Log In';
-      document.getElementById('loginBtn').onclick = openLoginModal;
+  const user = data?.user;
+
+  if (user) {
+    console.log("✅ Użytkownik zalogowany:", user);
+    document.getElementById('loginBtn').textContent = 'Hello 👋';
+    document.getElementById('loginBtn').onclick = logoutUser;
+
+    // 🔽 Pokaż sekcję profilu
+    const profileSection = document.getElementById('user-profile');
+    if (profileSection) {
+      profileSection.style.display = 'block';
+      document.getElementById('user-email').textContent = user.email || 'no email';
+      document.getElementById('user-id').textContent = user.id || 'unknown';
     }
-  });
+  } else {
+    console.log("ℹ️ Użytkownik niezalogowany");
+    document.getElementById('loginBtn').textContent = 'Log In';
+    document.getElementById('loginBtn').onclick = openLoginModal;
+
+    // 🔽 Ukryj profil
+    const profileSection = document.getElementById('user-profile');
+    if (profileSection) {
+      profileSection.style.display = 'none';
+    }
+  }
+});
+
 
   async function logoutUser() {
     const { error } = await supabaseClient.auth.signOut();
