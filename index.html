@@ -560,7 +560,7 @@ function toggleLightDarkMode() {
   const { data, error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://beawarely.github.io/beawarely-demo'
+      redirectTo: 'https://beawarely.github.io/beawarely-demo/profile.html'
 
     }
   });
