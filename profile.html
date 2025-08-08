@@ -183,18 +183,63 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener('DOMContentLoaded', async () => {
-      const { data, error } = await supabaseClient.auth.getUser();
-      const user = data?.user;
+  const { data, error } = await supabaseClient.auth.getUser();
+  const user = data?.user;
 
-      if (!user) {
-        alert("You are not logged in.");
-        window.location.href = "index.html";
-        return;
+  if (!user) {
+    alert("You are not logged in.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Metadane użytkownika
+  const meta = user.user_metadata || {};
+
+  // Wypełnij dane w HTML
+  document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
+  document.getElementById("user-email").textContent = user.email || "Unknown";
+  document.querySelector(".stats .stat:nth-child(1) strong").textContent = meta.role || "User";
+  document.querySelector(".stats .stat:nth-child(2) strong span")?.remove();
+  document.querySelector(".stats .stat:nth-child(2) strong").innerHTML = `<span id="trust-score">${meta.trust_score || 0}</span> / 100`;
+  document.querySelector(".trust-fill").style.width = `${meta.trust_score || 0}%`;
+  document.querySelector(".stats .stat:nth-child(3) strong").textContent = meta.points || 0;
+
+  // Odznaki
+  const badgeContainer = document.querySelector(".badges");
+  badgeContainer.innerHTML = "";
+  const badges = meta.badges || [];
+  badges.forEach(text => {
+    const badge = document.createElement("div");
+    badge.className = "badge";
+    badge.textContent = text;
+    badgeContainer.appendChild(badge);
+  });
+
+  // Jeśli brak metadanych — ustaw domyślne
+  if (!meta.role || !meta.points || !meta.trust_score) {
+    const updates = {
+      data: {
+        role: "Specialist",
+        points: 320,
+        trust_score: 87,
+        badges: [
+          "Verified Expert",
+          "100+ Posts",
+          "15 AI-Verified Answers"
+        ]
       }
+    };
+    const { error: updateError } = await supabaseClient.auth.updateUser(updates);
+    if (updateError) {
+      console.error("❌ Błąd aktualizacji metadanych:", updateError.message);
+    } else {
+      console.log("✅ Metadane nadpisane – odświeżenie");
+      location.reload();
+    }
+  }
+});
 
-      document.getElementById("user-email").textContent = user.email || "Unknown";
-      document.getElementById("user-name").textContent = user.user_metadata?.name || "BeAwarely User";
-    });
+
 
     async function logoutUser() {
       const { error } = await supabaseClient.auth.signOut();
@@ -206,6 +251,7 @@
       }
     }
   </script>
+
 </body>
 </html>
 
