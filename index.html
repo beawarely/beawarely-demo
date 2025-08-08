@@ -587,48 +587,39 @@ function toggleLightDarkMode() {
 <!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
-  const { data, error } = await supabaseClient.auth.getUser();
+    const { data, error } = await supabaseClient.auth.getUser();
 
-  if (error) {
-    console.error("❌ Błąd pobierania użytkownika:", error.message);
-  }
+    if (error) {
+      console.error("❌ Błąd pobierania użytkownika:", error.message);
+    }
 
-  const user = data?.user;
+    const user = data?.user;
 
     if (user) {
-    console.log("✅ Użytkownik zalogowany:", user);
-    document.getElementById('loginBtn').textContent = 'Hello 👋';
-    document.getElementById('loginBtn').onclick = logoutUser;
+      console.log("✅ Użytkownik zalogowany:", user);
+      document.getElementById('loginBtn').textContent = 'Hello 👋';
+      document.getElementById('loginBtn').onclick = logoutUser;
 
-    // 🔽 Pokaż przycisk do profilu
-    const profileBtn = document.getElementById('profileRedirect');
-    if (profileBtn) profileBtn.style.display = 'block';
+      const profileBtn = document.getElementById('profileRedirect');
+      if (profileBtn) profileBtn.style.display = 'block';
 
-    // 🔽 Pokaż przycisk "Your Profile" (w lewym górnym rogu)
-    const yourProfileBtn = document.getElementById('yourProfileBtn');
-    if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
+      const yourProfileBtn = document.getElementById('yourProfileBtn');
+      if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
 
-  
-  } else {
-    console.log("ℹ️ Użytkownik niezalogowany");
-    document.getElementById('loginBtn').textContent = 'Log In';
-    document.getElementById('loginBtn').onclick = openLoginModal;
+    } else {
+      console.log("ℹ️ Użytkownik niezalogowany");
+      document.getElementById('loginBtn').textContent = 'Log In';
+      document.getElementById('loginBtn').onclick = openLoginModal;
 
-    // 🔽 Ukryj przycisk do profilu
-    const profileBtn = document.getElementById('profileRedirect');
-    if (profileBtn) profileBtn.style.display = 'none';
+      const profileBtn = document.getElementById('profileRedirect');
+      if (profileBtn) profileBtn.style.display = 'none';
 
-    // 🔽 Ukryj przycisk "Your Profile"
-    const yourProfileBtn = document.getElementById('yourProfileBtn');
-    if (yourProfileBtn) yourProfileBtn.style.display = 'none';
-  }
+      const yourProfileBtn = document.getElementById('yourProfileBtn');
+      if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+    }
+  }); // ✅ DODANE - to był brakujący nawias
+</script>
 
-
-
-
-
-
-  </script>
 
 <script>
   // ❗️ Przenieśliśmy logoutUser() poza DOMContentLoaded
