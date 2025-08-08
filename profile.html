@@ -141,7 +141,7 @@
 </head>
 <body>
   <div class="profile-box">
-    <img src="https://i.imgur.com/0y0y0y0.png" alt="Profile Photo" class="profile-pic" />
+    <img id="profile-pic" src="images/default-avatar.png" alt="Profile Photo" class="profile-pic" />
     <h1 id="user-name">Michał Nowak</h1>
     <div class="email" id="user-email">cichy260591@gmail.com</div>
 
@@ -174,6 +174,14 @@
       <button class="btn secondary" onclick="alert('Report – coming soon')">Report Issue</button>
       <button class="btn" onclick="logoutUser()">Log Out</button>
     </div>
+
+    <!-- Upload avatar -->
+<div style="margin-top: 30px;">
+  <label for="avatar-upload">Upload your photo:</label><br><br>
+  <input type="file" id="avatar-upload" accept="image/*" style="margin-bottom: 10px;" />
+  <button class="btn" onclick="uploadAvatar()">Upload</button>
+</div>
+
   </div>
 
   <script>
@@ -194,6 +202,12 @@
 
   // Metadane użytkownika
   const meta = user.user_metadata || {};
+  
+  const profilePic = document.getElementById("profile-pic");
+if (meta.avatar_url) {
+  profilePic.src = meta.avatar_url;
+}
+
 
   // Wypełnij dane w HTML
   document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
@@ -251,6 +265,57 @@
       }
     }
   </script>
+
+  <script>
+  async function uploadAvatar() {
+    const fileInput = document.getElementById('avatar-upload');
+    const file = fileInput.files[0];
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+    const user = sessionData?.session?.user;
+    if (!user) {
+      alert("User not logged in.");
+      return;
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    const { error: uploadError } = await supabaseClient.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      alert("Upload failed.");
+      console.error(uploadError.message);
+      return;
+    }
+
+    const { data: urlData } = supabaseClient.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    const avatarUrl = urlData.publicUrl;
+
+    const { error: updateError } = await supabaseClient.auth.updateUser({
+      data: { avatar_url: avatarUrl }
+    });
+
+    if (updateError) {
+      alert("Failed to update profile.");
+      console.error(updateError.message);
+      return;
+    }
+
+    alert("Photo uploaded!");
+    location.reload();
+  }
+</script>
 
 </body>
 </html>
