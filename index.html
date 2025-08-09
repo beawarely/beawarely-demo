@@ -263,9 +263,7 @@ footer {
 
   const bg = document.getElementById('rotating-bg');
   if (bg) {
-    bg.style.backgroundImage = mode === 'light'
-      ? 'url("images/galaxy-light.png")'
-      : 'url("images/galaxy-dark.png")';
+    
   }
 
   // ✅ Hide loader inside DOMContentLoaded
@@ -279,12 +277,7 @@ footer {
 
 
     // Toggle mode and save
-    function toggleMode() {
-  const isLight = document.body.classList.toggle('light-mode');
-  localStorage.setItem('mode', isLight ? 'light' : 'dark');
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = isLight ? '🌞' : '🌛';
-}
+    
 function toggleLightDarkMode() {
   const isLight = document.body.classList.toggle('light-mode');
   document.body.classList.toggle('dark-mode', !isLight); // <-- to dodajemy
@@ -295,9 +288,7 @@ function toggleLightDarkMode() {
 
   const bg = document.getElementById('rotating-bg');
   if (bg) {
-    bg.style.backgroundImage = isLight
-      ? 'url("images/galaxy-light.png")'
-      : 'url("images/galaxy-dark.png")';
+    
   }
 }
 
@@ -322,7 +313,7 @@ function toggleLightDarkMode() {
         title="Toggle light/dark mode"
         style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
         onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-        onmouseout="this.style.backgroundColor='transparent'">🌙</span>
+        onmouseout="this.style.backgroundColor='transparent'">🌛</span>
 <!-- Przycisk Log In -->
 <span id="loginBtn"
       onclick="openLoginModal()"
@@ -435,7 +426,7 @@ function toggleLightDarkMode() {
     <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
     <a href="#" title="Instagram" style="margin: 0 10px; font-size: 20px;">📸</a>
     <a href="#" title="Mind" style="margin: 0 10px; font-size: 20px;">🧠</a>
-    <a href="https://discord.gg/a73WKd6DAZ" target="_blank" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
+    <a href="https://discord.gg/a73WKd6DAZ" target="_blank" rel="noopener" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
       <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
     </a>
   </div>
@@ -469,32 +460,35 @@ function toggleLightDarkMode() {
 
 
   @media (max-width: 500px) {
-    footer {
-      font-size: 13px;
-    }
-    .social-icons a {
-      margin: 0 6px;
-    }
-    .discord-icon {
-      width: 24px;
-      height: 24px;
-    }
+  footer {
+    font-size: 13px;
   }
-  @media (max-width: 500px) {
+  .social-icons a {
+    margin: 0 6px;
+  }
+  .discord-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* przeniesione z drugiego media-query */
   #modeIcon, #loginBtn {
     top: 10px;
     font-size: 1.1rem;
     padding: 4px 10px;
   }
-
   #loginBtn {
     right: 50px;
   }
-
   #modeIcon {
     right: 10px;
   }
 }
+
+
+  #modeIcon {
+    right: 10px;
+  }
 
 </style>
 
