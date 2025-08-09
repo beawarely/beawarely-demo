@@ -401,6 +401,8 @@ function toggleLightDarkMode() {
        ₿ Donate Crypto
     </a>
   </div>
+    /* Hide old support section (if still present) */
+#support { display: none !important; }
 </section>
 
   <section id="ai-tools" class="scroll-reveal" style="margin-top: 60px; text-align: center;">
@@ -428,6 +430,8 @@ function toggleLightDarkMode() {
       <p style="font-size: 0.9rem;">Auto-generate summaries of complex topics.</p>
     </div>
   </div>
+    
+
 </section>
 
 <!--  <section id="user-profile" class="scroll-reveal" style="display: none; text-align: center; margin-top: 60px;">
@@ -445,6 +449,19 @@ function toggleLightDarkMode() {
   </a>
 </div>
 
+<!-- Compact CTA: Support -->
+<section id="support-cta" class="scroll-reveal" style="text-align:center; margin: 50px 0;">
+  <button onclick="openSupportModal()" 
+          style="background: linear-gradient(135deg, var(--blue1), var(--blue2));
+                 color:#fff; padding:14px 28px; border:none; border-radius:10px;
+                 font-size:1.05rem; font-weight:700; cursor:pointer;
+                 box-shadow:0 8px 30px rgba(0,123,255,.25); transition:transform .2s;">
+    🤝 Support BeAwarely
+  </button>
+  <div style="font-size:.9rem; color:#bbb; margin-top:8px;">
+    Help us grow the mission
+  </div>
+</section>
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
   <div class="social-icons" style="margin-bottom: 10px;">
@@ -615,6 +632,45 @@ function toggleLightDarkMode() {
 }
 </script>
 
+  <script>
+  function openSupportModal() {
+    const m = document.getElementById('supportModal');
+    if (!m) return;
+    m.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // blokuj scroll tła
+  }
+
+  function closeSupportModal() {
+    const m = document.getElementById('supportModal');
+    if (!m) return;
+    m.style.display = 'none';
+    document.body.style.overflow = '';
+    const note = document.getElementById('copiedNote');
+    if (note) note.style.display = 'none';
+  }
+
+  // Zamknięcie po kliknięciu w tło (nie nadpisujemy window.onclick używanego przez loginModal)
+  window.addEventListener('click', (e) => {
+    const m = document.getElementById('supportModal');
+    if (m && e.target === m) closeSupportModal();
+  });
+
+  // Zamknięcie ESC
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSupportModal();
+  });
+
+  // Kopiowanie adresu crypto
+  function copyCrypto() {
+    const address = 'TWÓJ_ADRES_CRYPTO';
+    navigator.clipboard.writeText(address).then(() => {
+      const note = document.getElementById('copiedNote');
+      if (note) note.style.display = 'block';
+      setTimeout(() => note && (note.style.display = 'none'), 1800);
+    });
+  }
+</script>
+
 <!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
@@ -706,6 +762,63 @@ function toggleLightDarkMode() {
       border: none;
       border-radius: 4px;
     ">Close</button>
+  </div>
+</div>
+
+  <!-- Support Modal -->
+<div id="supportModal" style="
+  display:none; position:fixed; inset:0; z-index:9998;
+  background: rgba(0,0,0,.55); align-items:center; justify-content:center;">
+  <div role="dialog" aria-modal="true" tabindex="-1" style="
+      background: rgba(20,20,20,.98);
+      color:#fff; width:min(520px, 92vw); border-radius:16px; 
+      padding:26px; box-shadow: 0 20px 60px rgba(0,0,0,.5);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="margin:0; font-size:1.2rem;">Support BeAwarely</h3>
+      <button onclick="closeSupportModal()" aria-label="Close"
+              style="background:transparent; border:none; color:#aaa; font-size:1.2rem; cursor:pointer;">✖</button>
+    </div>
+
+    <p style="margin: 0 0 14px; color:#bbb; font-size:.95rem;">
+      Choose your way to support the mission:
+    </p>
+
+    <div style="
+      display:grid; grid-template-columns: repeat(2, minmax(140px,1fr));
+      gap:12px; justify-items:stretch;">
+
+      <a href="https://github.com/sponsors/x" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; 
+                background:#ea4aaa; color:#fff; text-decoration:none; 
+                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+        💖 <span>GitHub Sponsors</span>
+      </a>
+
+      <a href="https://ko-fi.com/beawarely" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; 
+                background:#29abe0; color:#fff; text-decoration:none; 
+                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+        ☕ <span>Ko‑fi</span>
+      </a>
+
+      <a href="https://paypal.me/x" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; 
+                background:#0070ba; color:#fff; text-decoration:none; 
+                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+        💳 <span>PayPal</span>
+      </a>
+
+      <button onclick="copyCrypto()" 
+              style="display:flex; align-items:center; gap:10px; 
+                     background:#f7931a; color:#fff; 
+                     padding:14px; border:none; border-radius:12px; font-weight:700; justify-content:center; cursor:pointer;">
+        ₿ <span>Donate Crypto</span>
+      </button>
+    </div>
+
+    <div id="copiedNote" style="display:none; text-align:center; margin-top:12px; color:#00cc66;">
+      Crypto address copied ✅
+    </div>
   </div>
 </div>
 
