@@ -142,8 +142,8 @@
 <body>
   <div class="profile-box">
     <img id="profile-pic" src="images/default-avatar.png" alt="Profile Photo" class="profile-pic" />
-    <h1 id="user-name">Michał Nowak</h1>
-    <div class="email" id="user-email">cichy260591@gmail.com</div>
+    <h1 id="user-name">Loading…</h1>
+    <div class="email" id="user-email">Loading…</div>
 
     <div class="stats">
       <div class="stat">
@@ -213,7 +213,6 @@ if (meta.avatar_url) {
   document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
   document.getElementById("user-email").textContent = user.email || "Unknown";
   document.querySelector(".stats .stat:nth-child(1) strong").textContent = meta.role || "User";
-  document.querySelector(".stats .stat:nth-child(2) strong span")?.remove();
   document.querySelector(".stats .stat:nth-child(2) strong").textContent = `${meta.trust_score || 0} / 100`;
   document.querySelector(".trust-fill").style.width = `${meta.trust_score || 0}%`;
   document.querySelector(".stats .stat:nth-child(3) strong").textContent = meta.points || 0;
@@ -229,31 +228,31 @@ if (meta.avatar_url) {
     badgeContainer.appendChild(badge);
   });
 
-  // Jeśli brak metadanych — ustaw domyślne
-  if (!meta.role || !meta.points || !meta.trust_score) {
-    const updates = {
-      data: {
-        role: "Specialist",
-        points: 320,
-        trust_score: 87,
-        badges: [
-          "Verified Expert",
-          "100+ Posts",
-          "15 AI-Verified Answers"
-        ]
-      }
-    };
-    const { error: updateError } = await supabaseClient.auth.updateUser(updates);
-    if (updateError) {
-      console.error("❌ Błąd aktualizacji metadanych:", updateError.message);
-    } else {
-      console.log("✅ Metadane nadpisane – odświeżenie");
-      location.reload();
+  // Jeśli brak metadanych — ustaw domyślne TYLKO gdy pole nie istnieje (null/undefined)
+if (meta.role == null || meta.points == null || meta.trust_score == null) {
+  const updates = {
+    data: {
+      role: meta.role ?? "Specialist",
+      points: meta.points ?? 320,
+      trust_score: meta.trust_score ?? 87,
+      badges: Array.isArray(meta.badges) ? meta.badges : [
+        "Verified Expert",
+        "100+ Posts",
+        "15 AI-Verified Answers"
+      ]
     }
+  };
+  const { error: updateError } = await supabaseClient.auth.updateUser(updates);
+  if (updateError) {
+    console.error("❌ Błąd aktualizacji metadanych:", updateError.message);
+  } else {
+    console.log("✅ Metadane uzupełnione");
+    location.reload();
   }
+}
+
+
 });
-
-
 
     async function logoutUser() {
       const { error } = await supabaseClient.auth.signOut();
@@ -274,6 +273,16 @@ if (meta.avatar_url) {
       alert("Please select a file.");
       return;
     }
+
+    const maxSize = 2 * 1024 * 1024; // 2 MB
+if (!file.type.startsWith('image/')) {
+  alert("Please select an image file.");
+  return;
+}
+if (file.size > maxSize) {
+  alert("Image is too large (max 2MB).");
+  return;
+}
 
     const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
     const user = sessionData?.session?.user;
@@ -311,6 +320,8 @@ if (meta.avatar_url) {
       console.error(updateError.message);
       return;
     }
+
+    document.getElementById('profile-pic').src = avatarUrl;
 
     alert("Photo uploaded!");
     location.reload();
