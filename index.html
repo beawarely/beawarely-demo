@@ -533,8 +533,13 @@ function toggleLightDarkMode() {
 
  <script>
   function openLoginModal() {
-    document.getElementById("loginModal").style.display = "block";
-  }
+    const modal = document.getElementById("loginModal");
+    modal.style.display = "flex"; // zamiast block → flex
+    // Ustawienie focusa dla dostępności
+    const dialog = modal.querySelector('[role="dialog"]');
+    if (dialog) dialog.focus();
+}
+
 
   function closeLoginModal() {
     document.getElementById("loginModal").style.display = "none";
