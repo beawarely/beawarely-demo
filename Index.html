@@ -331,7 +331,18 @@ function toggleLightDarkMode() {
    Your Profile
 </a>
 
-    
+ <button id="supportBtn"
+        onclick="openSupportModal()"
+        title="Support BeAwarely"
+        style="position: absolute; top: 66px; left: 20px; 
+               font-size: 0.95rem; font-weight: 700; 
+               background-color: rgba(255,255,255,0.10);
+               color: #fff; padding: 10px 16px; border-radius: 8px;
+               border: none; cursor: pointer;
+               transition: background-color .3s, transform .2s;">
+  🤝 Support BeAwarely
+</button>
+   
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
@@ -465,8 +476,10 @@ function toggleLightDarkMode() {
   </a>
 </div>
 
+  
 <!-- Compact CTA: Support -->
-<section id="support-cta" class="scroll-reveal">
+<!--
+ <section id="support-cta" class="scroll-reveal">
   <button onclick="openSupportModal()" 
         style="background: linear-gradient(135deg, var(--blue1), var(--blue2));
                color:#fff; padding:14px 28px; border:none; border-radius:10px;
@@ -477,7 +490,7 @@ function toggleLightDarkMode() {
   <div style="font-size:.9rem; color:#bbb; margin-top:8px;">
     Help us grow the mission
   </div>
-</section>
+</section> -->
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
   <div class="social-icons" style="margin-bottom: 10px;">
@@ -610,6 +623,27 @@ function toggleLightDarkMode() {
 /* tryb jasny */
 body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.08)}
 body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
+
+/* Support button – look & feel jak Your Profile / Hello */
+#supportBtn:hover { 
+  background-color: rgba(255,255,255,0.20);
+  transform: translateY(-1px);
+}
+
+/* Mobile korekta pozycji (spójnie z #loginBtn / #modeIcon) */
+@media (max-width: 500px) {
+  #supportBtn {
+    top: 56px;      /* trochę bliżej góry na małych ekranach */
+    left: 10px;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+}
+
+/* Schowaj dawną, środkową sekcję z przyciskiem Support (nic nie usuwamy) */
+#support-cta { 
+  display: none !important; 
+}
   
 </style>
 
