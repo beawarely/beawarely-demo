@@ -423,8 +423,8 @@ function toggleLightDarkMode() {
 </div>
 
 <!-- Compact CTA: Support -->
-<section id="support-cta" class="scroll-reveal" style="text-align:center; margin: 120px 0 60px;">
-  <button onclick="openSupportModal()"
+<section id="support-cta" class="scroll-reveal">
+  <button onclick="openSupportModal()" 
         style="background: linear-gradient(135deg, var(--blue1), var(--blue2));
                color:#fff; padding:14px 28px; border:none; border-radius:10px;
                font-size:1.05rem; font-weight:700; cursor:pointer;
@@ -504,6 +504,19 @@ function toggleLightDarkMode() {
   #modeIcon {
     right: 10px;
   }
+/* Twarde centrowanie sekcji z przyciskiem */
+#support-cta{
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: none;   /* nadpisuje globalne section { max-width: 720px } */
+  margin: 120px 0 60px;
+}
+#support-cta button{
+  margin: 0 auto;
+  position: static !important;  /* zbij ewentualne left:-... */
+  left: auto !important;
+}
 
 </style>
 
