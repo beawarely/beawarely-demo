@@ -509,9 +509,11 @@ function toggleLightDarkMode() {
   display: grid;
   place-items: center;
   width: 100%;
-  max-width: none;   /* nadpisuje globalne section { max-width: 720px } */
-  margin: 120px 0 60px;
+  max-width: none;
+  margin-top: clamp(90px, 10vh, 140px);
+  margin-bottom: clamp(60px, 6vh, 100px);
 }
+  
 #support-cta button{
   margin: 0 auto;
   position: static !important;  /* zbij ewentualne left:-... */
