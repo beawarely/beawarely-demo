@@ -692,6 +692,8 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
 
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.supabaseClient = supabaseClient;
+
 
   async function signInWithGoogle() {
   const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -903,12 +905,11 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 
 <script>
 (function(){
-  const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+  // ❗️UŻYJ TEGO SAMEGO KLIENTA, KTÓRY JUŻ MASZ (supabaseClient)
+  const sb = (typeof supabaseClient !== 'undefined')
+    ? supabaseClient
+    : supabase.createClient('https://xzwpqyomqjzmiqsszwkg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg');
 
-  // użyj istniejącego klienta, a jak nie ma – utwórz
-  const sb = (window.supabase && window.supabase.supabaseUrl) ? window.supabase
-           : window.supabase.createClient(SB_URL, SB_KEY);
 
   const grid = document.getElementById('toolsGrid');
   if (!grid) return;
