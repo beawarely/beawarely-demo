@@ -366,7 +366,7 @@ function toggleLightDarkMode() {
     </ul>
   </section>
 
-  <section id="ai-chat" class="scroll-reveal">
+<!--  <section id="ai-chat" class="legacy-hide" class="scroll-reveal">
   <h2>AI Chat Coming Soon</h2>
   <p style="margin-bottom: 20px;">
     We're working hard on integrating an interactive AI assistant.<br>
@@ -378,7 +378,7 @@ function toggleLightDarkMode() {
   </div>
 </section>
 
-  <section id="ai-tools" class="scroll-reveal" style="margin-top: 60px; text-align: center;">
+  <section id="ai-tools" class="legacy-hide"> class="scroll-reveal" style="margin-top: 60px; text-align: center;">
   <h2>Coming Soon: AI Tools</h2>
   <p style="margin-bottom: 30px;">Exciting features to support your awareness mission:</p>
   <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
@@ -405,15 +405,43 @@ function toggleLightDarkMode() {
   </div>
     
 
+</section>-->
+
+<section id="ai-hub" class="scroll-reveal">
+  <h2>BeAwarely AI Hub</h2>
+  <p class="section-sub">Choose a tool to explore. Some require login.</p>
+
+  <div id="toolsGrid" class="tools-grid">
+    <!-- Karta 1: AI Chat (Mistral) -->
+    <article class="tool-card" data-href="chat.html" data-requires-auth="true">
+      <div class="tool-top">
+        <span class="tool-icon">🤖</span>
+        <span class="tool-badge">Mistral-7B</span>
+      </div>
+      <h3 class="tool-title">AI Chat</h3>
+      <p class="tool-desc">Ask questions, brainstorm, get realtime help.</p>
+      <div class="tool-cta">
+        <span class="status">Login required</span>
+        <button class="open-btn" type="button">Open →</button>
+      </div>
+    </article>
+
+    <!-- Karta 2: AI Tools (przykład – strona zbiorcza, możesz podmienić link) -->
+    <article class="tool-card" data-href="ai-tools.html" data-requires-auth="true">
+      <div class="tool-top">
+        <span class="tool-icon">🧰</span>
+        <span class="tool-badge">Soon</span>
+      </div>
+      <h3 class="tool-title">AI Tools</h3>
+      <p class="tool-desc">A set of utilities to support your mission.</p>
+      <div class="tool-cta">
+        <span class="status">Login required</span>
+        <button class="open-btn" type="button">Open →</button>
+      </div>
+    </article>
+  </div>
 </section>
 
-<!--  <section id="user-profile" class="scroll-reveal" style="display: none; text-align: center; margin-top: 60px;">
-  <h2>Your Profile</h2>
-  <p><strong>Email:</strong> <span id="user-email">loading...</span></p>
-  <p><strong>ID:</strong> <span id="user-id">loading...</span></p>
-  <p><strong>Status:</strong> Logged In ✅</p>
-  <button onclick="logoutUser()" class="send-btn" style="margin-top: 20px;">Log Out</button>
-</section>-->
   
 <!-- 🔽 Przycisk do profilu (widoczny tylko po zalogowaniu) -->
 <div id="profileRedirect" class="scroll-reveal" style="display: none; text-align: center; margin-top: 40px;">
@@ -520,6 +548,54 @@ function toggleLightDarkMode() {
   left: auto !important;
 }
 
+.legacy-hide { display: none !important; }
+
+/* --- AI Hub cards --- */
+.section-sub{opacity:.8;margin:-6px 0 18px}
+.tools-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap:16px;
+}
+.tool-card{
+  position:relative;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  padding:16px;
+  backdrop-filter: blur(3px);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .2s;
+  cursor:pointer;
+}
+.tool-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  border-color: rgba(255,255,255,.18);
+}
+.tool-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.tool-icon{font-size:24px}
+.tool-badge{
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  background: rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+}
+.tool-title{margin:6px 0 4px}
+.tool-desc{opacity:.9;margin:0 0 10px}
+.tool-cta{display:flex;align-items:center;justify-content:space-between}
+.open-btn{
+  border:none; padding:8px 12px; border-radius:10px;
+  background: linear-gradient(135deg, var(--blue1), var(--blue2));
+  color:#fff; font-weight:600; cursor:pointer;
+}
+.tool-card.locked .open-btn{opacity:.7}
+.tool-card.locked .status::before{content:"🔒 ";}
+
+/* tryb jasny */
+body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.08)}
+body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
+  
 </style>
 
   <!-- 🔽 Google Translate dropdown in bottom-right corner -->
@@ -810,5 +886,66 @@ function toggleLightDarkMode() {
   </div>
 </div>
 
+<script>
+(function(){
+  const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+
+  // użyj istniejącego klienta, a jak nie ma – utwórz
+  const sb = (window.supabase && window.supabase.supabaseUrl) ? window.supabase
+           : window.supabase.createClient(SB_URL, SB_KEY);
+
+  const grid = document.getElementById('toolsGrid');
+  if (!grid) return;
+
+  async function refreshLocks(){
+    const { data: { session } } = await sb.auth.getSession();
+    const authed = !!session;
+
+    grid.querySelectorAll('.tool-card').forEach(card=>{
+      const needs = card.dataset.requiresAuth === 'true';
+      card.classList.toggle('locked', needs && !authed);
+      const status = card.querySelector('.status');
+      if(status){
+        status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
+      }
+      // klik
+      card.onclick = () => {
+        const href = card.dataset.href;
+        if (needs && !authed) {
+          // zapamiętaj, dokąd mamy wrócić po zalogowaniu
+          localStorage.setItem('ba_redirect', href);
+          // otwórz Twój modal logowania (dopasuj do swojego kodu)
+          const modal = document.getElementById('loginModal');
+          if (modal) modal.classList.add('open');
+          // jeśli masz funkcję np. openLoginModal() – wywołaj ją
+          if (typeof window.openLoginModal === 'function') window.openLoginModal();
+          return;
+        }
+        if (href) window.location.href = href;
+      };
+    });
+  }
+
+  // po zalogowaniu – automatyczny powrót
+  sb.auth.onAuthStateChange((_evt, session)=>{
+    if (session) {
+      const to = localStorage.getItem('ba_redirect');
+      if (to) { localStorage.removeItem('ba_redirect'); window.location.href = to; }
+      else location.reload();
+    }
+  });
+
+  // jeśli ktoś trafił tu z parametrem ?login=1 – pokaż modal
+  if (new URLSearchParams(location.search).get('login') === '1') {
+    const modal = document.getElementById('loginModal');
+    if (modal) modal.classList.add('open');
+    if (typeof window.openLoginModal === 'function') window.openLoginModal();
+  }
+
+  refreshLocks();
+})();
+</script>
+  
 </body>
 </html>
