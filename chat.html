@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chat — BeAwarely</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body{margin:0;font-family:'Segoe UI',sans-serif;color:#fff;background:radial-gradient(ellipse at top,#0d0d2b 0%,#000 100%);}
+    .wrap{max-width:960px;margin:0 auto;padding:28px}
+    .chat-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
+    .chat-messages{height:min(60vh,520px);overflow:auto;padding:10px;border-radius:12px;background:rgba(0,0,0,.18);display:flex;flex-direction:column;gap:10px}
+    .msg{max-width:92%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-wrap:break-word;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+    .msg.user{align-self:flex-end;background:linear-gradient(135deg,#007bff,#66b2ff);color:#fff;border-bottom-right-radius:6px}
+    .msg.ai{align-self:flex-start;background:rgba(255,255,255,.09);color:#eaeaea;border-bottom-left-radius:6px}
+    .controls{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px}
+    textarea{resize:none;border-radius:10px;padding:10px}
+    .send{border:none;border-radius:10px;padding:10px 14px;background:linear-gradient(135deg,#007bff,#66b2ff);color:#fff;font-weight:600;cursor:pointer}
+    .topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+    a.back{color:#66b2ff;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="index.html" class="back">← Back</a>
+      <h2 style="margin:0">BeAwarely AI Chat</h2>
+      <span class="badge">Mistral-7B-Instruct-Q6_K</span>
+    </div>
+
+    <div class="chat-card">
+      <div id="chatMessages" class="chat-messages">
+        <div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>
+      </div>
+      <div class="controls">
+        <textarea id="chatInput" rows="2" placeholder="Type and press Enter…"></textarea>
+        <button id="sendBtn" class="send">Send</button>
+      </div>
+      <div style="opacity:.7;margin-top:8px;font-size:.9rem">Backend not connected yet — UI is ready for your Mistral endpoint.</div>
+    </div>
+  </div>
+
+  <script>
+    // Supabase gate: jeśli brak sesji → wróć do index i otwórz login
+    const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+    const supa = window.supabase.createClient(SB_URL, SB_KEY);
+
+    (async () => {
+      const { data: { session } } = await supa.auth.getSession();
+      if (!session) {
+        // zapamiętaj dokąd miało wejść
+        localStorage.setItem('ba_redirect', 'chat.html');
+        window.location.href = 'index.html?login=1';
+        return;
+      }
+    })();
+
+    // Prosty handler UI (na razie bez połączenia do Mistrala)
+    const msgs = document.getElementById('chatMessages');
+    const input = document.getElementById('chatInput');
+    const send = document.getElementById('sendBtn');
+
+    function addMsg(text, who){
+      const el = document.createElement('div');
+      el.className = 'msg ' + (who || 'ai');
+      el.textContent = text;
+      msgs.appendChild(el);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault(); send.click();
+      }
+    });
+    send.onclick = () => {
+      const q = input.value.trim();
+      if(!q) return;
+      addMsg(q, 'user');
+      input.value = '';
+      // tu później wstawisz fetch do swojego endpointu Mistrala
+      setTimeout(()=>addMsg('This is a placeholder response. Connect your Mistral endpoint to get real answers.'), 400);
+    };
+  </script>
+</body>
+</html>
