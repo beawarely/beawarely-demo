@@ -928,13 +928,23 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
   }
 
   // po zalogowaniu – automatyczny powrót
-  sb.auth.onAuthStateChange((_evt, session)=>{
-    if (session) {
-      const to = localStorage.getItem('ba_redirect');
-      if (to) { localStorage.removeItem('ba_redirect'); window.location.href = to; }
-      else location.reload();
+  sb.auth.onAuthStateChange((event, session) => {
+  // Reaguj tylko na realne logowanie/wylogowanie, NIE na INITIAL_SESSION
+  if (event === 'SIGNED_IN') {
+    const to = localStorage.getItem('ba_redirect');
+    if (to) {
+      localStorage.removeItem('ba_redirect');
+      window.location.href = to;
+    } else {
+      refreshLocks(); // odśwież stan kłódek bez reloadu
     }
-  });
+  }
+
+  if (event === 'SIGNED_OUT') {
+    refreshLocks(); // odśwież widok dla niezalogowanego
+  }
+});
+
 
   // jeśli ktoś trafił tu z parametrem ?login=1 – pokaż modal
   if (new URLSearchParams(location.search).get('login') === '1') {
