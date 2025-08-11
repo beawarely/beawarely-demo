@@ -303,6 +303,41 @@ footer {
   #loginBtn{ padding: 4px 10px; font-size: .9rem; }
   #modeIcon{ width: 32px; height: 32px; padding: 6px; }
 }
+
+/* --- hide old big button --- */
+#supportBtn { display: none !important; }
+
+/* --- Gold style for topbar Support pill --- */
+#supportTopBtn{
+  background: linear-gradient(145deg,#caa007,#ffd76a);
+  color:#1a1a1a;
+  border:1px solid #9a7700;
+  box-shadow:
+    0 8px 22px rgba(255,200,0,.25),
+    inset 0 2px 0 rgba(255,255,255,.35),
+    inset 0 -2px 0 rgba(0,0,0,.20);
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing:.2px;
+}
+#supportTopBtn:hover{
+  transform: translateY(-1px);
+  filter: saturate(1.06) brightness(1.02);
+}
+
+/* icon before text (works even without PNG) */
+#supportTopBtn .coin{
+  width: 18px; height: 18px; display:inline-block;
+  margin-right: 8px; vertical-align: -3px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.35));
+}
+#supportTopBtn .coin.fallback{
+  font-size: 18px; line-height: 18px; width:auto; height:auto;
+  margin-right: 8px;
+  color:#2a1a00;
+  text-shadow: 0 1px 0 #ffe9a6, 0 0 6px rgba(255,220,90,.8);
+}
     
 </style>
   <script>
@@ -391,6 +426,7 @@ function toggleLightDarkMode() {
    Your Profile
 </a>
 
+  <!--  
  <button id="supportBtn"
         onclick="openSupportModal()"
         title="Support BeAwarely"
@@ -402,7 +438,8 @@ function toggleLightDarkMode() {
                transition: background-color .3s, transform .2s;">
   🤝 Support BeAwarely
 </button>
-   
+-->
+    
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
@@ -1076,16 +1113,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const login   = document.getElementById('loginBtn');        // już istnieje
   const mode    = document.getElementById('modeIcon');        // już istnieje
 
-  // SUPPORT – jeśli nie masz osobnego przycisku w headerze, tworzymy tu
-  let support = document.getElementById('supportTopBtn');
-  if (!support) {
-    support = document.createElement('a');
-    support.id = 'supportTopBtn';
-    support.href = 'javascript:void(0)';
-    support.className = 'pill';
-    support.textContent = 'Support';
-    support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
-  }
+  // SUPPORT – topbar (gold)
+let support = document.getElementById('supportTopBtn');
+if (!support) {
+  support = document.createElement('a');
+  support.id = 'supportTopBtn';
+  support.href = 'javascript:void(0)';
+  support.className = 'pill'; // zostawiamy, ale nadpisujemy stylem w CSS
+
+  // jeśli wgrasz plik: /images/dollar-gold.png (to Twoje złote $)
+  const imgPath = 'images/dollar-gold.png';
+  const img = new Image();
+  img.onload = () => {
+    support.innerHTML = `<img src="${imgPath}" alt="$" class="coin"> Support`;
+  };
+  img.onerror = () => {
+    // fallback bez PNG
+    support.innerHTML = `<span class="coin fallback">💲</span> Support`;
+  };
+  img.src = imgPath;
+
+  support.onclick = () =>
+    typeof openSupportModal === 'function' && openSupportModal();
+}
+
 
   // nadaj klasę „pill” istniejącym, by wyglądały spójnie
   if (profile) profile.classList.add('pill');
