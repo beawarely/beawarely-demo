@@ -251,6 +251,59 @@ section li,
 footer {
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
 }
+
+/* --- Fixed Topbar --- */
+#topbar{
+  position: fixed;
+  top: 14px; left: 20px; right: 20px;
+  z-index: 10000;
+  display: flex; justify-content: space-between; align-items: center;
+  pointer-events: none;  /* żeby tło pod spodem przewijało się normalnie */
+}
+#topbar .topbar-left, 
+#topbar .topbar-right{
+  display: flex; gap: 12px; align-items: center;
+  pointer-events: auto; /* ale same przyciski mają klikalność */
+}
+
+/* Uniwersalna pigułka */
+.pill{
+  background-color: rgba(255,255,255,0.10);
+  color: #fff; font-weight: 600; text-decoration: none;
+  padding: 6px 14px; border-radius: 12px; 
+  transition: background-color .25s, transform .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.pill:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+
+/* Ikona trybu jako okrągła pigułka */
+#modeIcon{
+  position: static !important;
+  top: auto !important; right: auto !important; left: auto !important;
+  font-size: 1.4rem; line-height: 1; 
+  background-color: rgba(255,255,255,0.10);
+  border-radius: 50%; padding: 8px; width: 36px; height: 36px;
+  display: inline-flex; align-items:center; justify-content:center;
+  transition: background-color .25s, transform .2s;
+}
+#modeIcon:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+
+/* Nadpisanie absolutów na login i profile (żeby nie „uciekały” z topbaru) */
+#loginBtn, #yourProfileBtn{
+  position: static !important; 
+  top: auto !important; right: auto !important; left: auto !important;
+  font-size: 0.95rem;
+  border-radius: 12px;
+}
+
+/* Responsywność */
+@media (max-width: 560px){
+  #topbar{ top: 10px; left: 12px; right: 12px; }
+  #topbar .topbar-left, #topbar .topbar-right{ gap: 8px; }
+  #loginBtn{ padding: 4px 10px; font-size: .9rem; }
+  #modeIcon{ width: 32px; height: 32px; padding: 6px; }
+}
+    
 </style>
   <script>
     // Load preferred theme
@@ -298,6 +351,13 @@ function toggleLightDarkMode() {
 
 </head>
 <body>
+
+  <!-- TOPBAR -->
+<div id="topbar">
+  <div class="topbar-left"></div>
+  <div class="topbar-right"></div>
+</div>
+
   <div id="rotating-bg">
   <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
 </div>
@@ -1005,6 +1065,38 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 
   refreshLocks();
 })();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const left  = document.querySelector('#topbar .topbar-left');
+  const right = document.querySelector('#topbar .topbar-right');
+
+  const profile = document.getElementById('yourProfileBtn'); // już istnieje
+  const login   = document.getElementById('loginBtn');        // już istnieje
+  const mode    = document.getElementById('modeIcon');        // już istnieje
+
+  // SUPPORT – jeśli nie masz osobnego przycisku w headerze, tworzymy tu
+  let support = document.getElementById('supportTopBtn');
+  if (!support) {
+    support = document.createElement('a');
+    support.id = 'supportTopBtn';
+    support.href = 'javascript:void(0)';
+    support.className = 'pill';
+    support.textContent = 'Support';
+    support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
+  }
+
+  // nadaj klasę „pill” istniejącym, by wyglądały spójnie
+  if (profile) profile.classList.add('pill');
+  if (login)   login.classList.add('pill');
+
+  // wstaw do odpowiednich grup
+  if (profile) left.appendChild(profile);
+  left.appendChild(support);
+  if (login)   right.appendChild(login);
+  if (mode)    right.appendChild(mode);
+});
 </script>
   
 </body>
