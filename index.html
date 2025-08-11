@@ -307,37 +307,23 @@ footer {
 /* --- hide old big button --- */
 #supportBtn { display: none !important; }
 
-/* --- Gold style for topbar Support pill --- */
 #supportTopBtn{
-  background: linear-gradient(145deg,#caa007,#ffd76a);
-  color:#1a1a1a;
-  border:1px solid #9a7700;
-  box-shadow:
-    0 8px 22px rgba(255,200,0,.25),
-    inset 0 2px 0 rgba(255,255,255,.35),
-    inset 0 -2px 0 rgba(0,0,0,.20);
-  padding: 6px 14px;
-  border-radius: 12px;
-  font-weight: 800;
-  letter-spacing:.2px;
+  background-color: rgba(255,255,255,0.10);
+  color:#fff;
+  font-weight:700;
+  padding:6px 10px;
+  border-radius:12px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:1rem;
+  border:none;        /* ważne: zeruje pozostałości po złotej wersji */
+  box-shadow:none;    /* j.w. */
+  letter-spacing:0;
 }
 #supportTopBtn:hover{
+  background-color: rgba(255,255,255,0.20);
   transform: translateY(-1px);
-  filter: saturate(1.06) brightness(1.02);
 }
 
-/* icon before text (works even without PNG) */
-#supportTopBtn .coin{
-  width: 18px; height: 18px; display:inline-block;
-  margin-right: 8px; vertical-align: -3px;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.35));
-}
-#supportTopBtn .coin.fallback{
-  font-size: 18px; line-height: 18px; width:auto; height:auto;
-  margin-right: 8px;
-  color:#2a1a00;
-  text-shadow: 0 1px 0 #ffe9a6, 0 0 6px rgba(255,220,90,.8);
-}
     
 </style>
   <script>
@@ -1113,29 +1099,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const login   = document.getElementById('loginBtn');        // już istnieje
   const mode    = document.getElementById('modeIcon');        // już istnieje
 
-  // SUPPORT – topbar (gold)
+// SUPPORT – topbar $$$ (minimal)
 let support = document.getElementById('supportTopBtn');
 if (!support) {
   support = document.createElement('a');
   support.id = 'supportTopBtn';
   support.href = 'javascript:void(0)';
-  support.className = 'pill'; // zostawiamy, ale nadpisujemy stylem w CSS
-
-  // jeśli wgrasz plik: /images/dollar-gold.png (to Twoje złote $)
-  const imgPath = 'images/dollar-gold.png';
-  const img = new Image();
-  img.onload = () => {
-    support.innerHTML = `<img src="${imgPath}" alt="$" class="coin"> Support`;
-  };
-  img.onerror = () => {
-    // fallback bez PNG
-    support.innerHTML = `<span class="coin fallback">💲</span> Support`;
-  };
-  img.src = imgPath;
-
-  support.onclick = () =>
-    typeof openSupportModal === 'function' && openSupportModal();
+  support.className = 'pill';
+  support.textContent = '$$$';
+  support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
 }
+
 
 
   // nadaj klasę „pill” istniejącym, by wyglądały spójnie
