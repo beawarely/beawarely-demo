@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Foresight — BeAwarely</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <style>
+    :root{
+      --blue1:#007bff; --blue2:#66b2ff; --blue3:#b3d9ff;
+    }
+    body{
+      margin:0; font-family:'Segoe UI',sans-serif; color:#fff;
+      background: radial-gradient(ellipse at top, #0d0d2b 0%, #000 100%);
+    }
+    .wrap{max-width:1100px; margin:0 auto; padding:26px}
+    .topbar{display:flex; align-items:center; gap:10px; margin-bottom:16px}
+    .back{color:#66b2ff; text-decoration:none}
+    h1{margin:4px 0 2px; font-size:1.6rem}
+    .sub{opacity:.8; margin-bottom:10px}
+
+    /* Cards */
+    .card{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      border-radius:14px; padding:16px; margin-bottom:14px}
+    .grid{display:grid; gap:14px}
+    @media(min-width:900px){ .grid{grid-template-columns: 1.2fr .8fr} }
+
+    /* Filters */
+    .filters{display:grid; gap:10px; grid-template-columns: repeat(4, minmax(120px,1fr));}
+    .filters input, .filters select{
+      padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.25); color:#fff; outline:none;
+    }
+    .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .chip{padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18); font-size:.9rem}
+
+    /* Table */
+    table{width:100%; border-collapse:separate; border-spacing:0 8px; font-size:.95rem}
+    thead th{ text-align:left; font-weight:600; padding:8px 10px; opacity:.9 }
+    tbody tr{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10) }
+    tbody td{ padding:10px }
+    .badge{font-size:.8rem; padding:4px 8px; border-radius:999px; 
+      background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18)}
+    .ok{background:rgba(0,204,102,.12); border-color:rgba(0,204,102,.45)}
+    .fail{background:rgba(255,84,84,.12); border-color:rgba(255,84,84,.45)}
+    .pending{background:rgba(255,255,255,.12)}
+    .conf{font-variant-numeric: tabular-nums}
+    .nowrap{white-space:nowrap}
+    .muted{opacity:.75}
+
+    /* Stats */
+    .stats{display:grid; grid-template-columns: repeat(2,1fr); gap:10px}
+    @media(min-width:520px){ .stats{grid-template-columns: repeat(4,1fr)} }
+    .stat{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      border-radius:12px; padding:12px; text-align:center}
+    .stat b{display:block; font-size:1.4rem; margin-top:4px}
+
+    /* Note */
+    .note{font-size:.9rem; color:#bbb}
+    .pill{
+      background: linear-gradient(135deg, var(--blue1), var(--blue2));
+      color:#fff; padding:8px 12px; border:none; border-radius:10px; font-weight:600; cursor:pointer;
+    }
+
+    /* Collapsible details */
+    details{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      border-radius:10px; padding:10px; margin-top:10px}
+    details[open]{background:rgba(255,255,255,.08)}
+    summary{cursor:pointer}
+    a.link{color:#66b2ff; text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="index.html">← Back</a>
+      <h1 style="margin:0;">Foresight</h1>
+    </div>
+    <div class="sub">Przegląd prognoz AI. Bez możliwości pisania — tylko czytanie, filtrowanie, statystyki i trafność.</div>
+
+    <!-- Filters + Quick Stats -->
+    <div class="grid">
+      <div class="card">
+        <div class="filters">
+          <input id="q" placeholder="Szukaj w treści…"/>
+          <select id="topic">
+            <option value="">Temat: wszystkie</option>
+            <option>AI</option>
+            <option>Economy</option>
+            <option>Policy</option>
+            <option>Science</option>
+          </select>
+          <select id="status">
+            <option value="">Status: wszystkie</option>
+            <option value="Correct">Correct</option>
+            <option value="Wrong">Wrong</option>
+            <option value="Pending">Pending</option>
+          </select>
+          <select id="horizon">
+            <option value="">Horyzont</option>
+            <option value="short">≤ 3 mies.</option>
+            <option value="mid">3–12 mies.</option>
+            <option value="long">> 12 mies.</option>
+          </select>
+        </div>
+        <div class="chips" id="activeChips"></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+          <div class="muted">Statystyki (z rozstrzygniętych)</div>
+          <button class="pill" id="exportBtn">Export JSON</button>
+        </div>
+        <div class="stats" id="stats">
+          <div class="stat"><span>Łącznie</span> <b id="s_total">0</b></div>
+          <div class="stat"><span>Rozstrzygnięte</span> <b id="s_resolved">0</b></div>
+          <div class="stat"><span>Accuracy</span> <b id="s_acc">–</b></div>
+          <div class="stat"><span>Śr. Brier</span> <b id="s_brier">–</b></div>
+        </div>
+        <div class="note" style="margin-top:8px">
+          <b>Brier score</b> – im niższy, tym lepiej (0 = idealnie). Liczony na rozstrzygniętych prognozach.
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th class="nowrap">Data</th>
+            <th>Treść prognozy</th>
+            <th>Temat</th>
+            <th class="nowrap">Horyzont</th>
+            <th class="nowrap">Confidence</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+
+      <details>
+        <summary>Jak liczymy trafność i weryfikację?</summary>
+        <div class="note" style="margin-top:8px">
+          Każda prognoza ma: <code>resolveBy</code> (deadline), <code>resolutionCriteria</code> (co musi się wydarzyć),
+          oraz źródła. Status to: <b>Correct</b>, <b>Wrong</b>, <b>Pending</b>.  
+          Trafność = Correct / (Correct + Wrong).  
+          Brier = średnia z (p - y)², gdzie p = confidence (0–1), y = 1 gdy Correct, 0 gdy Wrong.  
+          Po podpięciu backendu możesz użyć Edge Function + CRON do auto‑rezolucji (np. scraping/ API), z „human‑in‑the‑loop” do zatwierdzenia.
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    // ===== Demo data (podmień później na Supabase/API) =====
+    const predictions = [
+      {
+        id: "P-001",
+        createdAt: "2025-06-01",
+        topic: "AI",
+        text: "UE przyjmie łagodzące poprawki do regulacji modelów open‑source do 2026-03-31.",
+        horizon: "long",                  // short ≤3m, mid 3–12m, long >12m
+        confidence: 0.62,                 // 0..1
+        resolveBy: "2026-03-31",
+        resolutionCriteria: "Czy przyjęto formalne poprawki osłabiające restrykcje wobec OSS?",
+        sources: [{label:"EU documents", url:"#"}],
+        status: "Pending"                 // Pending | Correct | Wrong
+      },
+      {
+        id: "P-002",
+        createdAt: "2025-04-15",
+        topic: "Economy",
+        text: "Inflacja HICP w strefie euro spadnie poniżej 2.0% w Q4 2025.",
+        horizon: "mid",
+        confidence: 0.55,
+        resolveBy: "2025-12-31",
+        resolutionCriteria: "Średnia HICP w Q4 < 2.0% (Eurostat).",
+        sources: [{label:"Eurostat", url:"#"}],
+        status: "Pending"
+      },
+      {
+        id: "P-003",
+        createdAt: "2025-02-01",
+        topic: "Science",
+        text: "Ogłoszenie powtarzalnej syntezy energii z fuzji o dodatnim bilansie w 2025 r.",
+        horizon: "mid",
+        confidence: 0.28,
+        resolveBy: "2025-12-31",
+        resolutionCriteria: "Publikacja w recenzowanym czasopiśmie + niezależna replikacja.",
+        sources: [{label:"Journals", url:"#"}],
+        status: "Wrong"
+      },
+      {
+        id: "P-004",
+        createdAt: "2025-01-05",
+        topic: "Policy",
+        text: "USA wprowadzą ogólnokrajowe wytyczne dot. etykiet AI przy reklamach politycznych do 2025-09-30.",
+        horizon: "mid",
+        confidence: 0.48,
+        resolveBy: "2025-09-30",
+        resolutionCriteria: "Federalne wytyczne obowiązujące ogólnokrajowo.",
+        sources: [{label:"Gov docs", url:"#"}],
+        status: "Correct"
+      }
+    ];
+
+    // ===== Render & filters =====
+    const el = sel => document.querySelector(sel);
+    const rows = el('#rows');
+    const q = el('#q'), topic = el('#topic'), status = el('#status'), horizon = el('#horizon');
+    const chips = el('#activeChips');
+
+    function activeFilters(){
+      return {
+        q: q.value.trim().toLowerCase(),
+        topic: topic.value,
+        status: status.value,
+        horizon: horizon.value
+      };
+    }
+
+    function passFilters(p, f){
+      if (f.q && !(`${p.text} ${p.id}`.toLowerCase().includes(f.q))) return false;
+      if (f.topic && p.topic !== f.topic) return false;
+      if (f.status && p.status !== f.status) return false;
+      if (f.horizon && p.horizon !== f.horizon) return false;
+      return true;
+    }
+
+    function renderChips(f){
+      chips.innerHTML = '';
+      const add = (label, onClear) => {
+        const c = document.createElement('span'); c.className = 'chip';
+        c.textContent = label + ' ✕';
+        c.onclick = onClear; chips.appendChild(c);
+      };
+      if (f.q) add(`Szukaj: "${f.q}"`, ()=>{q.value=''; refresh();});
+      if (f.topic) add(`Temat: ${f.topic}`, ()=>{topic.value=''; refresh();});
+      if (f.status) add(`Status: ${f.status}`, ()=>{status.value=''; refresh();});
+      if (f.horizon) add(`Horyzont: ${f.horizon}`, ()=>{horizon.value=''; refresh();});
+    }
+
+    function badgeForStatus(s){
+      if (s === 'Correct') return 'badge ok';
+      if (s === 'Wrong')   return 'badge fail';
+      return 'badge pending';
+    }
+
+    function renderRows(list){
+      rows.innerHTML = '';
+      list.forEach(p=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="nowrap">${p.createdAt}</td>
+          <td>
+            ${p.text}
+            <div class="muted" style="margin-top:6px">
+              <span class="badge">ID: ${p.id}</span>
+              <span class="badge">Resolve by: ${p.resolveBy}</span>
+            </div>
+            ${p.sources?.length ? `
+            <div class="muted" style="margin-top:6px">
+              Źródła: ${p.sources.map(s=>`<a class="link" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`).join(', ')}
+            </div>`:''}
+          </td>
+          <td>${p.topic}</td>
+          <td class="nowrap">${p.horizon}</td>
+          <td class="conf">${Math.round(p.confidence*100)}%</td>
+          <td><span class="${badgeForStatus(p.status)}">${p.status}</span></td>
+        `;
+        rows.appendChild(tr);
+      });
+    }
+
+    // ===== Stats: accuracy, Brier, resolved =====
+    function computeStats(list){
+      const total = list.length;
+      const resolved = list.filter(p=>p.status==='Correct' || p.status==='Wrong');
+      const nRes = resolved.length;
+      let acc = null, brier = null;
+
+      if (nRes > 0){
+        const correct = resolved.filter(p=>p.status==='Correct').length;
+        acc = correct / nRes;
+
+        const scores = resolved.map(p=>{
+          const y = p.status==='Correct' ? 1 : 0;
+          const diff = (p.confidence - y);
+          return diff*diff;
+        });
+        brier = scores.reduce((a,b)=>a+b,0)/scores.length;
+      }
+
+      el('#s_total').textContent = total;
+      el('#s_resolved').textContent = nRes;
+      el('#s_acc').textContent = (acc==null) ? '–' : (Math.round(acc*100)+'%');
+      el('#s_brier').textContent = (brier==null) ? '–' : brier.toFixed(3);
+    }
+
+    function refresh(){
+      const f = activeFilters();
+      renderChips(f);
+      const list = predictions.filter(p=>passFilters(p,f));
+      renderRows(list);
+      computeStats(list);
+    }
+
+    [q, topic, status, horizon].forEach(ctrl=>ctrl.addEventListener('input', refresh));
+    refresh();
+
+    // ===== Export JSON (np. do ręcznej weryfikacji / kopii zapasowych) =====
+    el('#exportBtn').onclick = ()=>{
+      const data = JSON.stringify(predictions, null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'foresight-export.json';
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    };
+
+    // ===== Hook pod backend: automatyczna weryfikacja =====
+    // Później: zamień tę funkcję na fetch do Supabase (tabela `predictions`)
+    async function loadPredictions(){
+      // Przykład pod Supabase:
+      // const { data, error } = await supabaseClient.from('predictions').select('*');
+      // if (!error) { predictions = data; refresh(); }
+    }
+  </script>
+</body>
+</html>
