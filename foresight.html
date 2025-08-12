@@ -269,71 +269,7 @@
       <a class="btn primary" href="index.html?login=1">Log in</a>
     </div>
   </dialog>
-
-  <script>
-    // Lightweight auth gate (placeholder):
-    // In your real app, replace with Supabase session check.
-    const isLoggedIn = false; // TODO: wire to Supabase auth state
-
-    // Category links – intercept when user is not signed in
-    document.querySelectorAll('.cat').forEach(el => {
-      el.addEventListener('click', (e) => {
-        if (!isLoggedIn) {
-          e.preventDefault();
-          document.getElementById('authModal').showModal();
-        } else {
-          // Navigate to real pages, e.g., foresight-crypto.html
-          // location.href = `foresight-${el.dataset.topic}.html`;
-        }
-      });
-    });
-
-    document.getElementById('closeModal').addEventListener('click', () => {
-      document.getElementById('authModal').close();
-    });
-
-    // Refresh button – visual stub
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-      const btn = event.currentTarget;
-      btn.disabled = true;
-      btn.textContent = 'Refreshing…';
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.textContent = '⟳ Refresh';
-        // Here you would trigger your prediction fetch + render
-      }, 900);
-    });
-
-    // Tiny chart (no libraries)
-    (function() {
-      const c = document.getElementById('miniChart');
-      const ctx = c.getContext('2d');
-      const w = c.width, h = c.height;
-      // Background grid
-      ctx.fillStyle = '#0b1324'; ctx.fillRect(0,0,w,h);
-      ctx.strokeStyle = '#1a2236'; ctx.lineWidth = 1;
-      for (let y = 0; y <= h; y += 36) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
-      // Fake data
-      const points = [52,58,61,55,62,64,60,66,63,67,65,64];
-      const max = 80, min = 40; // scale
-      const pad = 12; const stepX = (w - pad*2) / (points.length - 1);
-      // Line
-      ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = '#7fb3ff';
-      points.forEach((v,i) => {
-        const x = pad + i * stepX;
-        const y = h - pad - ((v - min) / (max - min)) * (h - pad*2);
-        i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
-      });
-      ctx.stroke();
-      // Dots
-      ctx.fillStyle = '#a8ccff';
-      points.forEach((v,i) => {
-        const x = pad + i * stepX;
-        const y = h - pad - ((v - min) / (max - min)) * (h - pad*2);
-        ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
-      });
-    })();
-  </script>
+  
 
   <!-- Supabase (jak w index.html) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
