@@ -94,7 +94,6 @@
       background: radial-gradient(700px 300px at 50% 0, rgba(90,168,255,.18), transparent 60%),
                   linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
       position: relative;
-      overflow: hidden;
     }
     .oracle .stamp { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(800px 120px at 50% 0, rgba(90,168,255,.08), transparent 60%); }
     .oracle .title { display: flex; align-items: center; gap: 10px; }
@@ -125,7 +124,18 @@
     canvas { width: 100%; height: 180px; display: block; }
 
     /* Category buttons */
-    .categories { margin-top: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .categories{
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+    .categories .cat { 
+  min-width: 0; 
+  width: 100%; 
+}
+
     @media (max-width: 800px) { .categories { grid-template-columns: repeat(2, 1fr); } }
     .cat {
       padding: 14px;
@@ -220,15 +230,15 @@
         </div>
 
         <div class="categories" aria-label="Topic quick links">
-          <a class="cat lock" data-topic="economy" href="#">Economy</a>
-          <a class="cat lock" data-topic="geopolitics" href="#">Geopolitics</a>
-          <a class="cat lock" data-topic="technology" href="#">Technology</a>
-          <a class="cat lock" data-topic="crypto" href="#">Crypto</a>
-          <a class="cat lock" data-topic="health" href="#">Health</a>
-          <a class="cat lock" data-topic="climate" href="#">Climate</a>
-          <a class="cat lock" data-topic="culture" href="#">Culture</a>
-          <a class="cat lock" data-topic="sports" href="#">Sports</a>
-        </div>
+  <a class="cat" data-topic="economy" href="#">Economy</a>
+  <a class="cat" data-topic="geopolitics" href="#">Geopolitics</a>
+  <a class="cat" data-topic="technology" href="#">Technology</a>
+  <a class="cat" data-topic="crypto" href="#">Crypto</a>
+  <a class="cat" data-topic="health" href="#">Health</a>
+  <a class="cat" data-topic="climate" href="#">Climate</a>
+  <a class="cat" data-topic="culture" href="#">Culture</a>
+  <a class="cat" data-topic="sports" href="#">Sports</a>
+</div>
       </main>
 
       <!-- Right: Stats -->
@@ -256,7 +266,7 @@
     <p>You need to be signed in to view detailed category pages.</p>
     <div class="modal-actions">
       <button class="btn" id="closeModal">Close</button>
-      <a class="btn primary" href="index.html#login">Log in</a>
+      <a class="btn primary" href="index.html?login=1">Log in</a>
     </div>
   </dialog>
 
@@ -324,6 +334,49 @@
       });
     })();
   </script>
+
+  <!-- Supabase (jak w index.html) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+  const authModal = document.getElementById('authModal');
+  const catButtons = [...document.querySelectorAll('.cat')];
+
+  function wireCategoryClicks(authed){
+    catButtons.forEach(el => {
+      // pokaż kłódkę tylko gdy NIE zalogowany
+      el.classList.toggle('lock', !authed);
+      el.title = authed ? '' : 'Login required';
+
+      el.onclick = (e) => {
+        e.preventDefault();
+        if (!authed) {
+          authModal?.showModal();
+          return;
+        }
+        // TODO: tu możesz podłączyć realne podstrony kategorii
+        // np. location.href = `foresight-${el.dataset.topic}.html`;
+      };
+    });
+  }
+
+  async function applyAuthState(){
+    const { data:{ session } } = await sb.auth.getSession();
+    wireCategoryClicks(!!session);
+  }
+
+  // pierwsze sprawdzenie + reakcja na zmianę stanu
+  applyAuthState();
+  sb.auth.onAuthStateChange((_event, _session) => applyAuthState());
+
+  // zamykanie modala (dla pewności ESC też zadziała)
+  document.getElementById('closeModal')?.addEventListener('click', () => authModal?.close());
+  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') authModal?.close(); });
+</script>
+
 </body>
 </html>
 
