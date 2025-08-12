@@ -282,6 +282,7 @@
   const catButtons = [...document.querySelectorAll('.cat')];
 
   function wireCategoryClicks(authed){
+    console.log("Czy zalogowany? ", authed); // DEBUG — sprawdź w konsoli przeglądarki
     catButtons.forEach(el => {
       // pokaż kłódkę tylko gdy NIE zalogowany
       el.classList.toggle('lock', !authed);
@@ -293,11 +294,13 @@
           authModal?.showModal();
           return;
         }
+        alert(`Przechodzę do ${el.dataset.topic}`); // test przejścia
         // TODO: tu możesz podłączyć realne podstrony kategorii
         // np. location.href = `foresight-${el.dataset.topic}.html`;
       };
     });
-  }
+}
+
 
   async function applyAuthState(){
     const { data:{ session } } = await sb.auth.getSession();
