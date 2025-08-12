@@ -1,239 +1,297 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Foresight Review — BeAwarely</title>
-  <meta name="robots" content="noindex, nofollow"/>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>BeAwarely — Foresight (weekly)</title>
   <style>
-    :root{ --blue1:#007bff; --blue2:#66b2ff; }
-    body{ margin:0; font-family:'Segoe UI',sans-serif; color:#fff;
-      background: radial-gradient(ellipse at top, #0d0d2b 0%, #000 100%); }
-    .wrap{ max-width:1100px; margin:0 auto; padding:26px }
-    .topbar{ display:flex; align-items:center; gap:10px; margin-bottom:16px }
-    a.back{ color:#66b2ff; text-decoration:none }
-    h1{ margin:0 }
-
-    .card{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
-      border-radius:14px; padding:16px; margin-bottom:14px }
-    .filters{ display:grid; gap:10px; grid-template-columns:1fr 160px 160px }
-    .filters input, .filters select{
-      padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.18);
-      background:rgba(0,0,0,.25); color:#fff; outline:none;
+    :root{
+      --blue1:#007bff; --blue2:#66b2ff; --blue3:#b3d9ff;
+      --bg-dark: radial-gradient(ellipse at top, #0d0d2b 0%, #000 100%);
+      --card-dark: rgba(255,255,255,.06);
+      --card-dark-border: rgba(255,255,255,.10);
+      --muted: #b8c1cc;
+      --ok: #00cc66; --warn:#ffbf00; --bad:#ff4d4f;
     }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;color:#fff;background:var(--bg-dark)}
+    a{color:#66b2ff}
+    .wrap{max-width:1200px;margin:0 auto;padding:22px}
 
-    table{ width:100%; border-collapse:separate; border-spacing:0 8px; font-size:.95rem }
-    thead th{ text-align:left; padding:8px 10px; opacity:.9 }
-    tbody tr{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10) }
-    td{ padding:10px; vertical-align:top }
-    .nowrap{ white-space:nowrap }
-    .muted{ opacity:.8 }
-    .badge{ font-size:.8rem; padding:4px 8px; border-radius:999px;
-      background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18) }
+    /* Top panel */
+    .topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .pill{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);color:#fff;padding:6px 12px;border-radius:12px;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .pill:hover{background:rgba(255,255,255,.18)}
 
-    .btn{ border:none; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer }
-    .approve{ background:linear-gradient(135deg,#00c26e,#56e39f); color:#000 }
-    .reject{ background:linear-gradient(135deg,#ff6a6a,#ff9a9a); color:#000 }
-    .pill{ background:linear-gradient(135deg,var(--blue1),var(--blue2)); color:#fff; padding:8px 12px; border:none; border-radius:10px; font-weight:600; cursor:pointer }
+    .panel{background:var(--card-dark);border:1px solid var(--card-dark-border);border-radius:16px;padding:16px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-bottom:16px}
+    .panel .meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.95rem;color:var(--muted)}
+    .panel .title{font-size:1.2rem;font-weight:700;margin:0 0 6px}
+    .panel .export{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{border:none;border-radius:10px;padding:8px 12px;background:linear-gradient(135deg,var(--blue1),var(--blue2));color:#fff;font-weight:600;cursor:pointer}
 
-    .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px }
-    .stat{ text-align:center; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:12px; padding:12px }
-    .stat b{ display:block; font-size:1.3rem; margin-top:4px }
-    details{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
-      border-radius:10px; padding:10px; margin-top:10px }
+    /* Layout */
+    .grid{display:grid;grid-template-columns:280px 1fr 300px;gap:16px}
+    @media (max-width: 980px){.grid{grid-template-columns:1fr}.hide-mobile{display:none}}
+
+    .card{background:var(--card-dark);border:1px solid var(--card-dark-border);border-radius:16px;padding:14px}
+    .card h3{margin:0 0 10px}
+
+    /* Left: history */
+    .timeline{display:flex;flex-direction:column;gap:10px}
+    .t-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:10px}
+    .t-head{display:flex;justify-content:space-between;gap:8px;align-items:center}
+    .badge{font-size:.75rem;padding:3px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+    .status{display:inline-flex;align-items:center;gap:6px;font-size:.85rem}
+    .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+    /* Center */
+    .summary{margin-bottom:12px}
+    .forecast{display:flex;flex-direction:column;gap:10px}
+    .p-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:12px}
+    .row{display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:.92rem}
+
+    .topics{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+    .topic-btn{border:1px solid rgba(255,255,255,.20);background:transparent;color:#fff;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .topic-btn.active{background:rgba(102,178,255,.18);border-color:rgba(102,178,255,.55)}
+
+    /* Right: stats */
+    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:10px}
+    .kpi .val{font-size:1.3rem;font-weight:800}
+    .bar{height:8px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden}
+    .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--blue1),var(--blue2))}
+
+    .topic-stats{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+    .topic-line{display:flex;align-items:center;gap:8px}
+    .topic-line b{min-width:110px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
-      <a class="back" href="index.html">← Back</a>
-      <h1>Foresight Review</h1>
-    </div>
-    <div class="card">
-      <div class="filters">
-        <input id="q" placeholder="Szukaj w treści / ID…"/>
-        <select id="topic">
-          <option value="">Temat: wszystkie</option>
-          <option>AI</option><option>Economy</option><option>Policy</option><option>Science</option>
-        </select>
-        <select id="proposed">
-          <option value="">Propozycja: wszystkie</option>
-          <option value="Correct">Correct</option>
-          <option value="Wrong">Wrong</option>
-        </select>
-      </div>
+      <a class="pill" href="index.html">← Wróć</a>
+      <span class="pill">FORESIGHT • weekly</span>
     </div>
 
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-        <div class="muted">Propozycje rozstrzygnięć oczekujące na akceptację</div>
-        <button class="pill" id="exportBtn">Export proposals JSON</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th class="nowrap">Data</th>
-            <th>Prognoza</th>
-            <th>Temat</th>
-            <th class="nowrap">Propozycja</th>
-            <th>Dowody</th>
-            <th class="nowrap">Akcja</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <details>
-        <summary>Szczegóły procesu</summary>
-        <div class="muted" style="margin-top:8px">
-          Panel pokazuje wpisy z kolejki (np. tabela <code>resolutions_proposed</code>): propozycja statusu
-          (<b>Correct</b> / <b>Wrong</b>), krótkie uzasadnienie i linki. <br>
-          <b>Approve</b> → zapis do <code>predictions.status</code> + log <code>resolved_by='human'</code>.  
-          <b>Reject</b> → propozycja trafia do archiwum odrzuconych (do wglądu).
+    <!-- Top panel: global summary & controls -->
+    <section class="panel">
+      <div>
+        <div class="title">Przegląd tygodnia — ogólna przepowiednia AI</div>
+        <div id="globalText" class="summary" style="color:#eaeaea">
+          Ładowanie ogólnego podsumowania…
         </div>
-      </details>
-    </div>
-
-    <div class="card">
-      <div class="stats">
-        <div class="stat"><span>W kolejce</span> <b id="s_queue">0</b></div>
-        <div class="stat"><span>Approved (sesja)</span> <b id="s_approved">0</b></div>
-        <div class="stat"><span>Rejected (sesja)</span> <b id="s_rejected">0</b></div>
-        <div class="stat"><span>Ostatnia akcja</span> <b id="s_last">–</b></div>
+        <div class="meta">
+          <span>Ostatnia aktualizacja: <b id="updatedAt">—</b></span>
+          <span>Następne uruchomienie: <b id="nextRun">co poniedziałek 10:00 UTC</b></span>
+          <span>Model: <b id="modelName">Mistral‑7B (demo)</b></span>
+        </div>
       </div>
+      <div class="export">
+        <button class="btn" id="downloadJson">⬇ Eksport JSON</button>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- LEFT: history -->
+      <aside class="card hide-mobile">
+        <h3>Historia tygodni</h3>
+        <div id="history" class="timeline"></div>
+      </aside>
+
+      <!-- CENTER: topic predictions -->
+      <main class="card">
+        <h3>Prognozy tematyczne</h3>
+        <div class="topics" id="topicButtons"></div>
+        <div id="topicView" class="forecast"></div>
+      </main>
+
+      <!-- RIGHT: aggregate stats -->
+      <aside class="card hide-mobile">
+        <h3>Statystyki ogólne</h3>
+        <div class="kpis" id="kpis"></div>
+        <div class="topic-stats" id="byTopic"></div>
+      </aside>
     </div>
   </div>
 
-<script>
-/** ⛳️ KONFIG SUPABASE (później podmienisz na swoje stałe globalne) */
-const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-const supa = window.supabase.createClient(SB_URL, SB_KEY);
+  <script>
+    // --- demo dataset (docelowo podmienisz z backendu) ---
+    const foresightData = {
+      generatedAt: '2025-08-12T09:00:00Z',
+      schedule: 'WEEKLY_MONDAY_10UTC',
+      model: 'Mistral-7B-Instruct-Q6_K',
+      globalSummary: `Sentyment umiarkowanie pozytywny. W tym tygodniu spodziewane: 
+- AI: przyrost ogłoszeń o zastosowaniach agentów w narzędziach biurowych;
+- Gospodarka: niewielka zmienność indeksów, konsensus makro bez dużych niespodzianek;
+- Geopolityka: dalsze rozmowy bez eskalacji;
+- Krypto: podwyższona zmienność przy publikacjach danych makro.`,
+      forecasts: [
+        {id:'glo-2025w33', topic:'Ogólne', issued:'2025-08-11', due:'2025-08-18',
+         statement:'Brak poważnej eskalacji geopolitycznej w tym tygodniu', confidence:0.72, status:'pending', resolution:null},
 
-(async () => {
-  // Wymagamy zalogowania (jak w chat.html)
-  const { data: { session } } = await supa.auth.getSession();
-  if (!session) {
-    localStorage.setItem('ba_redirect', 'foresight-review.html');
-    window.location.href = 'index.html?login=1';
-    return;
-  }
-})();
+        {id:'ai-2025w32', topic:'AI', issued:'2025-08-04', due:'2025-08-11',
+         statement:'Zapowiedzi co najmniej 2 nowych open‑source agent frameworks', confidence:0.6, status:'resolved', resolution:true},
+        {id:'ai-2025w31', topic:'AI', issued:'2025-07-28', due:'2025-08-04',
+         statement:'Głośny incydent bezpieczeństwa AI w dużej firmie', confidence:0.35, status:'resolved', resolution:false},
 
-/** Demo proposals – PODMIENISZ NA loadProposals() z Supabase */
-let proposals = [
-  {
-    id: 'P-004',
-    createdAt: '2025-01-05',
-    topic: 'Policy',
-    text: 'USA wprowadzą ogólnokrajowe wytyczne dot. etykiet AI przy reklamach politycznych do 2025-09-30.',
-    resolveBy: '2025-09-30',
-    proposedStatus: 'Correct',           // Correct | Wrong
-    rationale: 'Ogłoszono federalne wytyczne (link).',
-    evidence: [{label: 'Gov docs', url: '#'}]
-  },
-  {
-    id: 'P-003',
-    createdAt: '2025-02-01',
-    topic: 'Science',
-    text: 'Ogłoszenie powtarzalnej syntezy energii z fuzji o dodatnim bilansie w 2025 r.',
-    resolveBy: '2025-12-31',
-    proposedStatus: 'Wrong',
-    rationale: 'Brak publikacji + brak replikacji do terminu.',
-    evidence: [{label: 'Journals', url: '#'}]
-  }
-];
+        {id:'eco-2025w32', topic:'Gospodarka', issued:'2025-08-04', due:'2025-08-11',
+         statement:'S&P 500 zamknie tydzień w przedziale ±1% vs poprzedni', confidence:0.58, status:'resolved', resolution:true},
+        {id:'eco-2025w33', topic:'Gospodarka', issued:'2025-08-11', due:'2025-08-18',
+         statement:'Inflacja CPI w USA ≤ konsensus', confidence:0.55, status:'pending', resolution:null},
 
-const el = s => document.querySelector(s);
-const rows = el('#rows');
-const q = el('#q'), topic = el('#topic'), proposed = el('#proposed');
+        {id:'geo-2025w32', topic:'Geopolityka', issued:'2025-08-04', due:'2025-08-11',
+         statement:'Brak nowych sankcji na poziomie G7', confidence:0.64, status:'resolved', resolution:true},
 
-let statApproved = 0, statRejected = 0;
+        {id:'crypto-2025w33', topic:'Krypto', issued:'2025-08-11', due:'2025-08-18',
+         statement:'BTC zmienność tygodniowa (hi‑lo)/close > 6%', confidence:0.57, status:'pending', resolution:null}
+      ]
+    };
 
-function passFilters(p){
-  const qq = q.value.trim().toLowerCase();
-  if (qq && !(`${p.text} ${p.id}`.toLowerCase().includes(qq))) return false;
-  if (topic.value && p.topic !== topic.value) return false;
-  if (proposed.value && p.proposedStatus !== proposed.value) return false;
-  return true;
-}
+    // --- helpers ---
+    const fmtPct = n => (n*100).toFixed(0)+'%';
+    const fmtDate = s => new Date(s).toLocaleDateString('pl-PL');
 
-function render(){
-  rows.innerHTML = '';
-  proposals.filter(passFilters).forEach(p=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="nowrap">${p.createdAt}</td>
-      <td>
-        ${p.text}
-        <div class="muted" style="margin-top:6px">
-          <span class="badge">ID: ${p.id}</span>
-          <span class="badge">Resolve by: ${p.resolveBy}</span>
-        </div>
-        <div class="muted" style="margin-top:6px">Uzasadnienie: ${p.rationale}</div>
-      </td>
-      <td>${p.topic}</td>
-      <td class="nowrap"><span class="badge">${p.proposedStatus}</span></td>
-      <td>
-        ${p.evidence?.map(e=>`<a href="${e.url}" target="_blank" rel="noopener" style="color:#66b2ff">${e.label}</a>`).join(', ') || '—'}
-      </td>
-      <td class="nowrap" style="display:flex; gap:8px;">
-        <button class="btn approve" onclick="approve('${p.id}')">Approve</button>
-        <button class="btn reject"  onclick="reject('${p.id}')">Reject</button>
-      </td>
-    `;
-    rows.appendChild(tr);
-  });
+    function computeStats(items){
+      const resolved = items.filter(x=>x.status==='resolved');
+      const pending = items.filter(x=>x.status!=='resolved');
+      const acc = resolved.length ? resolved.filter(x=>!!x.resolution).length / resolved.length : 0;
+      const avgConf = items.length ? items.reduce((a,b)=>a+b.confidence,0)/items.length : 0;
+      const brier = resolved.length ? resolved.reduce((s,x)=>{
+        const o = x.resolution ? 1:0; const p = x.confidence; return s + Math.pow(o-p,2);
+      },0)/resolved.length : 0;
+      return {resolved: resolved.length, pending: pending.length, total: items.length, acc, avgConf, brier};
+    }
 
-  el('#s_queue').textContent = proposals.length;
-}
+    function byTopicStats(items){
+      const map = {};
+      for(const f of items){
+        map[f.topic] = map[f.topic] || [];
+        map[f.topic].push(f);
+      }
+      const rows = Object.entries(map).map(([topic,list])=>({topic, ...computeStats(list)}));
+      return rows.sort((a,b)=>a.topic.localeCompare(b.topic));
+    }
 
-/** Export kolejki propozycji */
-el('#exportBtn').onclick = ()=>{
-  const data = JSON.stringify(proposals, null, 2);
-  const blob = new Blob([data], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'foresight-proposals.json';
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
-};
+    // --- render ---
+    function renderPanel(){
+      document.getElementById('globalText').textContent = foresightData.globalSummary;
+      document.getElementById('updatedAt').textContent = new Date(foresightData.generatedAt).toLocaleString('pl-PL');
+      document.getElementById('modelName').textContent = foresightData.model;
+    }
 
-[q, topic, proposed].forEach(ctrl=>ctrl.addEventListener('input', render));
-render();
+    function renderHistory(){
+      const hist = document.getElementById('history');
+      const byIssued = [...foresightData.forecasts].sort((a,b)=> new Date(b.issued)-new Date(a.issued));
+      hist.innerHTML = '';
+      for(const f of byIssued){
+        const stColor = f.status==='resolved' ? (f.resolution? 'var(--ok)':'var(--bad)') : 'var(--warn)';
+        const el = document.createElement('div'); el.className='t-item';
+        el.innerHTML = `
+          <div class="t-head">
+            <div class="status"><span class="dot" style="background:${stColor}"></span> ${f.topic}</div>
+            <span class="badge">${fmtDate(f.issued)} → ${fmtDate(f.due)}</span>
+          </div>
+          <div style="margin:6px 0 4px">${f.statement}</div>
+          <div class="row">
+            <span>Pewność: <b>${fmtPct(f.confidence)}</b></span>
+            <span>Status: <b>${f.status}${f.status==='resolved'?` / ${f.resolution?'TRAFIONE':'CHYBIONE'}`:''}</b></span>
+          </div>`;
+        hist.appendChild(el);
+      }
+    }
 
-/** APPROVE / REJECT – na razie lokalnie; poniżej zostawiłem hooki pod Supabase */
-async function approve(id){
-  const p = proposals.find(x=>x.id===id);
-  if (!p) return;
-  // TODO (Supabase):
-  // 1) await supa.from('predictions').update({ status: p.proposedStatus, resolved_at: new Date().toISOString(), resolved_by: 'human' }).eq('id', id);
-  // 2) await supa.from('resolutions_proposed').delete().eq('prediction_id', id);
-  proposals = proposals.filter(x=>x.id!==id);
-  statApproved++;
-  el('#s_approved').textContent = statApproved;
-  el('#s_last').textContent = `Approved ${id}`;
-  render();
-}
+    function renderKpis(){
+      const k = computeStats(foresightData.forecasts);
+      const box = document.getElementById('kpis');
+      box.innerHTML = `
+        <div class="kpi"><div>Dokładność</div><div class="val">${fmtPct(k.acc)}</div><div class="bar"><span style="width:${k.acc*100}%"></span></div></div>
+        <div class="kpi"><div>Śr. pewność</div><div class="val">${fmtPct(k.avgConf)}</div><div class="bar"><span style="width:${k.avgConf*100}%"></span></div></div>
+        <div class="kpi"><div>Brier score</div><div class="val">${k.brier.toFixed(3)}</div><div class="bar"><span style="width:${(1-Math.min(k.brier,1))*100}%"></span></div></div>
+        <div class="kpi"><div>Rozwiązane / wszystkie</div><div class="val">${k.resolved} / ${k.total}</div><div class="bar"><span style="width:${(k.resolved/(k.total||1))*100}%"></span></div></div>`;
 
-async function reject(id){
-  const p = proposals.find(x=>x.id===id);
-  if (!p) return;
-  // TODO (Supabase):
-  // 1) await supa.from('resolutions_proposed').update({ rejected_at: new Date().toISOString(), rejected_reason: 'manual' }).eq('prediction_id', id);
-  proposals = proposals.filter(x=>x.id!==id);
-  statRejected++;
-  el('#s_rejected').textContent = statRejected;
-  el('#s_last').textContent = `Rejected ${id}`;
-  render();
-}
+      const by = byTopicStats(foresightData.forecasts);
+      const bt = document.getElementById('byTopic');
+      bt.innerHTML = '<h4 style="margin:6px 0">Rozbicie na tematy</h4>' + by.map(r=>
+        `<div class="topic-line"><b>${r.topic}</b>
+          <span class="bar" style="flex:1"><span style="width:${r.acc*100}%"></span></span>
+          <span style="width:52px;text-align:right">${fmtPct(r.acc)}</span>
+        </div>`
+      ).join('');
+    }
 
-/** Podmiana na realne dane, gdy będziesz gotów */
-async function loadProposals(){
-  // Przykład:
-  // const { data, error } = await supa.from('resolutions_proposed').select('*').order('created_at', { ascending:false });
-  // if (!error) { proposals = data.map(mapper); render(); }
-}
-</script>
+    function topics(){
+      const set = new Set( foresightData.forecasts.map(f=>f.topic) );
+      return ['Wszystko', ...[...set].sort((a,b)=>a.localeCompare(b))];
+    }
+
+    let currentTopic = 'Wszystko';
+    function renderTopics(){
+      const box = document.getElementById('topicButtons');
+      box.innerHTML = '';
+      for(const t of topics()){
+        const b = document.createElement('button');
+        b.className = 'topic-btn' + (t===currentTopic?' active':'');
+        b.textContent = t;
+        // link docelowy do osobnych .html (kiedy je dodasz)
+        b.title = 'Kliknij, aby przefiltrować; kliknij z CTRL/⌘, by otworzyć stronę tematu';
+        b.onclick = (e)=>{ currentTopic = t; renderTopicView(); renderTopics(); };
+        // Podgląd: nazwy plików docelowych
+        const slug = t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$|/g,'');
+        b.dataset.href = `${slug||'index'}.html`;
+        box.appendChild(b);
+      }
+    }
+
+    function renderTopicView(){
+      const box = document.getElementById('topicView');
+      const items = foresightData.forecasts.filter(f=> currentTopic==='Wszystko' ? true : f.topic===currentTopic );
+      box.innerHTML = '';
+      if(!items.length){ box.innerHTML = '<div class="p-card">Brak prognoz dla wybranej kategorii.</div>'; return; }
+      for(const f of items.sort((a,b)=> new Date(b.issued)-new Date(a.issued))){
+        const st = f.status==='resolved' ? (f.resolution ? 'TRAFIONE' : 'CHYBIONE') : 'W TRAKCIE';
+        const col = f.status==='resolved' ? (f.resolution? 'var(--ok)':'var(--bad)') : 'var(--warn)';
+        const el = document.createElement('div'); el.className='p-card';
+        el.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+            <strong>${f.topic}</strong>
+            <span class="badge">${fmtDate(f.issued)} → ${fmtDate(f.due)}</span>
+          </div>
+          <div style="margin:6px 0 8px; font-size:1.05rem; line-height:1.35">${f.statement}</div>
+          <div class="row">
+            <span>Pewność: <b>${fmtPct(f.confidence)}</b></span>
+            <span>Status: <b style="color:${col}">${st}</b></span>
+            <span>ID: <span class="badge">${f.id}</span></span>
+          </div>`;
+        box.appendChild(el);
+      }
+    }
+
+    function wireExport(){
+      document.getElementById('downloadJson').addEventListener('click', ()=>{
+        // zrzut danych + metryk
+        const all = {...foresightData};
+        all.metrics = {
+          overall: computeStats(foresightData.forecasts),
+          byTopic: byTopicStats(foresightData.forecasts)
+        };
+        const blob = new Blob([JSON.stringify(all,null,2)], {type:'application/json'});
+        const a = document.createElement('a');
+        const dt = new Date().toISOString().slice(0,10);
+        a.download = `beawarely-foresight-${dt}.json`;
+        a.href = URL.createObjectURL(blob);
+        a.click(); URL.revokeObjectURL(a.href);
+      });
+    }
+
+    // init
+    renderPanel();
+    renderHistory();
+    renderKpis();
+    renderTopics();
+    renderTopicView();
+    wireExport();
+  </script>
 </body>
 </html>
+
