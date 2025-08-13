@@ -79,8 +79,10 @@ function itemHTML(row){
 async function loadQueue(){
   const { data, error } = await sb
     .from('inventor_ideas')
-    .select('*')
-    .order('created_at',{ascending:false});
+.select('*')
+.eq('status','pending')
+.order('created_at',{ascending:false})
+;
   if(error){ document.getElementById('queue').textContent=error.message; return; }
   document.getElementById('queue').innerHTML = data.map(itemHTML).join('');
   wire();
