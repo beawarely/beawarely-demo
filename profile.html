@@ -301,9 +301,8 @@ if (file.size > maxSize) {
       return;
     }
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+const filePath = `${user.id}/avatar.${fileExt}`;   // ✅ pierwszy segment to user.id (wymóg RLS)
 
     const { error: uploadError } = await supabaseClient.storage
       .from('avatars')
