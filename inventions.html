@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BeAwarely – Inventions</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:#0b0d14;color:#eaf0ff}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+  .card{background:#0f1424;border:1px solid #1a2236;border-radius:16px;padding:16px}
+  .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#0e1a33;border:1px solid #2a3b6a;font-size:.8rem}
+  .muted{color:#aab2d5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BeAwarely – Inventions</h1>
+  <p class="muted">Approved ideas. „Partial” = zredagowana wersja publiczna.</p>
+  <div id="list" class="grid">Loading…</div>
+</div>
+
+<script>
+const SB_URL='https://xzwpqyomqjzmiqsszwkg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+function cardHTML(r){
+  const title = r.public_title || 'Untitled concept';
+  const sum = r.public_summary || '—';
+  const cat = (r.categories||[]).slice(0,4).map(c=>`<span class="badge">${c}</span>`).join(' ');
+  const isPartial = r.visibility==='partial';
+  const shown = isPartial ? (r.redacted_outputs || {}) : (r.outputs || {});
+  const peek = JSON.stringify(shown).slice(0,200) + '…';
+  return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:0">${title}</h3>
+      <span class="badge">${r.visibility}</span>
+    </div>
+    <div class="muted" style="margin:6px 0">${sum}</div>
+    <div style="margin:6px 0">${cat}</div>
+    <pre style="white-space:pre-wrap;background:#0c1222;border:1px solid #24304b;border-radius:12px;padding:10px;max-height:180px;overflow:auto">${peek}</pre>
+  </div>`;
+}
+
+(async ()=>{
+  const { data, error } = await sb.from('inventor_ideas')
+    .select('id,public_title,public_summary,categories,visibility,outputs,redacted_outputs')
+    .eq('status','approved')
+    .in('visibility',['public','partial'])
+    .order('created_at',{ascending:false});
+  const el = document.getElementById('list');
+  if(error){ el.textContent = error.message; return; }
+  el.innerHTML = data.map(cardHTML).join('');
+})();
+</script>
+</body>
+</html>
