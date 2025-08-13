@@ -88,7 +88,7 @@ async function loadQueue(){
 
 function wire(){
   document.querySelectorAll('.item').forEach(el=>{
-    const id = Number(el.dataset.id);
+    const id = el.dataset.id;
     el.querySelector('.approve').onclick = async ()=>{
       const ttl = el.querySelector('.ttl').value.trim();
       const sum = el.querySelector('.sum').value.trim();
