@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>BeAwarely – AI Inventor (V2)</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    :root {
+      --bg:#0b0d14; --panel:#121625; --muted:#aab2d5; --text:#eaf0ff; --accent:#5aa8ff; --ok:#4ade80; --warn:#fbbf24;
+    }
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:radial-gradient(1200px 800px at 10% -10%,#10162a 0%,#070a12 40%,#05070d 70%),var(--bg);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:32px}
+    .card{background:linear-gradient(180deg,#121625 0%,#0f1320 100%);border:1px solid #1c2238;border-radius:16px;padding:20px;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+    h1{margin:8px 0 16px;font-weight:800;letter-spacing:.2px}
+    .muted{color:var(--muted);font-size:.95rem}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+    .btn{background:var(--accent);color:#041325;border:none;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn:hover{transform:translateY(-1px)}
+    .chip{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid #223055;border-radius:999px;background:#0c1222;font-size:.9rem;margin:6px 6px 0 0;cursor:pointer;user-select:none}
+    .chip.active{background:#102247;border-color:#2c4a86}
+    label{display:block;margin:10px 0 6px}
+    input[type="text"], textarea, select{width:100%;padding:10px 12px;border:1px solid #223055;border-radius:10px;background:#0c1222;color:var(--text)}
+    textarea{min-height:90px;resize:vertical}
+    .kicker{font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;color:#9fb6ff}
+    .idea{border:1px solid #243055;border-radius:14px;background:#0c1222;padding:14px}
+    .pill{display:inline-block;font-size:.8rem;padding:6px 9px;border-radius:999px;border:1px solid #2a3b6a;background:#0e1a33;margin-right:8px}
+    .ok{color:var(--ok)} .warn{color:var(--warn)}
+    .right{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+    .hide{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="kicker">BeAwarely / Tools</div>
+      <h1>AI Inventor — Category Synthesizer (V2)</h1>
+      <p class="muted">Wybierz kategorie i priorytety. AI złoży 3 warianty (Lean / Balanced / Bold) z mini-BOM, oceną kosztów i ryzyka. <span id="authInfo"></span></p>
+      <div id="authGate" class="warn pill hide">Only for logged-in users.</div>
+
+      <div class="row" style="margin-top:14px">
+        <div class="card" style="padding:16px">
+          <label>Kategorie (multi)</label>
+          <div id="catChips"></div>
+
+          <div class="row" style="margin-top:12px">
+            <div>
+              <label>Priorytet celu</label>
+              <select id="goal">
+                <option value="cost">Cheaper</option>
+                <option value="performance">Better performance</option>
+                <option value="manufacturing">Easier to produce</option>
+              </select>
+            </div>
+            <div>
+              <label>Budżet (szacunek) – tekstowo</label>
+              <input id="budget" type="text" placeholder="np. < €200 prototyp / < €20 jednostkowo"/>
+            </div>
+          </div>
+
+          <label style="margin-top:12px">Materiały/ograniczenia (opcjonalnie)</label>
+          <input id="constraints" type="text" placeholder="np. tylko materiały z recyclingu; brak rzadkich metali; EU compliance"/>
+
+          <label style="margin-top:12px">Opis kontekstu/problem</label>
+          <textarea id="problem" placeholder="W czym rzecz? np. tani, trwały panel solarny do balkonów w klimacie NL..."></textarea>
+
+          <div class="right">
+            <button id="genBtn" class="btn">Generate concepts</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px">
+          <div class="kicker">Output</div>
+          <div id="results" class="muted">Wyniki pojawią się tutaj.</div>
+          <div class="right">
+            <button id="saveBtn" class="btn" disabled>Save to BeAwarely</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;padding:16px">
+        <div class="kicker">Note</div>
+        <p class="muted">You remain the <b>human inventor</b>; AI is a tool. For patent steps, run a professional prior-art search before filing.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== CONFIG ======
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co"; // Twój projekt
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+
+    const CATEGORIES = [
+      "Energy","Materials","Manufacturing","Electronics","AI/Software",
+      "Bio/Health","Mobility","Food/Agri","Recycling","Housing"
+    ];
+
+    // ====== INIT SUPABASE ======
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // ====== AUTH GATE ======
+    let currentUser = null;
+    async function checkAuth(){
+      const { data: { user } } = await sb.auth.getUser();
+      currentUser = user;
+      document.getElementById("authInfo").textContent = user ? `Logged in as ${user.email}` : "";
+      document.getElementById("authGate").classList.toggle("hide", !!user);
+      document.getElementById("genBtn").disabled = !user; // generowanie tylko dla zalogowanych
+    }
+    checkAuth();
+    sb.auth.onAuthStateChange((_ev, session)=>{
+      currentUser = session?.user || null;
+      checkAuth();
+    });
+
+    // ====== UI: CATEGORY CHIPS ======
+    const catEl = document.getElementById("catChips");
+    const activeCats = new Set();
+    CATEGORIES.forEach(c=>{
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      chip.textContent = c;
+      chip.onclick = ()=>{
+        if(activeCats.has(c)){ activeCats.delete(c); chip.classList.remove("active"); }
+        else { activeCats.add(c); chip.classList.add("active"); }
+      }
+      catEl.appendChild(chip);
+    });
+
+    // ====== LLM STUB (podłączysz Mistral/OpenAI) ======
+    async function callLLM(prompt){
+      // TODO: Zamień na realne wywołanie (Edge Function / własny proxy / lokalny model)
+      // return await fetch("/api/llm", {method:"POST", body: JSON.stringify({prompt})}).then(r=>r.json());
+      // Tymczasowo – symulacja:
+      await new Promise(r=>setTimeout(r, 600)); // sztuczne opóźnienie
+      return {
+        variants: [
+          {
+            name: "Lean",
+            summary: "Najtańszy wariant z minimalnym BOM i prostym procesem.",
+            bom: ["Part A (~€5)","Part B (~€3)","Fasteners (~€1)"],
+            process: "3D print + basic assembly",
+            scores: { cost: 9, performance: 6, manufacturability: 9, risk: 3, novelty: 5 }
+          },
+          {
+            name: "Balanced",
+            summary: "Zrównoważony koszt/efekt, rozsądny BOM i trwałość.",
+            bom: ["Part X (~€12)","Part Y (~€7)","Coating (~€2)"],
+            process: "CNC / injection + assembly",
+            scores: { cost: 7, performance: 8, manufacturability: 7, risk: 4, novelty: 6 }
+          },
+          {
+            name: "Bold",
+            summary: "Futurystyczny, ryzykowny, potencjalnie przełomowy.",
+            bom: ["Experimental M (~€20)","Controller (~€10)","Custom housing (~€6)"],
+            process: "Custom fab + QA",
+            scores: { cost: 5, performance: 9, manufacturability: 5, risk: 8, novelty: 9 }
+          }
+        ],
+        notes: "Heurystyczna ocena nowości i kosztów; wymaga weryfikacji."
+      };
+    }
+
+    // ====== PROMPT BUILDER ======
+    function buildPrompt(){
+      const goal = document.getElementById("goal").value;
+      const budget = document.getElementById("budget").value.trim();
+      const constraints = document.getElementById("constraints").value.trim();
+      const problem = document.getElementById("problem").value.trim();
+
+      return `
+SYSTEM: You are an AI Inventor that synthesizes practical, low-cost, manufacturable inventions using category knowledge and prior-art awareness (heuristic). Output three variants: Lean, Balanced, Bold. Include for each: 1) short summary, 2) provisional BOM with rough unit costs (EUR), 3) suggested manufacturing process, 4) scores (cost, performance, manufacturability, risk, novelty) 1-10. Avoid unsafe designs.
+
+USER CONTEXT:
+- Categories: ${[...activeCats].join(", ") || "None selected"}
+- Goal priority: ${goal}
+- Budget hint: ${budget || "n/a"}
+- Constraints: ${constraints || "n/a"}
+- Problem: ${problem || "n/a"}
+
+POLICY:
+- Prefer off-the-shelf parts; reduce rare/regulated materials if goal=cost/manufacturing.
+- Provide clear, testable next steps for a prototype (bench tests).
+- Flag any regulatory concerns (EU/CE) if relevant.
+      `.trim();
+    }
+
+    // ====== RENDER ======
+    let lastOutputs = null;
+    function renderResults(data){
+      const box = document.getElementById("results");
+      box.innerHTML = "";
+      const grid = document.createElement("div");
+      grid.className = "row-3";
+      data.variants.forEach(v=>{
+        const el = document.createElement("div");
+        el.className = "idea";
+        el.innerHTML = `
+          <div class="pill">${v.name}</div>
+          <p>${v.summary}</p>
+          <div class="muted"><b>BOM:</b> ${v.bom.join(", ")}</div>
+          <div class="muted"><b>Process:</b> ${v.process}</div>
+          <div style="margin-top:6px">
+            <span class="pill">Cost: ${v.scores.cost}/10</span>
+            <span class="pill">Perf: ${v.scores.performance}/10</span>
+            <span class="pill">Mfg: ${v.scores.manufacturability}/10</span>
+            <span class="pill warn">Risk: ${v.scores.risk}/10</span>
+            <span class="pill ok">Novelty: ${v.scores.novelty}/10</span>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+      box.appendChild(grid);
+      if(data.notes){
+        const note = document.createElement("p");
+        note.className = "muted";
+        note.style.marginTop = "10px";
+        note.textContent = data.notes;
+        box.appendChild(note);
+      }
+      document.getElementById("saveBtn").disabled = false;
+    }
+
+    // ====== EVENTS ======
+    document.getElementById("genBtn").onclick = async ()=>{
+      if(!currentUser){ alert("Log in to use AI Inventor."); return; }
+      const prompt = buildPrompt();
+      document.getElementById("results").textContent = "Generating…";
+      try{
+        const data = await callLLM(prompt);
+        lastOutputs = { prompt, data };
+        renderResults(data);
+      }catch(e){
+        console.error(e);
+        document.getElementById("results").textContent = "Generation failed.";
+      }
+    };
+
+    document.getElementById("saveBtn").onclick = async ()=>{
+      if(!currentUser || !lastOutputs){ return; }
+      const payload = {
+        user_id: currentUser.id,
+        mode: "v2",
+        categories: [...activeCats],
+        constraints: {
+          goal: document.getElementById("goal").value,
+          budget: document.getElementById("budget").value.trim(),
+          constraints: document.getElementById("constraints").value.trim(),
+          problem: document.getElementById("problem").value.trim()
+        },
+        outputs: lastOutputs.data,
+        scores: { // agregaty (prosty przykład)
+          cost: avg(lastOutputs.data.variants.map(v=>v.scores.cost)),
+          performance: avg(lastOutputs.data.variants.map(v=>v.scores.performance)),
+          manufacturability: avg(lastOutputs.data.variants.map(v=>v.scores.manufacturability)),
+          risk: avg(lastOutputs.data.variants.map(v=>v.scores.risk)),
+          novelty: avg(lastOutputs.data.variants.map(v=>v.scores.novelty)),
+        }
+      };
+      const { error } = await sb.from("inventor_ideas").insert(payload);
+      if(error){ alert("Save failed: "+error.message); }
+      else { alert("Saved to BeAwarely ✓"); }
+    };
+
+    function avg(nums){ return Math.round(nums.reduce((a,b)=>a+b,0)/nums.length); }
+  </script>
+</body>
+</html>
