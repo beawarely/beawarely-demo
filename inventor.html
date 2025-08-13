@@ -72,13 +72,13 @@
         </div>
 
         <div class="card" style="padding:16px">
-          <div class="kicker">Output</div>
-          <div id="results" class="muted">Wyniki pojawią się tutaj.</div>
-          <div class="right">
-            <button id="saveBtn" class="btn" disabled>Save to BeAwarely</button>
-          </div>
-        </div>
-      </div>
+  <div class="kicker">Output</div>
+  <div id="results" class="muted">Wyniki pojawią się tutaj.</div>
+  <div class="right" style="gap:8px">
+    <button id="saveBtn" class="btn" disabled>Save to BeAwarely</button>
+    <button id="submitBtn" class="btn" disabled>Submit for review</button>
+  </div>
+</div>
 
       <div class="card" style="margin-top:16px;padding:16px">
         <div class="kicker">Note</div>
@@ -221,6 +221,7 @@ POLICY:
         box.appendChild(note);
       }
       document.getElementById("saveBtn").disabled = false;
+      document.getElementById("submitBtn").disabled = false;
     }
 
     // ====== EVENTS ======
@@ -266,5 +267,42 @@ POLICY:
 
     function avg(nums){ return Math.round(nums.reduce((a,b)=>a+b,0)/nums.length); }
   </script>
+
+  <script>
+  // w miejscu gdzie ustawiasz lastOutputs i odblokowujesz zapis:
+  // po renderResults(...) dopisz:
+  // document.getElementById("submitBtn").disabled = false;
+
+  document.getElementById("submitBtn").onclick = async () => {
+    if (!currentUser || !lastOutputs) return;
+
+    const payload = {
+      user_id: currentUser.id,
+      mode: "v2",
+      categories: [...activeCats],
+      constraints: {
+        goal: document.getElementById("goal").value,
+        budget: document.getElementById("budget").value.trim(),
+        constraints: document.getElementById("constraints").value.trim(),
+        problem: document.getElementById("problem").value.trim()
+      },
+      outputs: lastOutputs.data,
+      scores: {
+        cost: avg(lastOutputs.data.variants.map(v=>v.scores.cost)),
+        performance: avg(lastOutputs.data.variants.map(v=>v.scores.performance)),
+        manufacturability: avg(lastOutputs.data.variants.map(v=>v.scores.manufacturability)),
+        risk: avg(lastOutputs.data.variants.map(v=>v.scores.risk)),
+        novelty: avg(lastOutputs.data.variants.map(v=>v.scores.novelty)),
+      },
+      status: "pending",
+      visibility: "private"
+    };
+
+    const { error } = await sb.from("inventor_ideas").insert(payload);
+    if (error) alert("Submit failed: " + error.message);
+    else alert("Sent to review ✓");
+  };
+</script>
+
 </body>
 </html>
