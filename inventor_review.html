@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BeAwarely – Inventor Review</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:#0b0d14;color:#eaf0ff}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px}
+  .card{background:#0f1424;border:1px solid #1a2236;border-radius:16px;padding:18px;margin-bottom:16px}
+  .row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+  .muted{color:#aab2d5}
+  select,textarea,input{width:100%;padding:10px;border:1px solid #24304b;border-radius:10px;background:#0c1222;color:#eaf0ff}
+  .btn{background:#5aa8ff;color:#041325;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .tag{display:inline-block;margin-right:6px;margin-bottom:6px;padding:4px 8px;border-radius:999px;background:#0e1a33;border:1px solid #2a3b6a;font-size:.8rem}
+  .list .item{border:1px solid #1a2236;border-radius:12px;padding:12px;margin-bottom:10px;background:#0d1220}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Inventor – Review queue</h1>
+  <p class="muted">Only moderators can access. Approve → choose visibility (public/partial/private), optionally add redactions.</p>
+
+  <div id="queue" class="list">Loading…</div>
+</div>
+
+<script>
+const SB_URL='https://xzwpqyomqjzmiqsszwkg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+let isMod = false;
+
+async function requireMod(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ alert('Login required'); location.href='index.html?login=1'; return; }
+  const { data:mod } = await sb.from('moderators').select('user_id').eq('user_id', user.id).maybeSingle();
+  if(!mod){ document.body.innerHTML='<div class="wrap"><h2>No access</h2></div>'; return; }
+  isMod = true;
+}
+
+function itemHTML(row){
+  const cats = (row.categories||[]).map(c=>`<span class="tag">${c}</span>`).join(' ');
+  const preview = JSON.stringify(row.outputs)?.slice(0,300) + '…';
+  return `
+  <div class="item" data-id="${row.id}">
+    <div class="two">
+      <div>
+        <div><b>ID:</b> ${row.id}</div>
+        <div><b>User:</b> ${row.user_id}</div>
+        <div><b>Status:</b> ${row.status} | <b>Visibility:</b> ${row.visibility}</div>
+        <div style="margin:8px 0">${cats}</div>
+        <div class="muted" style="font-size:.9rem">${preview}</div>
+      </div>
+      <div>
+        <label>Public title</label>
+        <input class="ttl" value="${row.public_title ?? ''}">
+        <label>Public summary</label>
+        <textarea class="sum">${row.public_summary ?? ''}</textarea>
+        <label>Visibility</label>
+        <select class="vis">
+          <option value="public" ${row.visibility==='public'?'selected':''}>public</option>
+          <option value="partial" ${row.visibility==='partial'?'selected':''}>partial (use redacted)</option>
+          <option value="private" ${row.visibility==='private'?'selected':''}>private</option>
+        </select>
+        <label style="margin-top:8px">Redacted outputs (JSON for partial)</label>
+        <textarea class="red" placeholder='{"variants":[{"name":"…","summary":"…"}] }'>${row.redacted_outputs? JSON.stringify(row.redacted_outputs,null,2):''}</textarea>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn approve">Approve</button>
+          <button class="btn reject" style="background:#ff7676">Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function loadQueue(){
+  const { data, error } = await sb
+    .from('inventor_ideas')
+    .select('*')
+    .order('created_at',{ascending:false});
+  if(error){ document.getElementById('queue').textContent=error.message; return; }
+  document.getElementById('queue').innerHTML = data.map(itemHTML).join('');
+  wire();
+}
+
+function wire(){
+  document.querySelectorAll('.item').forEach(el=>{
+    const id = Number(el.dataset.id);
+    el.querySelector('.approve').onclick = async ()=>{
+      const ttl = el.querySelector('.ttl').value.trim();
+      const sum = el.querySelector('.sum').value.trim();
+      const vis = el.querySelector('.vis').value;
+      const redTxt = el.querySelector('.red').value.trim();
+      let red = null;
+      if(vis==='partial' && redTxt){
+        try{ red = JSON.parse(redTxt); }catch(e){ alert('Redacted JSON invalid'); return; }
+      }
+      const { error } = await sb.from('inventor_ideas').update({
+        public_title: ttl || null,
+        public_summary: sum || null,
+        redacted_outputs: red,
+        visibility: vis,
+        status: 'approved'
+      }).eq('id', id);
+      if(error) alert(error.message); else { el.style.opacity=.6; }
+    };
+    el.querySelector('.reject').onclick = async ()=>{
+      const { error } = await sb.from('inventor_ideas').update({ status:'rejected', visibility:'private' }).eq('id', id);
+      if(error) alert(error.message); else { el.style.opacity=.6; }
+    };
+  });
+}
+
+(async ()=>{
+  await requireMod();
+  if(isMod) await loadQueue();
+})();
+</script>
+</body>
+</html>
