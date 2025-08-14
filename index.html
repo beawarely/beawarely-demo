@@ -11,6 +11,8 @@
       --blue1: #007bff;
       --blue2: #66b2ff;
       --blue3: #b3d9ff;
+      --safe-top: env(safe-area-inset-top, 0px);
+
     }
 
     body {
@@ -31,9 +33,9 @@ footer {
   background-color: transparent !important;
     }
     header {
-      text-align: center;
-      padding: 80px 20px 40px;
-    }
+  text-align: center;
+  padding: calc(80px + var(--safe-top)) 20px 40px;
+}
 
     .logo-placeholder {
   width: 100px;
@@ -244,6 +246,25 @@ body:not(.light-mode) #rotating-bg img {
   0%   { transform: rotate(0deg) scale(1.1); }
   100% { transform: rotate(360deg) scale(1.1); }
 }
+/* Hint dla kompozytora */
+#rotating-bg img { will-change: transform; }
+
+/* Mobile perf: mniejszy canvas i spokojniejsza animacja */
+@media (max-width: 600px){
+  #rotating-bg{
+    width: 200vw;
+    height: 200vh;
+  }
+  #rotating-bg img{
+    animation-duration: 300s;
+  }
+}
+
+/* Osoby z preferencją mniejszych animacji */
+@media (prefers-reduced-motion: reduce){
+  #rotating-bg img{ animation: none; }
+}
+    
 header h1,
 section h2,
 section p,
@@ -251,15 +272,19 @@ section li,
 footer {
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
 }
+body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
 /* --- Fixed Topbar --- */
 #topbar{
   position: fixed;
-  top: 14px; left: 20px; right: 20px;
+  top: calc(14px + var(--safe-top));
+  left: 20px;
+  right: 20px;
   z-index: 10000;
   display: flex; justify-content: space-between; align-items: center;
-  pointer-events: none;  /* żeby tło pod spodem przewijało się normalnie */
+  pointer-events: none;
 }
+
 #topbar .topbar-left, 
 #topbar .topbar-right{
   display: flex; gap: 12px; align-items: center;
@@ -323,7 +348,19 @@ footer {
   background-color: rgba(255,255,255,0.20);
   transform: translateY(-1px);
 }
+    
+/* Support & Login modal – unified open state */
+#loginModal.open { display: flex !important; }
+#supportModal.open { display: flex !important; }
 
+.pill:focus-visible,
+#loginBtn:focus-visible,
+#modeIcon:focus-visible,
+#yourProfileBtn:focus-visible,
+.open-btn:focus-visible {
+  outline: 2px solid var(--blue2);
+  outline-offset: 2px;
+}
     
 </style>
   <script>
@@ -354,7 +391,7 @@ footer {
     
 function toggleLightDarkMode() {
   const isLight = document.body.classList.toggle('light-mode');
-  document.body.classList.toggle('dark-mode', !isLight); // <-- to dodajemy
+  document.body.classList.toggle('dark-mode', !isLight);
   localStorage.setItem('mode', isLight ? 'light' : 'dark');
 
   const icon = document.getElementById('modeIcon');
@@ -389,14 +426,15 @@ function toggleLightDarkMode() {
 
   <header style="position: relative;">
   <!-- Ikona trybu w prawym górnym rogu -->
-  <span id="modeIcon"
-        onclick="toggleLightDarkMode()"
-        title="Toggle light/dark mode"
-        style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
-        onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-        onmouseout="this.style.backgroundColor='transparent'">🌛</span>
+  <span id="modeIcon" role="button" tabindex="0" aria-label="Toggle light/dark mode"
+      onclick="toggleLightDarkMode()"
+      title="Toggle light/dark mode"
+      style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
+      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
+      onmouseout="this.style.backgroundColor='transparent'">🌛</span>
+
 <!-- Przycisk Log In -->
-<span id="loginBtn"
+<span id="loginBtn" role="button" tabindex="0" aria-label="Open login dialog"
       onclick="openLoginModal()"
       title="Log in/out"
       style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
@@ -783,6 +821,15 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 #support-cta { 
   display: none !important; 
 }
+
+@media (max-width: 500px){
+  #google_translate_element{ 
+    bottom: 12px; 
+    right: 12px;
+    transform: scale(.9);
+    transform-origin: bottom right;
+  }
+}
   
 </style>
 
@@ -828,25 +875,22 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
  <script>
   function openLoginModal() {
     const modal = document.getElementById("loginModal");
-    modal.style.display = "flex"; // zamiast block → flex
-    // Ustawienie focusa dla dostępności
+    modal.classList.add("open");
     const dialog = modal.querySelector('[role="dialog"]');
     if (dialog) dialog.focus();
-}
-
+  }
 
   function closeLoginModal() {
-    document.getElementById("loginModal").style.display = "none";
+    document.getElementById("loginModal").classList.remove("open");
   }
 
-  // Zamknij modal po kliknięciu poza okno
+  // Zamknięcie po kliknięciu poza okno (tylko dla loginModal)
   window.onclick = function(event) {
     const modal = document.getElementById("loginModal");
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
+    if (event.target === modal) modal.classList.remove("open");
   }
 </script>
+
 
 <script>
   // Zamknij modal klawiszem ESC
@@ -888,20 +932,21 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 
   <script>
   function openSupportModal() {
-    const m = document.getElementById('supportModal');
-    if (!m) return;
-    m.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // blokuj scroll tła
-  }
+  const m = document.getElementById('supportModal');
+  if (!m) return;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
 
-  function closeSupportModal() {
-    const m = document.getElementById('supportModal');
-    if (!m) return;
-    m.style.display = 'none';
-    document.body.style.overflow = '';
-    const note = document.getElementById('copiedNote');
-    if (note) note.style.display = 'none';
-  }
+function closeSupportModal() {
+  const m = document.getElementById('supportModal');
+  if (!m) return;
+  m.classList.remove('open');
+  document.body.style.overflow = '';
+  const note = document.getElementById('copiedNote');
+  if (note) note.style.display = 'none';
+}
+
 
   // Zamknięcie po kliknięciu w tło (nie nadpisujemy window.onclick używanego przez loginModal)
   window.addEventListener('click', (e) => {
@@ -1178,6 +1223,26 @@ if (!support) {
   if (login)   right.appendChild(login);
   if (mode)    right.appendChild(mode);
 });
+</script>
+
+<script>
+  // Enter/Space aktywują klik
+  function makeKeyboardClickable(el, onActivate){
+    if(!el) return;
+    el.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onActivate();
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{
+    makeKeyboardClickable(document.getElementById('modeIcon'), toggleLightDarkMode);
+    makeKeyboardClickable(document.getElementById('loginBtn'), () => {
+      const txt = document.getElementById('loginBtn')?.textContent?.toLowerCase() || '';
+      if (txt.includes('log out')) logoutUser(); else openLoginModal();
+    });
+  });
 </script>
   
 </body>
