@@ -19,6 +19,43 @@
     .topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
     .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
     a.back{color:#66b2ff;text-decoration:none}
+
+    :root{
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Chat layout -> kolumna */
+.chat-card{
+  display: flex;
+  flex-direction: column;
+  min-height: min(78dvh, 620px); /* dvh lepiej na mobile */
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+
+/* Messages -> elastyczne wypełnienie */
+.chat-messages{
+  flex: 1 1 auto;
+  max-height: 60dvh;           /* górny limit na małych ekranach */
+  height: auto;                /* zamiast stałej wysokości */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* textarea lepiej „trzyma” się szerokości, bez skoków */
+.controls textarea{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Focus-visible dla dostępności */
+.send:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #66b2ff;
+  outline-offset: 2px;
+}
+
+  .chat-messages{ overscroll-behavior: contain; }
+#chatInput{ line-height: 22px; } /* spójne z autogrow (22px) */
+  
   </style>
 </head>
 <body>
@@ -30,12 +67,19 @@
     </div>
 
     <div class="chat-card">
-      <div id="chatMessages" class="chat-messages">
+      <div id="chatMessages" class="chat-messages" aria-live="polite" aria-atomic="false">
         <div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>
       </div>
       <div class="controls">
-        <textarea id="chatInput" rows="2" placeholder="Type and press Enter…"></textarea>
-        <button id="sendBtn" class="send">Send</button>
+        <textarea id="chatInput" aria-label="Message input" rows="2"
+  placeholder="Type and press Enter…"
+  autocomplete="off"
+  autocapitalize="sentences"
+  spellcheck="true"
+  inputmode="text"></textarea>
+
+<button id="sendBtn" class="send" aria-label="Send message">Send</button>
+
       </div>
       <div style="opacity:.7;margin-top:8px;font-size:.9rem">Backend not connected yet</div>
     </div>
@@ -83,6 +127,66 @@
       // tu później wstawisz fetch do swojego endpointu Mistrala
       setTimeout(()=>addMsg('This is a placeholder response. Connect your Mistral endpoint to get real answers.'), 400);
     };
+    document.addEventListener('DOMContentLoaded', ()=>{ 
+  if(msgs) msgs.scrollTop = msgs.scrollHeight; 
+});
+
   </script>
+
+  <script>
+  // --- Autogrow textarea + stabilne przewijanie --- //
+  (function(){
+    const input = document.getElementById('chatInput');
+    const msgs  = document.getElementById('chatMessages');
+    const send  = document.getElementById('sendBtn');
+
+    if (!input || !msgs) return;
+
+    function scrollToBottom(){
+      // requestAnimationFrame = płynny scroll po DOM update
+      requestAnimationFrame(()=>{ msgs.scrollTop = msgs.scrollHeight; });
+    }
+
+    function autoGrow(){
+      input.style.height = 'auto';
+      const max = 6 * 22; // ok. 6 linii (22px line-height)
+      input.style.height = Math.min(input.scrollHeight, max) + 'px';
+    }
+
+    input.addEventListener('input', autoGrow);
+    // pierwsze wyliczenie
+    autoGrow();
+
+    // zabezpieczenie przed wielokrotnym klikaniem
+    let sending = false;
+    if (send){
+      const origHandler = send.onclick;
+      send.onclick = async () => {
+        if (sending) return;
+        sending = true;
+        try {
+          await origHandler?.();
+        } finally {
+  sending = false;
+  scrollToBottom();
+  autoGrow();
+  input.focus(); // ⬅️ utrzymaj fokus po wysłaniu
+}
+      };
+    }
+
+    // po każdych 300ms – jeśli coś doszło asynchronicznie, dociągnij dół
+    // (lekki „watcher”; możesz usunąć, jeśli zbędny)
+    let prevCount = 0;
+    setInterval(()=>{
+      const count = msgs.children.length;
+      if (count !== prevCount){
+        prevCount = count;
+        scrollToBottom();
+      }
+    }, 300);
+  })();
+</script>
+
 </body>
 </html>
