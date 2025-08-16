@@ -37,6 +37,7 @@
 
     a { color: var(--accent-2); text-decoration: none; }
     a:hover { text-decoration: underline; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
 
     .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 64px; }
 
@@ -54,9 +55,7 @@
       position: sticky; top: 16px; z-index: 10;
       backdrop-filter: blur(6px);
     }
-    .brand {
-      display: flex; align-items: center; gap: 12px;
-    }
+    .brand { display: flex; align-items: center; gap: 12px; }
     .brand .logo {
       width: 34px; height: 34px; border-radius: 10px;
       background: conic-gradient(from 140deg, var(--accent), #7f5af0, #00e5ff, var(--accent));
@@ -65,7 +64,12 @@
     .brand h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
     .brand h1 span { opacity: .7; font-weight: 600; }
 
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; border: 1px solid #24304b; background: #121a2b; color: var(--text); cursor: pointer; transition: .15s ease all; font-weight: 600; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border-radius: 12px; border: 1px solid #24304b;
+      background: #121a2b; color: var(--text); cursor: pointer;
+      transition: .15s ease all; font-weight: 600; text-decoration: none;
+    }
     .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.35), 0 0 0 3px var(--ring); }
     .btn.primary { background: linear-gradient(180deg, var(--accent) 0%, #477fd8 100%); border-color: #356cbf; }
 
@@ -91,15 +95,30 @@
 
     /* Oracle */
     .oracle {
-      background: radial-gradient(700px 300px at 50% 0, rgba(90,168,255,.18), transparent 60%),
-                  linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+      background:
+        radial-gradient(700px 300px at 50% 0, rgba(90,168,255,.18), transparent 60%),
+        linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
       position: relative;
+      overflow: hidden;
     }
-    .oracle .stamp { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(800px 120px at 50% 0, rgba(90,168,255,.08), transparent 60%); }
+    .oracle .stamp {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(800px 120px at 50% 0, rgba(90,168,255,.08), transparent 60%);
+    }
     .oracle .title { display: flex; align-items: center; gap: 10px; }
-    .oracle .title .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--success); box-shadow: 0 0 16px var(--success); }
-    .oracle .meta { display: flex; gap: 14px; align-items: center; color: var(--muted); font-size: 13px; margin: 6px 0 6px; }
-
+    .oracle .title .dot {
+      width: 9px; height: 9px; border-radius: 50%; background: var(--success);
+      box-shadow: 0 0 16px var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: .7; }
+    }
+    .oracle .meta {
+      display: flex; gap: 14px; align-items: center;
+      color: var(--muted); font-size: 13px; margin: 6px 0 6px; flex-wrap: wrap;
+    }
     .oracle .body { margin-top: 12px; font-size: 15px; color: #eaf1ff; }
     .oracle .body p { margin: 0 0 10px; }
 
@@ -108,7 +127,10 @@
 
     /* History */
     .history ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-    .event { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid #1a2236; background: #0d1220; border-radius: 12px; }
+    .event {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
+      padding: 10px; border: 1px solid #1a2236; background: #0d1220; border-radius: 12px;
+    }
     .event .date { font-weight: 700; color: #cfe2ff; }
     .event .topic { color: var(--muted); font-size: 13px; }
     .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; border: 1px solid #2b3756; background: #0c1324; }
@@ -124,18 +146,12 @@
     canvas { width: 100%; height: 180px; display: block; }
 
     /* Category buttons */
-    .categories{
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-}
-
-    .categories .cat { 
-  min-width: 0; 
-  width: 100%; 
-}
-
+    .categories {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
     @media (max-width: 800px) { .categories { grid-template-columns: repeat(2, 1fr); } }
     .cat {
       padding: 14px;
@@ -144,10 +160,14 @@
       border: 1px solid #1a2236;
       display: flex; gap: 10px; align-items: center; justify-content: center;
       font-weight: 700; letter-spacing: .3px; cursor: pointer;
-      transition: .2s ease transform, .2s ease box-shadow;
+      transition: .2s ease transform, .2s ease box-shadow, .2s ease filter;
+      color: var(--text);
+      text-decoration: none;
+      min-width: 0; width: 100%;
     }
     .cat:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.35), 0 0 0 3px var(--ring); }
     .cat.lock::after { content: '🔒'; margin-left: 6px; opacity: .9; }
+    .cat.lock { filter: grayscale(.2); }
 
     /* Modal */
     dialog {
@@ -158,30 +178,35 @@
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 
     .footer-note { margin-top: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn:hover, .cat:hover { transform: none; box-shadow: none; }
+      .oracle .title .dot { animation: none; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <!-- Top panel -->
-    <div class="topbar">
-      <div class="brand">
+    <div class="topbar" role="banner">
+      <div class="brand" aria-label="BeAwarely Foresight">
         <div class="logo" aria-hidden="true"></div>
         <h1>BeAwarely <span>· Foresight</span></h1>
       </div>
       <a class="btn" href="index.html" id="backHome" title="Back to Home">← Back to Home</a>
-      <button class="btn primary" id="refreshBtn" title="Refresh predictions (placeholder)">⟳ Refresh</button>
+      <button class="btn primary" id="refreshBtn" title="Refresh predictions (demo)">⟳ Refresh</button>
     </div>
 
     <!-- Main layout -->
-    <div class="grid">
+    <div class="grid" role="main">
       <!-- Left: History -->
-      <aside class="card history">
+      <aside class="card history" aria-label="Prediction history">
         <h2>Prediction History</h2>
         <p class="hint">Recent weekly calls with confidence & outcomes.</p>
         <ul id="historyList">
           <!-- Sample rows (replace with real data) -->
           <li class="event">
-            <div class="date">2025‑08‑10</div>
+            <div class="date">2025-08-10</div>
             <div>
               <div>Bitcoin spikes above $70k</div>
               <div class="topic">Crypto · Confidence 62%</div>
@@ -189,7 +214,7 @@
             <span class="badge ok">Correct</span>
           </li>
           <li class="event">
-            <div class="date">2025‑08‑03</div>
+            <div class="date">2025-08-03</div>
             <div>
               <div>ECB holds rates unchanged</div>
               <div class="topic">Economy · Confidence 71%</div>
@@ -197,9 +222,9 @@
             <span class="badge low">Pending</span>
           </li>
           <li class="event">
-            <div class="date">2025‑07‑27</div>
+            <div class="date">2025-07-27</div>
             <div>
-              <div>Major LLM open‑weights release</div>
+              <div>Major LLM open-weights release</div>
               <div class="topic">AI/Tech · Confidence 55%</div>
             </div>
             <span class="badge ok">Correct</span>
@@ -208,46 +233,46 @@
       </aside>
 
       <!-- Center: Oracle -->
-      <main class="card oracle">
-        <div class="stamp"></div>
+      <main class="card oracle" aria-label="This week's oracle">
+        <div class="stamp" aria-hidden="true"></div>
         <div class="title">
-          <div class="dot"></div>
+          <div class="dot" aria-hidden="true"></div>
           <h2>This Week’s Oracle</h2>
         </div>
         <div class="meta">
           <div id="lastUpdated">Last update: <strong>Aug 12, 2025</strong></div>
-          <div>Model: <strong>Mistral‑7B (planned)</strong></div>
+          <div>Model: <strong>Mistral-7B (planned)</strong></div>
         </div>
         <div class="body" id="oracleBody">
-          <p><strong>Headline:</strong> A cautious risk‑on mood builds across crypto and growth tech as macro data softens without signaling recession.</p>
+          <p><strong>Headline:</strong> A cautious risk-on mood builds across crypto and growth tech as macro data softens without signaling recession.</p>
           <p><strong>Outlook (7–10 days):</strong> Expect choppy upside in BTC and top AI equities; ECB commentary and US CPI prints are likely swing catalysts. Watch for liquidity gaps on weekends.</p>
-          <div class="chips">
+          <div class="chips" aria-label="Topics">
             <span class="chip">Macro</span>
             <span class="chip">Crypto</span>
             <span class="chip">AI</span>
             <span class="chip">Energy</span>
           </div>
-        </div>
 
-        <div class="categories" aria-label="Topic quick links">
-  <a class="cat" data-topic="economy" href="#">Economy</a>
-  <a class="cat" data-topic="geopolitics" href="#">Geopolitics</a>
-  <a class="cat" data-topic="technology" href="#">Technology</a>
-  <a class="cat" data-topic="crypto" href="#">Crypto</a>
-  <a class="cat" data-topic="health" href="#">Health</a>
-  <a class="cat" data-topic="climate" href="#">Climate</a>
-  <a class="cat" data-topic="culture" href="#">Culture</a>
-  <a class="cat" data-topic="sports" href="#">Sports</a>
-</div>
+          <div class="categories" aria-label="Topic quick links">
+            <a class="cat" data-topic="economy" href="#">Economy</a>
+            <a class="cat" data-topic="geopolitics" href="#">Geopolitics</a>
+            <a class="cat" data-topic="technology" href="#">Technology</a>
+            <a class="cat" data-topic="crypto" href="#">Crypto</a>
+            <a class="cat" data-topic="health" href="#">Health</a>
+            <a class="cat" data-topic="climate" href="#">Climate</a>
+            <a class="cat" data-topic="culture" href="#">Culture</a>
+            <a class="cat" data-topic="sports" href="#">Sports</a>
+          </div>
+        </div>
       </main>
 
       <!-- Right: Stats -->
-      <aside class="card">
+      <aside class="card" aria-label="Global statistics">
         <h2>Global Stats</h2>
         <div class="kpis">
           <div class="kpi"><div class="value" id="kpiTotal">128</div><div class="label">Total predictions</div></div>
-          <div class="kpi"><div class="value" id="kpiAcc">64%</div><div class="label">30‑day accuracy</div></div>
-          <div class="kpi"><div class="value" id="kpiConf">58%</div><div class="label">Mean confidence</div></div>
+          <div class="kpi"><div class="value" id="kpiAcc">64%</div><div class="label">30-day accuracy</div></div>
+          <div class="kpi"><div class="value" id="kpiConf">58%</</div><div class="label">Mean confidence</div></div>
           <div class="kpi"><div class="value" id="kpiTopics">12</div><div class="label">Topics covered</div></div>
         </div>
         <div style="margin-top: 12px;">
@@ -261,61 +286,128 @@
   </div>
 
   <!-- Login required modal -->
-  <dialog id="authModal">
-    <h3>Login required</h3>
-    <p>You need to be signed in to view detailed category pages.</p>
+  <dialog id="authModal" aria-labelledby="authTitle" aria-describedby="authDesc">
+    <h3 id="authTitle">Login required</h3>
+    <p id="authDesc">You need to be signed in to view detailed category pages.</p>
     <div class="modal-actions">
       <button class="btn" id="closeModal">Close</button>
       <a class="btn primary" href="index.html?login=1">Log in</a>
     </div>
   </dialog>
-  
 
-  <!-- Supabase (jak w index.html) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+  <!-- Supabase (same version as index.html) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ---- CONFIG ----
+    const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+    const sb = window.supabase.createClient(SB_URL, SB_KEY); // anon public key is fine client-side
 
-  const authModal = document.getElementById('authModal');
-  const catButtons = [...document.querySelectorAll('.cat')];
+    // ---- DOM ----
+    const authModal = document.getElementById('authModal');
+    const catButtons = [...document.querySelectorAll('.cat')];
+    const lastUpdatedEl = document.getElementById('lastUpdated');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const miniChart = document.getElementById('miniChart');
 
-  function wireCategoryClicks(authed){
-    console.log("Czy zalogowany? ", authed); // DEBUG — sprawdź w konsoli przeglądarki
-    catButtons.forEach(el => {
-      // pokaż kłódkę tylko gdy NIE zalogowany
-      el.classList.toggle('lock', !authed);
-      el.title = authed ? '' : 'Login required';
+    // ---- CATEGORIES GATING ----
+    function wireCategoryClicks(authed){
+      console.log('Authenticated:', authed); // DEBUG
+      catButtons.forEach(el => {
+        el.classList.toggle('lock', !authed);
+        el.title = authed ? '' : 'Login required';
+        el.onclick = (e) => {
+          e.preventDefault();
+          if (!authed) {
+            if (authModal?.showModal) authModal.showModal();
+            return;
+          }
+          // Navigate to topic page (create these files later)
+          const topic = el.dataset.topic;
+          location.href = `foresight-${topic}.html`;
+        };
+      });
+    }
 
-      el.onclick = (e) => {
-        e.preventDefault();
-        if (!authed) {
-          authModal?.showModal();
-          return;
-        }
-        alert(`Przechodzę do ${el.dataset.topic}`); // test przejścia
-        // TODO: tu możesz podłączyć realne podstrony kategorii
-        // np. location.href = `foresight-${el.dataset.topic}.html`;
-      };
+    async function applyAuthState(){
+      const { data:{ session } } = await sb.auth.getSession();
+      wireCategoryClicks(!!session);
+    }
+    applyAuthState();
+    sb.auth.onAuthStateChange((_event, _session) => applyAuthState());
+
+    // ---- MODAL CLOSE ----
+    document.getElementById('closeModal')?.addEventListener('click', () => authModal?.close());
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') authModal?.close(); });
+    authModal?.addEventListener('click', (e)=>{ if (e.target === authModal) authModal.close(); });
+
+    // ---- REFRESH BUTTON (demo) ----
+    function fmtDate(d){
+      const opts = { year:'numeric', month:'short', day:'2-digit' };
+      return d.toLocaleDateString('en-US', opts);
+    }
+    function setLastUpdatedNow(){
+      const now = new Date();
+      lastUpdatedEl.innerHTML = 'Last update: <strong>'+ fmtDate(now) +'</strong>';
+    }
+    refreshBtn?.addEventListener('click', () => {
+      setLastUpdatedNow();
+      drawMiniChart(true); // re-seed data (demo)
     });
-}
 
+    // ---- MINI CHART (pure canvas) ----
+    function drawMiniChart(reseed=false){
+      if (!miniChart) return;
+      const ctx = miniChart.getContext('2d');
+      const w = miniChart.width, h = miniChart.height;
+      ctx.clearRect(0,0,w,h);
 
-  async function applyAuthState(){
-    const { data:{ session } } = await sb.auth.getSession();
-    wireCategoryClicks(!!session);
-  }
+      // grid
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = '#23304b';
+      for (let i=0;i<=4;i++){
+        const y = (h/4)*i + 0.5;
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
 
-  // pierwsze sprawdzenie + reakcja na zmianę stanu
-  applyAuthState();
-  sb.auth.onAuthStateChange((_event, _session) => applyAuthState());
+      // demo data (12 points: accuracy in %)
+      if (reseed || !drawMiniChart.data) {
+        const base = 55 + Math.random()*10;
+        drawMiniChart.data = Array.from({length:12}, (_,i)=> {
+          const noise = (Math.random()-0.5)*8;
+          return Math.max(40, Math.min(90, base + i*0.8 + noise));
+        });
+      }
+      const data = drawMiniChart.data;
 
-  // zamykanie modala (dla pewności ESC też zadziała)
-  document.getElementById('closeModal')?.addEventListener('click', () => authModal?.close());
-  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') authModal?.close(); });
-</script>
+      // scale
+      const minY = 40, maxY = 90;
+      const px = (i)=> i*(w/(data.length-1));
+      const py = (v)=> h - ((v - minY)/(maxY-minY))*h;
 
+      // line
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#5aa8ff';
+      ctx.beginPath();
+      data.forEach((v,i)=> {
+        const x = Math.round(px(i)) + 0.5;
+        const y = Math.round(py(v)) + 0.5;
+        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
+
+      // points
+      ctx.fillStyle = '#89c2ff';
+      data.forEach((v,i)=>{
+        const x = px(i), y = py(v);
+        ctx.beginPath(); ctx.arc(x,y,2.8,0,Math.PI*2); ctx.fill();
+      });
+    }
+
+    // initial paint
+    setLastUpdatedNow();
+    drawMiniChart(true);
+  </script>
 </body>
 </html>
-
