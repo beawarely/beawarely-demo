@@ -3,27 +3,129 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>BeAwarely – Inventor Review</title>
+<title>BeAwarely – Moderation Hub</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:#0b0d14;color:#eaf0ff}
-  .wrap{max-width:1100px;margin:0 auto;padding:28px}
-  .card{background:#0f1424;border:1px solid #1a2236;border-radius:16px;padding:18px;margin-bottom:16px}
+  :root{
+    --bg:#0b0d14; --panel:#0f1424; --panel2:#0d1220; --text:#eaf0ff; --muted:#aab2d5;
+    --line:#1a2236; --accent:#5aa8ff; --ring:rgba(90,168,255,.45);
+    --ok:#19c37d; --warn:#ffb020; --danger:#ff5252;
+    --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:#0b0d14;color:var(--text)}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:linear-gradient(180deg,#121724 0%,#0e1422 100%); border:1px solid #1a2236;
+    border-radius:14px; padding:14px 16px; box-shadow:var(--shadow); position:sticky; top:12px; z-index:10;
+  }
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:30px;height:30px;border-radius:8px;background:conic-gradient(from 140deg,var(--accent),#7f5af0,#00e5ff,var(--accent))}
+  .hint{color:var(--muted);font-size:12px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+  .tab{
+    border:1px solid #24304b;background:#121a2b;color:var(--text);padding:8px 12px;border-radius:999px;
+    cursor:pointer;font-weight:700;transition:.15s; display:inline-flex; align-items:center; gap:8px;
+  }
+  .tab.active{background:linear-gradient(180deg,var(--accent),#477fd8);border-color:#356cbf}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:1000px){.grid{grid-template-columns:1fr}}
+  .panel{
+    background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%); border:1px solid var(--line);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:16px;
+  }
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  input[type="search"], select{
+    padding:10px 12px;border:1px solid #24304b;border-radius:10px;background:#0c1222;color:var(--text);min-height:40px
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1px solid #24304b;
+    background:#121a2b;color:var(--text);cursor:pointer;font-weight:700;transition:.15s
+  }
+  .btn.primary{background:linear-gradient(180deg,var(--accent) 0%,#477fd8 100%);border-color:#356cbf}
+  .btn.ok{background:#073b28;border-color:#0d5e42;color:#baf3da}
+  .btn.danger{background:#3b0710;border-color:#5e0d1e;color:#ffc2c2}
+  .list{display:grid;gap:10px}
+  .item{border:1px solid var(--line);border-radius:12px;padding:14px;background:#0d1220}
   .row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
-  .muted{color:#aab2d5}
-  select,textarea,input{width:100%;padding:10px;border:1px solid #24304b;border-radius:10px;background:#0c1222;color:#eaf0ff}
-  .btn{background:#5aa8ff;color:#041325;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .muted{color:var(--muted)}
+  textarea,input[type="text"]{width:100%;padding:10px;border:1px solid #24304b;border-radius:10px;background:#0c1222;color:var(--text)}
   .tag{display:inline-block;margin-right:6px;margin-bottom:6px;padding:4px 8px;border-radius:999px;background:#0e1a33;border:1px solid #2a3b6a;font-size:.8rem}
-  .list .item{border:1px solid #1a2236;border-radius:12px;padding:12px;margin-bottom:10px;background:#0d1220}
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pill{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid #2b3756;background:#0c1324;font-size:12px}
+  .pill.ok{color:var(--ok);border-color:rgba(25,195,125,.4)}
+  .pill.warn{color:var(--warn);border-color:rgba(255,176,32,.4)}
+  .right{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
+  .empty{padding:18px;border:1px dashed #2b3756;border-radius:12px;text-align:center;color:var(--muted)}
+  .footer-note{margin-top:16px;text-align:center;color:var(--muted);font-size:12px}
+  .kicker{font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;color:#9fb6ff;margin-bottom:6px}
+  .danger-note{color:#ff9aa8;font-size:.9rem}
+  .soft{opacity:.6}
+  .sticky-actions{position:sticky; bottom:8px; display:flex; gap:8px; justify-content:flex-end}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:700px){.row,.row-2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Inventor – Review queue</h1>
-  <p class="muted">Only moderators can access. Approve → choose visibility (public/partial/private), optionally add redactions.</p>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <div style="font-weight:800">BeAwarely · Moderation Hub</div>
+        <div class="hint">Review & approve submissions across tools</div>
+      </div>
+    </div>
+    <a class="btn" href="index.html">← Back to Home</a>
+  </div>
 
-  <div id="queue" class="list">Loading…</div>
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="inventor">🛠 Inventor Ideas</button>
+    <button class="tab" data-tab="avatars">🖼 Avatar Photos</button>
+    <button class="tab" data-tab="foresight">🔮 Foresight Posts</button>
+    <button class="tab" data-tab="reports">🚩 User Reports</button>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: Active queue -->
+    <section class="panel">
+      <div class="toolbar">
+        <input id="searchBox" type="search" placeholder="Search (title, user, id)…" />
+        <select id="filterSelect" aria-label="Filter">
+          <option value="all">All</option>
+          <option value="pending" selected>Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button id="refreshBtn" class="btn">⟳ Refresh</button>
+        <span id="countNote" class="hint"></span>
+      </div>
+      <div id="queue" class="list">Loading…</div>
+
+      <div class="sticky-actions">
+        <button id="bulkApprove" class="btn ok">✓ Approve selected</button>
+        <button id="bulkReject" class="btn danger">✗ Reject selected</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: Context / help -->
+    <aside class="panel">
+      <div class="kicker">Guidelines</div>
+      <ul class="muted" style="margin-top:6px;line-height:1.4">
+        <li>Approve → pick proper visibility (public/partial/private) if applicable.</li>
+        <li>For <b>partial</b> visibility use redacted data only (no sensitive info).</li>
+        <li>Avatars: approve only real, safe-for-work photos. No external URLs, only user uploads.</li>
+        <li>Foresight posts must be non-actionable financial advice (informational only).</li>
+        <li>Use bulk actions with care – they apply to currently visible (filtered & searched) items that are checked.</li>
+      </ul>
+      <div class="footer-note">Only moderators have access to this page.</div>
+      <div id="modBadge" class="pill ok" style="margin-top:8px;display:inline-block">You are a moderator</div>
+      <div id="noAccess" class="danger-note" style="display:none">No access – login with moderator account.</div>
+    </aside>
+  </div>
+
+  <div class="footer-note">Demo placeholders for Avatars / Foresight / Reports will auto-hide once tables exist.</div>
 </div>
 
 <script>
@@ -32,63 +134,257 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 let isMod = false;
+let activeTab = 'inventor';
+let cached = { inventor: [], avatars: [], foresight: [], reports: [] };
+
+const tabsEl = document.getElementById('tabs');
+const queueEl = document.getElementById('queue');
+const searchEl = document.getElementById('searchBox');
+const filterEl = document.getElementById('filterSelect');
+const countNote = document.getElementById('countNote');
+
+function setLoading(){ queueEl.textContent='Loading…'; }
+function empty(msg='Nothing to review yet (placeholder)'){ queueEl.innerHTML = `<div class="empty">${msg}</div>`; }
+function soft(el,flag){ el.style.opacity = flag? .6 : 1; }
 
 async function requireMod(){
   const { data:{ user } } = await sb.auth.getUser();
   if(!user){ alert('Login required'); location.href='index.html?login=1'; return; }
   const { data:mod } = await sb.from('moderators').select('user_id').eq('user_id', user.id).maybeSingle();
-  if(!mod){ document.body.innerHTML='<div class="wrap"><h2>No access</h2></div>'; return; }
+  if(!mod){
+    document.getElementById('modBadge').style.display='none';
+    document.getElementById('noAccess').style.display='block';
+    document.body.innerHTML='<div class="wrap"><div class="panel"><h2>No access</h2><p class="muted">This page is restricted to moderators.</p></div></div>';
+    return;
+  }
   isMod = true;
 }
 
-function itemHTML(row){
-  const cats = (row.categories||[]).map(c=>`<span class="tag">${c}</span>`).join(' ');
-  const preview = JSON.stringify(row.outputs)?.slice(0,300) + '…';
-  return `
-  <div class="item" data-id="${row.id}">
-    <div class="two">
-      <div>
-        <div><b>ID:</b> ${row.id}</div>
-        <div><b>User:</b> ${row.user_id}</div>
-        <div><b>Status:</b> ${row.status} | <b>Visibility:</b> ${row.visibility}</div>
-        <div style="margin:8px 0">${cats}</div>
-        <div class="muted" style="font-size:.9rem">${preview}</div>
-      </div>
-      <div>
-        <label>Public title</label>
-        <input class="ttl" value="${row.public_title ?? ''}">
-        <label>Public summary</label>
-        <textarea class="sum">${row.public_summary ?? ''}</textarea>
-        <label>Visibility</label>
-        <select class="vis">
-          <option value="public" ${row.visibility==='public'?'selected':''}>public</option>
-          <option value="partial" ${row.visibility==='partial'?'selected':''}>partial (use redacted)</option>
-          <option value="private" ${row.visibility==='private'?'selected':''}>private</option>
-        </select>
-        <label style="margin-top:8px">Redacted outputs (JSON for partial)</label>
-        <textarea class="red" placeholder='{"variants":[{"name":"…","summary":"…"}] }'>${row.redacted_outputs? JSON.stringify(row.redacted_outputs,null,2):''}</textarea>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button class="btn approve">Approve</button>
-          <button class="btn reject" style="background:#ff7676">Reject</button>
+function pick(val,a,b){ return val==null? a : val; }
+
+/* ========== RENDERERS ========== */
+
+function renderInventor(list){
+  if(!list?.length){ empty('No items in queue.'); return; }
+  queueEl.innerHTML = list.map(row=>{
+    const cats = (row.categories||[]).map(c=>`<span class="tag">${c}</span>`).join(' ');
+    const preview = (row.outputs ? JSON.stringify(row.outputs) : '').slice(0,320) + (row.outputs?'…':'');
+    const red = row.redacted_outputs ? JSON.stringify(row.redacted_outputs,null,2) : '';
+    const visSel = `
+      <select class="vis">
+        <option value="public" ${row.visibility==='public'?'selected':''}>public</option>
+        <option value="partial" ${row.visibility==='partial'?'selected':''}>partial (redacted)</option>
+        <option value="private" ${row.visibility==='private'?'selected':''}>private</option>
+      </select>`;
+    return `
+      <div class="item" data-id="${row.id}">
+        <div class="row">
+          <div>
+            <label class="kicker">Idea</label>
+            <div><b>ID:</b> ${row.id}</div>
+            <div><b>User:</b> ${row.user_id}</div>
+            <div><b>Status:</b> <span class="pill ${row.status==='pending'?'warn':'ok'}">${row.status}</span> 
+                 <span class="pill">Visibility: ${row.visibility}</span></div>
+            <div style="margin:8px 0">${cats}</div>
+            <div class="muted" style="font-size:.9rem"><b>Preview</b>: ${preview}</div>
+          </div>
+          <div>
+            <label>Public title</label>
+            <input class="ttl" value="${pick(row.public_title,'')}" type="text">
+            <label style="margin-top:8px">Public summary</label>
+            <textarea class="sum">${pick(row.public_summary,'')}</textarea>
+            <label style="margin-top:8px">Visibility</label>
+            ${visSel}
+            <label style="margin-top:8px">Redacted outputs (JSON for partial)</label>
+            <textarea class="red" placeholder='{"variants":[{"name":"…","summary":"…"}] }'>${red}</textarea>
+            <div class="right">
+              <label style="display:inline-flex;align-items:center;gap:8px">
+                <input class="selectRow" type="checkbox"> Select
+              </label>
+              <button class="btn ok approve">Approve</button>
+              <button class="btn danger reject">Reject</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  wireInventorActions();
+}
+
+function renderAvatars(list){
+  if(!list?.length){ empty('No avatars pending (placeholder).'); return; }
+  queueEl.innerHTML = list.map(row=>{
+    return `
+      <div class="item" data-id="${row.id}">
+        <div class="row-2">
+          <div>
+            <div><b>User:</b> ${row.user_id}</div>
+            <div class="muted">Proposed avatar (public URL generated after approval)</div>
+            <img src="${row.preview_url}" alt="Avatar preview" style="max-width:240px;border-radius:12px;margin-top:8px;border:1px solid #24304b"/>
+          </div>
+          <div>
+            <label>Moderator note (optional)</label>
+            <textarea class="note" placeholder="Why approved/rejected?"></textarea>
+            <div class="right">
+              <label style="display:inline-flex;align-items:center;gap:8px">
+                <input class="selectRow" type="checkbox"> Select
+              </label>
+              <button class="btn ok approve">Approve</button>
+              <button class="btn danger reject">Reject</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>`;
+    `;
+  }).join('');
+  wireSimpleActions('avatars_queue','id');
 }
 
-async function loadQueue(){
-  const { data, error } = await sb
-    .from('inventor_ideas')
-.select('*')
-.eq('status','pending')
-.order('created_at',{ascending:false})
-;
-  if(error){ document.getElementById('queue').textContent=error.message; return; }
-  document.getElementById('queue').innerHTML = data.map(itemHTML).join('');
-  wire();
+function renderForesight(list){
+  if(!list?.length){ empty('No foresight drafts pending (placeholder).'); return; }
+  queueEl.innerHTML = list.map(row=>{
+    const excerpt = (row.body||'').slice(0,280) + (row.body?.length>280?'…':'');
+    return `
+      <div class="item" data-id="${row.id}">
+        <div><b>Title:</b> ${row.title||'(untitled)'} · <span class="pill ${row.status==='pending'?'warn':'ok'}">${row.status}</span></div>
+        <div class="muted" style="margin:6px 0">${excerpt}</div>
+        <div class="right">
+          <label style="display:inline-flex;align-items:center;gap:8px">
+            <input class="selectRow" type="checkbox"> Select
+          </label>
+          <button class="btn ok approve">Approve</button>
+          <button class="btn danger reject">Reject</button>
+        </div>
+      </div>`;
+  }).join('');
+  wireSimpleActions('foresight_posts','id');
 }
 
-function wire(){
+function renderReports(list){
+  if(!list?.length){ empty('No open reports (placeholder).'); return; }
+  queueEl.innerHTML = list.map(r=>{
+    return `
+      <div class="item" data-id="${r.id}">
+        <div class="kicker">User Report</div>
+        <div><b>Type:</b> ${r.type||'n/a'} · <b>Status:</b> <span class="pill ${r.status==='open'?'warn':'ok'}">${r.status}</span></div>
+        <div class="muted" style="margin:6px 0">${r.message||'(no message)'}</div>
+        <div class="right">
+          <label style="display:inline-flex;align-items:center;gap:8px">
+            <input class="selectRow" type="checkbox"> Select
+          </label>
+          <button class="btn ok resolve">Resolve</button>
+          <button class="btn danger reject">Close as invalid</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.querySelectorAll('.item').forEach(el=>{
+    const id = el.dataset.id;
+    el.querySelector('.resolve').onclick = async ()=>{
+      const { error } = await sb.from('user_reports').update({ status:'resolved' }).eq('id', id);
+      if(error) alert(error.message); else soft(el,true);
+    };
+    el.querySelector('.reject').onclick = async ()=>{
+      const { error } = await sb.from('user_reports').update({ status:'closed' }).eq('id', id);
+      if(error) alert(error.message); else soft(el,true);
+    };
+  });
+}
+
+/* ========== LOADERS ========== */
+
+async function loadCurrent(){
+  setLoading();
+  const status = filterEl.value;
+  const q = (searchEl.value||'').toLowerCase();
+
+  if(activeTab==='inventor'){
+    const sel = `
+      id, user_id, status, visibility,
+      public_title, public_summary, redacted_outputs, outputs, categories
+    `;
+    let req = sb.from('inventor_ideas').select(sel).order('created_at',{ascending:false});
+    if(status!=='all') req = req.eq('status', status);
+    const { data, error } = await req;
+    if(error){ empty(error.message); return; }
+    // client filter/search
+    const filtered = (data||[]).filter(r=>{
+      const hay = `${r.id} ${r.user_id} ${r.public_title||''}`.toLowerCase();
+      return !q || hay.includes(q);
+    });
+    cached.inventor = filtered;
+    countNote.textContent = `${filtered.length} item(s)`;
+    renderInventor(filtered);
+    return;
+  }
+
+  if(activeTab==='avatars'){
+    // Placeholder: if table avatars_queue exists -> load; else show empty placeholder
+    try{
+      let req = sb.from('avatars_queue').select('id,user_id,preview_url,status').order('created_at',{ascending:false});
+      if(status!=='all') req = req.eq('status', status);
+      const { data, error } = await req;
+      if(error) { empty('No avatars pending (or table missing).'); return; }
+      const filtered = (data||[]).filter(r=>{
+        const hay = `${r.id} ${r.user_id}`.toLowerCase();
+        return !q || hay.includes(q);
+      });
+      cached.avatars = filtered;
+      countNote.textContent = `${filtered.length} item(s)`;
+      renderAvatars(filtered);
+    }catch(e){ empty('No avatars pending (placeholder).'); }
+    return;
+  }
+
+  if(activeTab==='foresight'){
+    try{
+      let req = sb.from('foresight_posts').select('id,title,body,status').order('created_at',{ascending:false});
+      if(status!=='all') req = req.eq('status', status);
+      const { data, error } = await req;
+      if(error){ empty('No foresight posts (or table missing).'); return; }
+      const filtered = (data||[]).filter(r=>{
+        const hay = `${r.id} ${r.title||''}`.toLowerCase();
+        return !q || hay.includes(q);
+      });
+      cached.foresight = filtered;
+      countNote.textContent = `${filtered.length} item(s)`;
+      renderForesight(filtered);
+    }catch(e){ empty('No foresight posts (placeholder).'); }
+    return;
+  }
+
+  if(activeTab==='reports'){
+    try{
+      let req = sb.from('user_reports').select('id,type,message,status').order('created_at',{ascending:false});
+      if(status!=='all') req = req.eq('status', status==='pending'?'open':status);
+      const { data, error } = await req;
+      if(error){ empty('No reports (or table missing).'); return; }
+      const filtered = (data||[]).filter(r=>{
+        const hay = `${r.id} ${r.type||''} ${r.message||''}`.toLowerCase();
+        return !q || hay.includes(q);
+      });
+      cached.reports = filtered;
+      countNote.textContent = `${filtered.length} item(s)`;
+      renderReports(filtered);
+    }catch(e){ empty('No reports (placeholder).'); }
+    return;
+  }
+}
+
+/* ========== WIRING ========== */
+
+function wireTabs(){
+  tabsEl.querySelectorAll('.tab').forEach(btn=>{
+    btn.onclick = ()=>{
+      tabsEl.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = btn.dataset.tab;
+      loadCurrent();
+    };
+  });
+}
+
+function wireInventorActions(){
   document.querySelectorAll('.item').forEach(el=>{
     const id = el.dataset.id;
     el.querySelector('.approve').onclick = async ()=>{
@@ -107,19 +403,88 @@ function wire(){
         visibility: vis,
         status: 'approved'
       }).eq('id', id);
-      if(error) alert(error.message); else { el.style.opacity=.6; }
+      if(error) alert(error.message); else soft(el,true);
     };
     el.querySelector('.reject').onclick = async ()=>{
       const { error } = await sb.from('inventor_ideas').update({ status:'rejected', visibility:'private' }).eq('id', id);
-      if(error) alert(error.message); else { el.style.opacity=.6; }
+      if(error) alert(error.message); else soft(el,true);
+    };
+  });
+
+  // bulk
+  document.getElementById('bulkApprove').onclick = ()=>bulkInventor('approved');
+  document.getElementById('bulkReject').onclick = ()=>bulkInventor('rejected');
+}
+
+async function bulkInventor(newStatus){
+  const items = [...document.querySelectorAll('.item')].filter(i=>i.querySelector('.selectRow')?.checked);
+  if(!items.length){ alert('Select at least one item.'); return; }
+  if(!confirm(`Apply "${newStatus}" to ${items.length} item(s)?`)) return;
+
+  for(const el of items){
+    const id = el.dataset.id;
+    if(newStatus==='approved'){
+      // minimal approve: keep current visibility / redactions as-is
+      const { error } = await sb.from('inventor_ideas').update({ status:'approved' }).eq('id', id);
+      if(error){ console.error(error.message); } else { soft(el,true); }
+    }else{
+      const { error } = await sb.from('inventor_ideas').update({ status:'rejected', visibility:'private' }).eq('id', id);
+      if(error){ console.error(error.message); } else { soft(el,true); }
+    }
+  }
+}
+
+function wireSimpleActions(table, pk){
+  document.getElementById('bulkApprove').onclick = async ()=>{
+    const items = [...document.querySelectorAll('.item')].filter(i=>i.querySelector('.selectRow')?.checked);
+    if(!items.length){ alert('Select at least one item.'); return; }
+    for(const el of items){
+      const id = el.dataset.id;
+      const { error } = await sb.from(table).update({ status:'approved' }).eq(pk, id);
+      if(error) console.error(error.message); else soft(el,true);
+    }
+  };
+  document.getElementById('bulkReject').onclick = async ()=>{
+    const items = [...document.querySelectorAll('.item')].filter(i=>i.querySelector('.selectRow')?.checked);
+    if(!items.length){ alert('Select at least one item.'); return; }
+    for(const el of items){
+      const id = el.dataset.id;
+      const { error } = await sb.from(table).update({ status:'rejected' }).eq(pk, id);
+      if(error) console.error(error.message); else soft(el,true);
+    }
+  };
+
+  document.querySelectorAll('.item').forEach(el=>{
+    const id = el.dataset.id;
+    const approve = el.querySelector('.approve');
+    const reject = el.querySelector('.reject');
+    if(approve) approve.onclick = async ()=>{
+      const { error } = await sb.from(table).update({ status:'approved' }).eq(pk, id);
+      if(error) alert(error.message); else soft(el,true);
+    };
+    if(reject) reject.onclick = async ()=>{
+      const { error } = await sb.from(table).update({ status:'rejected' }).eq(pk, id);
+      if(error) alert(error.message); else soft(el,true);
     };
   });
 }
 
+/* ========== EVENTS ========== */
+
+document.getElementById('refreshBtn').onclick = loadCurrent;
+searchEl.addEventListener('input', debounce(loadCurrent, 180));
+filterEl.addEventListener('change', loadCurrent);
+
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+/* ========== INIT ========== */
+
 (async ()=>{
   await requireMod();
-  if(isMod) await loadQueue();
+  wireTabs();
+  loadCurrent();
 })();
 </script>
 </body>
 </html>
+
