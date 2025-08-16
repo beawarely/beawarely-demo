@@ -9,27 +9,59 @@
   <style>
     :root {
       --bg:#0b0d14; --panel:#121625; --muted:#aab2d5; --text:#eaf0ff; --accent:#5aa8ff; --ok:#4ade80; --warn:#fbbf24;
+      --ring: rgba(90,168,255,.45);
     }
+    *{box-sizing:border-box}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:radial-gradient(1200px 800px at 10% -10%,#10162a 0%,#070a12 40%,#05070d 70%),var(--bg);color:var(--text)}
-    .wrap{max-width:1100px;margin:0 auto;padding:32px}
-    .card{background:linear-gradient(180deg,#121625 0%,#0f1320 100%);border:1px solid #1c2238;border-radius:16px;padding:20px;box-shadow:0 8px 28px rgba(0,0,0,.45)}
-    h1{margin:8px 0 16px;font-weight:800;letter-spacing:.2px}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .card{background:linear-gradient(180deg,#121625 0%,#0f1320 100%);border:1px solid #1c2238;border-radius:16px;padding:16px;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+    h1{margin:8px 0 16px;font-weight:800;letter-spacing:.2px;font-size:clamp(20px,3.3vw,28px)}
     .muted{color:var(--muted);font-size:.95rem}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-    .btn{background:var(--accent);color:#041325;border:none;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn{background:var(--accent);color:#041325;border:none;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.15s;min-height:44px}
     .btn:hover{transform:translateY(-1px)}
-    .chip{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid #223055;border-radius:999px;background:#0c1222;font-size:.9rem;margin:6px 6px 0 0;cursor:pointer;user-select:none}
+    .btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+    .chip{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid #223055;border-radius:999px;background:#0c1222;font-size:.9rem;margin:6px 6px 0 0;cursor:pointer;user-select:none;min-height:38px}
     .chip.active{background:#102247;border-color:#2c4a86}
     label{display:block;margin:10px 0 6px}
-    input[type="text"], textarea, select{width:100%;padding:10px 12px;border:1px solid #223055;border-radius:10px;background:#0c1222;color:var(--text)}
-    textarea{min-height:90px;resize:vertical}
+    input[type="text"], textarea, select{width:100%;padding:12px;border:1px solid #223055;border-radius:10px;background:#0c1222;color:var(--text);min-height:44px}
+    textarea{min-height:96px;resize:vertical}
     .kicker{font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;color:#9fb6ff}
     .idea{border:1px solid #243055;border-radius:14px;background:#0c1222;padding:14px}
-    .pill{display:inline-block;font-size:.8rem;padding:6px 9px;border-radius:999px;border:1px solid #2a3b6a;background:#0e1a33;margin-right:8px}
+    .pill{display:inline-block;font-size:.8rem;padding:6px 9px;border-radius:999px;border:1px solid #2a3b6a;background:#0e1a33;margin-right:8px;margin-bottom:4px}
     .ok{color:var(--ok)} .warn{color:var(--warn)}
-    .right{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+    .right{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap}
     .hide{display:none}
+    .chips-grid{display:flex;flex-wrap:wrap;margin:-6px 0 0 -6px}
+    .chips-grid .chip{margin:6px}
+
+    /* Focus rings (a11y) */
+    .btn:focus-visible, .chip:focus-visible, select:focus-visible, textarea:focus-visible, input[type="text"]:focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 2px;
+    }
+
+    /* Results state */
+    #results[aria-busy="true"]{opacity:.7}
+    #statusNote{font-size:.9rem;color:#9fb6ff;margin:6px 0 0}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .row{grid-template-columns:1fr}
+      .row-3{grid-template-columns:1fr;gap:12px}
+      .wrap{padding:16px}
+    }
+    @media (max-width: 520px){
+      .btn{width:100%}
+      .card{padding:14px}
+      input[type="text"], textarea, select{min-height:40px}
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .btn:hover{transform:none}
+    }
   </style>
 </head>
 <body>
@@ -37,48 +69,55 @@
     <div class="card">
       <div class="kicker">BeAwarely / Tools</div>
       <h1>AI Inventor — Category Synthesizer (V2)</h1>
-      <p class="muted">Wybierz kategorie i priorytety. AI złoży 3 warianty (Lean / Balanced / Bold) z mini-BOM, oceną kosztów i ryzyka. <span id="authInfo"></span></p>
-      <div id="authGate" class="warn pill hide">Only for logged-in users.</div>
+      <p class="muted">
+        Wybierz kategorie i priorytety. AI złoży 3 warianty (Lean / Balanced / Bold) z mini-BOM, oceną kosztów i ryzyka.
+        <span id="authInfo"></span>
+      </p>
+      <div id="authGate" class="warn pill hide" role="status" aria-live="polite">Only for logged-in users.</div>
 
       <div class="row" style="margin-top:14px">
+        <!-- Left: inputs -->
         <div class="card" style="padding:16px">
           <label>Kategorie (multi)</label>
-          <div id="catChips"></div>
+          <div id="catChips" class="chips-grid"></div>
 
           <div class="row" style="margin-top:12px">
             <div>
-              <label>Priorytet celu</label>
-              <select id="goal">
+              <label for="goal">Priorytet celu</label>
+              <select id="goal" aria-label="Goal priority">
                 <option value="cost">Cheaper</option>
                 <option value="performance">Better performance</option>
                 <option value="manufacturing">Easier to produce</option>
               </select>
             </div>
             <div>
-              <label>Budżet (szacunek) – tekstowo</label>
-              <input id="budget" type="text" placeholder="np. < €200 prototyp / < €20 jednostkowo"/>
+              <label for="budget">Budżet (szacunek) – tekstowo</label>
+              <input id="budget" type="text" placeholder="np. < €200 prototyp / < €20 jednostkowo" />
             </div>
           </div>
 
-          <label style="margin-top:12px">Materiały/ograniczenia (opcjonalnie)</label>
+          <label for="constraints" style="margin-top:12px">Materiały/ograniczenia (opcjonalnie)</label>
           <input id="constraints" type="text" placeholder="np. tylko materiały z recyclingu; brak rzadkich metali; EU compliance"/>
 
-          <label style="margin-top:12px">Opis kontekstu/problem</label>
+          <label for="problem" style="margin-top:12px">Opis kontekstu/problem</label>
           <textarea id="problem" placeholder="W czym rzecz? np. tani, trwały panel solarny do balkonów w klimacie NL..."></textarea>
 
           <div class="right">
-            <button id="genBtn" class="btn">Generate concepts</button>
+            <button id="genBtn" class="btn" aria-controls="results">Generate concepts</button>
           </div>
+          <div id="statusNote" class="muted" aria-live="polite"></div>
         </div>
 
+        <!-- Right: output -->
         <div class="card" style="padding:16px">
-  <div class="kicker">Output</div>
-  <div id="results" class="muted">Wyniki pojawią się tutaj.</div>
-  <div class="right" style="gap:8px">
-    <button id="saveBtn" class="btn" disabled>Save to BeAwarely</button>
-    <button id="submitBtn" class="btn" disabled>Submit for review</button>
-  </div>
-</div>
+          <div class="kicker">Output</div>
+          <div id="results" class="muted" aria-live="polite">Wyniki pojawią się tutaj.</div>
+          <div class="right" style="gap:8px">
+            <button id="saveBtn" class="btn" disabled>Save to BeAwarely</button>
+            <button id="submitBtn" class="btn" disabled>Submit for review</button>
+          </div>
+        </div>
+      </div>
 
       <div class="card" style="margin-top:16px;padding:16px">
         <div class="kicker">Note</div>
@@ -89,7 +128,7 @@
 
   <script>
     // ====== CONFIG ======
-    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co"; // Twój projekt
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
     const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
 
     const CATEGORIES = [
@@ -103,11 +142,16 @@
     // ====== AUTH GATE ======
     let currentUser = null;
     async function checkAuth(){
-      const { data: { user } } = await sb.auth.getUser();
-      currentUser = user;
-      document.getElementById("authInfo").textContent = user ? `Logged in as ${user.email}` : "";
-      document.getElementById("authGate").classList.toggle("hide", !!user);
-      document.getElementById("genBtn").disabled = !user; // generowanie tylko dla zalogowanych
+      try{
+        const { data: { user } } = await sb.auth.getUser();
+        currentUser = user;
+        document.getElementById("authInfo").textContent = user ? `Logged in as ${user.email}` : "";
+        document.getElementById("authGate").classList.toggle("hide", !!user);
+        toggleGenDisabled(!user);
+      }catch(err){
+        console.error(err);
+        toggleGenDisabled(true);
+      }
     }
     checkAuth();
     sb.auth.onAuthStateChange((_ev, session)=>{
@@ -115,26 +159,32 @@
       checkAuth();
     });
 
+    function toggleGenDisabled(disabled){
+      const b = document.getElementById("genBtn");
+      if (b) b.disabled = !!disabled;
+    }
+
     // ====== UI: CATEGORY CHIPS ======
     const catEl = document.getElementById("catChips");
     const activeCats = new Set();
     CATEGORIES.forEach(c=>{
-      const chip = document.createElement("div");
+      const chip = document.createElement("button");
+      chip.type = "button";
       chip.className = "chip";
+      chip.setAttribute("aria-pressed","false");
       chip.textContent = c;
       chip.onclick = ()=>{
-        if(activeCats.has(c)){ activeCats.delete(c); chip.classList.remove("active"); }
-        else { activeCats.add(c); chip.classList.add("active"); }
+        const isActive = activeCats.has(c);
+        if(isActive){ activeCats.delete(c); chip.classList.remove("active"); chip.setAttribute("aria-pressed","false"); }
+        else { activeCats.add(c); chip.classList.add("active"); chip.setAttribute("aria-pressed","true"); }
       }
       catEl.appendChild(chip);
     });
 
     // ====== LLM STUB (podłączysz Mistral/OpenAI) ======
     async function callLLM(prompt){
-      // TODO: Zamień na realne wywołanie (Edge Function / własny proxy / lokalny model)
-      // return await fetch("/api/llm", {method:"POST", body: JSON.stringify({prompt})}).then(r=>r.json());
-      // Tymczasowo – symulacja:
-      await new Promise(r=>setTimeout(r, 600)); // sztuczne opóźnienie
+      // TODO: podmień na realny endpoint (Edge Function / proxy / lokalny model)
+      await new Promise(r=>setTimeout(r, 650)); // symulacja
       return {
         variants: [
           {
@@ -191,15 +241,17 @@ POLICY:
     let lastOutputs = null;
     function renderResults(data){
       const box = document.getElementById("results");
+      box.setAttribute("aria-busy","false");
       box.innerHTML = "";
       const grid = document.createElement("div");
       grid.className = "row-3";
+
       data.variants.forEach(v=>{
         const el = document.createElement("div");
         el.className = "idea";
         el.innerHTML = `
           <div class="pill">${v.name}</div>
-          <p>${v.summary}</p>
+          <p style="margin:.4rem 0 0.6rem">${v.summary}</p>
           <div class="muted"><b>BOM:</b> ${v.bom.join(", ")}</div>
           <div class="muted"><b>Process:</b> ${v.process}</div>
           <div style="margin-top:6px">
@@ -220,22 +272,43 @@ POLICY:
         note.textContent = data.notes;
         box.appendChild(note);
       }
-      document.getElementById("saveBtn").disabled = false;
-      document.getElementById("submitBtn").disabled = false;
+      setActionsEnabled(true);
     }
+
+    function setActionsEnabled(enabled){
+      document.getElementById("saveBtn").disabled = !enabled;
+      document.getElementById("submitBtn").disabled = !enabled;
+    }
+
+    function setGenerating(isGen){
+      const genBtn = document.getElementById("genBtn");
+      const status = document.getElementById("statusNote");
+      const results = document.getElementById("results");
+      genBtn.disabled = isGen || !currentUser;
+      results.setAttribute("aria-busy", String(!!isGen));
+      status.textContent = isGen ? "Generating…" : "";
+    }
+
+    function avg(nums){ return Math.round(nums.reduce((a,b)=>a+b,0)/nums.length); }
 
     // ====== EVENTS ======
     document.getElementById("genBtn").onclick = async ()=>{
       if(!currentUser){ alert("Log in to use AI Inventor."); return; }
       const prompt = buildPrompt();
-      document.getElementById("results").textContent = "Generating…";
+      const results = document.getElementById("results");
+      results.textContent = "Generating…";
+      setActionsEnabled(false);
+      setGenerating(true);
       try{
         const data = await callLLM(prompt);
         lastOutputs = { prompt, data };
         renderResults(data);
       }catch(e){
         console.error(e);
-        document.getElementById("results").textContent = "Generation failed.";
+        results.textContent = "Generation failed.";
+        setActionsEnabled(false);
+      }finally{
+        setGenerating(false);
       }
     };
 
@@ -252,7 +325,7 @@ POLICY:
           problem: document.getElementById("problem").value.trim()
         },
         outputs: lastOutputs.data,
-        scores: { // agregaty (prosty przykład)
+        scores: {
           cost: avg(lastOutputs.data.variants.map(v=>v.scores.cost)),
           performance: avg(lastOutputs.data.variants.map(v=>v.scores.performance)),
           manufacturability: avg(lastOutputs.data.variants.map(v=>v.scores.manufacturability)),
@@ -265,44 +338,33 @@ POLICY:
       else { alert("Saved to BeAwarely ✓"); }
     };
 
-    function avg(nums){ return Math.round(nums.reduce((a,b)=>a+b,0)/nums.length); }
-  </script>
-
-  <script>
-  // w miejscu gdzie ustawiasz lastOutputs i odblokowujesz zapis:
-  // po renderResults(...) dopisz:
-  // document.getElementById("submitBtn").disabled = false;
-
-  document.getElementById("submitBtn").onclick = async () => {
-    if (!currentUser || !lastOutputs) return;
-
-    const payload = {
-      user_id: currentUser.id,
-      mode: "v2",
-      categories: [...activeCats],
-      constraints: {
-        goal: document.getElementById("goal").value,
-        budget: document.getElementById("budget").value.trim(),
-        constraints: document.getElementById("constraints").value.trim(),
-        problem: document.getElementById("problem").value.trim()
-      },
-      outputs: lastOutputs.data,
-      scores: {
-        cost: avg(lastOutputs.data.variants.map(v=>v.scores.cost)),
-        performance: avg(lastOutputs.data.variants.map(v=>v.scores.performance)),
-        manufacturability: avg(lastOutputs.data.variants.map(v=>v.scores.manufacturability)),
-        risk: avg(lastOutputs.data.variants.map(v=>v.scores.risk)),
-        novelty: avg(lastOutputs.data.variants.map(v=>v.scores.novelty)),
-      },
-      status: "pending",
-      visibility: "private"
+    document.getElementById("submitBtn").onclick = async ()=>{
+      if (!currentUser || !lastOutputs) return;
+      const payload = {
+        user_id: currentUser.id,
+        mode: "v2",
+        categories: [...activeCats],
+        constraints: {
+          goal: document.getElementById("goal").value,
+          budget: document.getElementById("budget").value.trim(),
+          constraints: document.getElementById("constraints").value.trim(),
+          problem: document.getElementById("problem").value.trim()
+        },
+        outputs: lastOutputs.data,
+        scores: {
+          cost: avg(lastOutputs.data.variants.map(v=>v.scores.cost)),
+          performance: avg(lastOutputs.data.variants.map(v=>v.scores.performance)),
+          manufacturability: avg(lastOutputs.data.variants.map(v=>v.scores.manufacturability)),
+          risk: avg(lastOutputs.data.variants.map(v=>v.scores.risk)),
+          novelty: avg(lastOutputs.data.variants.map(v=>v.scores.novelty)),
+        },
+        status: "pending",
+        visibility: "private"
+      };
+      const { error } = await sb.from("inventor_ideas").insert(payload);
+      if (error) alert("Submit failed: " + error.message);
+      else alert("Sent to review ✓");
     };
-
-    const { error } = await sb.from("inventor_ideas").insert(payload);
-    if (error) alert("Submit failed: " + error.message);
-    else alert("Sent to review ✓");
-  };
-</script>
-
+  </script>
 </body>
 </html>
