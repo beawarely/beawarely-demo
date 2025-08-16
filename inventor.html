@@ -22,7 +22,22 @@
     .btn{background:var(--accent);color:#041325;border:none;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.15s;min-height:44px}
     .btn:hover{transform:translateY(-1px)}
     .btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
-    .chip{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid #223055;border-radius:999px;background:#0c1222;font-size:.9rem;margin:6px 6px 0 0;cursor:pointer;user-select:none;min-height:38px}
+    .chip {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #223055;
+  border-radius: 999px;
+  background: #0c1222;
+  color: #e7ebff; /* jasny kolor tekstu */
+  font-size: .9rem;
+  margin: 6px 6px 0 0;
+  cursor: pointer;
+  user-select: none;
+  min-height: 38px;
+}
+
     .chip.active{background:#102247;border-color:#2c4a86}
     label{display:block;margin:10px 0 6px}
     input[type="text"], textarea, select{width:100%;padding:12px;border:1px solid #223055;border-radius:10px;background:#0c1222;color:var(--text);min-height:44px}
@@ -62,9 +77,7 @@
     @media (prefers-reduced-motion: reduce){
       .btn:hover{transform:none}
     }
-    .cat {
-  color: #e7ebff; /* jasny kolor tekstu kategorii */
-}
+    
 
   </style>
 </head>
