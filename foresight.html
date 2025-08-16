@@ -2,412 +2,384 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>BeAwarely – Foresight</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Profile – BeAwarely</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     :root {
-      --bg: #0a0b10;
-      --panel: #11131a;
-      --panel-2: #0f1218;
-      --text: #e7ebff;
-      --muted: #aab2d5;
-      --accent: #5aa8ff; /* primary blue */
-      --accent-2: #89c2ff; /* lighter blue */
-      --success: #19c37d;
-      --danger: #ff5252;
-      --warning: #ffb020;
-      --ring: rgba(90,168,255,0.5);
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
-      --radius: 16px;
+      --bg: radial-gradient(ellipse at top, #0d0d2b 0%, #000000 100%);
+      --panel: rgba(30, 30, 30, 0.9);
+      --text: #fff;
+      --muted: #ccc;
+      --blue: #007bff;
+      --blue-strong: #005fcc;
+      --border: rgba(255,255,255,0.08);
+      --trust: #00cc66;
     }
 
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+
     body {
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 10% -10%, #0f1424 0%, var(--bg) 50%) no-repeat fixed;
+      padding: 40px 20px 60px;
+      background: var(--bg);
       color: var(--text);
-      line-height: 1.45;
+      text-align: center;
     }
 
-    a { color: var(--accent-2); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    a:focus-visible, button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+    .back-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background-color: var(--blue);
+      color: white;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform .15s ease, background-color .25s ease;
+      z-index: 10;
+    }
+    .back-btn:hover { background-color: var(--blue-strong); transform: translateY(-1px); }
 
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 64px; }
+    .profile-box {
+      max-width: 680px;
+      margin: 60px auto 0;
+      background-color: var(--panel);
+      padding: 30px 24px;
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
 
-    /* Top panel */
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
+    .profile-pic {
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--blue);
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin: 6px 0 4px;
+    }
+
+    .email {
+      font-size: 0.98rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+      word-break: break-word;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
       gap: 16px;
-      align-items: center;
-      padding: 16px 18px;
-      background: linear-gradient(180deg, #121724 0%, #0e1422 100%);
-      border: 1px solid #1a2236;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      position: sticky; top: 16px; z-index: 10;
-      backdrop-filter: blur(6px);
+      flex-wrap: wrap;
+      margin: 8px 0 18px;
+      font-size: 0.95rem;
     }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand .logo {
-      width: 34px; height: 34px; border-radius: 10px;
-      background: conic-gradient(from 140deg, var(--accent), #7f5af0, #00e5ff, var(--accent));
-      box-shadow: 0 0 0 2px #1a2236, 0 0 30px rgba(90,168,255,0.25);
+
+    .stat {
+      flex: 1;
+      min-width: 150px;
+      padding: 10px 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
     }
-    .brand h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
-    .brand h1 span { opacity: .7; font-weight: 600; }
 
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 14px; border-radius: 12px; border: 1px solid #24304b;
-      background: #121a2b; color: var(--text); cursor: pointer;
-      transition: .15s ease all; font-weight: 600; text-decoration: none;
+    .stat strong {
+      display: block;
+      font-size: 1.25rem;
+      margin-top: 6px;
     }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.35), 0 0 0 3px var(--ring); }
-    .btn.primary { background: linear-gradient(180deg, var(--accent) 0%, #477fd8 100%); border-color: #356cbf; }
 
-    .hint { color: var(--muted); font-size: 12px; }
-
-    /* Layout */
-    .grid {
-      display: grid;
-      grid-template-columns: 320px 1fr 320px;
-      gap: 22px;
-      margin-top: 20px;
-    }
-    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
-
-    .card {
-      padding: 18px;
-      background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
-      border: 1px solid #1a2236;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .card h2 { margin: 0 0 12px; font-size: 18px; letter-spacing: .3px; }
-
-    /* Oracle */
-    .oracle {
-      background:
-        radial-gradient(700px 300px at 50% 0, rgba(90,168,255,.18), transparent 60%),
-        linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    .trust-bar {
+      background-color: #333;
+      border-radius: 20px;
+      height: 10px;
+      width: 86%;
+      margin: 6px auto 8px;
       position: relative;
       overflow: hidden;
     }
-    .oracle .stamp {
-      position: absolute; inset: 0; pointer-events: none;
-      background: radial-gradient(800px 120px at 50% 0, rgba(90,168,255,.08), transparent 60%);
-    }
-    .oracle .title { display: flex; align-items: center; gap: 10px; }
-    .oracle .title .dot {
-      width: 9px; height: 9px; border-radius: 50%; background: var(--success);
-      box-shadow: 0 0 16px var(--success);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: .7; }
-    }
-    .oracle .meta {
-      display: flex; gap: 14px; align-items: center;
-      color: var(--muted); font-size: 13px; margin: 6px 0 6px; flex-wrap: wrap;
-    }
-    .oracle .body { margin-top: 12px; font-size: 15px; color: #eaf1ff; }
-    .oracle .body p { margin: 0 0 10px; }
 
-    .oracle .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .chip { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #0f1727; border: 1px solid #23304b; color: #d3dcff; }
-
-    /* History */
-    .history ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-    .event {
-      display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center;
-      padding: 10px; border: 1px solid #1a2236; background: #0d1220; border-radius: 12px;
+    .trust-fill {
+      background-color: var(--trust);
+      height: 100%;
+      width: 0%;
+      border-radius: 20px;
+      transition: width .35s ease;
     }
-    .event .date { font-weight: 700; color: #cfe2ff; }
-    .event .topic { color: var(--muted); font-size: 13px; }
-    .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; border: 1px solid #2b3756; background: #0c1324; }
-    .badge.ok { color: var(--success); border-color: rgba(25,195,125,.4); }
-    .badge.low { color: var(--warning); border-color: rgba(255,176,32,.4); }
 
-    /* Stats */
-    .kpis { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
-    .kpi { padding: 12px; background: #0d1220; border: 1px solid #1a2236; border-radius: 12px; }
-    .kpi .value { font-size: 22px; font-weight: 800; letter-spacing: .3px; }
-    .kpi .label { color: var(--muted); font-size: 12px; }
+    .badges {
+      margin: 14px 0 22px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
-    canvas { width: 100%; height: 180px; display: block; }
+    .badge {
+      background: rgba(0, 123, 255, 0.12);
+      border: 1px solid var(--blue);
+      color: #66b2ff;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
 
-    /* Category buttons */
-    .categories {
-      margin-top: 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    .btn-group {
+      display: flex;
+      justify-content: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
-    @media (max-width: 800px) { .categories { grid-template-columns: repeat(2, 1fr); } }
-    .cat {
-      padding: 14px;
-      border-radius: 14px;
-      background: linear-gradient(180deg, #0e1526, #0b1324);
-      border: 1px solid #1a2236;
-      display: flex; gap: 10px; align-items: center; justify-content: center;
-      font-weight: 700; letter-spacing: .3px; cursor: pointer;
-      transition: .2s ease transform, .2s ease box-shadow, .2s ease filter;
-      color: var(--text);
-      text-decoration: none;
-      min-width: 0; width: 100%;
+
+    .btn {
+      background-color: var(--blue);
+      color: white;
+      border: none;
+      padding: 11px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background-color 0.25s, transform 0.15s;
+      min-width: 140px;
     }
-    .cat:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.35), 0 0 0 3px var(--ring); }
-    .cat.lock::after { content: '🔒'; margin-left: 6px; opacity: .9; }
-    .cat.lock { filter: grayscale(.2); }
 
-    /* Modal */
-    dialog {
-      border: 1px solid #27324d; border-radius: 14px; padding: 18px; background: #0f1524; color: var(--text); width: min(520px, 92vw);
-      box-shadow: var(--shadow);
+    .btn:hover { background-color: var(--blue-strong); transform: translateY(-1px); }
+    .btn.secondary { background-color: #444; }
+    .btn.secondary:hover { background-color: #555; }
+
+    .upload-wrap {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--border);
     }
-    dialog::backdrop { background: rgba(0,0,0,.6); }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
 
-    .footer-note { margin-top: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+    .helper {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
 
-    @media (prefers-reduced-motion: reduce) {
-      .btn:hover, .cat:hover { transform: none; box-shadow: none; }
-      .oracle .title .dot { animation: none; }
+    .sr {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 68px 14px 54px; }
+      .profile-box { padding: 24px 16px; border-radius: 14px; }
+      .profile-pic { width: 116px; height: 116px; }
+      .back-btn { top: 12px; left: 12px; padding: 9px 12px; }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- Top panel -->
-    <div class="topbar" role="banner">
-      <div class="brand" aria-label="BeAwarely Foresight">
-        <div class="logo" aria-hidden="true"></div>
-        <h1>BeAwarely <span>· Foresight</span></h1>
+  <!-- 🔙 Back to Homepage -->
+  <button class="back-btn" onclick="window.location.href='index.html'">← Back to Homepage</button>
+
+  <div class="profile-box" role="region" aria-label="User profile">
+    <img id="profile-pic" src="images/default-avatar.png" alt="Your profile photo" class="profile-pic" />
+
+    <h1 id="user-name">Loading…</h1>
+    <div class="email" id="user-email">Loading…</div>
+
+    <div class="stats">
+      <div class="stat">
+        Role
+        <strong id="role-val">—</strong>
       </div>
-      <a class="btn" href="index.html" id="backHome" title="Back to Home">← Back to Home</a>
-      <button class="btn primary" id="refreshBtn" title="Refresh predictions (demo)">⟳ Refresh</button>
+
+      <div class="stat">
+        Trust Score
+        <div class="trust-bar" aria-label="Trust score">
+          <div class="trust-fill" id="trust-fill" style="width:0%"></div>
+        </div>
+        <strong id="trust-val">— / 100</strong>
+      </div>
+
+      <div class="stat">
+        Activity Points
+        <strong id="points-val">—</strong>
+      </div>
     </div>
 
-    <!-- Main layout -->
-    <div class="grid" role="main">
-      <!-- Left: History -->
-      <aside class="card history" aria-label="Prediction history">
-        <h2>Prediction History</h2>
-        <p class="hint">Recent weekly calls with confidence & outcomes.</p>
-        <ul id="historyList">
-          <!-- Sample rows (replace with real data) -->
-          <li class="event">
-            <div class="date">2025-08-10</div>
-            <div>
-              <div>Bitcoin spikes above $70k</div>
-              <div class="topic">Crypto · Confidence 62%</div>
-            </div>
-            <span class="badge ok">Correct</span>
-          </li>
-          <li class="event">
-            <div class="date">2025-08-03</div>
-            <div>
-              <div>ECB holds rates unchanged</div>
-              <div class="topic">Economy · Confidence 71%</div>
-            </div>
-            <span class="badge low">Pending</span>
-          </li>
-          <li class="event">
-            <div class="date">2025-07-27</div>
-            <div>
-              <div>Major LLM open-weights release</div>
-              <div class="topic">AI/Tech · Confidence 55%</div>
-            </div>
-            <span class="badge ok">Correct</span>
-          </li>
-        </ul>
-      </aside>
+    <div class="badges" id="badges"></div>
 
-      <!-- Center: Oracle -->
-      <main class="card oracle" aria-label="This week's oracle">
-        <div class="stamp" aria-hidden="true"></div>
-        <div class="title">
-          <div class="dot" aria-hidden="true"></div>
-          <h2>This Week’s Oracle</h2>
-        </div>
-        <div class="meta">
-          <div id="lastUpdated">Last update: <strong>Aug 12, 2025</strong></div>
-          <div>Model: <strong>Mistral-7B (planned)</strong></div>
-        </div>
-        <div class="body" id="oracleBody">
-          <p><strong>Headline:</strong> A cautious risk-on mood builds across crypto and growth tech as macro data softens without signaling recession.</p>
-          <p><strong>Outlook (7–10 days):</strong> Expect choppy upside in BTC and top AI equities; ECB commentary and US CPI prints are likely swing catalysts. Watch for liquidity gaps on weekends.</p>
-          <div class="chips" aria-label="Topics">
-            <span class="chip">Macro</span>
-            <span class="chip">Crypto</span>
-            <span class="chip">AI</span>
-            <span class="chip">Energy</span>
-          </div>
-
-          <div class="categories" aria-label="Topic quick links">
-            <a class="cat" data-topic="economy" href="#">Economy</a>
-            <a class="cat" data-topic="geopolitics" href="#">Geopolitics</a>
-            <a class="cat" data-topic="technology" href="#">Technology</a>
-            <a class="cat" data-topic="crypto" href="#">Crypto</a>
-            <a class="cat" data-topic="health" href="#">Health</a>
-            <a class="cat" data-topic="climate" href="#">Climate</a>
-            <a class="cat" data-topic="culture" href="#">Culture</a>
-            <a class="cat" data-topic="sports" href="#">Sports</a>
-          </div>
-        </div>
-      </main>
-
-      <!-- Right: Stats -->
-      <aside class="card" aria-label="Global statistics">
-        <h2>Global Stats</h2>
-        <div class="kpis">
-          <div class="kpi"><div class="value" id="kpiTotal">128</div><div class="label">Total predictions</div></div>
-          <div class="kpi"><div class="value" id="kpiAcc">64%</div><div class="label">30-day accuracy</div></div>
-          <div class="kpi"><div class="value" id="kpiConf">58%</</div><div class="label">Mean confidence</div></div>
-          <div class="kpi"><div class="value" id="kpiTopics">12</div><div class="label">Topics covered</div></div>
-        </div>
-        <div style="margin-top: 12px;">
-          <canvas id="miniChart" width="500" height="180" aria-label="Accuracy trend chart"></canvas>
-          <p class="hint">Rolling accuracy (last 12 weeks).</p>
-        </div>
-      </aside>
+    <div class="btn-group">
+      <button class="btn secondary" onclick="alert('Edit profile – coming soon')">Edit Profile</button>
+      <button class="btn secondary" onclick="alert('Report – coming soon')">Report Issue</button>
+      <button class="btn" onclick="logoutUser()">Log Out</button>
     </div>
 
-    <p class="footer-note">Demo only · Content is illustrative. Private access will require login.</p>
+    <!-- Upload avatar -->
+    <div class="upload-wrap">
+      <label for="avatar-upload"><strong>Upload your photo</strong> (max 2MB):</label><br><br>
+      <input type="file" id="avatar-upload" accept="image/*" style="margin-bottom: 10px;" />
+      <button class="btn" id="upload-btn" onclick="uploadAvatar()">Upload</button>
+      <div class="helper">TIP: Square images look best. Supported: JPG/PNG/WebP.</div>
+    </div>
   </div>
 
-  <!-- Login required modal -->
-  <dialog id="authModal" aria-labelledby="authTitle" aria-describedby="authDesc">
-    <h3 id="authTitle">Login required</h3>
-    <p id="authDesc">You need to be signed in to view detailed category pages.</p>
-    <div class="modal-actions">
-      <button class="btn" id="closeModal">Close</button>
-      <a class="btn primary" href="index.html?login=1">Log in</a>
-    </div>
-  </dialog>
-
-  <!-- Supabase (same version as index.html) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ---- CONFIG ----
-    const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-    const sb = window.supabase.createClient(SB_URL, SB_KEY); // anon public key is fine client-side
+    // Supabase init
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ---- DOM ----
-    const authModal = document.getElementById('authModal');
-    const catButtons = [...document.querySelectorAll('.cat')];
-    const lastUpdatedEl = document.getElementById('lastUpdated');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const miniChart = document.getElementById('miniChart');
+    // Small helpers
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n|0));
 
-    // ---- CATEGORIES GATING ----
-    function wireCategoryClicks(authed){
-      console.log('Authenticated:', authed); // DEBUG
-      catButtons.forEach(el => {
-        el.classList.toggle('lock', !authed);
-        el.title = authed ? '' : 'Login required';
-        el.onclick = (e) => {
-          e.preventDefault();
-          if (!authed) {
-            if (authModal?.showModal) authModal.showModal();
-            return;
-          }
-          // Navigate to topic page (create these files later)
-          const topic = el.dataset.topic;
-          location.href = `foresight-${topic}.html`;
-        };
-      });
-    }
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Auth check
+      const { data, error } = await supabaseClient.auth.getUser();
+      const user = data?.user;
 
-    async function applyAuthState(){
-      const { data:{ session } } = await sb.auth.getSession();
-      wireCategoryClicks(!!session);
-    }
-    applyAuthState();
-    sb.auth.onAuthStateChange((_event, _session) => applyAuthState());
-
-    // ---- MODAL CLOSE ----
-    document.getElementById('closeModal')?.addEventListener('click', () => authModal?.close());
-    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') authModal?.close(); });
-    authModal?.addEventListener('click', (e)=>{ if (e.target === authModal) authModal.close(); });
-
-    // ---- REFRESH BUTTON (demo) ----
-    function fmtDate(d){
-      const opts = { year:'numeric', month:'short', day:'2-digit' };
-      return d.toLocaleDateString('en-US', opts);
-    }
-    function setLastUpdatedNow(){
-      const now = new Date();
-      lastUpdatedEl.innerHTML = 'Last update: <strong>'+ fmtDate(now) +'</strong>';
-    }
-    refreshBtn?.addEventListener('click', () => {
-      setLastUpdatedNow();
-      drawMiniChart(true); // re-seed data (demo)
-    });
-
-    // ---- MINI CHART (pure canvas) ----
-    function drawMiniChart(reseed=false){
-      if (!miniChart) return;
-      const ctx = miniChart.getContext('2d');
-      const w = miniChart.width, h = miniChart.height;
-      ctx.clearRect(0,0,w,h);
-
-      // grid
-      ctx.globalAlpha = 0.3;
-      ctx.strokeStyle = '#23304b';
-      for (let i=0;i<=4;i++){
-        const y = (h/4)*i + 0.5;
-        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+      if (!user) {
+        alert("You are not logged in.");
+        window.location.href = "index.html";
+        return;
       }
-      ctx.globalAlpha = 1;
 
-      // demo data (12 points: accuracy in %)
-      if (reseed || !drawMiniChart.data) {
-        const base = 55 + Math.random()*10;
-        drawMiniChart.data = Array.from({length:12}, (_,i)=> {
-          const noise = (Math.random()-0.5)*8;
-          return Math.max(40, Math.min(90, base + i*0.8 + noise));
+      // Metadata
+      const meta = user.user_metadata || {};
+
+      // Avatar (with cache-busting)
+      const profilePic = document.getElementById("profile-pic");
+      if (meta.avatar_url) {
+        const bust = meta.avatar_url.includes("?") ? "&" + Date.now() : "?" + Date.now();
+        profilePic.src = meta.avatar_url + bust;
+      }
+
+      // Fill basic fields
+      document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
+      document.getElementById("user-email").textContent = user.email || "Unknown";
+      document.getElementById("role-val").textContent = meta.role || "User";
+
+      const trust = clamp(meta.trust_score ?? 0, 0, 100);
+      document.getElementById("trust-val").textContent = `${trust} / 100`;
+      document.getElementById("trust-fill").style.width = `${trust}%`;
+
+      document.getElementById("points-val").textContent = (meta.points ?? 0);
+
+      // Badges
+      const badgeContainer = document.getElementById("badges");
+      badgeContainer.innerHTML = "";
+      const badges = Array.isArray(meta.badges) ? meta.badges : [];
+      if (badges.length) {
+        badges.forEach(text => {
+          const div = document.createElement("div");
+          div.className = "badge";
+          div.textContent = text;
+          badgeContainer.appendChild(div);
         });
       }
-      const data = drawMiniChart.data;
 
-      // scale
-      const minY = 40, maxY = 90;
-      const px = (i)=> i*(w/(data.length-1));
-      const py = (v)=> h - ((v - minY)/(maxY-minY))*h;
+      // If essential fields missing, set safe defaults ONCE
+      if (meta.role == null || meta.points == null || meta.trust_score == null || meta.badges == null) {
+        const updates = {
+          data: {
+            role: meta.role ?? "Specialist",
+            points: meta.points ?? 320,
+            trust_score: meta.trust_score ?? 87,
+            badges: Array.isArray(meta.badges) ? meta.badges : [
+              "Verified Expert",
+              "100+ Posts",
+              "15 AI-Verified Answers"
+            ]
+          }
+        };
+        const { error: updateError } = await supabaseClient.auth.updateUser(updates);
+        if (updateError) {
+          console.error("❌ Metadata update error:", updateError.message);
+        } else {
+          console.log("✅ Metadata filled with defaults.");
+          location.reload();
+        }
+      }
+    });
 
-      // line
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#5aa8ff';
-      ctx.beginPath();
-      data.forEach((v,i)=> {
-        const x = Math.round(px(i)) + 0.5;
-        const y = Math.round(py(v)) + 0.5;
-        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      });
-      ctx.stroke();
-
-      // points
-      ctx.fillStyle = '#89c2ff';
-      data.forEach((v,i)=>{
-        const x = px(i), y = py(v);
-        ctx.beginPath(); ctx.arc(x,y,2.8,0,Math.PI*2); ctx.fill();
-      });
+    async function logoutUser() {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        alert("Error signing out");
+        console.error(error.message);
+      } else {
+        window.location.href = "index.html";
+      }
     }
 
-    // initial paint
-    setLastUpdatedNow();
-    drawMiniChart(true);
+    async function uploadAvatar() {
+      const fileInput = document.getElementById('avatar-upload');
+      const btn = document.getElementById('upload-btn');
+      const file = fileInput.files?.[0];
+
+      if (!file) { alert("Please select an image file."); return; }
+      if (!file.type.startsWith('image/')) { alert("Please select an image file (JPG/PNG/WebP)."); return; }
+
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxSize) { alert("Image is too large (max 2MB)."); return; }
+
+      btn.disabled = true; btn.textContent = 'Uploading…';
+
+      const { data: sessionData } = await supabaseClient.auth.getSession();
+      const user = sessionData?.session?.user;
+      if (!user) { alert("User not logged in."); btn.disabled = false; btn.textContent = 'Upload'; return; }
+
+      const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+      const filePath = `${user.id}/avatar.${fileExt}`; // first segment MUST be user.id (RLS)
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        alert("Upload failed: " + uploadError.message);
+        console.error(uploadError);
+        btn.disabled = false; btn.textContent = 'Upload';
+        return;
+      }
+
+      const { data: urlData } = supabaseClient.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = urlData.publicUrl;
+
+      // Save to user metadata
+      const { error: updateError } = await supabaseClient.auth.updateUser({
+        data: { avatar_url: avatarUrl }
+      });
+
+      if (updateError) {
+        alert("Failed to update profile: " + updateError.message);
+        console.error(updateError);
+        btn.disabled = false; btn.textContent = 'Upload';
+        return;
+      }
+
+      // Refresh current image with cache-buster
+      const img = document.getElementById('profile-pic');
+      const bust = avatarUrl.includes("?") ? "&" + Date.now() : "?" + Date.now();
+      img.src = avatarUrl + bust;
+
+      alert("Photo uploaded!");
+      btn.disabled = false; btn.textContent = 'Upload';
+    }
   </script>
 </body>
 </html>
+
