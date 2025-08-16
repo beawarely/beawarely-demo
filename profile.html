@@ -6,178 +6,218 @@
   <title>Your Profile – BeAwarely</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
+    :root {
+      --bg: radial-gradient(ellipse at top, #0d0d2b 0%, #000000 100%);
+      --panel: rgba(30, 30, 30, 0.9);
+      --text: #fff;
+      --muted: #ccc;
+      --blue: #007bff;
+      --blue-strong: #005fcc;
+      --border: rgba(255,255,255,0.08);
+      --trust: #00cc66;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 40px 20px;
-      background: radial-gradient(ellipse at top, #0d0d2b 0%, #000000 100%);
-      color: #fff;
+      padding: 40px 20px 60px;
+      background: var(--bg);
+      color: var(--text);
       text-align: center;
     }
 
+    .back-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background-color: var(--blue);
+      color: white;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform .15s ease, background-color .25s ease;
+      z-index: 10;
+    }
+    .back-btn:hover { background-color: var(--blue-strong); transform: translateY(-1px); }
+
     .profile-box {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: rgba(30, 30, 30, 0.9);
-      padding: 30px;
+      max-width: 680px;
+      margin: 60px auto 0;
+      background-color: var(--panel);
+      padding: 30px 24px;
       border-radius: 16px;
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--border);
+      text-align: center;
     }
 
     .profile-pic {
-      width: 120px;
-      height: 120px;
+      width: 128px;
+      height: 128px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid #007bff;
-      margin-bottom: 10px;
+      border: 3px solid var(--blue);
+      margin-bottom: 12px;
+      display: inline-block;
     }
 
     h1 {
-      font-size: 2.2rem;
-      margin-bottom: 10px;
+      font-size: 2rem;
+      margin: 6px 0 4px;
     }
 
     .email {
-      font-size: 1rem;
-      color: #ccc;
-      margin-bottom: 25px;
+      font-size: 0.98rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+      word-break: break-word;
     }
 
     .stats {
       display: flex;
       justify-content: space-around;
+      gap: 16px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      margin: 8px 0 18px;
       font-size: 0.95rem;
     }
 
     .stat {
       flex: 1;
-      min-width: 120px;
-      margin: 10px;
+      min-width: 150px;
+      padding: 10px 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
     }
 
     .stat strong {
       display: block;
-      font-size: 1.3rem;
-      margin-top: 4px;
-    }
-
-    .badges {
-      margin: 15px 0 25px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .badge {
-      background: rgba(0, 123, 255, 0.1);
-      border: 1px solid #007bff;
-      color: #66b2ff;
-      border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 0.85rem;
-    }
-
-    .btn-group {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: background-color 0.3s, transform 0.2s;
-    }
-
-    .btn:hover {
-      background-color: #005fcc;
-      transform: scale(1.05);
-    }
-
-    .btn.secondary {
-      background-color: #444;
+      font-size: 1.25rem;
+      margin-top: 6px;
     }
 
     .trust-bar {
       background-color: #333;
       border-radius: 20px;
       height: 10px;
-      width: 80%;
-      margin: 5px auto 10px;
+      width: 86%;
+      margin: 6px auto 8px;
       position: relative;
+      overflow: hidden;
     }
 
     .trust-fill {
-      background-color: #00cc66;
+      background-color: var(--trust);
       height: 100%;
+      width: 0%;
       border-radius: 20px;
+      transition: width .35s ease;
     }
 
-    @media (max-width: 500px) {
-      .stats {
-        flex-direction: column;
-        align-items: center;
-      }
+    .badges {
+      margin: 14px 0 22px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
-      .stat {
-        margin-bottom: 16px;
-      }
+    .badge {
+      background: rgba(0, 123, 255, 0.12);
+      border: 1px solid var(--blue);
+      color: #66b2ff;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
 
-      .btn-group {
-        flex-direction: column;
-      }
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background-color: var(--blue);
+      color: white;
+      border: none;
+      padding: 11px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background-color 0.25s, transform 0.15s;
+      min-width: 140px;
+    }
+
+    .btn:hover { background-color: var(--blue-strong); transform: translateY(-1px); }
+    .btn.secondary { background-color: #444; }
+    .btn.secondary:hover { background-color: #555; }
+
+    .upload-wrap {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .helper {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .sr {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 68px 14px 54px; }
+      .profile-box { padding: 24px 16px; border-radius: 14px; }
+      .profile-pic { width: 116px; height: 116px; }
+      .back-btn { top: 12px; left: 12px; padding: 9px 12px; }
     }
   </style>
 </head>
 <body>
-  <!-- 🔙 Back to Homepage button -->
-<button onclick="window.location.href='index.html'" 
-        style="position: absolute; top: 20px; left: 20px; 
-               background-color: #007bff; color: white; 
-               padding: 8px 16px; border: none; border-radius: 6px; 
-               font-size: 0.9rem; cursor: pointer; 
-               transition: background-color 0.3s;">
-  ← Back to Homepage
-</button>
+  <!-- 🔙 Back to Homepage -->
+  <button class="back-btn" onclick="window.location.href='index.html'">← Back to Homepage</button>
 
-  <div class="profile-box">
-    <img id="profile-pic" src="images/default-avatar.png" alt="Profile Photo" class="profile-pic" />
+  <div class="profile-box" role="region" aria-label="User profile">
+    <img id="profile-pic" src="images/default-avatar.png" alt="Your profile photo" class="profile-pic" />
+
     <h1 id="user-name">Loading…</h1>
     <div class="email" id="user-email">Loading…</div>
 
     <div class="stats">
       <div class="stat">
         Role
-        <strong>Specialist</strong>
+        <strong id="role-val">—</strong>
       </div>
+
       <div class="stat">
         Trust Score
-        <div class="trust-bar">
-          <div class="trust-fill" style="width: 87%;"></div>
+        <div class="trust-bar" aria-label="Trust score">
+          <div class="trust-fill" id="trust-fill" style="width:0%"></div>
         </div>
-        <strong>87 / 100</strong>
+        <strong id="trust-val">— / 100</strong>
       </div>
+
       <div class="stat">
         Activity Points
-        <strong>320</strong>
+        <strong id="points-val">—</strong>
       </div>
     </div>
 
-    <div class="badges">
-      <div class="badge">🎓 Verified Expert</div>
-      <div class="badge">💬 100+ Posts</div>
-      <div class="badge">🤖 15 AI-Verified Answers</div>
-    </div>
+    <div class="badges" id="badges"></div>
 
     <div class="btn-group">
       <button class="btn secondary" onclick="alert('Edit profile – coming soon')">Edit Profile</button>
@@ -186,83 +226,91 @@
     </div>
 
     <!-- Upload avatar -->
-<div style="margin-top: 30px;">
-  <label for="avatar-upload">Upload your photo:</label><br><br>
-  <input type="file" id="avatar-upload" accept="image/*" style="margin-bottom: 10px;" />
-  <button class="btn" onclick="uploadAvatar()">Upload</button>
-</div>
-
+    <div class="upload-wrap">
+      <label for="avatar-upload"><strong>Upload your photo</strong> (max 2MB):</label><br><br>
+      <input type="file" id="avatar-upload" accept="image/*" style="margin-bottom: 10px;" />
+      <button class="btn" id="upload-btn" onclick="uploadAvatar()">Upload</button>
+      <div class="helper">TIP: Square images look best. Supported: JPG/PNG/WebP.</div>
+    </div>
   </div>
 
   <script>
+    // Supabase init
     const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // Small helpers
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n|0));
+
     document.addEventListener('DOMContentLoaded', async () => {
-  const { data, error } = await supabaseClient.auth.getUser();
-  const user = data?.user;
+      // Auth check
+      const { data, error } = await supabaseClient.auth.getUser();
+      const user = data?.user;
 
-  if (!user) {
-    alert("You are not logged in.");
-    window.location.href = "index.html";
-    return;
-  }
+      if (!user) {
+        alert("You are not logged in.");
+        window.location.href = "index.html";
+        return;
+      }
 
-  // Metadane użytkownika
-  const meta = user.user_metadata || {};
-  
-  const profilePic = document.getElementById("profile-pic");
-if (meta.avatar_url) {
-  profilePic.src = meta.avatar_url;
-}
+      // Metadata
+      const meta = user.user_metadata || {};
 
+      // Avatar (with cache-busting)
+      const profilePic = document.getElementById("profile-pic");
+      if (meta.avatar_url) {
+        const bust = meta.avatar_url.includes("?") ? "&" + Date.now() : "?" + Date.now();
+        profilePic.src = meta.avatar_url + bust;
+      }
 
-  // Wypełnij dane w HTML
-  document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
-  document.getElementById("user-email").textContent = user.email || "Unknown";
-  document.querySelector(".stats .stat:nth-child(1) strong").textContent = meta.role || "User";
-  document.querySelector(".stats .stat:nth-child(2) strong").textContent = `${meta.trust_score || 0} / 100`;
-  document.querySelector(".trust-fill").style.width = `${meta.trust_score || 0}%`;
-  document.querySelector(".stats .stat:nth-child(3) strong").textContent = meta.points || 0;
+      // Fill basic fields
+      document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
+      document.getElementById("user-email").textContent = user.email || "Unknown";
+      document.getElementById("role-val").textContent = meta.role || "User";
 
-  // Odznaki
-  const badgeContainer = document.querySelector(".badges");
-  badgeContainer.innerHTML = "";
-  const badges = meta.badges || [];
-  badges.forEach(text => {
-    const badge = document.createElement("div");
-    badge.className = "badge";
-    badge.textContent = text;
-    badgeContainer.appendChild(badge);
-  });
+      const trust = clamp(meta.trust_score ?? 0, 0, 100);
+      document.getElementById("trust-val").textContent = `${trust} / 100`;
+      document.getElementById("trust-fill").style.width = `${trust}%`;
 
-  // Jeśli brak metadanych — ustaw domyślne TYLKO gdy pole nie istnieje (null/undefined)
-if (meta.role == null || meta.points == null || meta.trust_score == null) {
-  const updates = {
-    data: {
-      role: meta.role ?? "Specialist",
-      points: meta.points ?? 320,
-      trust_score: meta.trust_score ?? 87,
-      badges: Array.isArray(meta.badges) ? meta.badges : [
-        "Verified Expert",
-        "100+ Posts",
-        "15 AI-Verified Answers"
-      ]
-    }
-  };
-  const { error: updateError } = await supabaseClient.auth.updateUser(updates);
-  if (updateError) {
-    console.error("❌ Błąd aktualizacji metadanych:", updateError.message);
-  } else {
-    console.log("✅ Metadane uzupełnione");
-    location.reload();
-  }
-}
+      document.getElementById("points-val").textContent = (meta.points ?? 0);
 
+      // Badges
+      const badgeContainer = document.getElementById("badges");
+      badgeContainer.innerHTML = "";
+      const badges = Array.isArray(meta.badges) ? meta.badges : [];
+      if (badges.length) {
+        badges.forEach(text => {
+          const div = document.createElement("div");
+          div.className = "badge";
+          div.textContent = text;
+          badgeContainer.appendChild(div);
+        });
+      }
 
-});
+      // If essential fields missing, set safe defaults ONCE
+      if (meta.role == null || meta.points == null || meta.trust_score == null || meta.badges == null) {
+        const updates = {
+          data: {
+            role: meta.role ?? "Specialist",
+            points: meta.points ?? 320,
+            trust_score: meta.trust_score ?? 87,
+            badges: Array.isArray(meta.badges) ? meta.badges : [
+              "Verified Expert",
+              "100+ Posts",
+              "15 AI-Verified Answers"
+            ]
+          }
+        };
+        const { error: updateError } = await supabaseClient.auth.updateUser(updates);
+        if (updateError) {
+          console.error("❌ Metadata update error:", updateError.message);
+        } else {
+          console.log("✅ Metadata filled with defaults.");
+          location.reload();
+        }
+      }
+    });
 
     async function logoutUser() {
       const { error } = await supabaseClient.auth.signOut();
@@ -273,70 +321,64 @@ if (meta.role == null || meta.points == null || meta.trust_score == null) {
         window.location.href = "index.html";
       }
     }
+
+    async function uploadAvatar() {
+      const fileInput = document.getElementById('avatar-upload');
+      const btn = document.getElementById('upload-btn');
+      const file = fileInput.files?.[0];
+
+      if (!file) { alert("Please select an image file."); return; }
+      if (!file.type.startsWith('image/')) { alert("Please select an image file (JPG/PNG/WebP)."); return; }
+
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxSize) { alert("Image is too large (max 2MB)."); return; }
+
+      btn.disabled = true; btn.textContent = 'Uploading…';
+
+      const { data: sessionData } = await supabaseClient.auth.getSession();
+      const user = sessionData?.session?.user;
+      if (!user) { alert("User not logged in."); btn.disabled = false; btn.textContent = 'Upload'; return; }
+
+      const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+      const filePath = `${user.id}/avatar.${fileExt}`; // first segment MUST be user.id (RLS)
+
+      const { error: uploadError } = await supabaseClient.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        alert("Upload failed: " + uploadError.message);
+        console.error(uploadError);
+        btn.disabled = false; btn.textContent = 'Upload';
+        return;
+      }
+
+      const { data: urlData } = supabaseClient.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const avatarUrl = urlData.publicUrl;
+
+      // Save to user metadata
+      const { error: updateError } = await supabaseClient.auth.updateUser({
+        data: { avatar_url: avatarUrl }
+      });
+
+      if (updateError) {
+        alert("Failed to update profile: " + updateError.message);
+        console.error(updateError);
+        btn.disabled = false; btn.textContent = 'Upload';
+        return;
+      }
+
+      // Refresh current image with cache-buster
+      const img = document.getElementById('profile-pic');
+      const bust = avatarUrl.includes("?") ? "&" + Date.now() : "?" + Date.now();
+      img.src = avatarUrl + bust;
+
+      alert("Photo uploaded!");
+      btn.disabled = false; btn.textContent = 'Upload';
+    }
   </script>
-
-  <script>
-  async function uploadAvatar() {
-    const fileInput = document.getElementById('avatar-upload');
-    const file = fileInput.files[0];
-    if (!file) {
-      alert("Please select a file.");
-      return;
-    }
-
-    const maxSize = 2 * 1024 * 1024; // 2 MB
-if (!file.type.startsWith('image/')) {
-  alert("Please select an image file.");
-  return;
-}
-if (file.size > maxSize) {
-  alert("Image is too large (max 2MB).");
-  return;
-}
-
-    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
-    const user = sessionData?.session?.user;
-    if (!user) {
-      alert("User not logged in.");
-      return;
-    }
-
-    const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
-const filePath = `${user.id}/avatar.${fileExt}`;   // ✅ pierwszy segment to user.id (wymóg RLS)
-
-    const { error: uploadError } = await supabaseClient.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      alert("Upload failed.");
-      console.error(uploadError.message);
-      return;
-    }
-
-    const { data: urlData } = supabaseClient.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
-    const avatarUrl = urlData.publicUrl;
-
-    const { error: updateError } = await supabaseClient.auth.updateUser({
-      data: { avatar_url: avatarUrl }
-    });
-
-    if (updateError) {
-      alert("Failed to update profile.");
-      console.error(updateError.message);
-      return;
-    }
-
-    document.getElementById('profile-pic').src = avatarUrl;
-
-    alert("Photo uploaded!");
-    location.reload();
-  }
-</script>
-
 </body>
 </html>
-
