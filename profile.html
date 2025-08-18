@@ -240,153 +240,153 @@
     const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
-});
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
 
-
-    // Small helpers
-    const clamp = (n, min, max) => Math.max(min, Math.min(max, n|0));
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Auth check
-      const { data, error } = await supabaseClient.auth.getUser();
-      const user = data?.user;
-
-      if (!user) {
-        alert("You are not logged in.");
-        window.location.href = "index.html";
-        return;
-      }
-
-      // Metadata
-      const meta = user.user_metadata || {};
-
-      // Avatar (with cache-busting)
-      const profilePic = document.getElementById("profile-pic");
-      if (meta.avatar_url) {
-        const bust = meta.avatar_url.includes("?") ? "&" + Date.now() : "?" + Date.now();
-        profilePic.src = meta.avatar_url + bust;
-      }
-
-      // Fill basic fields
-      document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
-      document.getElementById("user-email").textContent = user.email || "Unknown";
-      document.getElementById("role-val").textContent = meta.role || "User";
-
-      const trust = clamp(meta.trust_score ?? 0, 0, 100);
-      document.getElementById("trust-val").textContent = `${trust} / 100`;
-      document.getElementById("trust-fill").style.width = `${trust}%`;
-
-      document.getElementById("points-val").textContent = (meta.points ?? 0);
-
-      // Badges
-      const badgeContainer = document.getElementById("badges");
-      badgeContainer.innerHTML = "";
-      const badges = Array.isArray(meta.badges) ? meta.badges : [];
-      if (badges.length) {
-        badges.forEach(text => {
-          const div = document.createElement("div");
-          div.className = "badge";
-          div.textContent = text;
-          badgeContainer.appendChild(div);
-        });
-      }
-
-      // If essential fields missing, set safe defaults ONCE
-      if (meta.role == null || meta.points == null || meta.trust_score == null || meta.badges == null) {
-        const updates = {
-          data: {
-            role: meta.role ?? "Specialist",
-            points: meta.points ?? 320,
-            trust_score: meta.trust_score ?? 87,
-            badges: Array.isArray(meta.badges) ? meta.badges : [
-              "Verified Expert",
-              "100+ Posts",
-              "15 AI-Verified Answers"
-            ]
-          }
-        };
-        const { error: updateError } = await supabaseClient.auth.updateUser(updates);
-        if (updateError) {
-          console.error("❌ Metadata update error:", updateError.message);
-        } else {
-          console.log("✅ Metadata filled with defaults.");
-          location.reload();
+  // Czekamy na INITIAL_SESSION → brak „fałszywego” wylogowania po refreshu
+  async function waitForInitialSession(sb) {
+    let { data: { session } } = await sb.auth.getSession();
+    if (session) return session;
+    await new Promise(resolve => {
+      const { data: sub } = sb.auth.onAuthStateChange((event, sess) => {
+        if (event === 'INITIAL_SESSION') {
+          sub.subscription.unsubscribe();
+          session = sess || null;
+          resolve();
         }
-      }
-    });
-
-    async function logoutUser() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
-        alert("Error signing out");
-        console.error(error.message);
-      } else {
-        window.location.href = "index.html";
-      }
-    }
-
-    async function uploadAvatar() {
-      const fileInput = document.getElementById('avatar-upload');
-      const btn = document.getElementById('upload-btn');
-      const file = fileInput.files?.[0];
-
-      if (!file) { alert("Please select an image file."); return; }
-      if (!file.type.startsWith('image/')) { alert("Please select an image file (JPG/PNG/WebP)."); return; }
-
-      const maxSize = 2 * 1024 * 1024; // 2MB
-      if (file.size > maxSize) { alert("Image is too large (max 2MB)."); return; }
-
-      btn.disabled = true; btn.textContent = 'Uploading…';
-
-      const { data: sessionData } = await supabaseClient.auth.getSession();
-      const user = sessionData?.session?.user;
-      if (!user) { alert("User not logged in."); btn.disabled = false; btn.textContent = 'Upload'; return; }
-
-      const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
-      const filePath = `${user.id}/avatar.${fileExt}`; // first segment MUST be user.id (RLS)
-
-      const { error: uploadError } = await supabaseClient.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
-        alert("Upload failed: " + uploadError.message);
-        console.error(uploadError);
-        btn.disabled = false; btn.textContent = 'Upload';
-        return;
-      }
-
-      const { data: urlData } = supabaseClient.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      const avatarUrl = urlData.publicUrl;
-
-      // Save to user metadata
-      const { error: updateError } = await supabaseClient.auth.updateUser({
-        data: { avatar_url: avatarUrl }
       });
+    });
+    return session;
+  }
 
-      if (updateError) {
-        alert("Failed to update profile: " + updateError.message);
-        console.error(updateError);
-        btn.disabled = false; btn.textContent = 'Upload';
-        return;
-      }
+  // Small helpers
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n|0));
 
-      // Refresh current image with cache-buster
-      const img = document.getElementById('profile-pic');
-      const bust = avatarUrl.includes("?") ? "&" + Date.now() : "?" + Date.now();
-      img.src = avatarUrl + bust;
-
-      alert("Photo uploaded!");
-      btn.disabled = false; btn.textContent = 'Upload';
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 🔑 Bramkujemy dopiero po INITIAL_SESSION
+    const session = await waitForInitialSession(supabaseClient);
+    if (!session?.user) {
+      location.replace("index.html?login=1");
+      return;
     }
-  </script>
+    const user = session.user;
+
+    // Metadata
+    const meta = user.user_metadata || {};
+
+    // Avatar (with cache-busting)
+    const profilePic = document.getElementById("profile-pic");
+    if (meta.avatar_url) {
+      const bust = meta.avatar_url.includes("?") ? "&" + Date.now() : "?" + Date.now();
+      profilePic.src = meta.avatar_url + bust;
+    }
+
+    // Fill basic fields
+    document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
+    document.getElementById("user-email").textContent = user.email || "Unknown";
+    document.getElementById("role-val").textContent = meta.role || "User";
+
+    const trust = clamp(meta.trust_score ?? 0, 0, 100);
+    document.getElementById("trust-val").textContent = `${trust} / 100`;
+    document.getElementById("trust-fill").style.width = `${trust}%`;
+
+    document.getElementById("points-val").textContent = (meta.points ?? 0);
+
+    // Badges
+    const badgeContainer = document.getElementById("badges");
+    badgeContainer.innerHTML = "";
+    const badges = Array.isArray(meta.badges) ? meta.badges : [];
+    if (badges.length) {
+      badges.forEach(text => {
+        const div = document.createElement("div");
+        div.className = "badge";
+        div.textContent = text;
+        badgeContainer.appendChild(div);
+      });
+    }
+
+    // Uzupełnij brakujące metadane (jednorazowo, bezpieczne wartości)
+    if (meta.role == null || meta.points == null || meta.trust_score == null || meta.badges == null) {
+      const updates = {
+        data: {
+          role: meta.role ?? "Specialist",
+          points: meta.points ?? 320,
+          trust_score: meta.trust_score ?? 87,
+          badges: Array.isArray(meta.badges) ? meta.badges : [
+            "Verified Expert", "100+ Posts", "15 AI-Verified Answers"
+          ]
+        }
+      };
+      const { error: updateError } = await supabaseClient.auth.updateUser(updates);
+      if (updateError) {
+        console.error("❌ Metadata update error:", updateError.message);
+      } else {
+        console.log("✅ Metadata filled with defaults.");
+        location.reload();
+      }
+    }
+  });
+
+  async function logoutUser() {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      alert("Error signing out");
+      console.error(error.message);
+    } else {
+      window.location.href = "index.html";
+    }
+  }
+
+  async function uploadAvatar() {
+    const fileInput = document.getElementById('avatar-upload');
+    const btn = document.getElementById('upload-btn');
+    const file = fileInput.files?.[0];
+
+    if (!file) { alert("Please select an image file."); return; }
+    if (!file.type.startsWith('image/')) { alert("Please select an image file (JPG/PNG/WebP)."); return; }
+
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) { alert("Image is too large (max 2MB)."); return; }
+
+    btn.disabled = true; btn.textContent = 'Uploading…';
+
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const user = sessionData?.session?.user;
+    if (!user) { alert("User not logged in."); btn.disabled = false; btn.textContent = 'Upload'; return; }
+
+    const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+    const filePath = `${user.id}/avatar.${fileExt}`; // first segment MUST be user.id (RLS)
+
+    const { error: uploadError } = await supabaseClient
+      .storage.from('avatars').upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      alert("Upload failed: " + uploadError.message);
+      console.error(uploadError);
+      btn.disabled = false; btn.textContent = 'Upload';
+      return;
+    }
+
+    const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
+    const avatarUrl = urlData.publicUrl;
+
+    // Save to user metadata
+    const { error: updateError } = await supabaseClient.auth.updateUser({ data: { avatar_url: avatarUrl } });
+    if (updateError) {
+      alert("Failed to update profile: " + updateError.message);
+      console.error(updateError);
+      btn.disabled = false; btn.textContent = 'Upload';
+      return;
+    }
+
+    // Refresh current image with cache-buster
+    const img = document.getElementById('profile-pic');
+    const bust = avatarUrl.includes("?") ? "&" + Date.now() : "?" + Date.now();
+    img.src = avatarUrl + bust;
+
+    alert("Photo uploaded!");
+    btn.disabled = false; btn.textContent = 'Upload';
+  }
+</script>
 </body>
 </html>
