@@ -158,23 +158,19 @@
 
     // ====== AUTH GATE ======
     let currentUser = null;
-    async function checkAuth(){
-      try{
-        const { data: { user } } = await sb.auth.getUser();
-        currentUser = user;
-        document.getElementById("authInfo").textContent = user ? `Logged in as ${user.email}` : "";
-        document.getElementById("authGate").classList.toggle("hide", !!user);
-        toggleGenDisabled(!user);
-      }catch(err){
-        console.error(err);
-        toggleGenDisabled(true);
-      }
-    }
-    checkAuth();
-    sb.auth.onAuthStateChange((_ev, session)=>{
-      currentUser = session?.user || null;
-      checkAuth();
-    });
+    // --- Sprawdź sesję od razu po załadowaniu ---
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  currentUser = session?.user || null;
+  checkAuth();
+})();
+
+// --- Nasłuch zmian stanu (login / logout) ---
+sb.auth.onAuthStateChange((_ev, session) => {
+  currentUser = session?.user || null;
+  checkAuth();
+});
+
 
     function toggleGenDisabled(disabled){
       const b = document.getElementById("genBtn");
