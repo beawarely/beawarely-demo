@@ -154,10 +154,20 @@
     ];
 
     // ====== INIT SUPABASE ======
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
 
     // ====== AUTH GATE ======
     let currentUser = null;
+    function checkAuth(){
+  const gate = document.getElementById('authGate');
+  // pokaż/ukryj pasek „Only for logged-in users.” i zablokuj przycisk Generate
+  if (gate) gate.classList.toggle('hide', !!currentUser);
+  const genBtn = document.getElementById('genBtn');
+  if (genBtn) genBtn.disabled = !currentUser;
+}
+
     // --- Sprawdź sesję od razu po załadowaniu ---
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
