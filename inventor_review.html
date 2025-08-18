@@ -155,17 +155,42 @@ function empty(msg='Nothing to review yet (placeholder)'){ queueEl.innerHTML = `
 function soft(el,flag){ el.style.opacity = flag? .6 : 1; }
 
 async function requireMod(){
-  const { data:{ user } } = await sb.auth.getUser();
+  // 1) spróbuj mieć sesję od razu
+  let { data:{ session } } = await sb.auth.getSession();
+
+  // 2) jeśli jeszcze się nie wczytała – poczekaj na INITIAL_SESSION
+  if (!session) {
+    await new Promise(resolve => {
+      const { data: sub } = sb.auth.onAuthStateChange((event, sess) => {
+        if (event === 'INITIAL_SESSION') {
+          sub.subscription.unsubscribe();
+          session = sess || null;
+          resolve();
+        }
+      });
+    });
+  }
+
+  // 3) po inicjalizacji – sprawdź login
+  const user = session?.user || null;
   if(!user){ alert('Login required'); location.href='index.html?login=1'; return; }
-  const { data:mod } = await sb.from('moderators').select('user_id').eq('user_id', user.id).maybeSingle();
+
+  // 4) weryfikacja roli moderatora
+  const { data:mod } = await sb.from('moderators')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
   if(!mod){
     document.getElementById('modBadge').style.display='none';
     document.getElementById('noAccess').style.display='block';
-    document.body.innerHTML='<div class="wrap"><div class="panel"><h2>No access</h2><p class="muted">This page is restricted to moderators.</p></div></div>';
+    document.body.innerHTML =
+      '<div class="wrap"><div class="panel"><h2>No access</h2><p class="muted">This page is restricted to moderators.</p></div></div>';
     return;
   }
   isMod = true;
 }
+
 
 function pick(val,a,b){ return val==null? a : val; }
 
