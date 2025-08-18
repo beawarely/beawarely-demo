@@ -93,18 +93,19 @@ textarea:focus-visible {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
 
-// Bramka: dopiero po wstępnym załadowaniu sesji
-function requireLogin(session) {
-  if (!session) {
-    localStorage.setItem('ba_redirect', 'chat.html');
-    location.replace('index.html?login=1');
-  }
+function goLogin() {
+  localStorage.setItem('ba_redirect', 'chat.html');
+  location.replace('index.html?login=1');
 }
 
+// ⛔️ Nie rób nic zanim Supabase zainicjalizuje stan (INITIAL_SESSION)
 supa.auth.onAuthStateChange((event, session) => {
-  if (event === 'INITIAL_SESSION') requireLogin(session); // pierwszy „strzał” po odświeżeniu
-  if (event === 'SIGNED_OUT') requireLogin(null);         // realne wylogowanie
-  // SIGNED_IN -> OK, zostajemy na stronie
+  if (event === 'INITIAL_SESSION') {
+    if (!session) goLogin();        // brak sesji po inicjalizacji → przekieruj
+    return;                          // mamy sesję → zostajemy
+  }
+  if (event === 'SIGNED_OUT') goLogin();  // prawdziwe wylogowanie
+  // SIGNED_IN → zostajemy na stronie
 });
 
 
