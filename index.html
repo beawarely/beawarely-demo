@@ -416,8 +416,18 @@ function toggleLightDarkMode() {
   <!-- TOPBAR -->
 <div id="topbar">
   <div class="topbar-left"></div>
-  <div class="topbar-right"></div>
+  <div class="topbar-right">
+    <!-- Profile chip (pokazywany po zalogowaniu) -->
+    <div id="profileChip" style="display:none; align-items:center; gap:10px;">
+      <img id="profileAvatar" src="" alt="Avatar" width="32" height="32" style="border-radius:50%; object-fit:cover;" />
+      <div style="display:flex; flex-direction:column; line-height:1;">
+        <span id="profileName" style="font-weight:600;">—</span>
+        <span id="profileRank" style="font-size:12px; opacity:.8;">—</span>
+      </div>
+    </div>
+  </div>
 </div>
+
 
   <div id="rotating-bg">
   <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
@@ -1254,6 +1264,100 @@ if (!support) {
       if (txt.includes('log out')) logoutUser(); else openLoginModal();
     });
   });
+</script>
+
+<script>
+/* ===== Profiles: ensure + load + UI hook (wersja pod supabaseClient) ===== */
+
+async function ensureProfile(user) {
+  if (!user) return;
+  const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
+                   || (user.email ? user.email.split('@')[0] : 'User');
+  const { error } = await supabaseClient
+    .from('profiles')
+    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
+  if (error) console.error('ensureProfile error:', error);
+}
+
+async function fetchMyProfile() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('id, display_name, avatar_url, rank, points, badges')
+    .eq('id', user.id)
+    .single();
+  if (error) {
+    console.error('fetchMyProfile error:', error);
+    return null;
+  }
+  return data;
+}
+
+function applyProfileToUI(profile) {
+  const chip    = document.getElementById('profileChip');
+  const nameEl  = document.getElementById('profileName');
+  const rankEl  = document.getElementById('profileRank');
+  const avatarEl= document.getElementById('profileAvatar');
+  if (!chip || !nameEl || !rankEl || !avatarEl) return;
+
+  if (!profile) {
+    chip.style.display = 'none';
+    return;
+  }
+  nameEl.textContent = profile.display_name || 'User';
+  rankEl.textContent = profile.rank
+    ? `${profile.rank} • ${profile.points ?? 0} pts`
+    : `${profile.points ?? 0} pts`;
+
+  if (profile.avatar_url) {
+    const v = Date.now(); // lekki cache-buster
+    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
+  } else {
+    avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
+  }
+  chip.style.display = 'flex';
+}
+
+// Start: jeśli już zalogowany → utwórz/odśwież profil i pokaż chip
+(async () => {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (user) {
+    await ensureProfile(user);
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+  } else {
+    applyProfileToUI(null);
+  }
+})();
+
+// Reakcja na login/logout
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user) {
+    await ensureProfile(session.user);
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+  }
+  if (event === 'SIGNED_OUT') {
+    applyProfileToUI(null);
+  }
+});
+
+// (opcjonalne) helper do zmiany wyświetlanej nazwy
+async function updateDisplayName(newName) {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return { error: 'Not logged in' };
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update({ display_name: newName })
+    .eq('id', user.id);
+  if (error) console.error('updateDisplayName error:', error);
+  else {
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+  }
+  return { error: error?.message || null };
+}
 </script>
   
 </body>
