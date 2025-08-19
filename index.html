@@ -1035,6 +1035,34 @@ function closeSupportModal() {
 
 
 <script>
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    const loginBtn       = document.getElementById('loginBtn');
+    const profileBtn     = document.getElementById('profileRedirect');
+    const yourProfileBtn = document.getElementById('yourProfileBtn');
+
+    // ✅ Po załadowaniu sesji z localStorage (INITIAL_SESSION) albo po zalogowaniu (SIGNED_IN)
+    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+      if (session?.user) {
+        if (loginBtn) { loginBtn.textContent = 'Log out'; loginBtn.onclick = logoutUser; }
+        if (profileBtn) profileBtn.style.display = 'block';
+        if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
+      }
+      // (opcjonalnie, jeśli masz taką funkcję na stronie domowej)
+      if (typeof refreshLocks === 'function') refreshLocks();
+      return;
+    }
+
+    // 🚪 Prawdziwe wylogowanie
+    if (event === 'SIGNED_OUT') {
+      if (loginBtn) { loginBtn.textContent = 'Log In'; loginBtn.onclick = openLoginModal; }
+      if (profileBtn) profileBtn.style.display = 'none';
+      if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+      if (typeof refreshLocks === 'function') refreshLocks();
+    }
+  });
+</script>
+  
+<script>
   // ❗️ Przenieśliśmy logoutUser() poza DOMContentLoaded
   async function logoutUser() {
     const { error } = await supabaseClient.auth.signOut();
@@ -1188,21 +1216,22 @@ function closeSupportModal() {
 
   // po zalogowaniu – automatyczny powrót
   sb.auth.onAuthStateChange((event, session) => {
-  // Reaguj tylko na realne logowanie/wylogowanie, NIE na INITIAL_SESSION
-  if (event === 'SIGNED_IN') {
+  if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+    // po inicjalizacji lub po zalogowaniu – odśwież kłódki
+    refreshLocks();
+    // jeśli mamy zapamiętany cel – idź tam od razu
     const to = localStorage.getItem('ba_redirect');
-    if (to) {
+    if (to && session) {
       localStorage.removeItem('ba_redirect');
-      window.location.href = to;
-    } else {
-      refreshLocks(); // odśwież stan kłódek bez reloadu
+      location.href = to;
     }
+    return;
   }
-
   if (event === 'SIGNED_OUT') {
-    refreshLocks(); // odśwież widok dla niezalogowanego
+    refreshLocks();
   }
 });
+
 
 
   // jeśli ktoś trafił tu z parametrem ?login=1 – pokaż modal
