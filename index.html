@@ -15,500 +15,261 @@
       --blue2: #66b2ff;
       --blue3: #b3d9ff;
       --safe-top: env(safe-area-inset-top, 0px);
-
     }
 
     body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: rgba(0, 0, 0, 0.85) !important;
-  color: #fff;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-body.light-mode {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  color: #000;
-}
-    header,
-section,
-footer {
-  background-color: transparent !important;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: rgba(0, 0, 0, 0.85) !important;
+      color: #fff;
+      transition: background-color 0.3s, color 0.3s;
     }
+
+    body.light-mode {
+      background-color: rgba(255, 255, 255, 0.85) !important;
+      color: #000;
+    }
+
+    header, section, footer { background-color: transparent !important; }
+
     header {
-  text-align: center;
-  padding: calc(80px + var(--safe-top)) 20px 40px;
-}
+      text-align: center;
+      padding: calc(80px + var(--safe-top)) 20px 40px;
+    }
 
     .logo-placeholder {
-  width: 100px;
-  height: 100px;
-  background-color: #ccc;
-  border-radius: 12px;
-  margin: 0 auto 20px;
-  animation: pulse 3s infinite;
-  transition: background-color 0.3s, transform 0.3s;
-}
-
-    h1 {
-      font-size: 2.3rem;
-      margin-bottom: 20px;
-      animation: fadeIn 1s ease-in-out;
+      width: 100px; height: 100px; background-color: #ccc; border-radius: 12px;
+      margin: 0 auto 20px; animation: pulse 3s infinite; transition: background-color 0.3s, transform 0.3s;
     }
+
+    h1 { font-size: 2.3rem; margin-bottom: 20px; animation: fadeIn 1s ease-in-out; }
 
     button.scroll-btn {
-      background-color: var(--blue1);
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
+      background-color: var(--blue1); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;
     }
 
-    section {
-      padding: 40px 20px;
-      max-width: 720px;
-      margin: 0 auto;
-    }
+    section { padding: 40px 20px; max-width: 720px; margin: 0 auto; }
 
     .reasons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px 20px;
-      list-style-type: disc;
-      margin-left: 20px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 20px;
+      list-style-type: disc; margin-left: 20px;
     }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    form { display: flex; flex-direction: column; gap: 10px; }
 
     input, textarea {
-  padding: 12px;
-  border: 2px solid #333;
-  border-radius: 8px;
-  font-size: 1rem;
-  background-color: #1a1a1a;
-  color: #fff;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-body.light-mode input,
-body.light-mode textarea {
-  background-color: #fff;
-  color: #000;
-  border: 2px solid #ccc;
-}
-
-input:focus, textarea:focus {
-  border-color: var(--blue2);
-  outline: none;
-  box-shadow: 0 0 8px var(--blue2);
-  transform: scale(1.02);
-}
-
-    .send-btn {
-      background-color: var(--blue1);
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      padding: 12px; border: 2px solid #333; border-radius: 8px; font-size: 1rem; background-color: #1a1a1a; color: #fff; transition: border-color 0.3s, box-shadow 0.3s;
     }
+    body.light-mode input, body.light-mode textarea { background-color: #fff; color: #000; border: 2px solid #ccc; }
+    input:focus, textarea:focus {
+      border-color: var(--blue2); outline: none; box-shadow: 0 0 8px var(--blue2); transform: scale(1.02);
+    }
+
+    .send-btn { background-color: var(--blue1); color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; }
 
     .confirmation {
-  text-align: center;
-  color: #00cc66;
-  margin-top: 10px;
-  font-weight: bold;
-  background-color: rgba(0, 204, 102, 0.1);
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 0 8px rgba(0, 204, 102, 0.3);
-  transition: opacity 0.5s ease;
-}
-
-
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 60px;
-      padding: 30px 10px;
+      text-align: center; color: #00cc66; margin-top: 10px; font-weight: bold;
+      background-color: rgba(0, 204, 102, 0.1); padding: 12px; border-radius: 8px; box-shadow: 0 0 8px rgba(0, 204, 102, 0.3); transition: opacity 0.5s ease;
     }
 
-    .social-icons {
-      margin-top: 10px;
-      font-size: 1.4rem;
-    }
+    footer { text-align: center; font-size: 0.9rem; margin-top: 60px; padding: 30px 10px; }
 
-    .mode-toggle {
-      margin-left: 10px;
-      cursor: pointer;
-    }
+    .social-icons { margin-top: 10px; font-size: 1.4rem; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .mode-toggle { margin-left: 10px; cursor: pointer; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
     @keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
-  70% { transform: scale(1.05); box-shadow: 0 0 10px 10px rgba(0, 123, 255, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 10px 10px rgba(0, 123, 255, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
     }
 
     /* Spinner loading screen */
-#loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #0e0e0e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  transition: opacity 0.5s ease, visibility 0.5s;
-}
+    #loader {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0e0e0e;
+      display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s;
+    }
+    .spinner { width: 48px; height: 48px; border: 5px solid #fff; border-top: 5px solid var(--blue1); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-.spinner {
-  width: 48px;
-  height: 48px;
-  border: 5px solid #fff;
-  border-top: 5px solid var(--blue1);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+    .ai-tool-box {
+      background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; width: 220px;
+      transition: transform 0.3s ease, background-color 0.3s ease; animation: fadeIn 0.6s ease-in-out both;
+    }
+    .ai-tool-box:hover { transform: scale(1.05); background-color: rgba(255, 255, 255, 0.08); }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+    .scroll-reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+    .scroll-reveal.revealed { opacity: 1; transform: translateY(0); }
 
-.ai-tool-box {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 20px;
-  width: 220px;
-  transition: transform 0.3s ease, background-color 0.3s ease;
-  animation: fadeIn 0.6s ease-in-out both;
-}
+    #rotating-bg {
+      position: fixed; top: 50%; left: 50%; width: 300vw; height: 300vh; transform: translate(-50%, -50%);
+      z-index: -1; pointer-events: none; overflow: hidden;
+    }
+    #rotating-bg img {
+      width: 100%; height: 100%; object-fit: cover; animation: rotateBackground 240s linear infinite;
+      opacity: 0.3; filter: brightness(1); transition: opacity 0.6s ease, filter 0.6s ease;
+    }
+    body.light-mode #rotating-bg img { content: url("images/galaxy-light.png"); opacity: 0.4; filter: brightness(1.2); }
+    body:not(.light-mode) #rotating-bg img { content: url("images/galaxy-dark.png"); opacity: 0.25; filter: brightness(0.9); }
+    @keyframes rotateBackground { 0% { transform: rotate(0deg) scale(1.1); } 100% { transform: rotate(360deg) scale(1.1); } }
+    #rotating-bg img { will-change: transform; }
 
-.ai-tool-box:hover {
-  transform: scale(1.05);
-  background-color: rgba(255, 255, 255, 0.08);
-}
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
+    @media (max-width: 600px){
+      #rotating-bg{ width: 200vw; height: 200vh; }
+      #rotating-bg img{ animation-duration: 300s; }
+    }
+    @media (prefers-reduced-motion: reduce){ #rotating-bg img{ animation: none; } }
 
-.scroll-reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-  #rotating-bg {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 300vw;
-  height: 300vh;
-  transform: translate(-50%, -50%);
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
-}
+    header h1, section h2, section p, section li, footer { text-shadow: 0 0 4px rgba(0, 0, 0, 0.8); }
+    body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
-#rotating-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  animation: rotateBackground 240s linear infinite;
-  opacity: 0.3;
-  filter: brightness(1);
-  transition: opacity 0.6s ease, filter 0.6s ease;
-}
+    /* --- Fixed Topbar --- */
+    #topbar{
+      position: fixed; top: calc(14px + var(--safe-top)); left: 20px; right: 20px; z-index: 10000;
+      display: flex; justify-content: space-between; align-items: center; pointer-events: none;
+    }
+    #topbar .topbar-left, #topbar .topbar-right{ display: flex; gap: 12px; align-items: center; pointer-events: auto; }
 
-body.light-mode #rotating-bg img {
-  content: url("images/galaxy-light.png");
-  opacity: 0.4;
-  filter: brightness(1.2);
-}
+    .pill{
+      background-color: rgba(255,255,255,0.10); color: #fff; font-weight: 600; text-decoration: none;
+      padding: 6px 14px; border-radius: 12px; transition: background-color .25s, transform .2s;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .pill:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
 
-body:not(.light-mode) #rotating-bg img {
-  content: url("images/galaxy-dark.png");
-  opacity: 0.25;
-  filter: brightness(0.9);
-}
+    #modeIcon{
+      position: static !important; top: auto !important; right: auto !important; left: auto !important;
+      font-size: 1.4rem; line-height: 1; background-color: rgba(255,255,255,0.10);
+      border-radius: 50%; padding: 8px; width: 36px; height: 36px; display: inline-flex; align-items:center; justify-content:center;
+      transition: background-color .25s, transform .2s;
+    }
+    #modeIcon:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
 
-@keyframes rotateBackground {
-  0%   { transform: rotate(0deg) scale(1.1); }
-  100% { transform: rotate(360deg) scale(1.1); }
-}
-/* Hint dla kompozytora */
-#rotating-bg img { will-change: transform; }
+    #loginBtn, #yourProfileBtn{
+      position: static !important; top: auto !important; right: auto !important; left: auto !important;
+      font-size: 0.95rem; border-radius: 12px;
+    }
 
-/* Mobile perf: mniejszy canvas i spokojniejsza animacja */
-@media (max-width: 600px){
-  #rotating-bg{
-    width: 200vw;
-    height: 200vh;
-  }
-  #rotating-bg img{
-    animation-duration: 300s;
-  }
-}
+    @media (max-width: 560px){
+      #topbar{ top: 10px; left: 12px; right: 12px; }
+      #topbar .topbar-left, #topbar .topbar-right{ gap: 8px; }
+      #loginBtn{ padding: 4px 10px; font-size: .9rem; }
+      #modeIcon{ width: 32px; height: 32px; padding: 6px; }
+    }
 
-/* Osoby z preferencją mniejszych animacji */
-@media (prefers-reduced-motion: reduce){
-  #rotating-bg img{ animation: none; }
-}
-    
-header h1,
-section h2,
-section p,
-section li,
-footer {
-  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-}
-body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
+    #supportBtn { display: none !important; }
 
-/* --- Fixed Topbar --- */
-#topbar{
-  position: fixed;
-  top: calc(14px + var(--safe-top));
-  left: 20px;
-  right: 20px;
-  z-index: 10000;
-  display: flex; justify-content: space-between; align-items: center;
-  pointer-events: none;
-}
+    #supportTopBtn{
+      background-color: rgba(255,255,255,0.10); color:#fff; font-weight:700; padding:6px 10px; border-radius:12px;
+      display:inline-flex; align-items:center; justify-content:center; font-size:1rem; border:none; box-shadow:none; letter-spacing:0;
+    }
+    #supportTopBtn:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
 
-#topbar .topbar-left, 
-#topbar .topbar-right{
-  display: flex; gap: 12px; align-items: center;
-  pointer-events: auto; /* ale same przyciski mają klikalność */
-}
+    #loginModal.open { display: flex !important; }
+    #supportModal.open { display: flex !important; }
 
-/* Uniwersalna pigułka */
-.pill{
-  background-color: rgba(255,255,255,0.10);
-  color: #fff; font-weight: 600; text-decoration: none;
-  padding: 6px 14px; border-radius: 12px; 
-  transition: background-color .25s, transform .2s;
-  display: inline-flex; align-items: center; gap: 8px;
-}
-.pill:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+    .pill:focus-visible,
+    #loginBtn:focus-visible,
+    #modeIcon:focus-visible,
+    #yourProfileBtn:focus-visible,
+    .open-btn:focus-visible {
+      outline: 2px solid var(--blue2);
+      outline-offset: 2px;
+    }
+  </style>
 
-/* Ikona trybu jako okrągła pigułka */
-#modeIcon{
-  position: static !important;
-  top: auto !important; right: auto !important; left: auto !important;
-  font-size: 1.4rem; line-height: 1; 
-  background-color: rgba(255,255,255,0.10);
-  border-radius: 50%; padding: 8px; width: 36px; height: 36px;
-  display: inline-flex; align-items:center; justify-content:center;
-  transition: background-color .25s, transform .2s;
-}
-#modeIcon:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
-
-/* Nadpisanie absolutów na login i profile (żeby nie „uciekały” z topbaru) */
-#loginBtn, #yourProfileBtn{
-  position: static !important; 
-  top: auto !important; right: auto !important; left: auto !important;
-  font-size: 0.95rem;
-  border-radius: 12px;
-}
-
-/* Responsywność */
-@media (max-width: 560px){
-  #topbar{ top: 10px; left: 12px; right: 12px; }
-  #topbar .topbar-left, #topbar .topbar-right{ gap: 8px; }
-  #loginBtn{ padding: 4px 10px; font-size: .9rem; }
-  #modeIcon{ width: 32px; height: 32px; padding: 6px; }
-}
-
-/* --- hide old big button --- */
-#supportBtn { display: none !important; }
-
-#supportTopBtn{
-  background-color: rgba(255,255,255,0.10);
-  color:#fff;
-  font-weight:700;
-  padding:6px 10px;
-  border-radius:12px;
-  display:inline-flex; align-items:center; justify-content:center;
-  font-size:1rem;
-  border:none;        /* ważne: zeruje pozostałości po złotej wersji */
-  box-shadow:none;    /* j.w. */
-  letter-spacing:0;
-}
-#supportTopBtn:hover{
-  background-color: rgba(255,255,255,0.20);
-  transform: translateY(-1px);
-}
-    
-/* Support & Login modal – unified open state */
-#loginModal.open { display: flex !important; }
-#supportModal.open { display: flex !important; }
-
-.pill:focus-visible,
-#loginBtn:focus-visible,
-#modeIcon:focus-visible,
-#yourProfileBtn:focus-visible,
-.open-btn:focus-visible {
-  outline: 2px solid var(--blue2);
-  outline-offset: 2px;
-}
-    
-</style>
   <script>
     // Load preferred theme
     document.addEventListener('DOMContentLoaded', () => {
-  const mode = localStorage.getItem('mode') || 'dark';
-  document.body.classList.toggle('light-mode', mode === 'light');
+      const mode = localStorage.getItem('mode') || 'dark';
+      document.body.classList.toggle('light-mode', mode === 'light');
 
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
 
-  const bg = document.getElementById('rotating-bg');
-  if (bg) {
-    
-  }
-
-  // ✅ Hide loader inside DOMContentLoaded
-  const loader = document.getElementById('loader');
-  if (loader) {
-    loader.style.opacity = '0';
-    loader.style.visibility = 'hidden';
-    setTimeout(() => loader.remove(), 500);
-  }
-});
-
+      const loader = document.getElementById('loader');
+      if (loader) {
+        loader.style.opacity = '0';
+        loader.style.visibility = 'hidden';
+        setTimeout(() => loader.remove(), 500);
+      }
+    });
 
     // Toggle mode and save
-    
-function toggleLightDarkMode() {
-  const isLight = document.body.classList.toggle('light-mode');
-  document.body.classList.toggle('dark-mode', !isLight);
-  localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    function toggleLightDarkMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
 
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = isLight ? '🌞' : '🌛';
-
-  const bg = document.getElementById('rotating-bg');
-  if (bg) {
-    
-  }
-}
-
-
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+    }
   </script>
-
-
 </head>
 <body>
 
   <!-- TOPBAR -->
-<div id="topbar">
-  <div class="topbar-left"></div>
-  <div class="topbar-right">
-    <!-- Profile chip (pokazywany po zalogowaniu) -->
-    <div id="profileChip" style="display:none; align-items:center; gap:10px;">
-      <img id="profileAvatar" src="" alt="Avatar" width="32" height="32" style="border-radius:50%; object-fit:cover;" />
-      <div style="display:flex; flex-direction:column; line-height:1;">
-        <span id="profileName" style="font-weight:600;">—</span>
-        <span id="profileRank" style="font-size:12px; opacity:.8;">—</span>
+  <div id="topbar">
+    <div class="topbar-left"></div>
+    <div class="topbar-right">
+      <!-- Profile chip (pokazywany po zalogowaniu) -->
+      <div id="profileChip" style="display:none; align-items:center; gap:10px;">
+        <img id="profileAvatar" src="" alt="Avatar" width="32" height="32" style="border-radius:50%; object-fit:cover;" />
+        <div style="display:flex; flex-direction:column; line-height:1;">
+          <span id="profileName" style="font-weight:600;">—</span>
+          <span id="profileRank" style="font-size:12px; opacity:.8;">—</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
 
   <div id="rotating-bg">
-  <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
-</div>
+    <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
+  </div>
 
   <div id="loader">
     <div class="spinner"></div>
   </div>
 
   <header style="position: relative;">
-  <!-- Ikona trybu w prawym górnym rogu -->
-  <span id="modeIcon" role="button" tabindex="0" aria-label="Toggle light/dark mode"
-      onclick="toggleLightDarkMode()"
-      title="Toggle light/dark mode"
-      style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
-      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-      onmouseout="this.style.backgroundColor='transparent'">🌛</span>
+    <!-- Ikona trybu w prawym górnym rogu -->
+    <span id="modeIcon" role="button" tabindex="0" aria-label="Toggle light/dark mode"
+          onclick="toggleLightDarkMode()"
+          title="Toggle light/dark mode"
+          style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
+          onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
+          onmouseout="this.style.backgroundColor='transparent'">🌛</span>
 
-<!-- Przycisk Log In -->
-<span id="loginBtn" role="button" tabindex="0" aria-label="Open login dialog"
-      title="Log in/out"
-      style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
-      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
-      onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">Log In</span>
+    <!-- Przycisk Log In -->
+    <span id="loginBtn" role="button" tabindex="0" aria-label="Open login dialog"
+          title="Log in/out"
+          style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
+          onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
+          onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">Log In</span>
 
     <!-- Przycisk "Your Profile" widoczny po zalogowaniu -->
-<a id="yourProfileBtn"
-   href="profile.html"
-   style="display: none; position: absolute; top: 20px; left: 20px; font-size: 0.9rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; color: white; text-decoration: none; transition: background-color 0.3s;"
-   onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
-   onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">
-   Your Profile
-</a>
+    <a id="yourProfileBtn"
+      href="profile.html"
+      style="display: none; position: absolute; top: 20px; left: 20px; font-size: 0.9rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; color: white; text-decoration: none; transition: background-color 0.3s;"
+      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
+      onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">
+      Your Profile
+    </a>
 
-  <!--  
- <button id="supportBtn"
-        onclick="openSupportModal()"
-        title="Support BeAwarely"
-        style="position: absolute; top: 66px; left: 20px; 
-               font-size: 0.95rem; font-weight: 700; 
-               background-color: rgba(255,255,255,0.10);
-               color: #fff; padding: 10px 16px; border-radius: 8px;
-               border: none; cursor: pointer;
-               transition: background-color .3s, transform .2s;">
-  🤝 Support BeAwarely
-</button>
--->
-    
-  <!-- Logo + tekst -->
-<img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
+    <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
-  <h1 style="
-  font-family: 'Sriracha', cursive;
-  color: black;
-  font-size: 64px;
-  margin-top: 20px;
-">
-  BeAwarely
-</h1>
-
-
-
-
-  <!--<button class="scroll-btn"
-        onmouseover="this.textContent='Go to Tree...'" 
-        onmouseout="this.textContent='Explore the Tree'" 
-        onclick="window.location.href='tree.html'">
-  Explore the Tree
-</button>-->
-</header>
-
-
-
+    <h1 style="font-family: 'Sriracha', cursive; color: black; font-size: 64px; margin-top: 20px;">BeAwarely</h1>
+  </header>
 
   <section class="scroll-reveal">
-  <h2>About BeAwarely</h2>
+    <h2>About BeAwarely</h2>
     <p>BeAwarely is a project dedicated to raising awareness about the influence of artificial intelligence on our lives and choices.</p>
   </section>
 
   <section class="scroll-reveal">
-  <h2>Why Join?</h2>
+    <h2>Why Join?</h2>
     <ul class="reasons">
       <li>Inform and educate others</li>
       <li>Support responsible AI development</li>
@@ -518,340 +279,180 @@ function toggleLightDarkMode() {
     </ul>
   </section>
 
-<!--  <section id="ai-chat" class="legacy-hide" class="scroll-reveal">
-  <h2>AI Chat Coming Soon</h2>
-  <p style="margin-bottom: 20px;">
-    We're working hard on integrating an interactive AI assistant.<br>
-    Soon you'll be able to ask questions, explore ideas, and get support in real time.
-  </p>
-  <div style="background-color: rgba(255,255,255,0.05); border-radius: 10px; padding: 30px; text-align: center;">
-    <span style="font-size: 2.5rem;">🤖</span>
-    <p style="font-size: 1rem; color: #ccc; margin-top: 10px;">Your future AI companion will live here. Stay tuned!</p>
-  </div>
-</section>
+  <section id="ai-hub" class="scroll-reveal">
+    <h2>BeAwarely AI Hub</h2>
+    <p class="section-sub">Choose a tool to explore. Some require login.</p>
 
-  <section id="ai-tools" class="legacy-hide"> class="scroll-reveal" style="margin-top: 60px; text-align: center;">
-  <h2>Coming Soon: AI Tools</h2>
-  <p style="margin-bottom: 30px;">Exciting features to support your awareness mission:</p>
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">🔍</span>
-      <h3 style="margin: 10px 0 5px;">Fact Checker</h3>
-      <p style="font-size: 0.9rem;">Verify news and claims with AI-backed research.</p>
+    <div id="toolsGrid" class="tools-grid">
+      <article class="tool-card" data-href="chat.html" data-requires-auth="true">
+        <div class="tool-top">
+          <span class="tool-icon">🤖</span>
+          <span class="tool-badge">Mistral-7B</span>
+        </div>
+        <h3 class="tool-title">AI Chat</h3>
+        <p class="tool-desc">Ask questions, brainstorm, get realtime help.</p>
+        <div class="tool-cta">
+          <span class="status">Login required</span>
+          <button class="open-btn" type="button">Open →</button>
+        </div>
+      </article>
+
+      <article class="tool-card" data-href="inventions.html" data-requires-auth="false">
+        <div class="tool-top">
+          <span class="tool-icon">🧭</span>
+          <span class="tool-badge">Public</span>
+        </div>
+        <h3 class="tool-title">Inventions</h3>
+        <p class="tool-desc">Approved concepts (public/partial).</p>
+        <div class="tool-cta">
+          <span class="status">Open</span>
+          <button class="open-btn" type="button">Open →</button>
+        </div>
+      </article>
+
+      <article class="tool-card" data-href="inventor_review.html" data-requires-auth="true">
+        <div class="tool-top">
+          <span class="tool-icon">🛡️</span>
+          <span class="tool-badge">Moderation</span>
+        </div>
+        <h3 class="tool-title">Inventor Review</h3>
+        <p class="tool-desc">Approve & publish (you only).</p>
+        <div class="tool-cta">
+          <span class="status">Login required</span>
+          <button class="open-btn" type="button">Open →</button>
+        </div>
+      </article>
+
+      <article class="tool-card" data-href="foresight.html" data-requires-auth="false">
+        <div class="tool-top">
+          <span class="tool-icon">🔮</span>
+          <span class="tool-badge">Read‑only</span>
+        </div>
+        <h3 class="tool-title">Foresight</h3>
+        <p class="tool-desc">Przegląd prognoz AI, trafność i statystyki.</p>
+        <div class="tool-cta">
+          <span class="status">Open</span>
+          <button class="open-btn" type="button">Open →</button>
+        </div>
+      </article>
+
+      <article class="tool-card" data-href="inventor.html" data-requires-auth="true">
+        <div class="tool-top">
+          <span class="tool-icon">🛠</span>
+          <span class="tool-badge">Prototype</span>
+        </div>
+        <h3 class="tool-title">AI Inventor</h3>
+        <p class="tool-desc">Generowanie nowych, tańszych i lepszych rozwiązań na podstawie kategorii i baz wiedzy.</p>
+        <div class="tool-cta">
+          <span class="status">Open</span>
+          <button class="open-btn" type="button">Open →</button>
+        </div>
+      </article>
+
+      <article class="tool-card" data-href="tree.html" data-requires-auth="false">
+        <div class="tool-top">
+          <span class="tool-icon">🌳</span>
+          <span class="tool-badge">Open</span>
+        </div>
+        <h3 class="tool-title">Explore the Tree</h3>
+        <p class="tool-desc">Browse the Knowledge Tree and discover interconnected topics.</p>
+        <div class="tool-cta">
+          <span class="status">Open</span>
+          <button class="open-btn" type="button">Explore →</button>
+        </div>
+      </article>
+
+      <article class="tool-card" data-href="ai-tools.html" data-requires-auth="true">
+        <div class="tool-top">
+          <span class="tool-icon">🧰</span>
+          <span class="tool-badge">Soon</span>
+        </div>
+        <h3 class="tool-title">AI Tools</h3>
+        <p class="tool-desc">A set of utilities to support your mission.</p>
+        <div class="tool-cta">
+          <span class="status">Login required</span>
+          <button class="open-btn" type="button">Open →</button>
+        </div>
+      </article>
     </div>
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">🧠</span>
-      <h3 style="margin: 10px 0 5px;">AI Assistant</h3>
-      <p style="font-size: 0.9rem;">Ask anything, anytime. Get instant AI support.</p>
-    </div>
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">📊</span>
-      <h3 style="margin: 10px 0 5px;">Analytics</h3>
-      <p style="font-size: 0.9rem;">Visual insights about what matters most.</p>
-    </div>
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">✍️</span>
-      <h3 style="margin: 10px 0 5px;">Summary Gen</h3>
-      <p style="font-size: 0.9rem;">Auto-generate summaries of complex topics.</p>
-    </div>
-  </div>
-    
+  </section>
 
-</section>-->
-
-<section id="ai-hub" class="scroll-reveal">
-  <h2>BeAwarely AI Hub</h2>
-  <p class="section-sub">Choose a tool to explore. Some require login.</p>
-
-  <div id="toolsGrid" class="tools-grid">
-    <!-- Karta 1: AI Chat (Mistral) -->
-    <article class="tool-card" data-href="chat.html" data-requires-auth="true">
-      <div class="tool-top">
-        <span class="tool-icon">🤖</span>
-        <span class="tool-badge">Mistral-7B</span>
-      </div>
-      <h3 class="tool-title">AI Chat</h3>
-      <p class="tool-desc">Ask questions, brainstorm, get realtime help.</p>
-      <div class="tool-cta">
-        <span class="status">Login required</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
-
-    <!-- Public inventions gallery -->
-<article class="tool-card" data-href="inventions.html" data-requires-auth="false">
-  <div class="tool-top">
-    <span class="tool-icon">🧭</span>
-    <span class="tool-badge">Public</span>
-  </div>
-  <h3 class="tool-title">Inventions</h3>
-  <p class="tool-desc">Approved concepts (public/partial).</p>
-  <div class="tool-cta">
-    <span class="status">Open</span>
-    <button class="open-btn" type="button">Open →</button>
-  </div>
-</article>
-
-<!-- Moderator panel (login required) -->
-<article class="tool-card" data-href="inventor_review.html" data-requires-auth="true">
-  <div class="tool-top">
-    <span class="tool-icon">🛡️</span>
-    <span class="tool-badge">Moderation</span>
-  </div>
-  <h3 class="tool-title">Inventor Review</h3>
-  <p class="tool-desc">Approve & publish (you only).</p>
-  <div class="tool-cta">
-    <span class="status">Login required</span>
-    <button class="open-btn" type="button">Open →</button>
-  </div>
-</article> 
-
-   <!-- Karta: Foresight (czytelnia prognoz) -->
-<article class="tool-card" data-href="foresight.html" data-requires-auth="false">
-  <div class="tool-top">
-    <span class="tool-icon">🔮</span>
-    <span class="tool-badge">Read‑only</span>
-  </div>
-  <h3 class="tool-title">Foresight</h3>
-  <p class="tool-desc">Przegląd prognoz AI, trafność i statystyki.</p>
-  <div class="tool-cta">
-    <span class="status">Open</span>
-    <button class="open-btn" type="button">Open →</button>
-  </div>
-</article>
-
-    <!-- Karta: AI Inventor -->
-<article class="tool-card" data-href="inventor.html" data-requires-auth="true">
-  <div class="tool-top">
-    <span class="tool-icon">🛠</span>
-    <span class="tool-badge">Prototype</span>
-  </div>
-  <h3 class="tool-title">AI Inventor</h3>
-  <p class="tool-desc">Generowanie nowych, tańszych i lepszych rozwiązań na podstawie kategorii i baz wiedzy.</p>
-  <div class="tool-cta">
-    <span class="status">Open</span>
-    <button class="open-btn" type="button">Open →</button>
-  </div>
-</article>
-
-     <!-- Karta 3: Explore the Tree -->
-<article class="tool-card" data-href="tree.html" data-requires-auth="false">
-  <div class="tool-top">
-    <span class="tool-icon">🌳</span>
-    <span class="tool-badge">Open</span>
-  </div>
-  <h3 class="tool-title">Explore the Tree</h3>
-  <p class="tool-desc">Browse the Knowledge Tree and discover interconnected topics.</p>
-  <div class="tool-cta">
-    <span class="status">Open</span>
-    <button class="open-btn" type="button">Explore →</button>
-  </div>
-</article>
-    
-     <!-- Karta 2: AI Tools (przykład – strona zbiorcza, możesz podmienić link) -->
-    <article class="tool-card" data-href="ai-tools.html" data-requires-auth="true">
-      <div class="tool-top">
-        <span class="tool-icon">🧰</span>
-        <span class="tool-badge">Soon</span>
-      </div>
-      <h3 class="tool-title">AI Tools</h3>
-      <p class="tool-desc">A set of utilities to support your mission.</p>
-      <div class="tool-cta">
-        <span class="status">Login required</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
-    
-  </div>
-</section>
-
-  
-<!-- 🔽 Przycisk do profilu (widoczny tylko po zalogowaniu) -->
-<div id="profileRedirect" class="scroll-reveal" style="display: none; text-align: center; margin-top: 40px;">
-  <a href="profile.html" style="background-color: var(--blue1); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-    Go to My Profile
-  </a>
-</div>
-
-  
-<!-- Compact CTA: Support -->
-<!--
- <section id="support-cta" class="scroll-reveal">
-  <button onclick="openSupportModal()" 
-        style="background: linear-gradient(135deg, var(--blue1), var(--blue2));
-               color:#fff; padding:14px 28px; border:none; border-radius:10px;
-               font-size:1.05rem; font-weight:700; cursor:pointer;
-               box-shadow:0 8px 30px rgba(0,123,255,.25); transition:transform .2s;">
-  🤝 Support BeAwarely
-</button>
-  <div style="font-size:.9rem; color:#bbb; margin-top:8px;">
-    Help us grow the mission
-  </div>
-</section> -->
-
-  <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
-  <div class="social-icons" style="margin-bottom: 10px;">
-    <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
-    <a href="#" title="Instagram" style="margin: 0 10px; font-size: 20px;">📸</a>
-    <a href="#" title="Mind" style="margin: 0 10px; font-size: 20px;">🧠</a>
-    <a href="https://discord.gg/a73WKd6DAZ" target="_blank" rel="noopener" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
-      <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
+  <div id="profileRedirect" class="scroll-reveal" style="display: none; text-align: center; margin-top: 40px;">
+    <a href="profile.html" style="background-color: var(--blue1); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+      Go to My Profile
     </a>
   </div>
-  <div style="margin-bottom: 5px;">
-    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Privacy Policy</a> |
-    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Contact</a> |
-    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Project Principles</a>
-  </div>
-  <div style="margin-top: 5px;">
-    © 2025 BeAwarely. All rights reserved.
-  </div>
-  <div style="margin-top: 3px; font-size: 12px; color: #777;">
-    This is a demo version – not final.
-  </div>
-</footer>
 
-<style>
-  .discord-icon {
-    width: 26px;
-    height: 26px;
-    vertical-align: middle;
-    transition: transform 0.3s ease;
-  }
-  .discord-icon:hover {
-    transform: rotate(10deg) scale(1.1);
-  }
+  <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
+    <div class="social-icons" style="margin-bottom: 10px;">
+      <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
+      <a href="#" title="Instagram" style="margin: 0 10px; font-size: 20px;">📸</a>
+      <a href="#" title="Mind" style="margin: 0 10px; font-size: 20px;">🧠</a>
+      <a href="https://discord.gg/a73WKd6DAZ" target="_blank" rel="noopener" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
+        <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
+      </a>
+    </div>
+    <div style="margin-bottom: 5px;">
+      <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Privacy Policy</a> |
+      <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Contact</a> |
+      <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Project Principles</a>
+    </div>
+    <div style="margin-top: 5px;">© 2025 BeAwarely. All rights reserved.</div>
+    <div style="margin-top: 3px; font-size: 12px; color: #777;">This is a demo version – not final.</div>
+  </footer>
 
-  #loginBtn:hover {
-  transform: scale(1.05);
-}
+  <style>
+    .discord-icon { width: 26px; height: 26px; vertical-align: middle; transition: transform 0.3s ease; }
+    .discord-icon:hover { transform: rotate(10deg) scale(1.1); }
 
+    #loginBtn:hover { transform: scale(1.05); }
 
-  @media (max-width: 500px) {
-  footer {
-    font-size: 13px;
-  }
-  .social-icons a {
-    margin: 0 6px;
-  }
-  .discord-icon {
-    width: 24px;
-    height: 24px;
-  }
+    @media (max-width: 500px) {
+      footer { font-size: 13px; }
+      .social-icons a { margin: 0 6px; }
+      .discord-icon { width: 24px; height: 24px; }
+      #modeIcon, #loginBtn { top: 10px; font-size: 1.1rem; padding: 4px 10px; }
+      #loginBtn { right: 50px; }
+      #modeIcon { right: 10px; }
+    }
 
-  /* przeniesione z drugiego media-query */
-  #modeIcon, #loginBtn {
-    top: 10px;
-    font-size: 1.1rem;
-    padding: 4px 10px;
-  }
-  #loginBtn {
-    right: 50px;
-  }
-  #modeIcon {
-    right: 10px;
-  }
-}
+    #modeIcon { right: 10px; }
 
+    #support-cta{ display: grid; place-items: center; width: 100%; max-width: none; margin-top: clamp(90px, 10vh, 140px); margin-bottom: clamp(60px, 6vh, 100px); }
+    #support-cta button{ margin: 0 auto; position: static !important; left: auto !important; }
+    .legacy-hide { display: none !important; }
 
-  #modeIcon {
-    right: 10px;
-  }
-/* Twarde centrowanie sekcji z przyciskiem */
-#support-cta{
-  display: grid;
-  place-items: center;
-  width: 100%;
-  max-width: none;
-  margin-top: clamp(90px, 10vh, 140px);
-  margin-bottom: clamp(60px, 6vh, 100px);
-}
-  
-#support-cta button{
-  margin: 0 auto;
-  position: static !important;  /* zbij ewentualne left:-... */
-  left: auto !important;
-}
+    .section-sub{opacity:.8;margin:-6px 0 18px}
+    .tools-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:16px; }
+    .tool-card{
+      position:relative; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      border-radius:16px; padding:16px; backdrop-filter: blur(3px);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .2s; cursor:pointer;
+    }
+    .tool-card:hover{ transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.25); border-color: rgba(255,255,255,.18); }
+    .tool-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .tool-icon{font-size:24px}
+    .tool-badge{ font-size:12px; padding:4px 8px; border-radius:999px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); }
+    .tool-title{margin:6px 0 4px}
+    .tool-desc{opacity:.9;margin:0 0 10px}
+    .tool-cta{display:flex;align-items:center;justify-content:space-between}
+    .open-btn{ border:none; padding:8px 12px; border-radius:10px; background: linear-gradient(135deg, var(--blue1), var(--blue2)); color:#fff; font-weight:600; cursor:pointer; }
+    .tool-card.locked .open-btn{opacity:.7}
+    .tool-card.locked .status::before{content:"🔒 ";}
 
-.legacy-hide { display: none !important; }
+    body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.08)}
+    body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
 
-/* --- AI Hub cards --- */
-.section-sub{opacity:.8;margin:-6px 0 18px}
-.tools-grid{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
-  gap:16px;
-}
-.tool-card{
-  position:relative;
-  background: rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  padding:16px;
-  backdrop-filter: blur(3px);
-  transition: transform .15s ease, box-shadow .15s ease, border-color .2s;
-  cursor:pointer;
-}
-.tool-card:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
-  border-color: rgba(255,255,255,.18);
-}
-.tool-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.tool-icon{font-size:24px}
-.tool-badge{
-  font-size:12px;
-  padding:4px 8px;
-  border-radius:999px;
-  background: rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.18);
-}
-.tool-title{margin:6px 0 4px}
-.tool-desc{opacity:.9;margin:0 0 10px}
-.tool-cta{display:flex;align-items:center;justify-content:space-between}
-.open-btn{
-  border:none; padding:8px 12px; border-radius:10px;
-  background: linear-gradient(135deg, var(--blue1), var(--blue2));
-  color:#fff; font-weight:600; cursor:pointer;
-}
-.tool-card.locked .open-btn{opacity:.7}
-.tool-card.locked .status::before{content:"🔒 ";}
+    #supportBtn:hover { background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+    @media (max-width: 500px) {
+      #supportBtn { top: 56px; left: 10px; font-size: 0.9rem; padding: 8px 12px; }
+    }
+    #support-cta { display: none !important; }
 
-/* tryb jasny */
-body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.08)}
-body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
-
-/* Support button – look & feel jak Your Profile / Hello */
-#supportBtn:hover { 
-  background-color: rgba(255,255,255,0.20);
-  transform: translateY(-1px);
-}
-
-/* Mobile korekta pozycji (spójnie z #loginBtn / #modeIcon) */
-@media (max-width: 500px) {
-  #supportBtn {
-    top: 56px;      /* trochę bliżej góry na małych ekranach */
-    left: 10px;
-    font-size: 0.9rem;
-    padding: 8px 12px;
-  }
-}
-
-/* Schowaj dawną, środkową sekcję z przyciskiem Support (nic nie usuwamy) */
-#support-cta { 
-  display: none !important; 
-}
-
-@media (max-width: 500px){
-  #google_translate_element{ 
-    bottom: 12px; 
-    right: 12px;
-    transform: scale(.9);
-    transform-origin: bottom right;
-  }
-}
-  
-</style>
+    @media (max-width: 500px){
+      #google_translate_element{ bottom: 12px; right: 12px; transform: scale(.9); transform-origin: bottom right; }
+    }
+  </style>
 
   <!-- 🔽 Google Translate dropdown in bottom-right corner -->
   <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
@@ -859,550 +460,414 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
   <!-- 🔽 Google Translate script -->
   <script type="text/javascript">
     function googleTranslateElementInit() {
-      new google.translate.TranslateElement(
-        {pageLanguage: 'en'},
-        'google_translate_element'
-      );
+      new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
     }
   </script>
-  <script type="text/javascript"
-    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-  </script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const elements = document.querySelectorAll('.scroll-reveal');
-
-    const reveal = () => {
-      const windowHeight = window.innerHeight;
-      elements.forEach(el => {
-        const top = el.getBoundingClientRect().top;
-        if (top < windowHeight - 100) {
-          el.classList.add('revealed');
-        }
-      });
-    };
-
-    window.addEventListener('scroll', reveal);
-    reveal();
-  });
-
-  function toggleGalaxyMode() {
-    alert("Galaxy brightness toggle coming soon!");
-  }
-</script>
-
-
- <script>
-  function openLoginModal() {
-    const modal = document.getElementById("loginModal");
-    modal.classList.add("open");
-    const dialog = modal.querySelector('[role="dialog"]');
-    if (dialog) dialog.focus();
-  }
-
-  function closeLoginModal() {
-    document.getElementById("loginModal").classList.remove("open");
-  }
-
-  // Zamknięcie po kliknięciu poza okno (tylko dla loginModal)
-  window.onclick = function(event) {
-    const modal = document.getElementById("loginModal");
-    if (event.target === modal) modal.classList.remove("open");
-  }
-</script>
-
-
-<script>
-  // Zamknij modal klawiszem ESC
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLoginModal();
-  });
-</script>
-  
-
-  <!-- 🔽 Najpierw ładujemy bibliotekę Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- 🔽 Potem tworzymy klienta -->
-<script>
-  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-
-   // 🔐 trwała sesja + auto‑refresh tokenu + obsługa powrotu z OAuth
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  });
-  window.supabaseClient = supabaseClient;
-
-  async function signInWithGoogle() {
-  const { data, error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: 'https://beawarely.github.io/beawarely-demo/index.html'
-
-
-    }
-  });
-
-  if (error) {
-    console.error("OAuth error:", error.message);
-  } else if (data?.url) {
-    window.location.href = data.url;
-  }
-}
-</script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
   <script>
-  function openSupportModal() {
-  const m = document.getElementById('supportModal');
-  if (!m) return;
-  m.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeSupportModal() {
-  const m = document.getElementById('supportModal');
-  if (!m) return;
-  m.classList.remove('open');
-  document.body.style.overflow = '';
-  const note = document.getElementById('copiedNote');
-  if (note) note.style.display = 'none';
-}
-
-
-  // Zamknięcie po kliknięciu w tło (nie nadpisujemy window.onclick używanego przez loginModal)
-  window.addEventListener('click', (e) => {
-    const m = document.getElementById('supportModal');
-    if (m && e.target === m) closeSupportModal();
-  });
-
-  // Zamknięcie ESC
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSupportModal();
-  });
-
-  // Kopiowanie adresu crypto
-  function copyCrypto() {
-    const address = 'TWÓJ_ADRES_CRYPTO';
-    navigator.clipboard.writeText(address).then(() => {
-      const note = document.getElementById('copiedNote');
-      if (note) note.style.display = 'block';
-      setTimeout(() => note && (note.style.display = 'none'), 1800);
+    document.addEventListener('DOMContentLoaded', () => {
+      const elements = document.querySelectorAll('.scroll-reveal');
+      const reveal = () => {
+        const windowHeight = window.innerHeight;
+        elements.forEach(el => {
+          const top = el.getBoundingClientRect().top;
+          if (top < windowHeight - 100) el.classList.add('revealed');
+        });
+      };
+      window.addEventListener('scroll', reveal);
+      reveal();
     });
-  }
-</script>
+    function toggleGalaxyMode() { alert("Galaxy brightness toggle coming soon!"); }
+  </script>
 
-<!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
- <!-- 
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const { data, error } = await supabaseClient.auth.getUser();
-
-    if (error) {
-      console.error("❌ Błąd pobierania użytkownika:", error.message);
+  <script>
+    function openLoginModal() {
+      const modal = document.getElementById("loginModal");
+      modal.classList.add("open");
+      document.body.style.overflow = 'hidden';
+      const dialog = modal.querySelector('[role="dialog"]');
+      if (dialog) dialog.focus();
     }
-
-    const user = data?.user;
-
-    if (user) {
-      console.log("✅ Użytkownik zalogowany:", user);
-      document.getElementById('loginBtn').textContent = 'Log out';
-      document.getElementById('loginBtn').onclick = logoutUser;
-
-      const profileBtn = document.getElementById('profileRedirect');
-      if (profileBtn) profileBtn.style.display = 'block';
-
-      const yourProfileBtn = document.getElementById('yourProfileBtn');
-      if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
-
-    } else {
-      console.log("ℹ️ Użytkownik niezalogowany");
-      document.getElementById('loginBtn').textContent = 'Log In';
-      document.getElementById('loginBtn').onclick = openLoginModal;
-
-      const profileBtn = document.getElementById('profileRedirect');
-      if (profileBtn) profileBtn.style.display = 'none';
-
-      const yourProfileBtn = document.getElementById('yourProfileBtn');
-      if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+    function closeLoginModal() {
+      document.getElementById("loginModal").classList.remove("open");
+      document.body.style.overflow = '';
     }
-  }); // ✅ DODANE - to był brakujący nawias
-</script> -->
+    // ⬇️ Zamknięcie loginModal po kliknięciu w tło – bez nadpisywania window.onclick
+    document.addEventListener('click', (event) => {
+      const modal = document.getElementById('loginModal');
+      if (!modal) return;
+      if (event.target === modal) {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
 
+  <script>
+    // Zamknij modal klawiszem ESC
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLoginModal(); });
+  </script>
 
-<script>
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-    wireLoginButton(session);
-    if (typeof refreshLocks === 'function') refreshLocks();
+  <!-- 🔽 Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    if (event === 'SIGNED_IN' && session) {
-      const to = localStorage.getItem('ba_redirect');
-      if (to) {
-        localStorage.removeItem('ba_redirect');
-        location.href = to;
+  <script>
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+    window.supabaseClient = supabaseClient;
+
+    async function signInWithGoogle() {
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: 'https://beawarely.github.io/beawarely-demo/index.html' }
+      });
+      if (error) {
+        console.error("OAuth error:", error.message);
+      } else if (data?.url) {
+        window.location.href = data.url;
       }
     }
-  });
-</script>
-  
-<script>
-  // ❗️ Przenieśliśmy logoutUser() poza DOMContentLoaded
-  async function logoutUser() {
-    const { error } = await supabaseClient.auth.signOut();
-    if (error) {
-      alert("Error signing out");
-      console.error("❌ Błąd podczas wylogowywania:", error.message);
-    } else {
-      console.log("👋 Wylogowano pomyślnie");
-      location.reload();
+  </script>
+
+  <script>
+    function openSupportModal() {
+      const m = document.getElementById('supportModal');
+      if (!m) return;
+      m.classList.add('open');
+      document.body.style.overflow = 'hidden';
     }
-  }
-</script>
+    function closeSupportModal() {
+      const m = document.getElementById('supportModal');
+      if (!m) return;
+      m.classList.remove('open');
+      document.body.style.overflow = '';
+      const note = document.getElementById('copiedNote');
+      if (note) note.style.display = 'none';
+    }
+    // Zamknięcie po kliknięciu w tło (Support modal)
+    window.addEventListener('click', (e) => {
+      const m = document.getElementById('supportModal');
+      if (m && e.target === m) closeSupportModal();
+    });
+    // Zamknięcie ESC
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSupportModal(); });
+    // Kopiowanie adresu crypto
+    function copyCrypto() {
+      const address = 'TWÓJ_ADRES_CRYPTO';
+      navigator.clipboard.writeText(address).then(() => {
+        const note = document.getElementById('copiedNote');
+        if (note) note.style.display = 'block';
+        setTimeout(() => note && (note.style.display = 'none'), 1800);
+      });
+    }
+  </script>
 
-<script>
-function wireLoginButton(session){
-  const loginBtn = document.getElementById('loginBtn');
-  const profileBtn = document.getElementById('profileRedirect');
-  const yourProfileBtn = document.getElementById('yourProfileBtn');
+  <!-- 🔽 HANDLER onAuthStateChange – USUNIĘTY duplikat (pozostaje tylko w bloku refreshLocks niżej) -->
 
-  if (!loginBtn) return;
+  <script>
+    // Logout poprawiony: czyści redirect i porządkuje UI
+    async function logoutUser() {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) {
+        alert("Error signing out");
+        console.error("❌ Błąd podczas wylogowywania:", error.message);
+        return;
+      }
+      try {
+        localStorage.removeItem('ba_redirect');
+        const lm = document.getElementById('loginModal');
+        if (lm) lm.classList.remove('open');
+        document.body.style.overflow = '';
+      } finally {
+        console.log("👋 Wylogowano pomyślnie");
+        location.reload();
+      }
+    }
+  </script>
 
-  if (session?.user) {
-    loginBtn.textContent = 'Log out';
-    loginBtn.onclick = logoutUser;
-    if (profileBtn) profileBtn.style.display = 'block';
-    if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
-  } else {
-    loginBtn.textContent = 'Log In';
-    loginBtn.onclick = openLoginModal;
-    if (profileBtn) profileBtn.style.display = 'none';
-    if (yourProfileBtn) yourProfileBtn.style.display = 'none';
-  }
-}
+  <script>
+    function wireLoginButton(session){
+      const loginBtn = document.getElementById('loginBtn');
+      const profileBtn = document.getElementById('profileRedirect');
+      const yourProfileBtn = document.getElementById('yourProfileBtn');
+      if (!loginBtn) return;
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  wireLoginButton(session);
+      if (session?.user) {
+        loginBtn.textContent = 'Log out';
+        loginBtn.onclick = logoutUser;
+        if (profileBtn) profileBtn.style.display = 'block';
+        if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
+      } else {
+        loginBtn.textContent = 'Log In';
+        loginBtn.onclick = openLoginModal;
+        if (profileBtn) profileBtn.style.display = 'none';
+        if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+      }
+    }
 
-  // ▶ po pierwszym renderze ustaw także blokady kart
-  if (typeof window.refreshLocks === 'function') {
-    await window.refreshLocks();
-  }
-});
-</script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      wireLoginButton(session);
+      if (typeof window.refreshLocks === 'function') await window.refreshLocks();
+    });
+  </script>
 
-
-<!-- 🔽 Dodaj to przed </body> -->
-<div id="loginModal" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 9999;
-  align-items: center;
-  justify-content: center;
-">
-  <div style="
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    max-width: 400px;
-    color: black;
-  ">
-    <h2>Sign In</h2>
-    <button onclick="signInWithGoogle()" style="
-      margin-top: 10px;
-      background-color: #4285F4;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    ">
-      Continue with Google
-    </button>
-    <br><br>
-    <button onclick="closeLoginModal()" style="
-      background-color: #999;
-      color: white;
-      padding: 6px 14px;
-      border: none;
-      border-radius: 4px;
-    ">Close</button>
-  </div>
-</div>
-
-  <!-- Support Modal -->
-<div id="supportModal" style="
-  display:none; position:fixed; inset:0; z-index:9998;
-  background: rgba(0,0,0,.55); align-items:center; justify-content:center;">
-  <div role="dialog" aria-modal="true" tabindex="-1" style="
-      background: rgba(20,20,20,.98);
-      color:#fff; width:min(520px, 92vw); border-radius:16px; 
-      padding:26px; box-shadow: 0 20px 60px rgba(0,0,0,.5);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-      <h3 style="margin:0; font-size:1.2rem;">Support BeAwarely</h3>
-      <button onclick="closeSupportModal()" aria-label="Close"
-              style="background:transparent; border:none; color:#aaa; font-size:1.2rem; cursor:pointer;">✖</button>
-    </div>
-
-    <p style="margin: 0 0 14px; color:#bbb; font-size:.95rem;">
-      Choose your way to support the mission:
-    </p>
-
-    <div style="
-      display:grid; grid-template-columns: repeat(2, minmax(140px,1fr));
-      gap:12px; justify-items:stretch;">
-
-      <a href="https://github.com/beawarely" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; 
-                background:#ea4aaa; color:#fff; text-decoration:none; 
-                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
-        💖 <span>GitHub Sponsors</span>
-      </a>
-
-      <a href="https://ko-fi.com/beawarely" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; 
-                background:#29abe0; color:#fff; text-decoration:none; 
-                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
-        ☕ <span>Ko‑fi</span>
-      </a>
-
-      <a href="https://paypal.me/x" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; 
-                background:#0070ba; color:#fff; text-decoration:none; 
-                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
-        💳 <span>PayPal</span>
-      </a>
-
-      <button onclick="copyCrypto()" 
-              style="display:flex; align-items:center; gap:10px; 
-                     background:#f7931a; color:#fff; 
-                     padding:14px; border:none; border-radius:12px; font-weight:700; justify-content:center; cursor:pointer;">
-        ₿ <span>Donate Crypto</span>
+  <!-- 🔽 Login modal -->
+  <div id="loginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div role="dialog" aria-modal="true" tabindex="-1" style="background: white; padding: 30px; border-radius: 10px;
+      text-align: center; max-width: 400px; color: black;">
+      <h2>Sign In</h2>
+      <button onclick="signInWithGoogle()" style="margin-top: 10px; background-color: #4285F4; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+        Continue with Google
+      </button>
+      <br><br>
+      <button onclick="closeLoginModal()" style="background-color: #999; color: white; padding: 6px 14px; border: none; border-radius: 4px;">
+        Close
       </button>
     </div>
+  </div>
 
-    <div id="copiedNote" style="display:none; text-align:center; margin-top:12px; color:#00cc66;">
-      Crypto address copied ✅
+  <!-- 🔽 Support Modal -->
+  <div id="supportModal" style="display:none; position:fixed; inset:0; z-index:9998; background: rgba(0,0,0,.55); align-items:center; justify-content:center;">
+    <div role="dialog" aria-modal="true" tabindex="-1" style="background: rgba(20,20,20,.98); color:#fff; width:min(520px, 92vw);
+      border-radius:16px; padding:26px; box-shadow: 0 20px 60px rgba(0,0,0,.5);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="margin:0; font-size:1.2rem;">Support BeAwarely</h3>
+        <button onclick="closeSupportModal()" aria-label="Close"
+                style="background:transparent; border:none; color:#aaa; font-size:1.2rem; cursor:pointer;">✖</button>
+      </div>
+
+      <p style="margin: 0 0 14px; color:#bbb; font-size:.95rem;">Choose your way to support the mission:</p>
+
+      <div style="display:grid; grid-template-columns: repeat(2, minmax(140px,1fr)); gap:12px; justify-items:stretch;">
+        <a href="https://github.com/beawarely" target="_blank" rel="noopener"
+           style="display:flex; align-items:center; gap:10px; background:#ea4aaa; color:#fff; text-decoration:none; padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+          💖 <span>GitHub Sponsors</span>
+        </a>
+        <a href="https://ko-fi.com/beawarely" target="_blank" rel="noopener"
+           style="display:flex; align-items:center; gap:10px; background:#29abe0; color:#fff; text-decoration:none; padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+          ☕ <span>Ko‑fi</span>
+        </a>
+        <a href="https://paypal.me/x" target="_blank" rel="noopener"
+           style="display:flex; align-items:center; gap:10px; background:#0070ba; color:#fff; text-decoration:none; padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+          💳 <span>PayPal</span>
+        </a>
+        <button onclick="copyCrypto()"
+                style="display:flex; align-items:center; gap:10px; background:#f7931a; color:#fff; padding:14px; border:none; border-radius:12px; font-weight:700; justify-content:center; cursor:pointer;">
+          ₿ <span>Donate Crypto</span>
+        </button>
+      </div>
+
+      <div id="copiedNote" style="display:none; text-align:center; margin-top:12px; color:#00cc66;">
+        Crypto address copied ✅
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-(function(){
-  const sb = supabaseClient;
-  const grid = document.getElementById('toolsGrid');
-  if (!grid) return;
+  <script>
+    (function(){
+      const sb = supabaseClient;
+      const grid = document.getElementById('toolsGrid');
+      if (!grid) return;
 
-  // ⬇️ udostępniamy globalnie
-  window.refreshLocks = async function refreshLocks(){
-    const { data: { session } } = await sb.auth.getSession();
-    const authed = !!session;
+      // ⬇️ udostępniamy globalnie
+      window.refreshLocks = async function refreshLocks(){
+        const { data: { session } } = await sb.auth.getSession();
+        const authed = !!session;
 
-    grid.querySelectorAll('.tool-card').forEach(card => {
-      const needs = card.dataset.requiresAuth === 'true';
-      card.classList.toggle('locked', needs && !authed);
+        grid.querySelectorAll('.tool-card').forEach(card => {
+          const needs = card.dataset.requiresAuth === 'true';
+          card.classList.toggle('locked', needs && !authed);
 
-      const status = card.querySelector('.status');
-      if (status) status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
+          const status = card.querySelector('.status');
+          if (status) status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
 
-      const href = card.dataset.href;
+          const href = card.dataset.href;
 
-      // klik na całej karcie
-      card.onclick = () => {
-        if (needs && !authed) {
-          localStorage.setItem('ba_redirect', href);
-          const modal = document.getElementById('loginModal');
-          if (modal) modal.classList.add('open');
-          if (typeof window.openLoginModal === 'function') window.openLoginModal();
-          return;
-        }
-        if (href) window.location.href = href;
+          // klik na całej karcie
+          card.onclick = () => {
+            if (needs && !authed) {
+              // jedno źródło prawdy do otwarcia logowania + redirect po sukcesie
+              localStorage.setItem('ba_redirect', href);
+              if (typeof window.openLoginModal === 'function') {
+                window.openLoginModal();
+              } else {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                  modal.classList.add('open');
+                  document.body.style.overflow = 'hidden';
+                }
+              }
+              return;
+            }
+            if (href) window.location.href = href;
+          };
+
+          // klik na przycisku
+          const btn = card.querySelector('.open-btn');
+          if (btn) {
+            btn.onclick = (e) => { e.stopPropagation(); card.click(); };
+          }
+        });
       };
 
-      // ⬇️ ważne: klik także na samym przycisku, z bąbelkowaniem kontrolowanym
-      const btn = card.querySelector('.open-btn');
-      if (btn) {
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          card.click();
-        };
-      }
-    });
-  };
+      // jeden spójny nasłuch – bez duplikatów
+      sb.auth.onAuthStateChange((event, session) => {
+        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          window.refreshLocks();
+          wireLoginButton(session);
+          // auto‑redirect po zalogowaniu
+          const to = localStorage.getItem('ba_redirect');
+          if (to && session) {
+            localStorage.removeItem('ba_redirect');
+            location.href = to;
+          }
+        }
+      });
 
-  // czekamy na INITIAL_SESSION żeby nie blokować stanu „po zalogowaniu”
-  sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      // pierwsze wywołanie
       window.refreshLocks();
-      // auto‑redirect po zalogowaniu
-      const to = localStorage.getItem('ba_redirect');
-      if (to && session) {
-        localStorage.removeItem('ba_redirect');
-        location.href = to;
+    })();
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const left  = document.querySelector('#topbar .topbar-left');
+      const right = document.querySelector('#topbar .topbar-right');
+
+      const profile = document.getElementById('yourProfileBtn');
+      const login   = document.getElementById('loginBtn');
+      const mode    = document.getElementById('modeIcon');
+
+      // SUPPORT – topbar
+      let support = document.getElementById('supportTopBtn');
+      if (!support) {
+        support = document.createElement('a');
+        support.id = 'supportTopBtn';
+        support.href = 'javascript:void(0)';
+        support.className = 'pill';
+        support.textContent = '💲💲💲';
+        support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
       }
+
+      if (profile) profile.classList.add('pill');
+      if (login)   login.classList.add('pill');
+
+      if (profile) left.appendChild(profile);
+      left.appendChild(support);
+      if (login)   right.appendChild(login);
+      if (mode)    right.appendChild(mode);
+    });
+  </script>
+
+  <script>
+    // Enter/Space aktywują klik
+    function makeKeyboardClickable(el, onActivate){
+      if(!el) return;
+      el.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate(); }
+      });
     }
-  });
+    document.addEventListener('DOMContentLoaded', ()=>{
+      makeKeyboardClickable(document.getElementById('modeIcon'), toggleLightDarkMode);
+      const lb = document.getElementById('loginBtn');
+      makeKeyboardClickable(lb, () => lb?.click());
+    });
+  </script>
 
-  // pierwsze wywołanie
-  window.refreshLocks();
-})();
-</script>
+  <script>
+    /* ===== Profiles: ensure + load + UI hook ===== */
+    async function ensureProfile(user) {
+      if (!user) return;
+      const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
+                       || (user.email ? user.email.split('@')[0] : 'User');
+      const { error } = await supabaseClient
+        .from('profiles')
+        .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
+      if (error) console.error('ensureProfile error:', error);
+    }
 
+    async function fetchMyProfile() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return null;
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('id, display_name, avatar_url, rank, points, badges')
+        .eq('id', user.id)
+        .single();
+      if (error) {
+        console.error('fetchMyProfile error:', error);
+        return null;
+      }
+      return data;
+    }
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const left  = document.querySelector('#topbar .topbar-left');
-  const right = document.querySelector('#topbar .topbar-right');
+    function applyProfileToUI(profile) {
+      const chip    = document.getElementById('profileChip');
+      const nameEl  = document.getElementById('profileName');
+      const rankEl  = document.getElementById('profileRank');
+      const avatarEl= document.getElementById('profileAvatar');
+      if (!chip || !nameEl || !rankEl || !avatarEl) return;
 
-  const profile = document.getElementById('yourProfileBtn'); // już istnieje
-  const login   = document.getElementById('loginBtn');        // już istnieje
-  const mode    = document.getElementById('modeIcon');        // już istnieje
+      if (!profile) { chip.style.display = 'none'; return; }
 
-// SUPPORT – topbar $$$ (minimal)
-let support = document.getElementById('supportTopBtn');
-if (!support) {
-  support = document.createElement('a');
-  support.id = 'supportTopBtn';
-  support.href = 'javascript:void(0)';
-  support.className = 'pill';
-  support.textContent = '💲💲💲';
-  support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
-}
+      nameEl.textContent = profile.display_name || 'User';
+      rankEl.textContent = profile.rank
+        ? `${profile.rank} • ${profile.points ?? 0} pts`
+        : `${profile.points ?? 0} pts`;
 
+      if (profile.avatar_url) {
+        const v = Date.now(); // cache-buster
+        avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
+      } else {
+        avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
+      }
+      chip.style.display = 'flex';
+    }
 
+    (async () => {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        await ensureProfile(user);
+        const me = await fetchMyProfile();
+        applyProfileToUI(me);
+      } else {
+        applyProfileToUI(null);
+      }
+    })();
 
-  // nadaj klasę „pill” istniejącym, by wyglądały spójnie
-  if (profile) profile.classList.add('pill');
-  if (login)   login.classList.add('pill');
-
-  // wstaw do odpowiednich grup
-  if (profile) left.appendChild(profile);
-  left.appendChild(support);
-  if (login)   right.appendChild(login);
-  if (mode)    right.appendChild(mode);
-});
-</script>
-
-<script>
-  // Enter/Space aktywują klik
-  function makeKeyboardClickable(el, onActivate){
-    if(!el) return;
-    el.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onActivate();
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        await ensureProfile(session.user);
+        const me = await fetchMyProfile();
+        applyProfileToUI(me);
+      }
+      if (event === 'SIGNED_OUT') {
+        applyProfileToUI(null);
       }
     });
-  }
-  document.addEventListener('DOMContentLoaded', ()=>{
-    makeKeyboardClickable(document.getElementById('modeIcon'), toggleLightDarkMode);
 
-    const lb = document.getElementById('loginBtn');
-    makeKeyboardClickable(lb, () => lb?.click());   // ← tylko delegacja do kliknięcia
-  });
-</script>
+    async function updateDisplayName(newName) {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return { error: 'Not logged in' };
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ display_name: newName })
+        .eq('id', user.id);
+      if (error) console.error('updateDisplayName error:', error);
+      else {
+        const me = await fetchMyProfile();
+        applyProfileToUI(me);
+      }
+      return { error: error?.message || null };
+    }
+  </script>
 
-<script>
-/* ===== Profiles: ensure + load + UI hook (wersja pod supabaseClient) ===== */
-
-async function ensureProfile(user) {
-  if (!user) return;
-  const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
-                   || (user.email ? user.email.split('@')[0] : 'User');
-  const { error } = await supabaseClient
-    .from('profiles')
-    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
-  if (error) console.error('ensureProfile error:', error);
-}
-
-async function fetchMyProfile() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return null;
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('id, display_name, avatar_url, rank, points, badges')
-    .eq('id', user.id)
-    .single();
-  if (error) {
-    console.error('fetchMyProfile error:', error);
-    return null;
-  }
-  return data;
-}
-
-function applyProfileToUI(profile) {
-  const chip    = document.getElementById('profileChip');
-  const nameEl  = document.getElementById('profileName');
-  const rankEl  = document.getElementById('profileRank');
-  const avatarEl= document.getElementById('profileAvatar');
-  if (!chip || !nameEl || !rankEl || !avatarEl) return;
-
-  if (!profile) {
-    chip.style.display = 'none';
-    return;
-  }
-  nameEl.textContent = profile.display_name || 'User';
-  rankEl.textContent = profile.rank
-    ? `${profile.rank} • ${profile.points ?? 0} pts`
-    : `${profile.points ?? 0} pts`;
-
-  if (profile.avatar_url) {
-    const v = Date.now(); // lekki cache-buster
-    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
-  } else {
-    avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
-  }
-  chip.style.display = 'flex';
-}
-
-// Start: jeśli już zalogowany → utwórz/odśwież profil i pokaż chip
-(async () => {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (user) {
-    await ensureProfile(user);
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
-  } else {
-    applyProfileToUI(null);
-  }
-})();
-
-// Reakcja na login/logout
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session?.user) {
-    await ensureProfile(session.user);
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
-  }
-  if (event === 'SIGNED_OUT') {
-    applyProfileToUI(null);
-  }
-});
-
-// (opcjonalne) helper do zmiany wyświetlanej nazwy
-async function updateDisplayName(newName) {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return { error: 'Not logged in' };
-  const { error } = await supabaseClient
-    .from('profiles')
-    .update({ display_name: newName })
-    .eq('id', user.id);
-  if (error) console.error('updateDisplayName error:', error);
-  else {
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
-  }
-  return { error: error?.message || null };
-}
-</script>
-  
 </body>
 </html>
