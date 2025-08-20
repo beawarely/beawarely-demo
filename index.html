@@ -572,22 +572,23 @@
   <script>
     // Logout poprawiony: czyści redirect i porządkuje UI
     async function logoutUser() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
-        alert("Error signing out");
-        console.error("❌ Błąd podczas wylogowywania:", error.message);
-        return;
-      }
-      try {
-        localStorage.removeItem('ba_redirect');
-        const lm = document.getElementById('loginModal');
-        if (lm) lm.classList.remove('open');
-        document.body.style.overflow = '';
-      } finally {
-        console.log("👋 Wylogowano pomyślnie");
-        location.reload();
-      }
-    }
+  // 1) zawsze wyczyść lokalną sesję (działa bez sieci)
+  try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch (_) {}
+
+  // 2) spróbuj odwołać refresh token na serwerze (opcjonalne – ignorujemy błędy)
+  try { await supabaseClient.auth.signOut({ scope: 'global' }); }
+  catch (e) { console.warn('signOut(global) failed:', e?.message || e); }
+
+  // 3) porządkowanie UI i twardy redirect
+  try {
+    localStorage.removeItem('ba_redirect');
+    const lm = document.getElementById('loginModal');
+    if (lm) lm.classList.remove('open');
+    document.body.style.overflow = '';
+  } finally {
+    location.replace('index.html');
+  }
+}
   </script>
 
   <script>
