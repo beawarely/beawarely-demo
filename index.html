@@ -1087,8 +1087,14 @@ function wireLoginButton(session){
 document.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await supabaseClient.auth.getSession();
   wireLoginButton(session);
+
+  // ▶ po pierwszym renderze ustaw także blokady kart
+  if (typeof window.refreshLocks === 'function') {
+    await window.refreshLocks();
+  }
 });
 </script>
+
 
 <!-- 🔽 Dodaj to przed </body> -->
 <div id="loginModal" style="
@@ -1298,10 +1304,9 @@ if (!support) {
   }
   document.addEventListener('DOMContentLoaded', ()=>{
     makeKeyboardClickable(document.getElementById('modeIcon'), toggleLightDarkMode);
-    makeKeyboardClickable(document.getElementById('loginBtn'), () => {
-      const txt = document.getElementById('loginBtn')?.textContent?.toLowerCase() || '';
-      if (txt.includes('log out')) logoutUser(); else openLoginModal();
-    });
+
+    const lb = document.getElementById('loginBtn');
+    makeKeyboardClickable(lb, () => lb?.click());   // ← tylko delegacja do kliknięcia
   });
 </script>
 
