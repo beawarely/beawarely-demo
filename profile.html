@@ -327,13 +327,13 @@
     }
   });
 
-  async function logoutUser() {
+ async function logoutUser() {
   try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch (_) {}
-  try { await supabaseClient.auth.signOut({ scope: 'global' }); }
-  catch (e) { console.warn('signOut(global) failed:', e?.message || e); }
+  try { await supabaseClient.auth.signOut({ scope: 'global' }); } catch (e) {
+    console.warn('signOut(global) failed:', e?.message || e);
+  }
   location.replace('index.html');
 }
-
 
   async function uploadAvatar() {
     const fileInput = document.getElementById('avatar-upload');
