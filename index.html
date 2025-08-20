@@ -517,9 +517,26 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+window.supabaseClient = supabaseClient;
+
+// ⏳ Gwarantuje, że poczekamy na INITIAL_SESSION (przy pierwszym wejściu i po powrocie z innych kart)
+async function waitForInitialSession(sb) {
+  // szybka próba
+  let { data: { session } } = await sb.auth.getSession();
+  if (session) return session;
+  // nasłuch INITIAL_SESSION (wywoływany natychmiast po subskrypcji)
+  return await new Promise(resolve => {
+    const { data: sub } = sb.auth.onAuthStateChange((event, sess) => {
+      if (event === 'INITIAL_SESSION') {
+        try { sub.subscription.unsubscribe(); } catch {}
+        resolve(sess || null);
+      }
     });
-    window.supabaseClient = supabaseClient;
+  });
+}
+
 
     async function signInWithGoogle() {
       const { data, error } = await supabaseClient.auth.signInWithOAuth({
@@ -570,25 +587,23 @@
   <!-- 🔽 HANDLER onAuthStateChange – USUNIĘTY duplikat (pozostaje tylko w bloku refreshLocks niżej) -->
 
   <script>
-    // Logout poprawiony: czyści redirect i porządkuje UI
-    async function logoutUser() {
-  // 1) zawsze wyczyść lokalną sesję (działa bez sieci)
+    // ✅ Twarde i pewne wylogowanie + porządkowanie UI
+async function logoutUser() {
   try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch (_) {}
-
-  // 2) spróbuj odwołać refresh token na serwerze (opcjonalne – ignorujemy błędy)
-  try { await supabaseClient.auth.signOut({ scope: 'global' }); }
-  catch (e) { console.warn('signOut(global) failed:', e?.message || e); }
-
-  // 3) porządkowanie UI i twardy redirect
+  try { await supabaseClient.auth.signOut({ scope: 'global' }); } catch (e) {
+    console.warn('signOut(global) failed:', e?.message || e);
+  }
   try {
     localStorage.removeItem('ba_redirect');
     const lm = document.getElementById('loginModal');
     if (lm) lm.classList.remove('open');
     document.body.style.overflow = '';
   } finally {
+    // unikamy #/cache → zawsze wracamy na czyste index.html
     location.replace('index.html');
   }
 }
+
   </script>
 
   <script>
@@ -612,10 +627,18 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      wireLoginButton(session);
-      if (typeof window.refreshLocks === 'function') await window.refreshLocks();
-    });
+  const session = await waitForInitialSession(supabaseClient);
+  wireLoginButton(session);
+  if (typeof window.refreshLocks === 'function') await window.refreshLocks();
+});
+
+// 🔁 Powrót z innych podstron może użyć bfcache → odśwież UI i blokady
+window.addEventListener('pageshow', async () => {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  wireLoginButton(session);
+  if (typeof window.refreshLocks === 'function') await window.refreshLocks();
+});
+
   </script>
 
   <!-- 🔽 Login modal -->
