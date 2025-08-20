@@ -448,7 +448,6 @@ function toggleLightDarkMode() {
 
 <!-- Przycisk Log In -->
 <span id="loginBtn" role="button" tabindex="0" aria-label="Open login dialog"
-      onclick="openLoginModal()"
       title="Log in/out"
       style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
       onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
@@ -998,6 +997,7 @@ function closeSupportModal() {
 </script>
 
 <!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
+ <!-- 
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
     const { data, error } = await supabaseClient.auth.getUser();
@@ -1031,33 +1031,20 @@ function closeSupportModal() {
       if (yourProfileBtn) yourProfileBtn.style.display = 'none';
     }
   }); // ✅ DODANE - to był brakujący nawias
-</script>
+</script> -->
 
 
 <script>
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    const loginBtn       = document.getElementById('loginBtn');
-    const profileBtn     = document.getElementById('profileRedirect');
-    const yourProfileBtn = document.getElementById('yourProfileBtn');
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+    wireLoginButton(session);
+    if (typeof refreshLocks === 'function') refreshLocks();
 
-    // ✅ Po załadowaniu sesji z localStorage (INITIAL_SESSION) albo po zalogowaniu (SIGNED_IN)
-    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-      if (session?.user) {
-        if (loginBtn) { loginBtn.textContent = 'Log out'; loginBtn.onclick = logoutUser; }
-        if (profileBtn) profileBtn.style.display = 'block';
-        if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
+    if (event === 'SIGNED_IN' && session) {
+      const to = localStorage.getItem('ba_redirect');
+      if (to) {
+        localStorage.removeItem('ba_redirect');
+        location.href = to;
       }
-      // (opcjonalnie, jeśli masz taką funkcję na stronie domowej)
-      if (typeof refreshLocks === 'function') refreshLocks();
-      return;
-    }
-
-    // 🚪 Prawdziwe wylogowanie
-    if (event === 'SIGNED_OUT') {
-      if (loginBtn) { loginBtn.textContent = 'Log In'; loginBtn.onclick = openLoginModal; }
-      if (profileBtn) profileBtn.style.display = 'none';
-      if (yourProfileBtn) yourProfileBtn.style.display = 'none';
-      if (typeof refreshLocks === 'function') refreshLocks();
     }
   });
 </script>
@@ -1076,6 +1063,32 @@ function closeSupportModal() {
   }
 </script>
 
+<script>
+function wireLoginButton(session){
+  const loginBtn = document.getElementById('loginBtn');
+  const profileBtn = document.getElementById('profileRedirect');
+  const yourProfileBtn = document.getElementById('yourProfileBtn');
+
+  if (!loginBtn) return;
+
+  if (session?.user) {
+    loginBtn.textContent = 'Log out';
+    loginBtn.onclick = logoutUser;
+    if (profileBtn) profileBtn.style.display = 'block';
+    if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
+  } else {
+    loginBtn.textContent = 'Log In';
+    loginBtn.onclick = openLoginModal;
+    if (profileBtn) profileBtn.style.display = 'none';
+    if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  wireLoginButton(session);
+});
+</script>
 
 <!-- 🔽 Dodaj to przed </body> -->
 <div id="loginModal" style="
@@ -1178,72 +1191,65 @@ function closeSupportModal() {
 
 <script>
 (function(){
-  // ❗️UŻYJ TEGO SAMEGO KLIENTA, KTÓRY JUŻ MASZ (supabaseClient)
-  const sb = supabaseClient; // używamy jedynego, wcześniej utworzonego klienta
-
-
+  const sb = supabaseClient;
   const grid = document.getElementById('toolsGrid');
   if (!grid) return;
 
-  async function refreshLocks(){
+  // ⬇️ udostępniamy globalnie
+  window.refreshLocks = async function refreshLocks(){
     const { data: { session } } = await sb.auth.getSession();
     const authed = !!session;
 
-    grid.querySelectorAll('.tool-card').forEach(card=>{
+    grid.querySelectorAll('.tool-card').forEach(card => {
       const needs = card.dataset.requiresAuth === 'true';
       card.classList.toggle('locked', needs && !authed);
+
       const status = card.querySelector('.status');
-      if(status){
-        status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
-      }
-      // klik
+      if (status) status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
+
+      const href = card.dataset.href;
+
+      // klik na całej karcie
       card.onclick = () => {
-        const href = card.dataset.href;
         if (needs && !authed) {
-          // zapamiętaj, dokąd mamy wrócić po zalogowaniu
           localStorage.setItem('ba_redirect', href);
-          // otwórz Twój modal logowania (dopasuj do swojego kodu)
           const modal = document.getElementById('loginModal');
           if (modal) modal.classList.add('open');
-          // jeśli masz funkcję np. openLoginModal() – wywołaj ją
           if (typeof window.openLoginModal === 'function') window.openLoginModal();
           return;
         }
         if (href) window.location.href = href;
       };
+
+      // ⬇️ ważne: klik także na samym przycisku, z bąbelkowaniem kontrolowanym
+      const btn = card.querySelector('.open-btn');
+      if (btn) {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          card.click();
+        };
+      }
     });
-  }
+  };
 
-  // po zalogowaniu – automatyczny powrót
+  // czekamy na INITIAL_SESSION żeby nie blokować stanu „po zalogowaniu”
   sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-    // po inicjalizacji lub po zalogowaniu – odśwież kłódki
-    refreshLocks();
-    // jeśli mamy zapamiętany cel – idź tam od razu
-    const to = localStorage.getItem('ba_redirect');
-    if (to && session) {
-      localStorage.removeItem('ba_redirect');
-      location.href = to;
+    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+      window.refreshLocks();
+      // auto‑redirect po zalogowaniu
+      const to = localStorage.getItem('ba_redirect');
+      if (to && session) {
+        localStorage.removeItem('ba_redirect');
+        location.href = to;
+      }
     }
-    return;
-  }
-  if (event === 'SIGNED_OUT') {
-    refreshLocks();
-  }
-});
+  });
 
-
-
-  // jeśli ktoś trafił tu z parametrem ?login=1 – pokaż modal
-  if (new URLSearchParams(location.search).get('login') === '1') {
-    const modal = document.getElementById('loginModal');
-    if (modal) modal.classList.add('open');
-    if (typeof window.openLoginModal === 'function') window.openLoginModal();
-  }
-
-  refreshLocks();
+  // pierwsze wywołanie
+  window.refreshLocks();
 })();
 </script>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
