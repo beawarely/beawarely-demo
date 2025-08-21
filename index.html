@@ -126,11 +126,11 @@
     body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
     /* --- Fixed Topbar --- */
-    #topbar{
-      position: fixed; top: calc(14px + var(--safe-top)); left: 20px; right: 20px; z-index: 10000;
-      display: flex; justify-content: space-between; align-items: center; pointer-events: none;
-    }
-    #topbar .topbar-left, #topbar .topbar-right{ display: flex; gap: 12px; align-items: center; pointer-events: auto; }
+   #topbar{
+  position: fixed; top: calc(14px + var(--safe-top)); left: 20px; right: 20px; z-index: 10000;
+  display: flex; justify-content: space-between; align-items: center; pointer-events: auto;
+}
+#topbar .topbar-left, #topbar .topbar-right{ display: flex; gap: 12px; align-items: center; }
 
     .pill{
       background-color: rgba(255,255,255,0.10); color: #fff; font-weight: 600; text-decoration: none;
@@ -539,16 +539,21 @@ async function waitForInitialSession(sb) {
 
 
     async function signInWithGoogle() {
-      const { data, error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: 'https://beawarely.github.io/beawarely-demo/index.html' }
-      });
-      if (error) {
-        console.error("OAuth error:", error.message);
-      } else if (data?.url) {
-        window.location.href = data.url;
-      }
+  const redirectTo = new URL('index.html', location.href).href; // zawsze absolutny URL do index.html
+  const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo,
+      queryParams: { prompt: 'select_account' }
     }
+  });
+  if (error) {
+    console.error('OAuth error:', error.message);
+    return;
+  }
+  if (data?.url) location.href = data.url;
+}
+
   </script>
 
   <script>
@@ -599,10 +604,10 @@ async function logoutUser() {
     if (lm) lm.classList.remove('open');
     document.body.style.overflow = '';
   } finally {
-    // unikamy #/cache → zawsze wracamy na czyste index.html
-    location.replace('index.html');
+    location.replace('index.html'); // zawsze czysty redirect
   }
 }
+
 
   </script>
 
@@ -626,17 +631,32 @@ async function logoutUser() {
       }
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-  const session = await waitForInitialSession(supabaseClient);
-  wireLoginButton(session);
-  if (typeof window.refreshLocks === 'function') await window.refreshLocks();
-});
+    async function rehydrateUI() {
+  // 🔧 Zbij wszystko, co może blokować kliknięcia
+  const loader = document.getElementById('loader');
+  if (loader) { loader.style.display = 'none'; loader.remove?.(); }
+  const lm = document.getElementById('loginModal');
+  if (lm) { lm.classList.remove('open'); document.body.style.overflow = ''; }
 
-// 🔁 Powrót z innych podstron może użyć bfcache → odśwież UI i blokady
-window.addEventListener('pageshow', async () => {
+  // 🔑 Aktualna sesja + odświeżenie blokad i przycisków
   const { data: { session } } = await supabaseClient.auth.getSession();
   wireLoginButton(session);
   if (typeof window.refreshLocks === 'function') await window.refreshLocks();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await waitForInitialSession(supabaseClient);
+  await rehydrateUI();
+});
+
+// Powrót (BFCache), fokus zakładki i zmiany sesji w innej karcie → zawsze odśwież UI
+window.addEventListener('pageshow', rehydrateUI);
+window.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') rehydrateUI();
+});
+window.addEventListener('focus', rehydrateUI);
+window.addEventListener('storage', (e) => {
+  if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) rehydrateUI();
 });
 
   </script>
