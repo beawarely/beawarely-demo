@@ -243,11 +243,7 @@
           onmouseout="this.style.backgroundColor='transparent'">🌛</span>
 
     <!-- Przycisk Log In -->
-    <span id="loginBtn" role="button" tabindex="0" aria-label="Open login dialog"
-          title="Log in/out"
-          style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
-          onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
-          onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">Log In</span>
+    <!-- Przycisk logowania tworzony i zarządzany wyłącznie przez JS w topbar -->
 
     <!-- Przycisk "Your Profile" widoczny po zalogowaniu -->
     <a id="yourProfileBtn"
@@ -623,20 +619,23 @@ async function logoutUser() {
   </script>
 
   <script>
-    function wireLoginButton(session){
+   function wireLoginButton(session) {
       const loginBtn = document.getElementById('loginBtn');
       const profileBtn = document.getElementById('profileRedirect');
       const yourProfileBtn = document.getElementById('yourProfileBtn');
       if (!loginBtn) return;
 
+      // ZAWSZE usuwaj stare eventy (przypisanie nadpisuje stare)
       if (session?.user) {
         loginBtn.textContent = 'Log out';
         loginBtn.onclick = logoutUser;
+        loginBtn.setAttribute('aria-label', 'Log out');
         if (profileBtn) profileBtn.style.display = 'block';
         if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
       } else {
         loginBtn.textContent = 'Log In';
         loginBtn.onclick = openLoginModal;
+        loginBtn.setAttribute('aria-label', 'Open login dialog');
         if (profileBtn) profileBtn.style.display = 'none';
         if (yourProfileBtn) yourProfileBtn.style.display = 'none';
       }
@@ -778,11 +777,13 @@ window.addEventListener('storage', (e) => {
           window.refreshLocks();
           wireLoginButton(session);
           // auto‑redirect po zalogowaniu
-          const to = localStorage.getItem('ba_redirect');
-          if (to && session) {
-            localStorage.removeItem('ba_redirect');
-            location.href = to;
-          }
+    const to = localStorage.getItem('ba_redirect');
+    if (to && session) {
+      localStorage.removeItem('ba_redirect');
+      location.href = to;
+    } else {
+      localStorage.removeItem('ba_redirect');
+    }
         }
       });
 
@@ -797,7 +798,6 @@ window.addEventListener('storage', (e) => {
       const right = document.querySelector('#topbar .topbar-right');
 
       const profile = document.getElementById('yourProfileBtn');
-      const login   = document.getElementById('loginBtn');
       const mode    = document.getElementById('modeIcon');
 
       // SUPPORT – topbar
@@ -811,13 +811,27 @@ window.addEventListener('storage', (e) => {
         support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
       }
 
+      // Tworzenie loginBtn tylko tutaj
+      let login = document.getElementById('loginBtn');
+      if (!login) {
+        login = document.createElement('span');
+        login.id = 'loginBtn';
+        login.className = 'pill';
+        login.role = 'button';
+        login.tabIndex = 0;
+        login.setAttribute('aria-label', 'Open login dialog');
+        login.style.fontWeight = '600';
+      }
+      // reset eventów
+      login.onclick = openLoginModal;
+      login.textContent = 'Log In';
+
       if (profile) profile.classList.add('pill');
-      if (login)   login.classList.add('pill');
 
       if (profile) left.appendChild(profile);
       left.appendChild(support);
-      if (login)   right.appendChild(login);
-      if (mode)    right.appendChild(mode);
+      right.appendChild(login);
+      if (mode) right.appendChild(mode);
     });
   </script>
 
@@ -832,7 +846,7 @@ window.addEventListener('storage', (e) => {
     document.addEventListener('DOMContentLoaded', ()=>{
       makeKeyboardClickable(document.getElementById('modeIcon'), toggleLightDarkMode);
       const lb = document.getElementById('loginBtn');
-      makeKeyboardClickable(lb, () => lb?.click());
+      if (lb) makeKeyboardClickable(lb, () => lb?.click());
     });
   </script>
 
@@ -868,9 +882,14 @@ window.addEventListener('storage', (e) => {
       const nameEl  = document.getElementById('profileName');
       const rankEl  = document.getElementById('profileRank');
       const avatarEl= document.getElementById('profileAvatar');
+      const yourProfileBtn = document.getElementById('yourProfileBtn');
       if (!chip || !nameEl || !rankEl || !avatarEl) return;
 
-      if (!profile) { chip.style.display = 'none'; return; }
+      if (!profile) {
+        chip.style.display = 'none';
+        if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+        return;
+      }
 
       nameEl.textContent = profile.display_name || 'User';
       rankEl.textContent = profile.rank
@@ -884,6 +903,7 @@ window.addEventListener('storage', (e) => {
         avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
       }
       chip.style.display = 'flex';
+      if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
     }
 
     (async () => {
