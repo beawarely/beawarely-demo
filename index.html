@@ -812,6 +812,24 @@ window.addEventListener('storage', (e) => {
   }
 });
 
+      // --- Rehydratacja sesji przy starcie strony ---
+(async () => {
+  try {
+    const { data } = await supabaseClient.auth.getSession();
+    const session = data.session;
+    wireLoginButton(session);
+    if (session?.user) {
+      await ensureProfile(session.user);
+      const me = await fetchMyProfile?.();
+      applyProfileToUI?.(me);
+    } else {
+      applyProfileToUI?.(null);
+    }
+  } catch (e) {
+    console.warn('Initial session fetch failed:', e);
+  }
+})();
+
       // pierwsze wywołanie
       window.refreshLocks();
     })();
