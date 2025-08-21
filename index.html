@@ -594,20 +594,31 @@ async function waitForInitialSession(sb) {
   <script>
     // ✅ Twarde i pewne wylogowanie + porządkowanie UI
 async function logoutUser() {
-  try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch (_) {}
-  try { await supabaseClient.auth.signOut({ scope: 'global' }); } catch (e) {
-    console.warn('signOut(global) failed:', e?.message || e);
+  try {
+    await supabaseClient.auth.signOut(); // jedna komenda wystarczy
+  } catch (e) {
+    console.warn('signOut failed:', e?.message || e);
   }
   try {
     localStorage.removeItem('ba_redirect');
+
+    // zamknij ewentualne modale
     const lm = document.getElementById('loginModal');
     if (lm) lm.classList.remove('open');
+    const sm = document.getElementById('supportModal');
+    if (sm) sm.classList.remove('open');
+
+    // usuń ewentualne nakładki blokujące kliknięcia (np. loader)
+    const loader = document.getElementById('loader');
+    if (loader) { loader.style.display = 'none'; loader.remove?.(); }
+
+    // odblokuj scroll
     document.body.style.overflow = '';
   } finally {
-    location.replace('index.html'); // zawsze czysty redirect
+    // twarde przeładowanie
+    location.replace('index.html');
   }
 }
-
 
   </script>
 
