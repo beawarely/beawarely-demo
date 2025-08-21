@@ -588,58 +588,56 @@ async function waitForInitialSession(sb) {
   <!-- 🔽 HANDLER onAuthStateChange – USUNIĘTY duplikat (pozostaje tylko w bloku refreshLocks niżej) -->
 
   <script>
-    // ✅ Twarde i pewne wylogowanie + porządkowanie UI
+   // ✅ Wylogowanie — resztą UI zajmuje się centralny onAuthStateChange
 async function logoutUser() {
   try {
-    await supabaseClient.auth.signOut(); // jedna komenda wystarczy
+    await supabaseClient.auth.signOut();
   } catch (e) {
     console.warn('signOut failed:', e?.message || e);
   }
-  try {
-    localStorage.removeItem('ba_redirect');
-
-    // zamknij ewentualne modale
-    const lm = document.getElementById('loginModal');
-    if (lm) lm.classList.remove('open');
-    const sm = document.getElementById('supportModal');
-    if (sm) sm.classList.remove('open');
-
-    // usuń ewentualne nakładki blokujące kliknięcia (np. loader)
-    const loader = document.getElementById('loader');
-    if (loader) { loader.style.display = 'none'; loader.remove?.(); }
-
-    // odblokuj scroll
-    document.body.style.overflow = '';
-  } finally {
-    // twarde przeładowanie
-    location.replace('index.html');
-  }
+  // żadnych reloadów ani ręcznego sprzątania — to zrobi handler SIGNED_OUT
 }
 
   </script>
 
   <script>
    function wireLoginButton(session) {
-      const loginBtn = document.getElementById('loginBtn');
-      const profileBtn = document.getElementById('profileRedirect');
-      const yourProfileBtn = document.getElementById('yourProfileBtn');
-      if (!loginBtn) return;
+  let loginBtn = document.getElementById('loginBtn');
+  const profileBtn = document.getElementById('profileRedirect');
+  const yourProfileBtn = document.getElementById('yourProfileBtn');
 
-      // ZAWSZE usuwaj stare eventy (przypisanie nadpisuje stare)
-      if (session?.user) {
-        loginBtn.textContent = 'Log out';
-        loginBtn.onclick = logoutUser;
-        loginBtn.setAttribute('aria-label', 'Log out');
-        if (profileBtn) profileBtn.style.display = 'block';
-        if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
-      } else {
-        loginBtn.textContent = 'Log In';
-        loginBtn.onclick = openLoginModal;
-        loginBtn.setAttribute('aria-label', 'Open login dialog');
-        if (profileBtn) profileBtn.style.display = 'none';
-        if (yourProfileBtn) yourProfileBtn.style.display = 'none';
-      }
-    }
+  // jeśli nie istnieje — utwórz i dołącz do topbara (prawa strona)
+  if (!loginBtn) {
+    loginBtn = document.createElement('span');
+    loginBtn.id = 'loginBtn';
+    loginBtn.className = 'pill';
+    loginBtn.role = 'button';
+    loginBtn.tabIndex = 0;
+    loginBtn.style.fontWeight = '600';
+    loginBtn.setAttribute('aria-label', 'Open login dialog');
+    const right = document.querySelector('#topbar .topbar-right');
+    if (right) right.appendChild(loginBtn);
+  }
+
+  // wyczyść stare handlery przez klon/replace
+  const clone = loginBtn.cloneNode(true);
+  loginBtn.parentNode.replaceChild(clone, loginBtn);
+  loginBtn = clone;
+
+  if (session?.user) {
+    loginBtn.textContent = 'Log out';
+    loginBtn.setAttribute('aria-label', 'Log out');
+    loginBtn.onclick = logoutUser;
+    if (profileBtn) profileBtn.style.display = 'block';
+    if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
+  } else {
+    loginBtn.textContent = 'Log In';
+    loginBtn.setAttribute('aria-label', 'Open login dialog');
+    loginBtn.onclick = openLoginModal;
+    if (profileBtn) profileBtn.style.display = 'none';
+    if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+  }
+}
 
     async function rehydrateUI() {
   // 🔧 Zbij wszystko, co może blokować kliknięcia
@@ -659,7 +657,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await rehydrateUI();
 });
 
-// Powrót (BFCache), fokus zakładki i zmiany sesji w innej karcie → zawsze odśwież UI
+/* centralny onAuthStateChange wystarczy — usuwamy duplikaty odświeżania UI
 window.addEventListener('pageshow', rehydrateUI);
 window.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') rehydrateUI();
@@ -668,6 +666,7 @@ window.addEventListener('focus', rehydrateUI);
 window.addEventListener('storage', (e) => {
   if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) rehydrateUI();
 });
+*/
 
   </script>
 
@@ -772,20 +771,46 @@ window.addEventListener('storage', (e) => {
       };
 
       // jeden spójny nasłuch – bez duplikatów
-      sb.auth.onAuthStateChange((event, session) => {
-        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-          window.refreshLocks();
-          wireLoginButton(session);
-          // auto‑redirect po zalogowaniu
+     sb.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+    await window.refreshLocks();
+    wireLoginButton(session);
+    // profil po zalogowaniu
+    try {
+      if (session?.user && typeof ensureProfile === 'function') {
+        await ensureProfile(session.user);
+        const me = await fetchMyProfile?.();
+        applyProfileToUI?.(me);
+      }
+    } catch (e) { console.warn('profile hydrate failed:', e); }
+    // auto-redirect po zalogowaniu
     const to = localStorage.getItem('ba_redirect');
-    if (to && session) {
-      localStorage.removeItem('ba_redirect');
-      location.href = to;
-    } else {
-      localStorage.removeItem('ba_redirect');
-    }
-        }
+    localStorage.removeItem('ba_redirect');
+    if (to && session) location.href = to;
+  }
+
+  if (event === 'SIGNED_OUT') {
+    // 1) Zamknij i zdezaktywuj modale/overlays
+    ['#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]'].forEach(sel=>{
+      document.querySelectorAll(sel).forEach(el=>{
+        el.classList?.remove('open','show','active');
+        el.setAttribute?.('aria-hidden','true');
+        if (sel === '.modal-backdrop' || sel === '[data-overlay]') el.remove?.();
       });
+    });
+    // 2) Przywróć interakcje i scroll
+    document.body.classList.remove('no-scroll','overflow-hidden','pointer-events-none');
+    document.body.style.overflow = '';
+    document.body.style.pointerEvents = '';
+    document.documentElement.style.pointerEvents = '';
+    // 3) Wyczyść redirect i UI profilu, przełącz loginBtn
+    localStorage.removeItem('ba_redirect');
+    applyProfileToUI?.(null);
+    wireLoginButton(null);
+    // 4) Odśwież kafelki narzędzi
+    await window.refreshLocks?.();
+  }
+});
 
       // pierwsze wywołanie
       window.refreshLocks();
