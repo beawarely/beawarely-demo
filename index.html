@@ -170,15 +170,24 @@
     #loginModal.open { display: flex !important; }
     #supportModal.open { display: flex !important; }
 
-    .pill:focus-visible,
-    #loginBtn:focus-visible,
-    #modeIcon:focus-visible,
-    #yourProfileBtn:focus-visible,
-    .open-btn:focus-visible {
-      outline: 2px solid var(--blue2);
-      outline-offset: 2px;
-    }
-  </style>
+      .pill:focus-visible,
+  #loginBtn:focus-visible,
+  #modeIcon:focus-visible,
+  #yourProfileBtn:focus-visible,
+  .open-btn:focus-visible {
+    outline: 2px solid var(--blue2);
+    outline-offset: 2px;
+  }
+
+  /* 🔧 Google Translate potrafi zostawić pełnoekranowy overlay, który blokuje kliknięcia po powrocie.
+     Wyłączamy baner/tooltip i wymuszamy brak przesunięcia body. */
+  #goog-gt-tt,
+  .goog-te-banner-frame,
+  .goog-te-balloon-frame,
+  .goog-tooltip.skiptranslate { display: none !important; }
+  body { top: 0 !important; }
+</style>
+
 
   <script>
     // Load preferred theme
@@ -631,8 +640,20 @@ async function logoutUser() {
       }
     }
 
-    async function rehydrateUI() {
+    function killTranslateOverlays(){
+  // usuń tooltip TT
+  const tt = document.getElementById('goog-gt-tt');
+  if (tt) tt.remove();
+  // schowaj baner (iframe) jeśli Google go wstrzyknął
+  const banner = document.querySelector('iframe.goog-te-banner-frame');
+  if (banner) banner.style.display = 'none';
+  // na wszelki wypadek skasuj przesunięcie body
+  document.body.style.top = '0px';
+}
+
+async function rehydrateUI() {
   // 🔧 Zbij wszystko, co może blokować kliknięcia
+  killTranslateOverlays();
   const loader = document.getElementById('loader');
   if (loader) { loader.style.display = 'none'; loader.remove?.(); }
   const lm = document.getElementById('loginModal');
@@ -644,19 +665,21 @@ async function logoutUser() {
   if (typeof window.refreshLocks === 'function') await window.refreshLocks();
 }
 
+
 document.addEventListener('DOMContentLoaded', async () => {
+  killTranslateOverlays();
   await waitForInitialSession(supabaseClient);
   await rehydrateUI();
 });
 
 // Powrót (BFCache), fokus zakładki i zmiany sesji w innej karcie → zawsze odśwież UI
-window.addEventListener('pageshow', rehydrateUI);
+window.addEventListener('pageshow', () => { killTranslateOverlays(); rehydrateUI(); });
 window.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') rehydrateUI();
+  if (document.visibilityState === 'visible') { killTranslateOverlays(); rehydrateUI(); }
 });
-window.addEventListener('focus', rehydrateUI);
+window.addEventListener('focus', () => { killTranslateOverlays(); rehydrateUI(); });
 window.addEventListener('storage', (e) => {
-  if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) rehydrateUI();
+  if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) { killTranslateOverlays(); rehydrateUI(); }
 });
 
   </script>
