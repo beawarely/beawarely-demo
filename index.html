@@ -520,17 +520,18 @@ window.supabaseClient = supabaseClient;
 // ⏳ Gwarantuje, że poczekamy na INITIAL_SESSION (przy pierwszym wejściu i po powrocie z innych kart)
 async function waitForInitialSession(sb) {
   // szybka próba
-  let { data: { session } } = await sb.auth.getSession();
+  let { data: { session } } = await supabaseClient.auth.getSession();
   if (session) return session;
   // nasłuch INITIAL_SESSION (wywoływany natychmiast po subskrypcji)
   return await new Promise(resolve => {
-    const { data: sub } = sb.auth.onAuthStateChange((event, sess) => {
-      if (event === 'INITIAL_SESSION') {
-        try { sub.subscription.unsubscribe(); } catch {}
-        resolve(sess || null);
-      }
-    });
+  const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, sess) => {
+    if (event === 'INITIAL_SESSION') {
+      try { subscription.unsubscribe(); } catch {}
+      resolve(sess || null);
+    }
   });
+});
+  
 }
 
 
@@ -725,13 +726,13 @@ window.addEventListener('storage', (e) => {
 
   <script>
     (function(){
-      const sb = supabaseClient;
+      // const sb = supabaseClient; // alias niepotrzebny
       const grid = document.getElementById('toolsGrid');
       if (!grid) return;
 
       // ⬇️ udostępniamy globalnie
       window.refreshLocks = async function refreshLocks(){
-        const { data: { session } } = await sb.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         const authed = !!session;
 
         grid.querySelectorAll('.tool-card').forEach(card => {
@@ -771,7 +772,7 @@ window.addEventListener('storage', (e) => {
       };
 
       // jeden spójny nasłuch – bez duplikatów
-     sb.auth.onAuthStateChange(async (event, session) => {
+     supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
     await window.refreshLocks();
     wireLoginButton(session);
