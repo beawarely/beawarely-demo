@@ -771,46 +771,71 @@ window.addEventListener('storage', (e) => {
         });
       };
 
-      // jeden spójny nasłuch – bez duplikatów
-     supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-    await window.refreshLocks();
-    wireLoginButton(session);
-    // profil po zalogowaniu
-    try {
-      if (session?.user && typeof ensureProfile === 'function') {
-        await ensureProfile(session.user);
-        const me = await fetchMyProfile?.();
-        applyProfileToUI?.(me);
-      }
-    } catch (e) { console.warn('profile hydrate failed:', e); }
-    // auto-redirect po zalogowaniu
-    const to = localStorage.getItem('ba_redirect');
-    localStorage.removeItem('ba_redirect');
-    if (to && session) location.href = to;
-  }
+     // strażnik — nie wykonuj SIGNED_OUT zanim nie dostaniemy INITIAL_SESSION
+let __sawInitialSession = false;
 
-  if (event === 'SIGNED_OUT') {
-    // 1) Zamknij i zdezaktywuj modale/overlays
-    ['#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]'].forEach(sel=>{
-      document.querySelectorAll(sel).forEach(el=>{
-        el.classList?.remove('open','show','active');
-        el.setAttribute?.('aria-hidden','true');
-        if (sel === '.modal-backdrop' || sel === '[data-overlay]') el.remove?.();
-      });
+// pomocnicze: stan po zalogowaniu
+async function __handleSignedIn(session){
+  await window.refreshLocks?.();
+  wireLoginButton(session);
+  try {
+    if (session?.user && typeof ensureProfile === 'function') {
+      await ensureProfile(session.user);
+      const me = await fetchMyProfile?.();
+      applyProfileToUI?.(me);
+    }
+  } catch(e){ console.warn('profile hydrate failed:', e); }
+  const to = localStorage.getItem('ba_redirect');
+  localStorage.removeItem('ba_redirect');
+  if (to && session) location.href = to;
+}
+
+// pomocnicze: pełny reset UI po wylogowaniu
+async function __handleSignedOut(){
+  ['#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]'].forEach(sel=>{
+    document.querySelectorAll(sel).forEach(el=>{
+      el.classList?.remove('open','show','active');
+      el.setAttribute?.('aria-hidden','true');
+      if (sel === '.modal-backdrop' || sel === '[data-overlay]') el.remove?.();
     });
-    // 2) Przywróć interakcje i scroll
-    document.body.classList.remove('no-scroll','overflow-hidden','pointer-events-none');
-    document.body.style.overflow = '';
-    document.body.style.pointerEvents = '';
-    document.documentElement.style.pointerEvents = '';
-    // 3) Wyczyść redirect i UI profilu, przełącz loginBtn
-    localStorage.removeItem('ba_redirect');
-    applyProfileToUI?.(null);
+  });
+  document.body.classList.remove('no-scroll','overflow-hidden','pointer-events-none');
+  document.body.style.overflow = '';
+  document.body.style.pointerEvents = '';
+  document.documentElement.style.pointerEvents = '';
+  localStorage.removeItem('ba_redirect');
+  applyProfileToUI?.(null);
+  wireLoginButton(null);
+  await window.refreshLocks?.();
+}
+
+// jeden spójny nasłuch – z blokadą „early SIGNED_OUT”
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+
+  if (event === 'INITIAL_SESSION') {
+  __sawInitialSession = true;
+  if (session?.user) {
+    await __handleSignedIn(session);
+  } else {
+    // brak sesji – ustaw minimalny stan bez twardego resetu UI
     wireLoginButton(null);
-    // 4) Odśwież kafelki narzędzi
-    await window.refreshLocks?.();
+    applyProfileToUI?.(null);
   }
+  return;
+}
+
+if (event === 'SIGNED_IN') {
+  await __handleSignedIn(session);
+  return;
+}
+
+if (event === 'SIGNED_OUT') {
+  // jeśli nie mieliśmy jeszcze INITIAL_SESSION, to ignorujemy ten „fałszywy” SIGNED_OUT
+  if (!__sawInitialSession) return;
+  await __handleSignedOut();
+  return;
+}
+
 });
 
       // --- Rehydratacja sesji przy starcie strony ---
