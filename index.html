@@ -663,16 +663,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   await rehydrateUI();
 });
 
-/* centralny onAuthStateChange wystarczy — usuwamy duplikaty odświeżania UI
+// 🔁 Rehydratacja UI po powrocie/odświeżeniu/kartach (BFCache, visibility, storage)
 window.addEventListener('pageshow', rehydrateUI);
 window.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') rehydrateUI();
 });
 window.addEventListener('focus', rehydrateUI);
 window.addEventListener('storage', (e) => {
-  if (e.key && e.key.startsWith('sb-') && e.key.endsWith('-auth-token')) rehydrateUI();
+  // gdy inna karta odświeży tokeny Supabase → odśwież UI
+  if (!e.key) return;
+  if (e.key.startsWith('sb-') && (e.key.endsWith('-auth-token') || e.key.endsWith('-provider-token'))) {
+    rehydrateUI();
+  }
 });
-*/
+
 
   </script>
 
