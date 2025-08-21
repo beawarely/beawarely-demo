@@ -401,6 +401,10 @@
     .discord-icon { width: 26px; height: 26px; vertical-align: middle; transition: transform 0.3s ease; }
     .discord-icon:hover { transform: rotate(10deg) scale(1.1); }
 
+/* Google Translate: nie zasłania topbara i nie łapie klików */
+#google_translate_element { pointer-events: none; z-index: 1 !important; }
+
+
     #loginBtn:hover { transform: scale(1.05); }
 
     @media (max-width: 500px) {
@@ -451,7 +455,7 @@
   </style>
 
   <!-- 🔽 Google Translate dropdown in bottom-right corner -->
-  <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+  <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px;"></div>
 
   <!-- 🔽 Google Translate script -->
   <script type="text/javascript">
@@ -518,7 +522,8 @@
 window.supabaseClient = supabaseClient;
 
 // ⏳ Gwarantuje, że poczekamy na INITIAL_SESSION (przy pierwszym wejściu i po powrocie z innych kart)
-async function waitForInitialSession(sb) {
+async function waitForInitialSession() {
+
   // szybka próba
   let { data: { session } } = await supabaseClient.auth.getSession();
   if (session) return session;
@@ -654,7 +659,7 @@ async function logoutUser() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await waitForInitialSession(supabaseClient);
+  await waitForInitialSession();
   await rehydrateUI();
 });
 
@@ -986,16 +991,19 @@ if (event === 'SIGNED_OUT') {
       }
     })();
 
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        await ensureProfile(session.user);
-        const me = await fetchMyProfile();
-        applyProfileToUI(me);
-      }
-      if (event === 'SIGNED_OUT') {
-        applyProfileToUI(null);
-      }
-    });
+    /* DUPLIKAT — usuwamy. Całość obsługuje już centralny handler powyżej.
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user) {
+    await ensureProfile(session.user);
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+  }
+  if (event === 'SIGNED_OUT') {
+    applyProfileToUI(null);
+  }
+});
+*/
+
 
     async function updateDisplayName(newName) {
       const { data: { user } } = await supabaseClient.auth.getUser();
