@@ -204,7 +204,16 @@
     .discord-icon:hover { transform: rotate(10deg) scale(1.1); }
 
     /* Google Translate: nie zasłania topbara i nie łapie klików */
-    #google_translate_element { pointer-events: none; z-index: 1 !important; }
+    /* Google Translate i podobne nakładki: nie przechwytują klików i nie zasłaniają UI */
+#google_translate_element { pointer-events: none; z-index: 1 !important; }
+.goog-te-banner-frame,
+.skiptranslate,
+iframe.skiptranslate,
+[class^="VIpgJd-"],
+[id^="goog-"] {
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
 
     #loginBtn:hover { transform: scale(1.05); }
 
@@ -215,7 +224,16 @@
       #modeIcon, #loginBtn { top: 10px; font-size: 1.1rem; padding: 4px 10px; }
       #loginBtn { right: 50px; }
       #modeIcon { right: 10px; }
-      #google_translate_element{ bottom: 12px; right: 12px; transform: scale(.9); transform-origin: bottom right; }
+      /* Google Translate i podobne nakładki: nie przechwytują klików i nie zasłaniają UI */
+#google_translate_element { pointer-events: none; z-index: 1 !important; }
+.goog-te-banner-frame,
+.skiptranslate,
+iframe.skiptranslate,
+[class^="VIpgJd-"],
+[id^="goog-"] {
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
     }
 
     #modeIcon { right: 10px; }
@@ -444,16 +462,7 @@
     <div style="margin-top: 3px; font-size: 12px; color: #777;">This is a demo version – not final.</div>
   </footer>
 
-  <!-- 🔽 Google Translate dropdown in bottom-right corner -->
-  <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px;"></div>
-
-  <!-- 🔽 Google Translate script -->
-  <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <!-- Google Translate widget removed -->
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -665,7 +674,16 @@ try {
   });
 
         
-        // Reset body
+        
+
+  // 🔒 Ubij overlaye Google Translate i inne wstrzyknięte elementy
+  ['[id^="goog-"]','[class^="goog-"]','iframe.goog-te-banner-frame','iframe.skiptranslate','[class^="VIpgJd-"]']
+    .forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        try { el.remove(); } catch {}
+      });
+    });
+// Reset body
         document.body.classList.remove('modal-open', 'no-scroll', 'overlay-open', 'popup-open');
         document.body.style.overflow = '';
         document.body.style.pointerEvents = '';
