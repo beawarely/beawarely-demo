@@ -89,7 +89,7 @@
     /* Spinner loading screen */
     #loader {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #0e0e0e;
-      display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s;
+      display: flex; align-items: center; justify-content: center; z-index: 1; transition: opacity 0.5s ease, visibility 0.5s;
     }
     .spinner { width: 48px; height: 48px; border: 5px solid #fff; border-top: 5px solid var(--blue1); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -265,6 +265,25 @@ iframe.skiptranslate,
 #loginModal, #supportModal { pointer-events: none; }
 #loginModal.open, #supportModal.open { pointer-events: auto; }
 /* Koniec kill switcha */
+
+
+/* === GLOBAL OVERLAY KILL-SWITCH (hard) === */
+#loader,
+#loginModal, #supportModal,
+.modal, .overlay, .modal-backdrop, [data-overlay]{
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  z-index: 0 !important;
+}
+/* Hub is always clickable */
+#ai-hub, #toolsGrid, .tool-card, .tool-cta, .open-btn{
+  pointer-events: auto !important;
+}
+
+/* Modals only catch events when .open */
+#loginModal, #supportModal { pointer-events: none !important; }
+#loginModal.open, #supportModal.open { pointer-events: auto !important; display: flex !important; }
 
 </style>
 
@@ -803,7 +822,7 @@ async function logoutUser() {
 
   <!-- 🔽 Login modal -->
   <div id="loginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+    background: rgba(0, 0, 0, 0.7); z-index: 1; align-items: center; justify-content: center;">
     <div role="dialog" aria-modal="true" tabindex="-1" style="background: white; padding: 30px; border-radius: 10px;
       text-align: center; max-width: 400px; color: black;">
       <h2>Sign In</h2>
@@ -818,7 +837,7 @@ async function logoutUser() {
   </div>
 
   <!-- 🔽 Support Modal -->
-  <div id="supportModal" style="display:none; position:fixed; inset:0; z-index:9998; background: rgba(0,0,0,.55); align-items:center; justify-content:center;">
+  <div id="supportModal" style="display:none; position:fixed; inset:0; z-index:1; background: rgba(0,0,0,.55); align-items:center; justify-content:center;">
     <div role="dialog" aria-modal="true" tabindex="-1" style="background: rgba(20,20,20,.98); color:#fff; width:min(520px, 92vw);
       border-radius:16px; padding:26px; box-shadow: 0 20px 60px rgba(0,0,0,.5);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -1226,6 +1245,29 @@ async function logoutUser() {
       }
     })();
   </script>
+
+
+<script>
+// === UI unlock after navigation/refresh ===
+(function(){
+  function unlockUI(){
+    try {
+      ['#loader','#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]',
+       'iframe.goog-te-banner-frame','iframe.skiptranslate','[class^="VIpgJd-"]','[id^="goog-"]']
+        .forEach(sel => document.querySelectorAll(sel).forEach(el => { try{ el.remove(); }catch(e){} }));
+      document.body.classList.remove('modal-open','no-scroll','overlay-open','popup-open');
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      // ensure hub cards have click handlers again
+      if (typeof window.refreshLocks === 'function') window.refreshLocks();
+    } catch(e){}
+  }
+  requestAnimationFrame(unlockUI);
+  window.addEventListener('pageshow', unlockUI);
+  window.addEventListener('visibilitychange', ()=>{ if (document.visibilityState==='visible') unlockUI(); });
+  window.addEventListener('focus', unlockUI);
+})();
+</script>
 
 </body>
 </html>
