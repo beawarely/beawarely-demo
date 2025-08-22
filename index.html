@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="robots" content="noindex, nofollow" />
-<title>BeAwarely</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>BeAwarely</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <style>
     :root {
@@ -178,6 +178,56 @@
       outline: 2px solid var(--blue2);
       outline-offset: 2px;
     }
+
+    .section-sub{opacity:.8;margin:-6px 0 18px}
+    .tools-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:16px; }
+    .tool-card{
+      position:relative; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+      border-radius:16px; padding:16px; backdrop-filter: blur(3px);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .2s; cursor:pointer;
+    }
+    .tool-card:hover{ transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.25); border-color: rgba(255,255,255,.18); }
+    .tool-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+    .tool-icon{font-size:24px}
+    .tool-badge{ font-size:12px; padding:4px 8px; border-radius:999px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); }
+    .tool-title{margin:6px 0 4px}
+    .tool-desc{opacity:.9;margin:0 0 10px}
+    .tool-cta{display:flex;align-items:center;justify-content:space-between}
+    .open-btn{ border:none; padding:8px 12px; border-radius:10px; background: linear-gradient(135deg, var(--blue1), var(--blue2)); color:#fff; font-weight:600; cursor:pointer; }
+    .tool-card.locked .open-btn{opacity:.7}
+    .tool-card.locked .status::before{content:"🔒 ";}
+
+    body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.08)}
+    body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
+
+    .discord-icon { width: 26px; height: 26px; vertical-align: middle; transition: transform 0.3s ease; }
+    .discord-icon:hover { transform: rotate(10deg) scale(1.1); }
+
+    /* Google Translate: nie zasłania topbara i nie łapie klików */
+    #google_translate_element { pointer-events: none; z-index: 1 !important; }
+
+    #loginBtn:hover { transform: scale(1.05); }
+
+    @media (max-width: 500px) {
+      footer { font-size: 13px; }
+      .social-icons a { margin: 0 6px; }
+      .discord-icon { width: 24px; height: 24px; }
+      #modeIcon, #loginBtn { top: 10px; font-size: 1.1rem; padding: 4px 10px; }
+      #loginBtn { right: 50px; }
+      #modeIcon { right: 10px; }
+      #google_translate_element{ bottom: 12px; right: 12px; transform: scale(.9); transform-origin: bottom right; }
+    }
+
+    #modeIcon { right: 10px; }
+
+    #support-cta{ display: grid; place-items: center; width: 100%; max-width: none; margin-top: clamp(90px, 10vh, 140px); margin-bottom: clamp(60px, 6vh, 100px); }
+    #support-cta button{ margin: 0 auto; position: static !important; left: auto !important; }
+    .legacy-hide { display: none !important; }
+    #supportBtn:hover { background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+    @media (max-width: 500px) {
+      #supportBtn { top: 56px; left: 10px; font-size: 0.9rem; padding: 8px 12px; }
+    }
+    #support-cta { display: none !important; }
   </style>
 
   <script>
@@ -241,9 +291,6 @@
           style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
           onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
           onmouseout="this.style.backgroundColor='transparent'">🌛</span>
-
-    <!-- Przycisk Log In -->
-    <!-- Przycisk logowania tworzony i zarządzany wyłącznie przez JS w topbar -->
 
     <!-- Przycisk "Your Profile" widoczny po zalogowaniu -->
     <a id="yourProfileBtn"
@@ -397,63 +444,6 @@
     <div style="margin-top: 3px; font-size: 12px; color: #777;">This is a demo version – not final.</div>
   </footer>
 
-  <style>
-    .discord-icon { width: 26px; height: 26px; vertical-align: middle; transition: transform 0.3s ease; }
-    .discord-icon:hover { transform: rotate(10deg) scale(1.1); }
-
-/* Google Translate: nie zasłania topbara i nie łapie klików */
-#google_translate_element { pointer-events: none; z-index: 1 !important; }
-
-
-    #loginBtn:hover { transform: scale(1.05); }
-
-    @media (max-width: 500px) {
-      footer { font-size: 13px; }
-      .social-icons a { margin: 0 6px; }
-      .discord-icon { width: 24px; height: 24px; }
-      #modeIcon, #loginBtn { top: 10px; font-size: 1.1rem; padding: 4px 10px; }
-      #loginBtn { right: 50px; }
-      #modeIcon { right: 10px; }
-    }
-
-    #modeIcon { right: 10px; }
-
-    #support-cta{ display: grid; place-items: center; width: 100%; max-width: none; margin-top: clamp(90px, 10vh, 140px); margin-bottom: clamp(60px, 6vh, 100px); }
-    #support-cta button{ margin: 0 auto; position: static !important; left: auto !important; }
-    .legacy-hide { display: none !important; }
-
-    .section-sub{opacity:.8;margin:-6px 0 18px}
-    .tools-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap:16px; }
-    .tool-card{
-      position:relative; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
-      border-radius:16px; padding:16px; backdrop-filter: blur(3px);
-      transition: transform .15s ease, box-shadow .15s ease, border-color .2s; cursor:pointer;
-    }
-    .tool-card:hover{ transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.25); border-color: rgba(255,255,255,.18); }
-    .tool-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-    .tool-icon{font-size:24px}
-    .tool-badge{ font-size:12px; padding:4px 8px; border-radius:999px; background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); }
-    .tool-title{margin:6px 0 4px}
-    .tool-desc{opacity:.9;margin:0 0 10px}
-    .tool-cta{display:flex;align-items:center;justify-content:space-between}
-    .open-btn{ border:none; padding:8px 12px; border-radius:10px; background: linear-gradient(135deg, var(--blue1), var(--blue2)); color:#fff; font-weight:600; cursor:pointer; }
-    .tool-card.locked .open-btn{opacity:.7}
-    .tool-card.locked .status::before{content:"🔒 ";}
-
-    body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.08)}
-    body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
-
-    #supportBtn:hover { background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
-    @media (max-width: 500px) {
-      #supportBtn { top: 56px; left: 10px; font-size: 0.9rem; padding: 8px 12px; }
-    }
-    #support-cta { display: none !important; }
-
-    @media (max-width: 500px){
-      #google_translate_element{ bottom: 12px; right: 12px; transform: scale(.9); transform-origin: bottom right; }
-    }
-  </style>
-
   <!-- 🔽 Google Translate dropdown in bottom-right corner -->
   <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px;"></div>
 
@@ -489,11 +479,13 @@
       const dialog = modal.querySelector('[role="dialog"]');
       if (dialog) dialog.focus();
     }
+    
     function closeLoginModal() {
       document.getElementById("loginModal").classList.remove("open");
       document.body.style.overflow = '';
     }
-    // ⬇️ Zamknięcie loginModal po kliknięciu w tło – bez nadpisywania window.onclick
+    
+    // Zamknięcie loginModal po kliknięciu w tło
     document.addEventListener('click', (event) => {
       const modal = document.getElementById('loginModal');
       if (!modal) return;
@@ -502,11 +494,14 @@
         document.body.style.overflow = '';
       }
     });
-  </script>
 
-  <script>
     // Zamknij modal klawiszem ESC
-    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLoginModal(); });
+    window.addEventListener('keydown', (e) => { 
+      if (e.key === 'Escape') {
+        closeLoginModal();
+        closeSupportModal();
+      }
+    });
   </script>
 
   <!-- 🔽 Supabase -->
@@ -517,45 +512,48 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-});
-window.supabaseClient = supabaseClient;
+      auth: { 
+        persistSession: true, 
+        autoRefreshToken: true, 
+        detectSessionInUrl: true,
+        debug: false
+      }
+    });
+    
+    window.supabaseClient = supabaseClient;
 
-// ⏳ Gwarantuje, że poczekamy na INITIAL_SESSION (przy pierwszym wejściu i po powrocie z innych kart)
-async function waitForInitialSession() {
-
-  // szybka próba
-  let { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) return session;
-  // nasłuch INITIAL_SESSION (wywoływany natychmiast po subskrypcji)
-  return await new Promise(resolve => {
-  const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, sess) => {
-    if (event === 'INITIAL_SESSION') {
-      try { subscription.unsubscribe(); } catch {}
-      resolve(sess || null);
+    // Gwarantuje, że poczekamy na INITIAL_SESSION
+    async function waitForInitialSession() {
+      // Szybka próba
+      let { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) return session;
+      
+      // Nasłuch INITIAL_SESSION
+      return await new Promise(resolve => {
+        const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event, sess) => {
+          if (event === 'INITIAL_SESSION') {
+            try { subscription.unsubscribe(); } catch {}
+            resolve(sess || null);
+          }
+        });
+      });
     }
-  });
-});
-  
-}
-
 
     async function signInWithGoogle() {
-  const redirectTo = new URL('index.html', location.href).href; // zawsze absolutny URL do index.html
-  const { data, error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo,
-      queryParams: { prompt: 'select_account' }
+      const redirectTo = new URL('index.html', location.href).href;
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: { prompt: 'select_account' }
+        }
+      });
+      if (error) {
+        console.error('OAuth error:', error.message);
+        return;
+      }
+      if (data?.url) location.href = data.url;
     }
-  });
-  if (error) {
-    console.error('OAuth error:', error.message);
-    return;
-  }
-  if (data?.url) location.href = data.url;
-}
-
   </script>
 
   <script>
@@ -565,6 +563,7 @@ async function waitForInitialSession() {
       m.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
+    
     function closeSupportModal() {
       const m = document.getElementById('supportModal');
       if (!m) return;
@@ -573,13 +572,13 @@ async function waitForInitialSession() {
       const note = document.getElementById('copiedNote');
       if (note) note.style.display = 'none';
     }
+    
     // Zamknięcie po kliknięciu w tło (Support modal)
     window.addEventListener('click', (e) => {
       const m = document.getElementById('supportModal');
       if (m && e.target === m) closeSupportModal();
     });
-    // Zamknięcie ESC
-    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSupportModal(); });
+    
     // Kopiowanie adresu crypto
     function copyCrypto() {
       const address = 'TWÓJ_ADRES_CRYPTO';
@@ -591,113 +590,263 @@ async function waitForInitialSession() {
     }
   </script>
 
-  <!-- 🔽 HANDLER onAuthStateChange – USUNIĘTY duplikat (pozostaje tylko w bloku refreshLocks niżej) -->
-
   <script>
-     // ✅ Wylogowanie — resztą UI zajmuje się centralny onAuthStateChange
-async function logoutUser() {
-  try {
-    await supabaseClient.auth.signOut();
-  } catch (e) {
-    console.warn('signOut failed:', e?.message || e);
-  }
-  
-  // Twarde czyszczenie UI
-  ['#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]'].forEach(sel=>{
-    document.querySelectorAll(sel).forEach(el=>{
-      el.classList?.remove('open','show','visible','active');
-      if (sel === '.modal-backdrop' || sel === '[data-overlay]') el.remove?.();
-    });
-  });
-  document.body.classList.remove('modal-open','no-scroll','overlay-open');
-  document.body.style.overflow = '';
-  
-  // Reset przycisków auth
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginBtn) {
-    loginBtn.textContent = 'Log In';
-    loginBtn.removeAttribute('data-user');
-  }
-  
-  // Przeładowanie strony
-  location.replace(location.pathname);
-}
-
-
+    // ✅ NAPRAWIONA FUNKCJA WYLOGOWANIA - kompletne czyszczenie + reload
+    async function logoutUser() {
+      console.log('🔄 Rozpoczynanie procesu wylogowania...');
+      
+      try {
+        // 1. Wylogowanie z Supabase
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+          console.warn('⚠️ Błąd podczas signOut:', error.message);
+        } else {
+          console.log('✅ Supabase signOut zakończony pomyślnie');
+        }
+      } catch (e) {
+        console.warn('⚠️ Wyjątek podczas signOut:', e?.message || e);
+      }
+      
+      // 2. TWARDE CZYSZCZENIE WSZYSTKICH DANYCH
+      try {
+        // Czyszczenie localStorage (wszystkie klucze Supabase)
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-') || 
+              key.includes('supabase') || 
+              key.includes('auth') ||
+              key.includes('session') ||
+              key === 'ba_redirect') {
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Czyszczenie sessionStorage (wszystkie klucze)
+        Object.keys(sessionStorage).forEach(key => {
+          if (key.startsWith('sb-') || 
+              key.includes('supabase') || 
+              key.includes('auth') ||
+              key.includes('session')) {
+            sessionStorage.removeItem(key);
+          }
+        });
+        
+        console.log('✅ Wyczyszczono localStorage i sessionStorage');
+      } catch (e) {
+        console.warn('⚠️ Błąd podczas czyszczenia storage:', e);
+      }
+      
+      // 3. TWARDE RESETOWANIE UI
+      try {
+        // Zamknięcie wszystkich modali
+        const modalsSelectors = [
+          '#loginModal',
+          '#supportModal', 
+          '.modal',
+          '.overlay',
+          '.modal-backdrop',
+          '[data-overlay]',
+          '[role="dialog"]',
+          '.popup',
+          '.lightbox'
+        ];
+        
+        modalsSelectors.forEach(selector => {
+          document.querySelectorAll(selector).forEach(el => {
+            if (el) {
+              // Usuń klasy stanu
+              el.classList?.remove('open', 'show', 'visible', 'active', 'displayed');
+              el.style.display = 'none';
+              el.setAttribute('aria-hidden', 'true');
+              
+              // Usuń backdrop/overlay całkowicie
+              if (selector === '.modal-backdrop' || 
+                  selector === '[data-overlay]' ||
+                  selector === '.overlay') {
+                el.remove?.();
+              }
+            }
+          });
+        });
+        
+        // Reset body
+        document.body.classList.remove('modal-open', 'no-scroll', 'overlay-open', 'popup-open');
+        document.body.style.overflow = '';
+        document.body.style.pointerEvents = '';
+        document.body.style.userSelect = '';
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.pointerEvents = '';
+        
+        // Reset przycisków auth
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+          loginBtn.textContent = 'Log In';
+          loginBtn.removeAttribute('data-user');
+          loginBtn.setAttribute('aria-label', 'Open login dialog');
+        }
+        
+        // Ukryj elementy wymagające autoryzacji
+        const authElements = ['#profileRedirect', '#yourProfileBtn', '#profileChip'];
+        authElements.forEach(sel => {
+          const el = document.querySelector(sel);
+          if (el) el.style.display = 'none';
+        });
+        
+        console.log('✅ UI zostało zresetowane');
+      } catch (e) {
+        console.warn('⚠️ Błąd podczas resetowania UI:', e);
+      }
+      
+      // 4. CZYSTY RELOAD STRONY (z delay dla pewności)
+      console.log('🔄 Przeładowanie strony za 100ms...');
+      setTimeout(() => {
+        try {
+          // Użyj location.replace() zamiast reload() aby uniknąć powrotu
+          window.location.replace(window.location.pathname + window.location.search);
+        } catch (e) {
+          // Fallback
+          console.warn('⚠️ Fallback do window.location.reload()');
+          window.location.reload(true);
+        }
+      }, 100);
+    }
   </script>
 
   <script>
-   function wireLoginButton(session) {
-  let loginBtn = document.getElementById('loginBtn');
-  const profileBtn = document.getElementById('profileRedirect');
-  const yourProfileBtn = document.getElementById('yourProfileBtn');
+    // ✅ NAPRAWIONA FUNKCJA ZARZĄDZANIA PRZYCISKIEM LOGOWANIA
+    function wireLoginButton(session) {
+      let loginBtn = document.getElementById('loginBtn');
+      const profileBtn = document.getElementById('profileRedirect');
+      const yourProfileBtn = document.getElementById('yourProfileBtn');
 
-  // jeśli nie istnieje — utwórz i dołącz do topbara (prawa strona)
-  if (!loginBtn) {
-    loginBtn = document.createElement('span');
-    loginBtn.id = 'loginBtn';
-    loginBtn.className = 'pill';
-    loginBtn.role = 'button';
-    loginBtn.tabIndex = 0;
-    loginBtn.style.fontWeight = '600';
-    loginBtn.setAttribute('aria-label', 'Open login dialog');
-    const right = document.querySelector('#topbar .topbar-right');
-    if (right) right.appendChild(loginBtn);
-  }
+      // Jeśli nie istnieje - utwórz i dołącz do topbara
+      if (!loginBtn) {
+        loginBtn = document.createElement('span');
+        loginBtn.id = 'loginBtn';
+        loginBtn.className = 'pill';
+        loginBtn.role = 'button';
+        loginBtn.tabIndex = 0;
+        loginBtn.style.fontWeight = '600';
+        loginBtn.setAttribute('aria-label', 'Open login dialog');
+        const right = document.querySelector('#topbar .topbar-right');
+        if (right) right.appendChild(loginBtn);
+      }
 
-  // wyczyść stare handlery przez klon/replace
-  const clone = loginBtn.cloneNode(true);
-  loginBtn.parentNode.replaceChild(clone, loginBtn);
-  loginBtn = clone;
+      // Wyczyść stare event handlers przez klonowanie
+      const clone = loginBtn.cloneNode(true);
+      loginBtn.parentNode.replaceChild(clone, loginBtn);
+      loginBtn = clone;
 
-  if (session?.user) {
-    loginBtn.textContent = 'Log out';
-    loginBtn.setAttribute('aria-label', 'Log out');
-    loginBtn.onclick = logoutUser;
-    if (profileBtn) profileBtn.style.display = 'block';
-    if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
-  } else {
-    loginBtn.textContent = 'Log In';
-    loginBtn.setAttribute('aria-label', 'Open login dialog');
-    loginBtn.onclick = openLoginModal;
-    if (profileBtn) profileBtn.style.display = 'none';
-    if (yourProfileBtn) yourProfileBtn.style.display = 'none';
-  }
-}
+      if (session?.user) {
+        // Stan zalogowany
+        loginBtn.textContent = 'Log out';
+        loginBtn.setAttribute('aria-label', 'Log out');
+        loginBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          logoutUser();
+        };
+        
+        // Pokaż elementy dla zalogowanych
+        if (profileBtn) profileBtn.style.display = 'block';
+        if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
+        
+        console.log('🔑 UI ustawione dla zalogowanego użytkownika');
+      } else {
+        // Stan niezalogowany
+        loginBtn.textContent = 'Log In';
+        loginBtn.setAttribute('aria-label', 'Open login dialog');
+        loginBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openLoginModal();
+        };
+        
+        // Ukryj elementy dla zalogowanych
+        if (profileBtn) profileBtn.style.display = 'none';
+        if (yourProfileBtn) yourProfileBtn.style.display = 'none';
+        
+        console.log('🔓 UI ustawione dla niezalogowanego użytkownika');
+      }
+    }
 
+    // ✅ NAPRAWIONA FUNKCJA REHYDRATACJI UI
     async function rehydrateUI() {
-  // 🔧 Zbij wszystko, co może blokować kliknięcia
-  const loader = document.getElementById('loader');
-  if (loader) { loader.style.display = 'none'; loader.remove?.(); }
-  const lm = document.getElementById('loginModal');
-  if (lm) { lm.classList.remove('open'); document.body.style.overflow = ''; }
+      console.log('🔄 Rehydratacja UI...');
+      
+      // Zbij wszystko, co może blokować
+      const loader = document.getElementById('loader');
+      if (loader) { 
+        loader.style.display = 'none'; 
+        loader.remove?.(); 
+      }
+      
+      const lm = document.getElementById('loginModal');
+      if (lm) { 
+        lm.classList.remove('open'); 
+        document.body.style.overflow = ''; 
+      }
 
-  // 🔑 Aktualna sesja + odświeżenie blokad i przycisków
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  wireLoginButton(session);
-  if (typeof window.refreshLocks === 'function') await window.refreshLocks();
-}
+      // Pobierz aktualną sesję i odśwież UI
+      try {
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) {
+          console.warn('⚠️ Błąd podczas pobierania sesji:', error);
+        }
+        
+        wireLoginButton(session);
+        
+        if (typeof window.refreshLocks === 'function') {
+          await window.refreshLocks();
+        }
+        
+        console.log('✅ Rehydratacja UI zakończona', session ? 'z sesją' : 'bez sesji');
+      } catch (e) {
+        console.error('❌ Błąd podczas rehydratacji UI:', e);
+        // Fallback - ustaw jako niezalogowany
+        wireLoginButton(null);
+      }
+    }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await waitForInitialSession();
-  await rehydrateUI();
-});
+    // ✅ NAPRAWIONY GŁÓWNY INICJALIZATOR
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 Inicjalizacja aplikacji...');
+      
+      try {
+        await waitForInitialSession();
+        await rehydrateUI();
+        console.log('✅ Aplikacja zainicjalizowana pomyślnie');
+      } catch (e) {
+        console.error('❌ Błąd podczas inicjalizacji:', e);
+        // Fallback
+        wireLoginButton(null);
+      }
+    });
 
-// 🔁 Rehydratacja UI po powrocie/odświeżeniu/kartach (BFCache, visibility, storage)
-window.addEventListener('pageshow', rehydrateUI);
-window.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') rehydrateUI();
-});
-window.addEventListener('focus', rehydrateUI);
-window.addEventListener('storage', (e) => {
-  // gdy inna karta odświeży tokeny Supabase → odśwież UI
-  if (!e.key) return;
-  if (e.key.startsWith('sb-') && (e.key.endsWith('-auth-token') || e.key.endsWith('-provider-token'))) {
-    rehydrateUI();
-  }
-});
+    // ✅ NAPRAWIONE EVENT LISTENERY dla rehydratacji
+    window.addEventListener('pageshow', (e) => {
+      console.log('📄 Wydarzenie pageshow, rehydratacja...');
+      rehydrateUI();
+    });
 
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ Strona stała się widoczna, rehydratacja...');
+        rehydrateUI();
+      }
+    });
 
+    window.addEventListener('focus', () => {
+      console.log('🎯 Strona otrzymała focus, rehydratacja...');
+      rehydrateUI();
+    });
+
+    window.addEventListener('storage', (e) => {
+      if (!e.key) return;
+      if (e.key.startsWith('sb-') && (e.key.endsWith('-auth-token') || e.key.endsWith('-provider-token'))) {
+        console.log('💾 Zmiana w storage Supabase, rehydratacja...');
+        rehydrateUI();
+      }
+    });
   </script>
 
   <!-- 🔽 Login modal -->
@@ -754,144 +903,205 @@ window.addEventListener('storage', (e) => {
   </div>
 
   <script>
+    // ✅ NAPRAWIONY SYSTEM ZARZĄDZANIA NARZĘDZIAMI I BLOKAD
     (function(){
-      // const sb = supabaseClient; // alias niepotrzebny
       const grid = document.getElementById('toolsGrid');
       if (!grid) return;
 
-      // ⬇️ udostępniamy globalnie
+      // Udostępniamy globalnie
       window.refreshLocks = async function refreshLocks(){
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        const authed = !!session;
-
-        grid.querySelectorAll('.tool-card').forEach(card => {
-          const needs = card.dataset.requiresAuth === 'true';
-          card.classList.toggle('locked', needs && !authed);
-
-          const status = card.querySelector('.status');
-          if (status) status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
-
-          const href = card.dataset.href;
-
-          // klik na całej karcie
-          card.onclick = () => {
-            if (needs && !authed) {
-              // jedno źródło prawdy do otwarcia logowania + redirect po sukcesie
-              localStorage.setItem('ba_redirect', href);
-              if (typeof window.openLoginModal === 'function') {
-                window.openLoginModal();
-              } else {
-                const modal = document.getElementById('loginModal');
-                if (modal) {
-                  modal.classList.add('open');
-                  document.body.style.overflow = 'hidden';
-                }
-              }
-              return;
-            }
-            if (href) window.location.href = href;
-          };
-
-          // klik na przycisku
-          const btn = card.querySelector('.open-btn');
-          if (btn) {
-            btn.onclick = (e) => { e.stopPropagation(); card.click(); };
+        console.log('🔒 Odświeżanie blokad narzędzi...');
+        
+        try {
+          const { data: { session }, error } = await supabaseClient.auth.getSession();
+          if (error) {
+            console.warn('⚠️ Błąd podczas sprawdzania sesji dla blokad:', error);
           }
-        });
+          
+          const authed = !!session;
+          console.log(`🔑 Status autoryzacji: ${authed ? 'zalogowany' : 'niezalogowany'}`);
+
+          grid.querySelectorAll('.tool-card').forEach(card => {
+            const needs = card.dataset.requiresAuth === 'true';
+            card.classList.toggle('locked', needs && !authed);
+
+            const status = card.querySelector('.status');
+            if (status) {
+              status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
+            }
+
+            const href = card.dataset.href;
+
+            // Klik na całej karcie
+            card.onclick = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              
+              if (needs && !authed) {
+                console.log('🔒 Próba dostępu do zablokowanego narzędzia:', href);
+                // Zapisz redirect dla po zalogowaniu
+                localStorage.setItem('ba_redirect', href);
+                openLoginModal();
+                return;
+              }
+              
+              if (href) {
+                console.log('🔓 Otwieranie narzędzia:', href);
+                window.location.href = href;
+              }
+            };
+
+            // Klik na przycisku
+            const btn = card.querySelector('.open-btn');
+            if (btn) {
+              btn.onclick = (e) => { 
+                e.stopPropagation(); 
+                card.click(); 
+              };
+            }
+          });
+          
+          console.log('✅ Blokady odświeżone');
+        } catch (e) {
+          console.error('❌ Błąd podczas odświeżania blokad:', e);
+        }
       };
 
-     // strażnik — nie wykonuj SIGNED_OUT zanim nie dostaniemy INITIAL_SESSION
-let __sawInitialSession = false;
+      // ✅ NAPRAWIONY GŁÓWNY AUTH STATE HANDLER
+      let __sawInitialSession = false;
 
-// pomocnicze: stan po zalogowaniu
-async function __handleSignedIn(session){
-  await window.refreshLocks?.();
-  wireLoginButton(session);
-  try {
-    if (session?.user && typeof ensureProfile === 'function') {
-      await ensureProfile(session.user);
-      const me = await fetchMyProfile?.();
-      applyProfileToUI?.(me);
-    }
-  } catch(e){ console.warn('profile hydrate failed:', e); }
-  const to = localStorage.getItem('ba_redirect');
-  localStorage.removeItem('ba_redirect');
-  if (to && session) location.href = to;
-}
+      // Pomocnicze: stan po zalogowaniu
+      async function __handleSignedIn(session){
+        console.log('✅ Obsługa SIGNED_IN:', session.user.email);
+        
+        await window.refreshLocks?.();
+        wireLoginButton(session);
+        
+        try {
+          if (session?.user && typeof ensureProfile === 'function') {
+            await ensureProfile(session.user);
+            const me = await fetchMyProfile?.();
+            applyProfileToUI?.(me);
+          }
+        } catch(e){ 
+          console.warn('⚠️ Błąd podczas obsługi profilu:', e); 
+        }
+        
+        // Sprawdź redirect
+        const to = localStorage.getItem('ba_redirect');
+        if (to && session) {
+          console.log('🔄 Przekierowanie po zalogowaniu na:', to);
+          localStorage.removeItem('ba_redirect');
+          setTimeout(() => {
+            window.location.href = to;
+          }, 500);
+        }
+      }
 
-// pomocnicze: pełny reset UI po wylogowaniu
-async function __handleSignedOut(){
-  ['#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]'].forEach(sel=>{
-    document.querySelectorAll(sel).forEach(el=>{
-      el.classList?.remove('open','show','active');
-      el.setAttribute?.('aria-hidden','true');
-      if (sel === '.modal-backdrop' || sel === '[data-overlay]') el.remove?.();
-    });
-  });
-  document.body.classList.remove('no-scroll','overflow-hidden','pointer-events-none');
-  document.body.style.overflow = '';
-  document.body.style.pointerEvents = '';
-  document.documentElement.style.pointerEvents = '';
-  localStorage.removeItem('ba_redirect');
-  applyProfileToUI?.(null);
-  wireLoginButton(null);
-  await window.refreshLocks?.();
-}
+      // Pomocnicze: pełny reset UI po wylogowaniu
+      async function __handleSignedOut(){
+        console.log('🔓 Obsługa SIGNED_OUT');
+        
+        // Resetowanie modali i UI
+        ['#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]'].forEach(sel=>{
+          document.querySelectorAll(sel).forEach(el=>{
+            el.classList?.remove('open','show','active');
+            el.setAttribute?.('aria-hidden','true');
+            if (sel === '.modal-backdrop' || sel === '[data-overlay]') {
+              el.remove?.();
+            }
+          });
+        });
+        
+        document.body.classList.remove('no-scroll','overflow-hidden','pointer-events-none');
+        document.body.style.overflow = '';
+        document.body.style.pointerEvents = '';
+        document.documentElement.style.pointerEvents = '';
+        
+        localStorage.removeItem('ba_redirect');
+        applyProfileToUI?.(null);
+        wireLoginButton(null);
+        await window.refreshLocks?.();
+        
+        console.log('✅ UI zresetowane po wylogowaniu');
+      }
 
-// jeden spójny nasłuch – z blokadą „early SIGNED_OUT”
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      // ✅ JEDEN SPÓJNY AUTH STATE CHANGE HANDLER
+      supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        console.log('🔄 Auth State Change:', event, session?.user?.email || 'brak sesji');
 
-  if (event === 'INITIAL_SESSION') {
-  __sawInitialSession = true;
-  if (session?.user) {
-    await __handleSignedIn(session);
-  } else {
-    // brak sesji – ustaw minimalny stan bez twardego resetu UI
-    wireLoginButton(null);
-    applyProfileToUI?.(null);
-  }
-  return;
-}
+        if (event === 'INITIAL_SESSION') {
+          __sawInitialSession = true;
+          if (session?.user) {
+            await __handleSignedIn(session);
+          } else {
+            // Brak sesji - ustaw minimalny stan bez twardego resetu UI
+            wireLoginButton(null);
+            applyProfileToUI?.(null);
+            await window.refreshLocks?.();
+          }
+          return;
+        }
 
-if (event === 'SIGNED_IN') {
-  await __handleSignedIn(session);
-  return;
-}
+        if (event === 'SIGNED_IN') {
+          await __handleSignedIn(session);
+          return;
+        }
 
-if (event === 'SIGNED_OUT') {
-  // jeśli nie mieliśmy jeszcze INITIAL_SESSION, to ignorujemy ten „fałszywy” SIGNED_OUT
-  if (!__sawInitialSession) return;
-  await __handleSignedOut();
-  return;
-}
+        if (event === 'SIGNED_OUT') {
+          // Jeśli nie mieliśmy jeszcze INITIAL_SESSION, ignorujemy "fałszywy" SIGNED_OUT
+          if (!__sawInitialSession) {
+            console.log('⏭️ Ignorowanie wczesnego SIGNED_OUT (przed INITIAL_SESSION)');
+            return;
+          }
+          await __handleSignedOut();
+          return;
+        }
 
-});
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('🔄 Token odświeżony');
+          // Tylko odśwież blokady, nie resetuj UI
+          await window.refreshLocks?.();
+          return;
+        }
+      });
 
-      // --- Rehydratacja sesji przy starcie strony ---
-(async () => {
-  try {
-    const { data } = await supabaseClient.auth.getSession();
-    const session = data.session;
-    wireLoginButton(session);
-    if (session?.user) {
-      await ensureProfile(session.user);
-      const me = await fetchMyProfile?.();
-      applyProfileToUI?.(me);
-    } else {
-      applyProfileToUI?.(null);
-    }
-  } catch (e) {
-    console.warn('Initial session fetch failed:', e);
-  }
-})();
+      // Pierwsza rehydratacja sesji przy starcie strony
+      (async () => {
+        try {
+          console.log('🔄 Pierwsza rehydratacja sesji...');
+          const { data, error } = await supabaseClient.auth.getSession();
+          if (error) {
+            console.warn('⚠️ Błąd podczas pierwszej rehydratacji:', error);
+          }
+          
+          const session = data.session;
+          wireLoginButton(session);
+          
+          if (session?.user) {
+            await ensureProfile(session.user);
+            const me = await fetchMyProfile?.();
+            applyProfileToUI?.(me);
+          } else {
+            applyProfileToUI?.(null);
+          }
+          
+          console.log('✅ Pierwsza rehydratacja zakończona');
+        } catch (e) {
+          console.error('❌ Błąd pierwszej rehydratacji:', e);
+        }
+      })();
 
-      // pierwsze wywołanie
+      // Pierwsze wywołanie refreshLocks
       window.refreshLocks();
     })();
   </script>
 
   <script>
+    // ✅ NAPRAWIONE TWORZENIE ELEMENTÓW TOPBAR
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('🏗️ Tworzenie elementów topbar...');
+      
       const left  = document.querySelector('#topbar .topbar-left');
       const right = document.querySelector('#topbar .topbar-right');
 
@@ -909,7 +1119,7 @@ if (event === 'SIGNED_OUT') {
         support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
       }
 
-      // Tworzenie loginBtn tylko tutaj
+      // Login Button - będzie tworzony w wireLoginButton
       let login = document.getElementById('loginBtn');
       if (!login) {
         login = document.createElement('span');
@@ -919,28 +1129,34 @@ if (event === 'SIGNED_OUT') {
         login.tabIndex = 0;
         login.setAttribute('aria-label', 'Open login dialog');
         login.style.fontWeight = '600';
+        login.onclick = openLoginModal;
+        login.textContent = 'Log In';
       }
-      // reset eventów
-      login.onclick = openLoginModal;
-      login.textContent = 'Log In';
 
       if (profile) profile.classList.add('pill');
 
-      if (profile) left.appendChild(profile);
-      left.appendChild(support);
-      right.appendChild(login);
-      if (mode) right.appendChild(mode);
+      // Dodaj do topbar
+      if (profile && left) left.appendChild(profile);
+      if (support && left) left.appendChild(support);
+      if (login && right) right.appendChild(login);
+      if (mode && right) right.appendChild(mode);
+      
+      console.log('✅ Elementy topbar utworzone');
     });
   </script>
 
   <script>
-    // Enter/Space aktywują klik
+    // Keyboard accessibility
     function makeKeyboardClickable(el, onActivate){
       if(!el) return;
       el.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate(); }
+        if(e.key === 'Enter' || e.key === ' ') { 
+          e.preventDefault(); 
+          onActivate(); 
+        }
       });
     }
+    
     document.addEventListener('DOMContentLoaded', ()=>{
       makeKeyboardClickable(document.getElementById('modeIcon'), toggleLightDarkMode);
       const lb = document.getElementById('loginBtn');
@@ -949,29 +1165,40 @@ if (event === 'SIGNED_OUT') {
   </script>
 
   <script>
-    /* ===== Profiles: ensure + load + UI hook ===== */
+    // ✅ PROFILE MANAGEMENT - pozostaje bez zmian ale z dodanymi logami
     async function ensureProfile(user) {
       if (!user) return;
+      console.log('👤 Zapewnianie profilu dla:', user.email);
+      
       const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                        || (user.email ? user.email.split('@')[0] : 'User');
       const { error } = await supabaseClient
         .from('profiles')
         .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
-      if (error) console.error('ensureProfile error:', error);
+      if (error) {
+        console.error('❌ Błąd ensureProfile:', error);
+      } else {
+        console.log('✅ Profil zapewniony');
+      }
     }
 
     async function fetchMyProfile() {
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (!user) return null;
+      
+      console.log('📥 Pobieranie profilu dla:', user.email);
+      
       const { data, error } = await supabaseClient
         .from('profiles')
         .select('id, display_name, avatar_url, rank, points, badges')
         .eq('id', user.id)
         .single();
       if (error) {
-        console.error('fetchMyProfile error:', error);
+        console.error('❌ Błąd fetchMyProfile:', error);
         return null;
       }
+      
+      console.log('✅ Profil pobrany:', data.display_name);
       return data;
     }
 
@@ -984,10 +1211,13 @@ if (event === 'SIGNED_OUT') {
       if (!chip || !nameEl || !rankEl || !avatarEl) return;
 
       if (!profile) {
+        console.log('🚫 Ukrywanie profilu w UI');
         chip.style.display = 'none';
         if (yourProfileBtn) yourProfileBtn.style.display = 'none';
         return;
       }
+
+      console.log('✅ Aplikowanie profilu do UI:', profile.display_name);
 
       nameEl.textContent = profile.display_name || 'User';
       rankEl.textContent = profile.rank
@@ -1004,45 +1234,42 @@ if (event === 'SIGNED_OUT') {
       if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
     }
 
-    (async () => {
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      if (user) {
-        await ensureProfile(user);
-        const me = await fetchMyProfile();
-        applyProfileToUI(me);
-      } else {
-        applyProfileToUI(null);
-      }
-    })();
-
-    /* DUPLIKAT — usuwamy. Całość obsługuje już centralny handler powyżej.
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session?.user) {
-    await ensureProfile(session.user);
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
-  }
-  if (event === 'SIGNED_OUT') {
-    applyProfileToUI(null);
-  }
-});
-*/
-
-
     async function updateDisplayName(newName) {
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (!user) return { error: 'Not logged in' };
+      
+      console.log('✏️ Aktualizacja nazwy displayName na:', newName);
+      
       const { error } = await supabaseClient
         .from('profiles')
         .update({ display_name: newName })
         .eq('id', user.id);
-      if (error) console.error('updateDisplayName error:', error);
-      else {
+      if (error) {
+        console.error('❌ Błąd updateDisplayName:', error);
+      } else {
+        console.log('✅ DisplayName zaktualizowane');
         const me = await fetchMyProfile();
         applyProfileToUI(me);
       }
       return { error: error?.message || null };
     }
+
+    // Pierwsza inicjalizacja profilu
+    (async () => {
+      try {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user) {
+          await ensureProfile(user);
+          const me = await fetchMyProfile();
+          applyProfileToUI(me);
+        } else {
+          applyProfileToUI(null);
+        }
+      } catch (e) {
+        console.error('❌ Błąd podczas pierwszej inicjalizacji profilu:', e);
+        applyProfileToUI(null);
+      }
+    })();
   </script>
 
 </body>
