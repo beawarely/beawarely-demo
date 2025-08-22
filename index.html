@@ -594,15 +594,35 @@ async function waitForInitialSession() {
   <!-- 🔽 HANDLER onAuthStateChange – USUNIĘTY duplikat (pozostaje tylko w bloku refreshLocks niżej) -->
 
   <script>
-   // ✅ Wylogowanie — resztą UI zajmuje się centralny onAuthStateChange
+     // ✅ Wylogowanie — resztą UI zajmuje się centralny onAuthStateChange
 async function logoutUser() {
   try {
     await supabaseClient.auth.signOut();
   } catch (e) {
     console.warn('signOut failed:', e?.message || e);
   }
-  // żadnych reloadów ani ręcznego sprzątania — to zrobi handler SIGNED_OUT
+  
+  // Twarde czyszczenie UI
+  ['#loginModal','#supportModal','.modal','.overlay','.modal-backdrop','[data-overlay]'].forEach(sel=>{
+    document.querySelectorAll(sel).forEach(el=>{
+      el.classList?.remove('open','show','visible','active');
+      if (sel === '.modal-backdrop' || sel === '[data-overlay]') el.remove?.();
+    });
+  });
+  document.body.classList.remove('modal-open','no-scroll','overlay-open');
+  document.body.style.overflow = '';
+  
+  // Reset przycisków auth
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    loginBtn.textContent = 'Log In';
+    loginBtn.removeAttribute('data-user');
+  }
+  
+  // Przeładowanie strony
+  location.replace(location.pathname);
 }
+
 
   </script>
 
