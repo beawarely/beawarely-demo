@@ -76,7 +76,7 @@
         <div class="hint">Review & approve submissions across tools</div>
       </div>
     </div>
-    <a class="btn" href="index.html">← Back to Home</a>
+    <a class="btn" href="index.html" onclick="sb.auth.signOut().catch(()=>{});">← Back to Home</a>
   </div>
 
   <!-- Tabs -->
@@ -173,7 +173,11 @@ async function requireMod(){
 
   // 3) po inicjalizacji – sprawdź login
   const user = session?.user || null;
-  if(!user){ alert('Login required'); location.href='index.html?login=1'; return; }
+  if(!user){
+  // zamiast alertu i problematycznego redirectu wymuś czysty powrót
+  location.replace('index.html');
+  return;
+}
 
   // 4) weryfikacja roli moderatora
   const { data:mod } = await sb.from('moderators')
