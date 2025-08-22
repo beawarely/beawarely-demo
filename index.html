@@ -250,6 +250,22 @@ iframe.skiptranslate,
 /* Modale: nie przechwytują klików, dopóki nie są .open */
 #loginModal, #supportModal { pointer-events: none; }
 #loginModal.open, #supportModal.open { pointer-events: auto; }
+
+/* === HARD OVERLAY KILL SWITCH === */
+.skiptranslate,
+iframe.skiptranslate,
+.goog-te-banner-frame,
+[class^="VIpgJd-"],
+[id^="goog-"] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  z-index: 0 !important;
+}
+#loginModal, #supportModal { pointer-events: none; }
+#loginModal.open, #supportModal.open { pointer-events: auto; }
+/* Koniec kill switcha */
+
 </style>
 
 
@@ -606,133 +622,46 @@ iframe.skiptranslate,
 
   <script>
     // ✅ NAPRAWIONA FUNKCJA WYLOGOWANIA - kompletne czyszczenie + reload
-    async function logoutUser() {
-      console.log('🔄 Rozpoczynanie procesu wylogowania...');
-      
-      try {
-        // 1. Wylogowanie z Supabase
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) {
-          console.warn('⚠️ Błąd podczas signOut:', error.message);
-        } else {
-          console.log('✅ Supabase signOut zakończony pomyślnie');
-        }
-      } catch (e) {
-        console.warn('⚠️ Wyjątek podczas signOut:', e?.message || e);
-      }
-      
-      // 2. TWARDE CZYSZCZENIE WSZYSTKICH DANYCH
-      try {
-        // Czyszczenie localStorage (wszystkie klucze Supabase)
-        Object.keys(localStorage).forEach(key => {
-          if (key.startsWith('sb-') || 
-              key.includes('supabase') || 
-              key.includes('auth') ||
-              key.includes('session') ||
-              key === 'ba_redirect') {
-            localStorage.removeItem(key);
-          }
-        });
-        
-        // Czyszczenie sessionStorage (wszystkie klucze)
-        Object.keys(sessionStorage).forEach(key => {
-          if (key.startsWith('sb-') || 
-              key.includes('supabase') || 
-              key.includes('auth') ||
-              key.includes('session')) {
-            sessionStorage.removeItem(key);
-          }
-        });
-        
-        console.log('✅ Wyczyszczono localStorage i sessionStorage');
-      } catch (e) {
-        console.warn('⚠️ Błąd podczas czyszczenia storage:', e);
-      }
-      
-     // 3. TWARDE RESETOWANIE UI
-try {
-  // Zamknięcie i usunięcie modali
-  const modalsSelectors = [
-    '#loginModal',
-    '#supportModal', 
-    '.modal',
-    '.overlay',
-    '.modal-backdrop',
-    '[data-overlay]',
-    '[role="dialog"]',
-    '.popup',
-    '.lightbox'
-  ];
-        
-  modalsSelectors.forEach(selector => {
-    document.querySelectorAll(selector).forEach(el => {
-      if (el) {
-        el.classList?.remove('open', 'show', 'visible', 'active', 'displayed');
-        el.style.display = 'none';
-        el.setAttribute('aria-hidden', 'true');
-        el.style.pointerEvents = 'none';
-        el.style.zIndex = '0';
-        // 🔑 kluczowa różnica: usuwamy całkowicie, żeby nie wisiały w DOM
-        el.remove?.();
-      }
-    });
-  });
+    
+async function logoutUser() {
+  console.log('🔄 Wylogowanie START');
+  try { await supabaseClient.auth.signOut(); } catch(e){ console.warn('signOut err', e); }
 
-        
-        
-
-  // 🔒 Ubij overlaye Google Translate i inne wstrzyknięte elementy
-  ['[id^="goog-"]','[class^="goog-"]','iframe.goog-te-banner-frame','iframe.skiptranslate','[class^="VIpgJd-"]']
-    .forEach(sel => {
-      document.querySelectorAll(sel).forEach(el => {
-        try { el.remove(); } catch {}
-      });
-    });
-// Reset body
-        document.body.classList.remove('modal-open', 'no-scroll', 'overlay-open', 'popup-open');
-        document.body.style.overflow = '';
-        document.body.style.pointerEvents = '';
-        document.body.style.userSelect = '';
-        document.documentElement.style.overflow = '';
-        document.documentElement.style.pointerEvents = '';
-        
-        // Reset przycisków auth
-        const loginBtn = document.getElementById('loginBtn');
-        if (loginBtn) {
-          loginBtn.textContent = 'Log In';
-          loginBtn.removeAttribute('data-user');
-          loginBtn.setAttribute('aria-label', 'Open login dialog');
-        }
-        
-        // Ukryj elementy wymagające autoryzacji
-        const authElements = ['#profileRedirect', '#yourProfileBtn', '#profileChip'];
-        authElements.forEach(sel => {
-          const el = document.querySelector(sel);
-          if (el) el.style.display = 'none';
-        });
-        
-        // Ubij overlaye Google Translate
-        ['[id^="goog-"]','[class^="goog-"]','iframe.goog-te-banner-frame','iframe.skiptranslate','[class^="VIpgJd-"]']
-          .forEach(sel => { document.querySelectorAll(sel).forEach(el => { try{ el.remove(); }catch{} }); });
-        console.log('✅ UI zostało zresetowane');
-      } catch (e) {
-        console.warn('⚠️ Błąd podczas resetowania UI:', e);
-      }
-      
-      // 4. CZYSTY RELOAD STRONY (z delay dla pewności)
-      console.log('🔄 Przeładowanie strony za 100ms...');
-      setTimeout(() => {
-        try {
-          // Użyj location.replace() zamiast reload() aby uniknąć powrotu
-          window.location.replace(window.location.pathname + window.location.search);
-        } catch (e) {
-          // Fallback
-          console.warn('⚠️ Fallback do window.location.reload()');
-          window.location.reload(true);
-        }
-      }, 100);
+  // Usuń klucze SB z obu storage
+  try {
+    for (const store of [localStorage, sessionStorage]) {
+      const keys = [];
+      for (let i=0;i<store.length;i++) keys.push(store.key(i));
+      keys.forEach(k=>{ if(k && (k.startsWith('sb-') || k.includes('supabase'))) store.removeItem(k); });
     }
-  </script>
+  } catch(e){}
+
+  // Zdejmij wszystkie overlaya/banery/iframe'y
+  ['[id^="goog-"]','[class^="goog-"]','iframe.goog-te-banner-frame','iframe.skiptranslate','[class^="VIpgJd-"]',
+   '.modal','.overlay','.modal-backdrop','[data-overlay]','[role="dialog"]','.popup','.lightbox']
+    .forEach(sel => document.querySelectorAll(sel).forEach(el => { try{ el.remove(); }catch{} }));
+
+  // Reset body
+  document.body.classList.remove('modal-open','no-scroll','overlay-open','popup-open');
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow='';
+
+  // Czekaj max 2s aż sesja faktycznie zniknie
+  const t0 = Date.now();
+  while (Date.now() - t0 < 2000) {
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) break;
+    } catch {}
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  const clean = location.pathname + location.search;
+  console.log('🔁 Replace ->', clean);
+  location.replace(clean);
+}
+</script>
+
 
   <script>
     // ✅ NAPRAWIONA FUNKCJA ZARZĄDZANIA PRZYCISKIEM LOGOWANIA
@@ -1078,6 +1007,9 @@ try {
             return;
           }
           await __handleSignedOut();
+          wireLoginButton(null);
+          document.getElementById('yourProfileBtn')?.style && (document.getElementById('yourProfileBtn').style.display='none');
+          document.getElementById('profileChip')?.style && (document.getElementById('profileChip').style.display='none');
           return;
         }
 
@@ -1297,4 +1229,3 @@ try {
 
 </body>
 </html>
-
