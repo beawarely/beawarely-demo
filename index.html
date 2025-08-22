@@ -1153,9 +1153,8 @@ function closeSupportModal() {
 <script>
 (function(){
   // ❗️UŻYJ TEGO SAMEGO KLIENTA, KTÓRY JUŻ MASZ (supabaseClient)
-  const sb = (typeof supabaseClient !== 'undefined')
-    ? supabaseClient
-    : supabase.createClient('https://xzwpqyomqjzmiqsszwkg.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg');
+ const sb = supabaseClient;
+
 
 
   const grid = document.getElementById('toolsGrid');
@@ -1189,25 +1188,6 @@ function closeSupportModal() {
       };
     });
   }
-
-  // po zalogowaniu – automatyczny powrót
-  sb.auth.onAuthStateChange((event, session) => {
-  // Reaguj tylko na realne logowanie/wylogowanie, NIE na INITIAL_SESSION
-  if (event === 'SIGNED_IN') {
-    const to = localStorage.getItem('ba_redirect');
-    if (to) {
-      localStorage.removeItem('ba_redirect');
-      window.location.href = to;
-    } else {
-      refreshLocks(); // odśwież stan kłódek bez reloadu
-    }
-  }
-
-  if (event === 'SIGNED_OUT') {
-    refreshLocks(); // odśwież widok dla niezalogowanego
-  }
-});
-
 
   // jeśli ktoś trafił tu z parametrem ?login=1 – pokaż modal
   if (new URLSearchParams(location.search).get('login') === '1') {
