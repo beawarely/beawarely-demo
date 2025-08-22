@@ -635,38 +635,35 @@
         console.warn('⚠️ Błąd podczas czyszczenia storage:', e);
       }
       
-      // 3. TWARDE RESETOWANIE UI
-      try {
-        // Zamknięcie wszystkich modali
-        const modalsSelectors = [
-          '#loginModal',
-          '#supportModal', 
-          '.modal',
-          '.overlay',
-          '.modal-backdrop',
-          '[data-overlay]',
-          '[role="dialog"]',
-          '.popup',
-          '.lightbox'
-        ];
+     // 3. TWARDE RESETOWANIE UI
+try {
+  // Zamknięcie i usunięcie modali
+  const modalsSelectors = [
+    '#loginModal',
+    '#supportModal', 
+    '.modal',
+    '.overlay',
+    '.modal-backdrop',
+    '[data-overlay]',
+    '[role="dialog"]',
+    '.popup',
+    '.lightbox'
+  ];
         
-        modalsSelectors.forEach(selector => {
-          document.querySelectorAll(selector).forEach(el => {
-            if (el) {
-              // Usuń klasy stanu
-              el.classList?.remove('open', 'show', 'visible', 'active', 'displayed');
-              el.style.display = 'none';
-              el.setAttribute('aria-hidden', 'true');
-              
-              // Usuń backdrop/overlay całkowicie
-              if (selector === '.modal-backdrop' || 
-                  selector === '[data-overlay]' ||
-                  selector === '.overlay') {
-                el.remove?.();
-              }
-            }
-          });
-        });
+  modalsSelectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach(el => {
+      if (el) {
+        el.classList?.remove('open', 'show', 'visible', 'active', 'displayed');
+        el.style.display = 'none';
+        el.setAttribute('aria-hidden', 'true');
+        el.style.pointerEvents = 'none';
+        el.style.zIndex = '0';
+        // 🔑 kluczowa różnica: usuwamy całkowicie, żeby nie wisiały w DOM
+        el.remove?.();
+      }
+    });
+  });
+
         
         // Reset body
         document.body.classList.remove('modal-open', 'no-scroll', 'overlay-open', 'popup-open');
