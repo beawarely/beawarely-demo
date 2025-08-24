@@ -61,10 +61,15 @@ textarea:focus-visible {
 <body>
   <div class="wrap">
     <div class="topbar">
-      <a href="index.html" class="back">← Back</a>
-      <h2 style="margin:0">BeAwarely AI Chat</h2>
-      <span class="badge">Mistral-7B-Instruct-Q6_K</span>
-    </div>
+  <a href="index.html" class="back">← Back</a>
+  <h2 style="margin:0">BeAwarely AI Chat</h2>
+  <span class="badge">Mistral-7B-Instruct-Q6_K</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <span id="loginStatus" class="badge" aria-live="polite">Checking session…</span>
+    <button id="logoutBtn" class="send" type="button" aria-label="Log out">Log out</button>
+  </div>
+</div>
+
 
     <div class="chat-card">
       <div id="chatMessages" class="chat-messages" aria-live="polite" aria-atomic="false">
@@ -85,21 +90,62 @@ textarea:focus-visible {
     </div>
   </div>
 
-  <script>
-    // Supabase gate: jeśli brak sesji → wróć do index i otwórz login
-    const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-    const supa = window.supabase.createClient(SB_URL, SB_KEY);
-
-    (async () => {
-      const { data: { session } } = await supa.auth.getSession();
-      if (!session) {
-        // zapamiętaj dokąd miało wejść
-        localStorage.setItem('ba_redirect', 'chat.html');
-        window.location.href = 'index.html?login=1';
-        return;
+    <script>
+    // === Supabase: jeden klient dla całego serwisu (spójnie z index.html) ===
+    (function initSupabaseOnce(){
+      const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+      const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+      if (!window.supabaseClient) {
+        window.supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
       }
     })();
+
+    // Ciche domknięcie ewentualnego loginModal (gdy wrócono z index.html)
+    (function closeStrayLoginModal(){
+      const lm = document.getElementById('loginModal');
+      if (lm) lm.classList.remove('open');
+      document.body.style.overflow = '';
+    })();
+
+    // === Helper: poczekaj na bieżącą sesję ===
+    async function waitForInitialSession(){
+      const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+      if (error) console.warn('getSession error:', error.message || error);
+      return session || null;
+    }
+
+    // === Brama: wymagaj zalogowania + ustaw redirect po zalogowaniu ===
+    (async () => {
+      const session = await waitForInitialSession();
+      if (!session) {
+        localStorage.setItem('ba_redirect', 'chat.html');
+        location.replace('index.html?login=1');
+        return;
+      }
+      // UI status
+      const st = document.getElementById('loginStatus');
+      if (st) st.textContent = 'Logged in';
+    })();
+
+    // === Reakcja na wylogowanie z innej karty ===
+    window.supabaseClient.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        location.replace('index.html');
+      }
+    });
+
+    // === Log out (spójny z index.html) ===
+    async function logoutUser(){
+      try { await window.supabaseClient.auth.signOut(); }
+      catch(e){ console.warn('signOut failed:', e?.message || e); }
+      finally { location.replace('index.html'); }
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const btn = document.getElementById('logoutBtn');
+      if (btn) btn.addEventListener('click', logoutUser);
+    });
+  </script>
+
 
     // Prosty handler UI (na razie bez połączenia do Mistrala)
     const msgs = document.getElementById('chatMessages');
