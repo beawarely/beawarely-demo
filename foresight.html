@@ -188,14 +188,19 @@
 <body>
   <div class="wrap">
     <!-- Top panel -->
-    <div class="topbar" role="banner">
+        <div class="topbar" role="banner">
       <div class="brand" aria-label="BeAwarely Foresight">
         <div class="logo" aria-hidden="true"></div>
         <h1>BeAwarely <span>· Foresight</span></h1>
       </div>
       <a class="btn" href="index.html" id="backHome" title="Back to Home">← Back to Home</a>
       <button class="btn primary" id="refreshBtn" title="Refresh predictions (demo)">⟳ Refresh</button>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <span id="loginStatus" class="badge" aria-live="polite">Checking session…</span>
+        <button id="logoutBtn" class="btn primary" type="button" aria-label="Log out">Log out</button>
+      </div>
     </div>
+
 
     <!-- Main layout -->
     <div class="grid" role="main">
@@ -295,13 +300,24 @@
     </div>
   </dialog>
 
-  <!-- Supabase (same version as index.html) -->
+    <!-- Supabase (same version as index.html) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // ---- CONFIG ----
-    const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-    const sb = window.supabase.createClient(SB_URL, SB_KEY); // anon public key is fine client-side
+    // === Supabase: singleton klient jak w index/chat ===
+    (function initSupabaseOnce(){
+      const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+      const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+      if (!window.supabaseClient) {
+        window.supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
+      }
+    })();
+
+    // Zgaś ewentualne stray modale po powrocie z index.html
+    (function closeStrayLoginModal(){
+      const lm = document.getElementById('loginModal');
+      if (lm) lm.classList.remove('open');
+      document.body.style.overflow = '';
+    })();
 
     // ---- DOM ----
     const authModal = document.getElementById('authModal');
@@ -309,10 +325,11 @@
     const lastUpdatedEl = document.getElementById('lastUpdated');
     const refreshBtn = document.getElementById('refreshBtn');
     const miniChart = document.getElementById('miniChart');
+    const loginStatus = document.getElementById('loginStatus');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     // ---- CATEGORIES GATING ----
     function wireCategoryClicks(authed){
-      console.log('Authenticated:', authed); // DEBUG
       catButtons.forEach(el => {
         el.classList.toggle('lock', !authed);
         el.title = authed ? '' : 'Login required';
@@ -322,19 +339,33 @@
             if (authModal?.showModal) authModal.showModal();
             return;
           }
-          // Navigate to topic page (create these files later)
           const topic = el.dataset.topic;
           location.href = `foresight-${topic}.html`;
         };
       });
     }
 
-    async function applyAuthState(){
-      const { data:{ session } } = await sb.auth.getSession();
-      wireCategoryClicks(!!session);
+    async function refreshAuthUI(){
+      const { data:{ session }, error } = await window.supabaseClient.auth.getSession();
+      if (error) console.warn('getSession error:', error.message || error);
+      const authed = !!session;
+      if (loginStatus) loginStatus.textContent = authed ? 'Logged in' : 'Logged out';
+      wireCategoryClicks(authed);
     }
-    applyAuthState();
-    sb.auth.onAuthStateChange((_event, _session) => applyAuthState());
+
+    // start + reakcja na zmiany sesji (np. inna karta)
+    refreshAuthUI();
+    window.supabaseClient.auth.onAuthStateChange((_event, _session) => {
+      refreshAuthUI();
+    });
+
+    // ---- Log out (spójnie z chat/index) ----
+    async function logoutUser(){
+      try { await window.supabaseClient.auth.signOut(); }
+      catch(e){ console.warn('signOut failed:', e?.message || e); }
+      finally { location.replace('index.html'); }
+    }
+    logoutBtn?.addEventListener('click', logoutUser);
 
     // ---- MODAL CLOSE ----
     document.getElementById('closeModal')?.addEventListener('click', () => authModal?.close());
@@ -409,5 +440,6 @@
     setLastUpdatedNow();
     drawMiniChart(true);
   </script>
+
 </body>
 </html>
