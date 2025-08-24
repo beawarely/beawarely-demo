@@ -146,7 +146,7 @@ textarea:focus-visible {
     });
   </script>
 
-
+  <script>
     // Prosty handler UI (na razie bez połączenia do Mistrala)
     const msgs = document.getElementById('chatMessages');
     const input = document.getElementById('chatInput');
@@ -162,9 +162,11 @@ textarea:focus-visible {
 
     input.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' && !e.shiftKey){
-        e.preventDefault(); send.click();
+        e.preventDefault(); 
+        send.click();
       }
     });
+
     send.onclick = () => {
       const q = input.value.trim();
       if(!q) return;
@@ -173,11 +175,12 @@ textarea:focus-visible {
       // tu później wstawisz fetch do swojego endpointu Mistrala
       setTimeout(()=>addMsg('This is a placeholder response. Connect your Mistral endpoint to get real answers.'), 400);
     };
-    document.addEventListener('DOMContentLoaded', ()=>{ 
-  if(msgs) msgs.scrollTop = msgs.scrollHeight; 
-});
 
+    document.addEventListener('DOMContentLoaded', ()=>{ 
+      if(msgs) msgs.scrollTop = msgs.scrollHeight; 
+    });
   </script>
+
 
   <script>
   // --- Autogrow textarea + stabilne przewijanie --- //
