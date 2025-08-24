@@ -366,47 +366,24 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 }
     
 </style>
-  <script>
-    // Load preferred theme
+    <script>
+    // Motyw + znikanie loadera (spójnie)
     document.addEventListener('DOMContentLoaded', () => {
-  const mode = localStorage.getItem('mode') || 'dark';
-  document.body.classList.toggle('light-mode', mode === 'light');
-
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = mode === 'light' ? '🌞' : '🌛';
-
-  const bg = document.getElementById('rotating-bg');
-  if (bg) {
-    
-  }
-
-  // ✅ Hide loader inside DOMContentLoaded
-  const loader = document.getElementById('loader');
-  if (loader) {
-    loader.style.opacity = '0';
-    loader.style.visibility = 'hidden';
-    setTimeout(() => loader.remove(), 500);
-  }
-});
-
-
-    // Toggle mode and save
-    
-function toggleLightDarkMode() {
-  const isLight = document.body.classList.toggle('light-mode');
-  document.body.classList.toggle('dark-mode', !isLight);
-  localStorage.setItem('mode', isLight ? 'light' : 'dark');
-
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.textContent = isLight ? '🌞' : '🌛';
-
-  const bg = document.getElementById('rotating-bg');
-  if (bg) {
-    
-  }
-}
-
-
+      const isLight = (localStorage.getItem('mode') || 'dark') === 'light';
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+      const loader = document.getElementById('loader');
+      if (loader) { loader.style.opacity = '0'; loader.style.visibility = 'hidden'; setTimeout(() => loader.remove(), 500); }
+    });
+    function toggleLightDarkMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+    }
   </script>
 
 
@@ -415,9 +392,12 @@ function toggleLightDarkMode() {
 
   <!-- TOPBAR -->
 <div id="topbar">
-  <div class="topbar-left"></div>
+  <div class="topbar-left">
+    <a id="yourProfileBtn" href="profile.html" class="pill" style="display:none">Your Profile</a>
+  </div>
   <div class="topbar-right">
-    <!-- Profile chip (pokazywany po zalogowaniu) -->
+    <button id="modeIcon" type="button" class="pill" aria-label="Toggle light/dark mode">🌛</button>
+    <button id="loginBtn" type="button" class="pill">Log In</button>
     <div id="profileChip" style="display:none; align-items:center; gap:10px;">
       <img id="profileAvatar" src="" alt="Avatar" width="32" height="32" style="border-radius:50%; object-fit:cover;" />
       <div style="display:flex; flex-direction:column; line-height:1;">
@@ -438,44 +418,7 @@ function toggleLightDarkMode() {
   </div>
 
   <header style="position: relative;">
-  <!-- Ikona trybu w prawym górnym rogu -->
-  <span id="modeIcon" role="button" tabindex="0" aria-label="Toggle light/dark mode"
-      onclick="toggleLightDarkMode()"
-      title="Toggle light/dark mode"
-      style="position: absolute; top: 20px; right: 20px; font-size: 1.6rem; cursor: pointer; padding: 8px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s;"
-      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-      onmouseout="this.style.backgroundColor='transparent'">🌛</span>
-
-<!-- Przycisk Log In -->
-<span id="loginBtn" role="button" tabindex="0" aria-label="Open login dialog"
-      onclick="openLoginModal()"
-      title="Log in/out"
-      style="position: absolute; top: 20px; right: 60px; font-size: 1rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background-color 0.3s, transform 0.3s; color: white;"
-      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
-      onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">Log In</span>
-
-    <!-- Przycisk "Your Profile" widoczny po zalogowaniu -->
-<a id="yourProfileBtn"
-   href="profile.html"
-   style="display: none; position: absolute; top: 20px; left: 20px; font-size: 0.9rem; font-weight: 600; background-color: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 6px; color: white; text-decoration: none; transition: background-color 0.3s;"
-   onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
-   onmouseout="this.style.backgroundColor='rgba(255,255,255,0.1)'">
-   Your Profile
-</a>
-
-  <!--  
- <button id="supportBtn"
-        onclick="openSupportModal()"
-        title="Support BeAwarely"
-        style="position: absolute; top: 66px; left: 20px; 
-               font-size: 0.95rem; font-weight: 700; 
-               background-color: rgba(255,255,255,0.10);
-               color: #fff; padding: 10px 16px; border-radius: 8px;
-               border: none; cursor: pointer;
-               transition: background-color .3s, transform .2s;">
-  🤝 Support BeAwarely
-</button>
--->
+  
     
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
@@ -490,17 +433,7 @@ function toggleLightDarkMode() {
 </h1>
 
 
-
-
-  <!--<button class="scroll-btn"
-        onmouseover="this.textContent='Go to Tree...'" 
-        onmouseout="this.textContent='Explore the Tree'" 
-        onclick="window.location.href='tree.html'">
-  Explore the Tree
-</button>-->
 </header>
-
-
 
 
   <section class="scroll-reveal">
@@ -519,46 +452,6 @@ function toggleLightDarkMode() {
     </ul>
   </section>
 
-<!--  <section id="ai-chat" class="legacy-hide" class="scroll-reveal">
-  <h2>AI Chat Coming Soon</h2>
-  <p style="margin-bottom: 20px;">
-    We're working hard on integrating an interactive AI assistant.<br>
-    Soon you'll be able to ask questions, explore ideas, and get support in real time.
-  </p>
-  <div style="background-color: rgba(255,255,255,0.05); border-radius: 10px; padding: 30px; text-align: center;">
-    <span style="font-size: 2.5rem;">🤖</span>
-    <p style="font-size: 1rem; color: #ccc; margin-top: 10px;">Your future AI companion will live here. Stay tuned!</p>
-  </div>
-</section>
-
-  <section id="ai-tools" class="legacy-hide"> class="scroll-reveal" style="margin-top: 60px; text-align: center;">
-  <h2>Coming Soon: AI Tools</h2>
-  <p style="margin-bottom: 30px;">Exciting features to support your awareness mission:</p>
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">🔍</span>
-      <h3 style="margin: 10px 0 5px;">Fact Checker</h3>
-      <p style="font-size: 0.9rem;">Verify news and claims with AI-backed research.</p>
-    </div>
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">🧠</span>
-      <h3 style="margin: 10px 0 5px;">AI Assistant</h3>
-      <p style="font-size: 0.9rem;">Ask anything, anytime. Get instant AI support.</p>
-    </div>
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">📊</span>
-      <h3 style="margin: 10px 0 5px;">Analytics</h3>
-      <p style="font-size: 0.9rem;">Visual insights about what matters most.</p>
-    </div>
-    <div class="ai-tool-box">
-      <span style="font-size: 2rem;">✍️</span>
-      <h3 style="margin: 10px 0 5px;">Summary Gen</h3>
-      <p style="font-size: 0.9rem;">Auto-generate summaries of complex topics.</p>
-    </div>
-  </div>
-    
-
-</section>-->
 
 <section id="ai-hub" class="scroll-reveal">
   <h2>BeAwarely AI Hub</h2>
@@ -674,21 +567,6 @@ function toggleLightDarkMode() {
   </a>
 </div>
 
-  
-<!-- Compact CTA: Support -->
-<!--
- <section id="support-cta" class="scroll-reveal">
-  <button onclick="openSupportModal()" 
-        style="background: linear-gradient(135deg, var(--blue1), var(--blue2));
-               color:#fff; padding:14px 28px; border:none; border-radius:10px;
-               font-size:1.05rem; font-weight:700; cursor:pointer;
-               box-shadow:0 8px 30px rgba(0,123,255,.25); transition:transform .2s;">
-  🤝 Support BeAwarely
-</button>
-  <div style="font-size:.9rem; color:#bbb; margin-top:8px;">
-    Help us grow the mission
-  </div>
-</section> -->
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
   <div class="social-icons" style="margin-bottom: 10px;">
@@ -741,23 +619,10 @@ function toggleLightDarkMode() {
   }
 
   /* przeniesione z drugiego media-query */
-  #modeIcon, #loginBtn {
-    top: 10px;
-    font-size: 1.1rem;
-    padding: 4px 10px;
-  }
-  #loginBtn {
-    right: 50px;
-  }
-  #modeIcon {
-    right: 10px;
-  }
+    /* przyciski siedzą w #topbar – bez absolute top/right */
+  #modeIcon, #loginBtn { font-size: 1.1rem; padding: 4px 10px; }
 }
 
-
-  #modeIcon {
-    right: 10px;
-  }
 /* Twarde centrowanie sekcji z przyciskiem */
 #support-cta{
   display: grid;
@@ -893,30 +758,33 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 </script>
 
 
- <script>
+  <script>
   function openLoginModal() {
     const modal = document.getElementById("loginModal");
+    if (!modal) return;
     modal.classList.add("open");
+    document.body.style.overflow = 'hidden';
     const dialog = modal.querySelector('[role="dialog"]');
     if (dialog) dialog.focus();
   }
-
   function closeLoginModal() {
-    document.getElementById("loginModal").classList.remove("open");
-  }
-
-  // Zamknięcie po kliknięciu poza okno (tylko dla loginModal)
-  window.onclick = function(event) {
     const modal = document.getElementById("loginModal");
-    if (event.target === modal) modal.classList.remove("open");
+    if (!modal) return;
+    modal.classList.remove("open");
+    document.body.style.overflow = '';
   }
-</script>
-
-
-<script>
-  // Zamknij modal klawiszem ESC
+  // Klik w tło (oba modale)
+  window.addEventListener('click', (e) => {
+    const lm = document.getElementById('loginModal');   if (lm && e.target === lm) closeLoginModal();
+    const sm = document.getElementById('supportModal'); if (sm && e.target === sm) closeSupportModal();
+  });
+  // Jeden ESC dla obu
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLoginModal();
+    if (e.key !== 'Escape') return;
+    const loginOpen   = document.getElementById('loginModal')?.classList.contains('open');
+    const supportOpen = document.getElementById('supportModal')?.classList.contains('open');
+    if (loginOpen) closeLoginModal();
+    else if (supportOpen) closeSupportModal();
   });
 </script>
   
@@ -977,17 +845,6 @@ function closeSupportModal() {
 }
 
 
-  // Zamknięcie po kliknięciu w tło (nie nadpisujemy window.onclick używanego przez loginModal)
-  window.addEventListener('click', (e) => {
-    const m = document.getElementById('supportModal');
-    if (m && e.target === m) closeSupportModal();
-  });
-
-  // Zamknięcie ESC
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSupportModal();
-  });
-
   // Kopiowanie adresu crypto
   function copyCrypto() {
     const address = 'TWÓJ_ADRES_CRYPTO';
@@ -1000,53 +857,51 @@ function closeSupportModal() {
 </script>
 
 <!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
+<!-- 🔽 Spójne sterowanie UI stanem sesji -->
 <script>
+  function wireLoginUI(session){
+    const logged = !!session;
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+      loginBtn.textContent = logged ? 'Log out' : 'Log In';
+      loginBtn.onclick = logged ? logoutUser : openLoginModal;
+    }
+    const profileRedirect = document.getElementById('profileRedirect');
+    if (profileRedirect) profileRedirect.style.display = logged ? 'block' : 'none';
+    const yourProfileBtn = document.getElementById('yourProfileBtn');
+    if (yourProfileBtn) yourProfileBtn.style.display = logged ? 'inline-block' : 'none';
+  }
   document.addEventListener('DOMContentLoaded', async () => {
-    const { data, error } = await supabaseClient.auth.getUser();
-
-    if (error) {
-      console.error("❌ Błąd pobierania użytkownika:", error.message);
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    wireLoginUI(session);
+    await window.refreshLocks?.();
+  });
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    wireLoginUI(session);
+    await window.refreshLocks?.();
+    if (event === 'SIGNED_IN') {
+      const dest = localStorage.getItem('ba_redirect');
+      if (dest) { localStorage.removeItem('ba_redirect'); location.replace(dest); }
+    } else if (event === 'SIGNED_OUT') {
+      localStorage.removeItem('ba_redirect');
+      document.getElementById('loginModal')?.classList.remove('open');
+      document.getElementById('supportModal')?.classList.remove('open');
+      document.body.style.overflow = '';
+      location.replace('index.html');
     }
-
-    const user = data?.user;
-
-    if (user) {
-      console.log("✅ Użytkownik zalogowany:", user);
-      document.getElementById('loginBtn').textContent = 'Log out';
-      document.getElementById('loginBtn').onclick = logoutUser;
-
-      const profileBtn = document.getElementById('profileRedirect');
-      if (profileBtn) profileBtn.style.display = 'block';
-
-      const yourProfileBtn = document.getElementById('yourProfileBtn');
-      if (yourProfileBtn) yourProfileBtn.style.display = 'inline-block';
-
-    } else {
-      console.log("ℹ️ Użytkownik niezalogowany");
-      document.getElementById('loginBtn').textContent = 'Log In';
-      document.getElementById('loginBtn').onclick = openLoginModal;
-
-      const profileBtn = document.getElementById('profileRedirect');
-      if (profileBtn) profileBtn.style.display = 'none';
-
-      const yourProfileBtn = document.getElementById('yourProfileBtn');
-      if (yourProfileBtn) yourProfileBtn.style.display = 'none';
-    }
-  }); // ✅ DODANE - to był brakujący nawias
+  });
 </script>
 
 
 <script>
-  // ❗️ Przenieśliśmy logoutUser() poza DOMContentLoaded
   async function logoutUser() {
-    const { error } = await supabaseClient.auth.signOut();
-    if (error) {
-      alert("Error signing out");
-      console.error("❌ Błąd podczas wylogowywania:", error.message);
-    } else {
-      console.log("👋 Wylogowano pomyślnie");
-      location.reload();
-    }
+    try { await supabaseClient.auth.signOut(); }
+    catch (e) { console.error("❌ signOut failed:", e?.message || e); }
+    localStorage.removeItem('ba_redirect');
+    document.getElementById('loginModal')?.classList.remove('open');
+    document.getElementById('supportModal')?.classList.remove('open');
+    document.body.style.overflow = '';
+    location.replace('index.html');
   }
 </script>
 
@@ -1152,35 +1007,23 @@ function closeSupportModal() {
 
 <script>
 (function(){
-  // ❗️UŻYJ TEGO SAMEGO KLIENTA, KTÓRY JUŻ MASZ (supabaseClient)
- const sb = supabaseClient;
-
-
-
+  const sb = supabaseClient;
   const grid = document.getElementById('toolsGrid');
   if (!grid) return;
 
   async function refreshLocks(){
     const { data: { session } } = await sb.auth.getSession();
     const authed = !!session;
-
     grid.querySelectorAll('.tool-card').forEach(card=>{
       const needs = card.dataset.requiresAuth === 'true';
       card.classList.toggle('locked', needs && !authed);
       const status = card.querySelector('.status');
-      if(status){
-        status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open';
-      }
-      // klik
+      if(status){ status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open'; }
       card.onclick = () => {
         const href = card.dataset.href;
         if (needs && !authed) {
-          // zapamiętaj, dokąd mamy wrócić po zalogowaniu
           localStorage.setItem('ba_redirect', href);
-          // otwórz Twój modal logowania (dopasuj do swojego kodu)
-          const modal = document.getElementById('loginModal');
-          if (modal) modal.classList.add('open');
-          // jeśli masz funkcję np. openLoginModal() – wywołaj ją
+          const modal = document.getElementById('loginModal'); if (modal) modal.classList.add('open');
           if (typeof window.openLoginModal === 'function') window.openLoginModal();
           return;
         }
@@ -1189,15 +1032,16 @@ function closeSupportModal() {
     });
   }
 
-  // jeśli ktoś trafił tu z parametrem ?login=1 – pokaż modal
+  window.refreshLocks = refreshLocks;
+
   if (new URLSearchParams(location.search).get('login') === '1') {
     const modal = document.getElementById('loginModal');
     if (modal) modal.classList.add('open');
     if (typeof window.openLoginModal === 'function') window.openLoginModal();
   }
-
   refreshLocks();
 })();
+
 </script>
 
 <script>
@@ -1245,13 +1089,13 @@ if (!support) {
       }
     });
   }
-  document.addEventListener('DOMContentLoaded', ()=>{
-    makeKeyboardClickable(document.getElementById('modeIcon'), toggleLightDarkMode);
+    document.addEventListener('DOMContentLoaded', ()=>{
     makeKeyboardClickable(document.getElementById('loginBtn'), () => {
-      const txt = document.getElementById('loginBtn')?.textContent?.toLowerCase() || '';
-      if (txt.includes('log out')) logoutUser(); else openLoginModal();
+      const btn = document.getElementById('loginBtn');
+      if (btn) btn.click(); // używa handlera przypiętego w wireLoginUI
     });
   });
+
 </script>
 
 <script>
@@ -1307,9 +1151,10 @@ function applyProfileToUI(profile) {
   chip.style.display = 'flex';
 }
 
-// Start: jeśli już zalogowany → utwórz/odśwież profil i pokaż chip
+// Start: sesja → profil → chip
 (async () => {
-  const { data: { user } } = await supabaseClient.auth.getUser();
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const user = session?.user;
   if (user) {
     await ensureProfile(user);
     const me = await fetchMyProfile();
@@ -1319,17 +1164,18 @@ function applyProfileToUI(profile) {
   }
 })();
 
+
 // Reakcja na login/logout
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
     await ensureProfile(session.user);
     const me = await fetchMyProfile();
     applyProfileToUI(me);
-  }
-  if (event === 'SIGNED_OUT') {
+  } else if (event === 'SIGNED_OUT') {
     applyProfileToUI(null);
   }
 });
+
 
 // (opcjonalne) helper do zmiany wyświetlanej nazwy
 async function updateDisplayName(newName) {
@@ -1346,6 +1192,15 @@ async function updateDisplayName(newName) {
   }
   return { error: error?.message || null };
 }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modeBtn = document.getElementById('modeIcon');
+  if (modeBtn) {
+    modeBtn.addEventListener('click', toggleLightDarkMode);
+  }
+});
 </script>
   
 </body>
