@@ -156,30 +156,38 @@
     // ====== INIT SUPABASE ======
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // ====== AUTH GATE ======
+        // ====== SESSION / AUTH (spójne z index.html) ======
     let currentUser = null;
-    async function checkAuth(){
-      try{
-        const { data: { user } } = await sb.auth.getUser();
-        currentUser = user;
-        document.getElementById("authInfo").textContent = user ? `Logged in as ${user.email}` : "";
-        document.getElementById("authGate").classList.toggle("hide", !!user);
-        toggleGenDisabled(!user);
-      }catch(err){
-        console.error(err);
-        toggleGenDisabled(true);
-      }
-    }
-    checkAuth();
-    sb.auth.onAuthStateChange((_ev, session)=>{
-      currentUser = session?.user || null;
-      checkAuth();
-    });
 
-    function toggleGenDisabled(disabled){
-      const b = document.getElementById("genBtn");
-      if (b) b.disabled = !!disabled;
+    async function waitForInitialSession(){
+      const { data: { session } } = await sb.auth.getSession();
+      return session;
     }
+
+    function applyAuth(session){
+      currentUser = session?.user || null;
+
+      const infoEl = document.getElementById("authInfo");
+      if (infoEl) infoEl.textContent = currentUser ? `Logged in as ${currentUser.email || "user"}` : "";
+
+      const gateEl = document.getElementById("authGate");
+      if (gateEl) gateEl.classList.toggle("hide", !!currentUser);
+
+      const genBtn = document.getElementById("genBtn");
+      if (genBtn) genBtn.disabled = !currentUser;
+
+      // Po zmianie sesji wyłącz akcje, dopóki nie będzie nowych wyników
+      setActionsEnabled(false);
+    }
+
+    (async () => {
+      const session = await waitForInitialSession();
+      applyAuth(session);
+    })();
+
+    sb.auth.onAuthStateChange((_ev, session) => {
+      applyAuth(session);
+    });
 
     // ====== UI: CATEGORY CHIPS ======
     const catEl = document.getElementById("catChips");
