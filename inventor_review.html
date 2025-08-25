@@ -147,18 +147,50 @@ function setLoading(){ queueEl.textContent='Loading…'; }
 function empty(msg='Nothing to review yet (placeholder)'){ queueEl.innerHTML = `<div class="empty">${msg}</div>`; }
 function soft(el,flag){ el.style.opacity = flag? .6 : 1; }
 
-async function requireMod(){
-  const { data:{ user } } = await sb.auth.getUser();
-  if(!user){ alert('Login required'); location.href='index.html?login=1'; return; }
-  const { data:mod } = await sb.from('moderators').select('user_id').eq('user_id', user.id).maybeSingle();
-  if(!mod){
-    document.getElementById('modBadge').style.display='none';
-    document.getElementById('noAccess').style.display='block';
-    document.body.innerHTML='<div class="wrap"><div class="panel"><h2>No access</h2><p class="muted">This page is restricted to moderators.</p></div></div>';
-    return;
-  }
-  isMod = true;
+// ====== SESSION / AUTH (spójnie z index.html) ======
+async function getInitialSession(){
+  const { data:{ session } } = await sb.auth.getSession();
+  return session;
 }
+
+async function ensureModerator(session){
+  const user = session?.user || null;
+
+  if(!user){
+    // bez alertów/migotania – od razu na stronę główną z intencją logowania
+    location.href = 'index.html?login=1';
+    return false;
+  }
+
+  const { data: mod, error } = await sb
+    .from('moderators')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  isMod = !!mod && !error;
+
+  // UI badge / noAccess
+  const badge = document.getElementById('modBadge');
+  const noAccess = document.getElementById('noAccess');
+  if(badge) badge.style.display = isMod ? 'inline-block' : 'none';
+  if(noAccess) noAccess.style.display = isMod ? 'none' : 'block';
+
+  // Jeśli brak uprawnień – nie nadpisujemy całej strony (żeby nie psuć layoutu), po prostu blokujemy dalsze ładowanie.
+  return isMod;
+}
+
+// Reakcja na zmianę sesji (login/logout)
+sb.auth.onAuthStateChange(async (_ev, session) => {
+  const ok = await ensureModerator(session);
+  if(ok){
+    // przeładuj widok z aktualnymi danymi i filtrami
+    loadCurrent();
+  }else{
+    // nic nie rób – użytkownik trafi na index.html albo zobaczy noAccess
+  }
+});
+
 
 function pick(val,a,b){ return val==null? a : val; }
 
@@ -479,11 +511,16 @@ function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(
 
 /* ========== INIT ========== */
 
+// Start po stabilnej sesji (brak migotania)
 (async ()=>{
-  await requireMod();
+  const session = await getInitialSession();
+  const ok = await ensureModerator(session);
+  if(!ok) return;  // brak uprawnień – przerywamy inicjalizację
+
   wireTabs();
   loadCurrent();
 })();
+
 </script>
 </body>
 </html>
