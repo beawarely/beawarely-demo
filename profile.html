@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Your Profile – BeAwarely</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: radial-gradient(ellipse at top, #0d0d2b 0%, #000000 100%);
@@ -243,52 +243,49 @@
     // Small helpers
     const clamp = (n, min, max) => Math.max(min, Math.min(max, n|0));
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Auth check
-      const { data, error } = await supabaseClient.auth.getUser();
-      const user = data?.user;
+        document.addEventListener('DOMContentLoaded', async () => {
+      // ✅ Stabilna sesja (spójnie z index.html)
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const user = session?.user || null;
 
       if (!user) {
-        alert("You are not logged in.");
-        window.location.href = "index.html";
+        // bez alertów; zapamiętaj powrót
+        try { localStorage.setItem('ba_redirect', 'profile.html'); } catch {}
+        location.replace('index.html?login=1');
         return;
       }
 
-      // Metadata
       const meta = user.user_metadata || {};
 
-      // Avatar (with cache-busting)
+      // Avatar (cache-busting)
       const profilePic = document.getElementById("profile-pic");
       if (meta.avatar_url) {
         const bust = meta.avatar_url.includes("?") ? "&" + Date.now() : "?" + Date.now();
         profilePic.src = meta.avatar_url + bust;
       }
 
-      // Fill basic fields
-      document.getElementById("user-name").textContent = meta.name || "BeAwarely User";
+      // Pola podstawowe
+      document.getElementById("user-name").textContent  = meta.name  || "BeAwarely User";
       document.getElementById("user-email").textContent = user.email || "Unknown";
-      document.getElementById("role-val").textContent = meta.role || "User";
+      document.getElementById("role-val").textContent   = meta.role  || "User";
 
       const trust = clamp(meta.trust_score ?? 0, 0, 100);
-      document.getElementById("trust-val").textContent = `${trust} / 100`;
-      document.getElementById("trust-fill").style.width = `${trust}%`;
+      document.getElementById("trust-val").textContent   = `${trust} / 100`;
+      document.getElementById("trust-fill").style.width  = `${trust}%`;
+      document.getElementById("points-val").textContent  = (meta.points ?? 0);
 
-      document.getElementById("points-val").textContent = (meta.points ?? 0);
-
-      // Badges
+      // Odznaki
       const badgeContainer = document.getElementById("badges");
       badgeContainer.innerHTML = "";
       const badges = Array.isArray(meta.badges) ? meta.badges : [];
-      if (badges.length) {
-        badges.forEach(text => {
-          const div = document.createElement("div");
-          div.className = "badge";
-          div.textContent = text;
-          badgeContainer.appendChild(div);
-        });
-      }
+      badges.forEach(text => {
+        const div = document.createElement("div");
+        div.className = "badge";
+        div.textContent = text;
+        badgeContainer.appendChild(div);
+      });
 
-      // If essential fields missing, set safe defaults ONCE
+      // Jednorazowe bezpieczne domyślne metadane (opcjonalnie)
       if (meta.role == null || meta.points == null || meta.trust_score == null || meta.badges == null) {
         const updates = {
           data: {
@@ -310,15 +307,22 @@
           location.reload();
         }
       }
+
+      // Reakcja na zmianę sesji w locie (np. wylogowanie w innej karcie)
+      supabaseClient.auth.onAuthStateChange((_ev, newSession) => {
+        if (!newSession) {
+          location.replace('index.html');
+        }
+      });
     });
 
-    async function logoutUser() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) {
-        alert("Error signing out");
-        console.error(error.message);
-      } else {
-        window.location.href = "index.html";
+        async function logoutUser() {
+      try {
+        await supabaseClient.auth.signOut(); // jedna komenda – spójnie z index.html
+      } catch (e) {
+        console.warn('signOut failed:', e?.message || e);
+      } finally {
+        location.replace('index.html'); // czysty redirect
       }
     }
 
