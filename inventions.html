@@ -65,6 +65,10 @@
     <button class="back" onclick="location.href='index.html'">← Back to Home</button>
     <div class="title">Public Inventions</div>
     <div class="sp"></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="loginStatus" class="badge" aria-live="polite">Checking session…</span>
+      <button id="logoutBtn" class="back" type="button" aria-label="Log out">Log out</button>
+    </div>
   </div>
 </header>
 
@@ -90,10 +94,41 @@
 </main>
 
 <script>
-  // Supabase client (zachowuję Twoje wartości)
-  const SB_URL='https://xzwpqyomqjzmiqsszwkg.supabase.co';
-  const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+  // === Supabase: singleton jak w index/chat ===
+  (function initSupabaseOnce(){
+    const SB_URL='https://xzwpqyomqjzmiqsszwkg.supabase.co';
+    const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+    if (!window.supabaseClient) {
+      window.supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
+    }
+  })();
+  const sb = window.supabaseClient; // alias dla bieżącego pliku
+
+  // Zgaś ewentualny pozostawiony modal z innych stron
+  (function closeStrayLoginModal(){
+    const lm = document.getElementById('loginModal');
+    if (lm) lm.classList.remove('open');
+    document.body.style.overflow = '';
+  })();
+
+  // --- UI status + Log out ---
+  const loginStatus = document.getElementById('loginStatus');
+  const logoutBtn   = document.getElementById('logoutBtn');
+
+  async function refreshAuthUI(){
+    const { data:{ session }, error } = await sb.auth.getSession();
+    if (error) console.warn('getSession error:', error?.message || error);
+    if (loginStatus) loginStatus.textContent = session ? 'Logged in' : 'Logged out';
+  }
+  sb.auth.onAuthStateChange(() => refreshAuthUI());
+  refreshAuthUI();
+
+  async function logoutUser(){
+    try { await sb.auth.signOut(); }
+    catch(e){ console.warn('signOut failed:', e?.message || e); }
+    finally { location.replace('index.html'); }
+  }
+  logoutBtn?.addEventListener('click', logoutUser);
 
   const state = { q:"", category:"All", page:0, size:12, total:0, cats:new Set() };
   const els = {
