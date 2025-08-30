@@ -128,9 +128,39 @@
       background: linear-gradient(135deg, var(--blue1), var(--blue2));
       color:#fff; font-weight:700; cursor:pointer;
     }
-    .btn.secondary{
+        .btn.secondary{
       background: transparent; color: inherit; border:1px solid rgba(255,255,255,.18);
     }
+
+    /* Verify box */
+    .verify{ margin: 10px 0 22px; }
+    .verify-box{
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:12px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    body.light-mode .verify-box{ background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.10); }
+    .verify-box textarea{
+      width:100%; resize:vertical; min-height:84px;
+      background: transparent; color: inherit;
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:10px; padding:10px 12px; outline:none;
+    }
+    body.light-mode .verify-box textarea{ border-color: rgba(0,0,0,.18); }
+    .verify-actions{ display:flex; justify-content:flex-end; }
+
+    .verify-result{
+      margin-top:10px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px; padding:12px;
+    }
+    body.light-mode .verify-result{ background: rgba(255,255,255,.65); }
+    .vr-line{ margin:6px 0; }
+    .vr-label{ opacity:.85; font-weight:700; margin-right:6px; }
+
 
     /* Fokusy dla dostępności */
     .pill:focus-visible, .btn:focus-visible, a:focus-visible{
@@ -267,9 +297,10 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', ()=>{
+        document.addEventListener('DOMContentLoaded', ()=>{
       const search = document.getElementById('mythSearch');
       renderMyths(myths);
+
       if (search){
         search.addEventListener('input', ()=>{
           const q = search.value.toLowerCase().trim();
@@ -282,7 +313,83 @@
           renderMyths(filtered);
         });
       }
+
+      // Wire verify
+      const verifyBtn = document.getElementById('verifyBtn');
+      const mythInput = document.getElementById('mythInput');
+      if (verifyBtn && mythInput){
+        verifyBtn.addEventListener('click', async ()=>{
+          const text = (mythInput.value || '').trim();
+          if (!text){ mythInput.focus(); return; }
+          verifyBtn.disabled = true; verifyBtn.textContent = 'Checking…';
+          try{
+            const result = await verifyMyth(text);
+            showVerifyResult(result);
+          }catch(e){
+            showVerifyResult({ verdict:'Error', reasoning:'Failed to verify. Please try again later.' });
+          }finally{
+            verifyBtn.disabled = false; verifyBtn.textContent = 'Check with AI →';
+          }
+        });
+      }
     });
+
+    // Try Supabase Edge Function first (optional), else fallback heuristic
+    async function verifyMyth(text){
+      const EDGE_URL = 'https://xzwpqyomqjzmiqsszwkg.functions.supabase.co/verify-myth';
+      try{
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const r = await fetch(EDGE_URL, {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization': 'Bearer ' + (session?.access_token || SUPABASE_ANON_KEY)
+          },
+          body: JSON.stringify({ myth:text })
+        });
+        if (r.ok){
+          const json = await r.json();
+          return {
+            verdict: json.verdict || 'Needs Sources',
+            reasoning: json.reasoning || 'No reasoning returned.',
+            sources: json.sources || []
+          };
+        }
+      }catch(e){ /* ignore and fallback */ }
+      return verifyMythClient(text);
+    }
+
+    // Simple client heuristic fallback
+    function verifyMythClient(text){
+      const t = text.toLowerCase();
+      let verdict = 'Needs Sources';
+      if (/\b(always|never|guaranteed|100%)\b/.test(t)) verdict = 'Busted';
+      if (/\bmaybe|could|might|depends\b/.test(t)) verdict = 'Plausible';
+      if (/\bconspiracy|flat earth|chemtrails\b/.test(t)) verdict = 'Busted';
+      if (/\bai\b/.test(t) && /\btruth|facts\b/.test(t)) verdict = 'Debated';
+      const reasoning = 'Preliminary, heuristic assessment. Connect an AI verifier (Edge Function) for authoritative results.';
+      return { verdict, reasoning, sources: [] };
+    }
+
+    function showVerifyResult({ verdict, reasoning, sources }){
+      const box = document.getElementById('verifyResult');
+      const v = document.getElementById('vrVerdict');
+      const r = document.getElementById('vrReason');
+      const sw = document.getElementById('vrSourcesWrap');
+      const s = document.getElementById('vrSources');
+      if (!box || !v || !r) return;
+      v.textContent = verdict || '—';
+      r.textContent = reasoning || '—';
+      if (sources && sources.length){
+        sw.hidden = false;
+        s.textContent = sources.join(' • ');
+      }else{
+        sw.hidden = true;
+      }
+      box.hidden = false;
+      box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+
   </script>
 </head>
 <body>
@@ -304,10 +411,27 @@
     <p class="sub">Busting myths. Short, clear, verified.</p>
   </header>
 
-  <main>
+    <main>
     <div class="controls">
       <input id="mythSearch" type="search" placeholder="Search a myth, tag, or verdict..."/>
     </div>
+
+    <!-- Verify a myth (user input) -->
+    <section class="verify">
+      <h2 style="margin:6px 0 8px;">Verify a myth</h2>
+      <div class="verify-box">
+        <textarea id="mythInput" rows="3" placeholder="Paste a myth you've heard..."></textarea>
+        <div class="verify-actions">
+          <button id="verifyBtn" class="btn" type="button">Check with AI →</button>
+        </div>
+      </div>
+
+      <div id="verifyResult" class="verify-result" hidden>
+        <div class="vr-line"><span class="vr-label">Verdict:</span> <span id="vrVerdict">—</span></div>
+        <div class="vr-line"><span class="vr-label">Reasoning:</span> <span id="vrReason">—</span></div>
+        <div class="vr-line" id="vrSourcesWrap" hidden><span class="vr-label">Sources:</span> <span id="vrSources">—</span></div>
+      </div>
+    </section>
 
     <section>
       <div id="mythsGrid" class="myths-grid"></div>
