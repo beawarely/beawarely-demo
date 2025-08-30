@@ -355,18 +355,20 @@
       const mythInput = document.getElementById('mythInput');
       if (verifyBtn && mythInput){
         verifyBtn.addEventListener('click', async ()=>{
-          const text = (mythInput.value || '').trim();
-          if (!text){ mythInput.focus(); return; }
-          verifyBtn.disabled = true; verifyBtn.textContent = 'Checking…';
-          try{
-            const result = await verifyMyth(text);
-            showVerifyResult(result);
-          }catch(e){
-            showVerifyResult({ verdict:'Error', reasoning:'Failed to verify. Please try again later.' });
-          }finally{
-            verifyBtn.disabled = false; verifyBtn.textContent = 'Check with AI →';
-          }
-        });
+  const text = (mythInput.value || '').trim();
+  if (!text){ mythInput.focus(); return; }
+  verifyBtn.disabled = true; verifyBtn.textContent = 'Checking…';
+  try{
+    const result = await verifyMyth(text);
+    showVerifyResult(result);
+    await logSubmission(text, result);   // ⬅ zapis do Supabase (best-effort)
+  }catch(e){
+    showVerifyResult({ verdict:'Error', reasoning:'Failed to verify. Please try again later.' });
+  }finally{
+    verifyBtn.disabled = false; verifyBtn.textContent = 'Check with AI →';
+  }
+});
+
       }
     });
 
@@ -408,31 +410,42 @@
     }
 
     function showVerifyResult({ verdict, reasoning, sources }){
-      const box = document.getElementById('verifyResult');
-      const v = document.getElementById('vrVerdict');
-      const r = document.getElementById('vrReason');
-      const sw = document.getElementById('vrSourcesWrap');
-      const s = document.getElementById('vrSources');
-      if (!box || !v || !r) return;
-      v.textContent = verdict || '—';
-      r.textContent = reasoning || '—';
-      if (verdict){
-        v.classList.add('badge');
-        v.setAttribute('data-verdict', verdict);
-      } else {
-        v.classList.remove('badge');
-        v.removeAttribute('data-verdict');
-      }
+  const box = document.getElementById('verifyResult');
+  const v = document.getElementById('vrVerdict');
+  const r = document.getElementById('vrReason');
+  const sw = document.getElementById('vrSourcesWrap');
+  const s = document.getElementById('vrSources');
+  if (!box || !v || !r) return;
+  v.textContent = verdict || '—';
+  r.textContent = reasoning || '—';
+  if (sources && sources.length){
+    sw.hidden = false;
+    s.textContent = sources.join(' • ');
+  }else{
+    sw.hidden = true;
+  }
+  box.hidden = false;
+  box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
 
-      if (sources && sources.length){
-        sw.hidden = false;
-        s.textContent = sources.join(' • ');
-      }else{
-        sw.hidden = true;
-      }
-      box.hidden = false;
-      box.scrollIntoView({ behavior:'smooth', block:'nearest' });
-    }
+/* Save each verification attempt (best-effort; non-blocking) */
+async function logSubmission(text, result){
+  try{
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const payload = {
+      content: text,
+      verdict: result?.verdict ?? null,
+      reasoning: result?.reasoning ?? null,
+      sources: Array.isArray(result?.sources) ? result.sources : [],
+      user_id: session?.user?.id ?? null
+    };
+    const { error } = await supabaseClient.from('myth_submissions').insert(payload);
+    if (error) console.warn('logSubmission error:', error.message);
+  }catch(e){
+    console.warn('logSubmission error:', e?.message || e);
+  }
+}
+
 
   </script>
 </head>
