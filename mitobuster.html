@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Mitobuster – BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    :root{
+      --blue1:#007bff;
+      --blue2:#66b2ff;
+      --blue3:#b3d9ff;
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
+
+    body{
+      margin:0;
+      font-family:'Segoe UI', system-ui, Arial, sans-serif;
+      background: rgba(0,0,0,.85);
+      color:#fff;
+      transition: background-color .3s, color .3s;
+    }
+    body.light-mode{ background: rgba(255,255,255,.9); color:#000; }
+
+    /* --- Fixed Topbar (spójny z index.html) --- */
+    #topbar{
+      position: fixed;
+      top: calc(14px + var(--safe-top));
+      left: 20px; right: 20px;
+      z-index: 10000;
+      display:flex; justify-content:space-between; align-items:center;
+      pointer-events:none;
+    }
+    #topbar .topbar-left, #topbar .topbar-right{
+      display:flex; gap:12px; align-items:center; pointer-events:auto;
+    }
+    .pill{
+      background-color: rgba(255,255,255,0.10);
+      color: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      padding: 6px 14px; border-radius: 12px;
+      transition: background-color .25s, transform .2s;
+      display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer;
+    }
+    .pill:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+    #modeIcon{
+      font-size:1.1rem; line-height:1; width:auto; height:auto;
+      border-radius:50%; padding:8px;
+      background-color: rgba(255,255,255,0.10);
+    }
+    #loginBtn{ border-radius:12px; }
+
+    @media (max-width:560px){
+      #topbar{ top:10px; left:12px; right:12px; }
+      #topbar .topbar-left, #topbar .topbar-right{ gap:8px; }
+      #loginBtn{ padding:4px 10px; font-size:.9rem; }
+      #modeIcon{ padding:6px; }
+    }
+
+    header{
+      text-align:center;
+      padding: calc(120px + var(--safe-top)) 16px 24px;
+    }
+    header h1{
+      font-family:'Sriracha', cursive;
+      font-size:56px; margin:0 0 6px; color:#fff;
+    }
+    body.light-mode header h1{ color:#000; }
+    header p.sub{ opacity:.8; margin:0; }
+
+    main{ max-width:1200px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* Filtry/Search (opcjonalne) */
+    .controls{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; margin: 10px 0 16px;
+    }
+    .controls input[type="search"]{
+      flex:1 1 260px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.06); color:inherit; outline:none;
+    }
+    body.light-mode .controls input[type="search"]{ background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); }
+
+    /* Siatka mitów */
+    .myths-grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(240px,1fr));
+      gap:16px;
+      align-items:stretch;
+    }
+    @media (max-width:1023px){ .myths-grid{ grid-template-columns: repeat(2, minmax(220px,1fr)); } }
+    @media (max-width:639px){ .myths-grid{ grid-template-columns: 1fr; } }
+
+    .myth-card{
+      position:relative;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:16px;
+      display:flex; flex-direction:column; gap:10px;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .2s;
+    }
+    .myth-card:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      border-color: rgba(255,255,255,.18);
+    }
+    body.light-mode .myth-card{ background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.10); }
+
+    .card-top{ display:flex; align-items:center; justify-content:space-between; }
+    .icon{ font-size:22px; }
+    .badge{
+      font-size:12px; padding:4px 8px; border-radius:999px;
+      background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
+    }
+    .title{ font-size:18px; font-weight:800; line-height:1.2; margin: 0; }
+    .meta{ font-size:12px; opacity:.8; }
+
+    .details{ display:none; font-size:14px; opacity:.95; }
+    .myth-card.open .details{ display:block; }
+
+    .cta-row{ margin-top:auto; display:flex; justify-content:flex-end; gap:8px; }
+    .btn{
+      border:none; padding:9px 12px; border-radius:10px;
+      background: linear-gradient(135deg, var(--blue1), var(--blue2));
+      color:#fff; font-weight:700; cursor:pointer;
+    }
+    .btn.secondary{
+      background: transparent; color: inherit; border:1px solid rgba(255,255,255,.18);
+    }
+
+    /* Fokusy dla dostępności */
+    .pill:focus-visible, .btn:focus-visible, a:focus-visible{
+      outline: 2px solid var(--blue2); outline-offset:2px;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, storage: window.localStorage }
+    });
+
+    // Motyw
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const isLight = (localStorage.getItem('mode') || 'dark') === 'light';
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+    });
+    function toggleLightDarkMode(){
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+    }
+
+    // Auth UI
+    async function signInWithGoogle(){
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: "https://beawarely.github.io/beawarely-demo/mitobuster.html" }
+      });
+      if (error) console.error(error);
+      else if (data?.url) location.replace(data.url);
+    }
+    async function logoutUser(){
+      try{ await supabaseClient.auth.signOut(); }catch(e){ console.warn(e); }
+      location.replace('mitobuster.html');
+    }
+    function wireLoginUI(session){
+      const logged = !!session;
+      const btn = document.getElementById('loginBtn');
+      const profileBtn = document.getElementById('yourProfileBtn');
+      if (btn){
+        btn.textContent = logged ? 'Log out' : 'Log In';
+        btn.onclick = logged ? logoutUser : signInWithGoogle;
+      }
+      if (profileBtn) profileBtn.style.display = logged ? 'inline-flex' : 'none';
+    }
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      wireLoginUI(session);
+    });
+    supabaseClient.auth.onAuthStateChange((_ev, session)=> wireLoginUI(session));
+
+    // Mitobuster – lokalne dane przykładowe (bez DB)
+    const myths = [
+      {
+        id:1,
+        title:"„AI zawsze mówi prawdę, bo operuje na faktach.”",
+        verdict:"Busted",
+        reality:"Modele językowe generują odpowiedzi statystycznie najbardziej prawdopodobne – mogą halucynować. Zawsze wymagaj źródeł/weryfikacji.",
+        tags:["AI","Halucynacje"]
+      },
+      {
+        id:2,
+        title:"„Tryb incognito całkowicie ukrywa mnie w internecie.”",
+        verdict:"Busted",
+        reality:"Incognito czyści historię lokalnie. Twój ISP/strona nadal mogą Cię identyfikować. Potrzebny jest pełniejszy model prywatności.",
+        tags:["Prywatność","Przeglądarka"]
+      },
+      {
+        id:3,
+        title:"„Więcej megapikseli = zawsze lepsze zdjęcia.”",
+        verdict:"Plausible",
+        reality:"Jakość zależy też od matrycy, optyki i algorytmów przetwarzania. MP to tylko jeden z czynników.",
+        tags:["Foto","Sprzęt"]
+      },
+      {
+        id:4,
+        title:"„Ładowanie przez noc niszczy baterię.”",
+        verdict:"Needs Sources",
+        reality:"Nowoczesne urządzenia mają kontrolę ładowania. Degradacja to efekt cykli, temperatury i czasu – nie samej nocy.",
+        tags:["Bateria","Smartfon"]
+      },
+      {
+        id:5,
+        title:"„VPN = pełna anonimowość.”",
+        verdict:"Busted",
+        reality:"VPN ukrywa ruch przed operatorem sieci, ale nie czyni Cię anonimowym wobec witryn czy samego dostawcy VPN.",
+        tags:["VPN","Prywatność"]
+      },
+      {
+        id:6,
+        title:"„AI zabierze wszystkie miejsca pracy w 5 lat.”",
+        verdict:"Debated",
+        reality:"Wpływ AI jest nierówny – automatyzuje zadania, tworzy nowe role i przekształca kompetencje. Skala i tempo są niepewne.",
+        tags:["Rynek pracy","AI"]
+      }
+    ];
+
+    function renderMyths(list){
+      const grid = document.getElementById('mythsGrid');
+      grid.innerHTML = '';
+      for (const m of list){
+        const art = document.createElement('article');
+        art.className = 'myth-card';
+        art.innerHTML = `
+          <div class="card-top">
+            <span class="icon">🧯</span>
+            <span class="badge">${m.verdict}</span>
+          </div>
+          <h3 class="title">${m.title}</h3>
+          <div class="meta">${(m.tags||[]).join(' • ')}</div>
+          <div class="details">
+            <strong>Reality:</strong> ${m.reality}
+          </div>
+          <div class="cta-row">
+            <button class="btn secondary" type="button">Details</button>
+            <a class="btn" href="#" onclick="return false;">Share</a>
+          </div>
+        `;
+        const detailsBtn = art.querySelector('.btn.secondary');
+        detailsBtn.addEventListener('click', ()=>{
+          art.classList.toggle('open');
+          detailsBtn.textContent = art.classList.contains('open') ? 'Hide' : 'Details';
+        });
+        grid.appendChild(art);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const search = document.getElementById('mythSearch');
+      renderMyths(myths);
+      if (search){
+        search.addEventListener('input', ()=>{
+          const q = search.value.toLowerCase().trim();
+          if (!q) return renderMyths(myths);
+          const filtered = myths.filter(m =>
+            m.title.toLowerCase().includes(q) ||
+            (m.tags||[]).some(t=> t.toLowerCase().includes(q)) ||
+            m.verdict.toLowerCase().includes(q)
+          );
+          renderMyths(filtered);
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="pill">← Back</a>
+      <a id="yourProfileBtn" href="profile.html" class="pill" style="display:none">Your Profile</a>
+    </div>
+    <div class="topbar-right">
+      <button id="modeIcon" type="button" class="pill" aria-label="Toggle light/dark mode" onclick="toggleLightDarkMode()">🌛</button>
+      <button id="loginBtn" type="button" class="pill">Log In</button>
+    </div>
+  </div>
+
+  <header>
+    <h1>Mitobuster</h1>
+    <p class="sub">Gasimy mity. Krótko, jasno, z weryfikacją.</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <input id="mythSearch" type="search" placeholder="Szukaj mitu, tagu lub werdyktu..."/>
+    </div>
+
+    <section>
+      <div id="mythsGrid" class="myths-grid"></div>
+    </section>
+  </main>
+
+</body>
+</html>
