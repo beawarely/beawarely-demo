@@ -675,10 +675,19 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
 /* --- AI Hub cards --- */
 .section-sub{opacity:.8;margin:-6px 0 18px}
+/* Szerokość i wyśrodkowanie całej sekcji AI Hub (nadpisuje globalne section{max-width:720px}) */
+#ai-hub{
+  max-width:1320px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* Siatka kart – wyśrodkowana horyzontalnie */
 .tools-grid{
   display:grid;
   grid-template-columns: repeat(4, minmax(220px,1fr)); /* 4 kolumny na desktopie */
   gap:16px;
+  justify-content:center; /* wyśrodkuj cały blok kolumn w dostępnej szerokości */
 }
 @media (max-width:1279px){
   .tools-grid{ grid-template-columns: repeat(3, minmax(220px,1fr)); }
@@ -689,6 +698,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 @media (max-width:639px){
   .tools-grid{ grid-template-columns: 1fr; }
 }
+
 
 .tool-card{
   position:relative;
