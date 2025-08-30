@@ -79,9 +79,11 @@
       flex-wrap:wrap; margin: 10px 0 16px;
     }
     .controls input[type="search"]{
-      flex:1 1 260px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.15);
-      background: rgba(255,255,255,.06); color:inherit; outline:none;
-    }
+  flex:1 1 260px; min-width:0;                /* pozwól się zwężać w flex */
+  padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06); color:inherit; outline:none;
+  box-sizing:border-box;                       /* nie wychodź poza kontener */
+}
     body.light-mode .controls input[type="search"]{ background: rgba(0,0,0,.05); border-color: rgba(0,0,0,.12); }
 
     /* Siatka mitów */
@@ -143,11 +145,12 @@
     }
     body.light-mode .verify-box{ background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.10); }
     .verify-box textarea{
-      width:100%; resize:vertical; min-height:84px;
-      background: transparent; color: inherit;
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:10px; padding:10px 12px; outline:none;
-    }
+  width:100%; max-width:100%; box-sizing:border-box;  /* kluczowa poprawka */
+  resize:vertical; min-height:84px;
+  background: transparent; color: inherit;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:10px; padding:10px 12px; outline:none;
+}
     body.light-mode .verify-box textarea{ border-color: rgba(0,0,0,.18); }
     .verify-actions{ display:flex; justify-content:flex-end; }
 
