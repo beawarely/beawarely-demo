@@ -374,7 +374,7 @@
 
     // Try Supabase Edge Function first (optional), else fallback heuristic
     async function verifyMyth(text){
-      const EDGE_URL = 'https://xzwpqyomqjzmiqsszwkg.functions.supabase.co/verify-myth';
+      const EDGE_URL = 'https://xzwpqyomqjzmiqsszwkg.functions.supabase.co/functions/v1/verify-myth';
       try{
         const { data: { session } } = await supabaseClient.auth.getSession();
         const r = await fetch(EDGE_URL, {
