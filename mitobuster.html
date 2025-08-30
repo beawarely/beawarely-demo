@@ -114,10 +114,33 @@
 
     .card-top{ display:flex; align-items:center; justify-content:space-between; }
     .icon{ font-size:22px; }
-    .badge{
+        .badge{
       font-size:12px; padding:4px 8px; border-radius:999px;
       background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
+      transition: background-color .2s, border-color .2s, color .2s;
     }
+    /* Colored verdict pills */
+    .badge[data-verdict="Busted"]{
+      background: rgba(255,77,77,.18);
+      border-color: rgba(255,77,77,.38);
+      color:#ffbfbf;
+    }
+    .badge[data-verdict="Plausible"]{
+      background: rgba(255,196,0,.18);
+      border-color: rgba(255,196,0,.38);
+      color:#ffe8a3;
+    }
+    .badge[data-verdict="Needs Sources"]{
+      background: rgba(102,153,255,.18);
+      border-color: rgba(102,153,255,.38);
+      color:#d7e3ff;
+    }
+    .badge[data-verdict="Debated"]{
+      background: rgba(173,102,255,.18);
+      border-color: rgba(173,102,255,.38);
+      color:#e6d6ff;
+    }
+
     .title{ font-size:18px; font-weight:800; line-height:1.2; margin: 0; }
     .meta{ font-size:12px; opacity:.8; }
 
@@ -279,7 +302,7 @@
         art.innerHTML = `
           <div class="card-top">
             <span class="icon">🧯</span>
-            <span class="badge">${m.verdict}</span>
+            <span class="badge" data-verdict="${m.verdict}">${m.verdict}</span>
           </div>
           <h3 class="title">${m.title}</h3>
           <div class="meta">${(m.tags||[]).join(' • ')}</div>
@@ -383,6 +406,14 @@
       if (!box || !v || !r) return;
       v.textContent = verdict || '—';
       r.textContent = reasoning || '—';
+      if (verdict){
+        v.classList.add('badge');
+        v.setAttribute('data-verdict', verdict);
+      } else {
+        v.classList.remove('badge');
+        v.removeAttribute('data-verdict');
+      }
+
       if (sources && sources.length){
         sw.hidden = false;
         s.textContent = sources.join(' • ');
