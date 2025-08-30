@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>WorkVerify – BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    :root{ --safe-top: env(safe-area-inset-top, 0px); }
+    body{ margin:0; font-family:'Segoe UI', system-ui, Arial, sans-serif; background: rgba(0,0,0,.85); color:#fff; }
+    body.light-mode{ background:#f7f7f7; color:#000; }
+
+    /* Topbar (jak na innych podstronach) */
+    #topbar{ position:fixed; top:calc(14px + var(--safe-top)); left:20px; right:20px; z-index:10000;
+             display:flex; justify-content:space-between; align-items:center; pointer-events:none; }
+    #topbar .grp{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
+    .pill{ background:rgba(255,255,255,.10); color:inherit; font-weight:700; text-decoration:none;
+           padding:6px 14px; border-radius:12px; border:none; display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+    .pill:hover{ background:rgba(255,255,255,.20); transform: translateY(-1px); }
+
+    header{ text-align:center; padding: calc(120px + var(--safe-top)) 16px 12px; }
+    header h1{ font-family:'Sriracha', cursive; font-size:56px; margin:0 0 8px; }
+    header p.sub{ opacity:.85; margin:0; }
+
+    main{ max-width:1100px; margin:0 auto; padding:24px 16px 60px; display:grid; gap:16px; }
+
+    .panel{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+            border-radius:16px; padding:16px; }
+    body.light-mode .panel{ background:rgba(0,0,0,.04); border-color:rgba(0,0,0,.10); }
+
+    .panel h2{ margin:0 0 8px; font-size:20px; }
+    .muted{ opacity:.8; }
+
+    .actions{ display:flex; gap:8px; justify-content:flex-end; }
+    .btn{ border:none; padding:10px 14px; border-radius:10px;
+          background:linear-gradient(135deg,#007bff,#66b2ff); color:#fff; font-weight:700; cursor:pointer; }
+    .btn.secondary{ background:transparent; color:inherit; border:1px solid rgba(255,255,255,.18); }
+
+    textarea, input[type="text"]{
+      width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.18); background:transparent; color:inherit; outline:none;
+    }
+    .grid{ display:grid; grid-template-columns:repeat(2, minmax(260px,1fr)); gap:16px; }
+    @media (max-width:900px){ .grid{ grid-template-columns:1fr; } }
+
+    .badge{ font-size:12px; padding:4px 8px; border-radius:999px;
+            background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); }
+  </style>
+
+  <script>
+    // light/dark toggle (spójne z innymi)
+    document.addEventListener('DOMContentLoaded',()=>{
+      const isLight = (localStorage.getItem('mode')||'dark')==='light';
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+    });
+    function toggleLightDarkMode(){
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    }
+
+    // Tymczasowy placeholder akcji – prawdziwą logikę dodamy później
+    function submitExperience(){
+      const txt = (document.getElementById('expText').value||'').trim();
+      if(!txt){ alert('Please write a short experience.'); return; }
+      alert('Saved locally (stub). We will connect Supabase/AI next.');
+      document.getElementById('expText').value='';
+    }
+  </script>
+</head>
+<body>
+  <!-- Topbar -->
+  <div id="topbar">
+    <div class="grp">
+      <a href="index.html" class="pill">← Back</a>
+    </div>
+    <div class="grp">
+      <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
+      <a href="profile.html" class="pill">Your Profile</a>
+    </div>
+  </div>
+
+  <header>
+    <h1>WorkVerify</h1>
+    <p class="sub">Balanced employee–employer verification. Real experiences, fair checks, clear signals.</p>
+  </header>
+
+  <main>
+    <!-- Intro / scope -->
+    <section class="panel">
+      <h2>What this tool does</h2>
+      <p class="muted">
+        Collects first-hand experiences from both employees and employers, then uses AI to detect red/green flags,
+        verify claims, and surface balanced insights. (Early prototype.)
+      </p>
+      <div class="badge">Prototype</div>
+    </section>
+
+    <!-- Quick submit (placeholder) -->
+    <section class="panel">
+      <h2>Share an experience (early)</h2>
+      <div class="grid">
+        <div>
+          <label class="muted">Company (optional)</label>
+          <input id="companyName" type="text" placeholder="e.g., ACME Sp. z o.o."/>
+        </div>
+        <div>
+          <label class="muted">Role (optional)</label>
+          <input id="roleName" type="text" placeholder="e.g., Warehouse Worker / HR Manager"/>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label class="muted">Experience</label>
+        <textarea id="expText" rows="5" placeholder="Describe the situation. Keep it factual; avoid personal data."></textarea>
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn secondary" type="button" onclick="document.getElementById('expText').value=''">Clear</button>
+        <button class="btn" type="button" onclick="submitExperience()">Submit</button>
+      </div>
+    </section>
+
+    <!-- Roadmap / coming next -->
+    <section class="panel">
+      <h2>Coming next</h2>
+      <ul class="muted" style="margin:8px 0 0 18px;">
+        <li>AI roles: evidence checker, bias detector, legal/ethics lens.</li>
+        <li>Company dossiers: timelines, signals, and patterns.</li>
+        <li>Balanced inputs: both employees and employers.</li>
+        <li>Privacy & moderation pipeline.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
