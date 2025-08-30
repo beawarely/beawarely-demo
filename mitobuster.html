@@ -193,49 +193,49 @@
 
     // Mitobuster – lokalne dane przykładowe (bez DB)
     const myths = [
-      {
-        id:1,
-        title:"„AI zawsze mówi prawdę, bo operuje na faktach.”",
-        verdict:"Busted",
-        reality:"Modele językowe generują odpowiedzi statystycznie najbardziej prawdopodobne – mogą halucynować. Zawsze wymagaj źródeł/weryfikacji.",
-        tags:["AI","Halucynacje"]
-      },
-      {
-        id:2,
-        title:"„Tryb incognito całkowicie ukrywa mnie w internecie.”",
-        verdict:"Busted",
-        reality:"Incognito czyści historię lokalnie. Twój ISP/strona nadal mogą Cię identyfikować. Potrzebny jest pełniejszy model prywatności.",
-        tags:["Prywatność","Przeglądarka"]
-      },
-      {
-        id:3,
-        title:"„Więcej megapikseli = zawsze lepsze zdjęcia.”",
-        verdict:"Plausible",
-        reality:"Jakość zależy też od matrycy, optyki i algorytmów przetwarzania. MP to tylko jeden z czynników.",
-        tags:["Foto","Sprzęt"]
-      },
-      {
-        id:4,
-        title:"„Ładowanie przez noc niszczy baterię.”",
-        verdict:"Needs Sources",
-        reality:"Nowoczesne urządzenia mają kontrolę ładowania. Degradacja to efekt cykli, temperatury i czasu – nie samej nocy.",
-        tags:["Bateria","Smartfon"]
-      },
-      {
-        id:5,
-        title:"„VPN = pełna anonimowość.”",
-        verdict:"Busted",
-        reality:"VPN ukrywa ruch przed operatorem sieci, ale nie czyni Cię anonimowym wobec witryn czy samego dostawcy VPN.",
-        tags:["VPN","Prywatność"]
-      },
-      {
-        id:6,
-        title:"„AI zabierze wszystkie miejsca pracy w 5 lat.”",
-        verdict:"Debated",
-        reality:"Wpływ AI jest nierówny – automatyzuje zadania, tworzy nowe role i przekształca kompetencje. Skala i tempo są niepewne.",
-        tags:["Rynek pracy","AI"]
-      }
-    ];
+  {
+    id:1,
+    title:"AI always tells the truth because it operates on facts.",
+    verdict:"Busted",
+    reality:"Language models generate statistically likely answers and can hallucinate. Always ask for sources and verify.",
+    tags:["AI","Hallucinations"]
+  },
+  {
+    id:2,
+    title:"Incognito mode completely hides me on the internet.",
+    verdict:"Busted",
+    reality:"Incognito clears local history. Your ISP and websites can still identify you. You need a broader privacy model.",
+    tags:["Privacy","Browser"]
+  },
+  {
+    id:3,
+    title:"More megapixels always means better photos.",
+    verdict:"Plausible",
+    reality:"Quality also depends on sensor size, optics, and processing. MP is only one factor.",
+    tags:["Photography","Hardware"]
+  },
+  {
+    id:4,
+    title:"Charging overnight ruins the battery.",
+    verdict:"Needs Sources",
+    reality:"Modern devices manage charging. Degradation comes mainly from cycles, temperature, and time — not nighttime alone.",
+    tags:["Battery","Smartphone"]
+  },
+  {
+    id:5,
+    title:"VPN equals full anonymity.",
+    verdict:"Busted",
+    reality:"A VPN hides traffic from your network operator, but it doesn't make you anonymous to websites or the VPN provider.",
+    tags:["VPN","Privacy"]
+  },
+  {
+    id:6,
+    title:"AI will take all jobs within 5 years.",
+    verdict:"Debated",
+    reality:"AI automates tasks, creates new roles, and reshapes skills. Scale and timing are uncertain.",
+    tags:["Workforce","AI"]
+  }
+];
 
     function renderMyths(list){
       const grid = document.getElementById('mythsGrid');
@@ -301,12 +301,12 @@
 
   <header>
     <h1>Mitobuster</h1>
-    <p class="sub">Gasimy mity. Krótko, jasno, z weryfikacją.</p>
+    <p class="sub">Busting myths. Short, clear, verified.</p>
   </header>
 
   <main>
     <div class="controls">
-      <input id="mythSearch" type="search" placeholder="Szukaj mitu, tagu lub werdyktu..."/>
+      <input id="mythSearch" type="search" placeholder="Search a myth, tag, or verdict..."/>
     </div>
 
     <section>
