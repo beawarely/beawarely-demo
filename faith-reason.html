@@ -385,47 +385,52 @@
     }
 
     async function submitNewItem(){
-      const btn = document.getElementById('btnSubmit');
-      const out = document.getElementById('submitMsg');
-      btn.disabled = true; out.textContent = 'Submitting…';
+  const btn = document.getElementById('btnSubmit');
+  const out = document.getElementById('submitMsg');
+  btn.disabled = true; out.textContent = 'Submitting…';
 
-      const religion = document.getElementById('religion').value.trim();
-      const category = document.getElementById('category').value;
-      const title = document.getElementById('title').value.trim();
-      const summary = document.getElementById('summary').value.trim();
-      const evidenceRaw = document.getElementById('evidence').value.split('\n').map(s=>s.trim()).filter(Boolean);
-      if (!religion || !category || !title || !summary){
-        out.textContent = 'Fill religion, category, title, summary.'; btn.disabled = false; return;
-        }
+  const religion = document.getElementById('religion').value.trim();
+  const category = document.getElementById('category').value;
+  const title = document.getElementById('title').value.trim();
+  const summary = document.getElementById('summary').value.trim();
+  const evidenceRaw = document.getElementById('evidence').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if (!religion || !category || !title || !summary){
+    out.textContent = 'Fill religion, category, title, summary.'; btn.disabled = false; return;
+  }
 
-      // INSERT new item
-      const { data: ins, error: insErr } = await supabaseClient
-        .from('faith_items')
-        .insert({
-          religion, category, title, summary, evidence_links: evidenceRaw, status: 'pending_ai'
-        })
-        .select().single();
+  // ensure session
+  const sess = window.BA_SESSION || (await supabaseClient.auth.getSession()).data?.session;
+  if (!sess){ out.textContent = 'Login required.'; btn.disabled = false; return; }
 
-      if (insErr){
-        out.textContent = 'Save error: '+ (insErr.message || insErr); btn.disabled = false; return;
-      }
+  // INSERT new item (z autorem dla RLS)
+  const { data: ins, error: insErr } = await supabaseClient
+    .from('faith_items')
+    .insert({
+      author: sess.user.id,
+      religion, category, title, summary,
+      evidence_links: evidenceRaw, status: 'pending_ai'
+    })
+    .select().single();
 
-      // Optional: queue AI verification via RPC (if exists)
-      try {
-        await supabaseClient.rpc('ai_queue_verify_faith_item', { p_item_id: ins.id });
-        out.textContent = 'Item saved. AI pre-check queued. It will appear after refresh.';
-      } catch(e){
-        out.textContent = 'Item saved. (AI queue not configured yet).';
-      }
+  if (insErr){
+    out.textContent = 'Save error: '+ (insErr.message || insErr); btn.disabled = false; return;
+  }
 
-      // reset form
-      document.getElementById('title').value='';
-      document.getElementById('summary').value='';
-      document.getElementById('evidence').value='';
-      // Refresh list
-      await refreshList();
-      btn.disabled = false;
-    }
+  // Kolejka AI (jeśli RPC istnieje)
+  try {
+    await supabaseClient.rpc('ai_queue_verify_faith_item', { p_item_id: ins.id });
+    out.textContent = 'Item saved. AI pre-check queued. It will appear after refresh.';
+  } catch(e){
+    out.textContent = 'Item saved. (AI queue not configured yet).';
+  }
+
+  // reset & refresh
+  document.getElementById('title').value='';
+  document.getElementById('summary').value='';
+  document.getElementById('evidence').value='';
+  await refreshList();
+  btn.disabled = false;
+}
 
     async function fetchItems(){
       const r = document.getElementById('filterReligion').value;
@@ -482,24 +487,29 @@
       summary.value = item.summary;
       evidence.value = (item.evidence_links||[]).join('\n');
 
-      dlg.querySelector('.e-cancel').onclick = ()=> dlg.remove();
       dlg.querySelector('.e-submit').onclick = async ()=>{
-        const new_title = title.value.trim();
-        const new_summary = summary.value.trim();
-        const new_evidence_links = evidence.value.split('\n').map(s=>s.trim()).filter(Boolean);
-        const justification = why.value.trim();
-        if (!justification){ msg.textContent = 'Justification required.'; return; }
+  const new_title = title.value.trim();
+  const new_summary = summary.value.trim();
+  const new_evidence_links = evidence.value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const justification = why.value.trim();
+  if (!justification){ msg.textContent = 'Justification required.'; return; }
 
-        const { error } = await supabaseClient.from('faith_edits').insert({
-          item_id: item.id, new_title, new_summary, new_evidence_links, justification
-        });
+  const sess = window.BA_SESSION || (await supabaseClient.auth.getSession()).data?.session;
+  if (!sess){ msg.textContent = 'Login required.'; return; }
 
-        if (error){ msg.textContent = 'Error: '+error.message; return; }
-        // queue AI for edit (optional)
-        try { await supabaseClient.rpc('ai_queue_verify_faith_edit', { p_edit_id: null /* server resolves last edit for user */ }); } catch(_){}
-        msg.textContent = 'Edit submitted. Awaiting review/AI.';
-        setTimeout(()=> dlg.remove(), 900);
-      };
+  const { data: ins, error } = await supabaseClient.from('faith_edits').insert({
+    item_id: item.id,
+    editor: sess.user.id,
+    new_title, new_summary, new_evidence_links, justification
+  }).select('id').single();
+
+  if (error){ msg.textContent = 'Error: '+error.message; return; }
+  // queue AI for edit (optional)
+  try { await supabaseClient.rpc('ai_queue_verify_faith_edit', { p_edit_id: ins.id }); } catch(_){}
+  msg.textContent = 'Edit submitted. Awaiting review/AI.';
+  setTimeout(()=> dlg.remove(), 900);
+};
+
     }
 
     function openFlagDialog(item){
@@ -514,14 +524,19 @@
 
       dlg.querySelector('.f-cancel').onclick = ()=> dlg.remove();
       dlg.querySelector('.f-submit').onclick = async ()=>{
-        const r = reason.value; const det = details.value.trim();
-        const { error } = await supabaseClient.from('faith_flags').insert({
-          item_id: item.id, reason: r, details: det
-        });
-        if (error){ msg.textContent = 'Error: '+error.message; return; }
-        msg.textContent = 'Report sent to moderators.';
-        setTimeout(()=> dlg.remove(), 800);
-      };
+  const r = reason.value; const det = details.value.trim();
+  const sess = window.BA_SESSION || (await supabaseClient.auth.getSession()).data?.session;
+  if (!sess){ msg.textContent = 'Login required.'; return; }
+  const { error } = await supabaseClient.from('faith_flags').insert({
+    item_id: item.id,
+    reporter: sess.user.id,
+    reason: r, details: det
+  });
+  if (error){ msg.textContent = 'Error: '+error.message; return; }
+  msg.textContent = 'Report sent to moderators.';
+  setTimeout(()=> dlg.remove(), 800);
+};
+
     }
 
     function mountItemCard(item){
