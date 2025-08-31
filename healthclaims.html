@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Health Claims – BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    :root{ --safe-top: env(safe-area-inset-top, 0px); }
+    body{ margin:0; font-family:'Segoe UI', system-ui, Arial, sans-serif; background: rgba(0,0,0,.85); color:#fff; }
+    body.light-mode{ background:#f7f7f7; color:#000; }
+
+    #topbar{ position:fixed; top:calc(14px + var(--safe-top)); left:20px; right:20px; z-index:10000;
+      display:flex; justify-content:space-between; align-items:center; pointer-events:none; }
+    #topbar .grp{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
+    .pill{ background:rgba(255,255,255,.10); color:inherit; font-weight:700; text-decoration:none;
+      padding:6px 14px; border-radius:12px; border:none; display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+    .pill:hover{ background:rgba(255,255,255,.20); transform: translateY(-1px); }
+
+    header{ text-align:center; padding: calc(120px + var(--safe-top)) 16px 12px; }
+    header h1{ font-family:'Sriracha', cursive; font-size:56px; margin:0 0 8px; }
+    header p.sub{ opacity:.85; margin:0; }
+
+    main{ max-width:1100px; margin:0 auto; padding:24px 16px 60px; display:grid; gap:16px; }
+    .panel{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:16px; }
+    body.light-mode .panel{ background:rgba(0,0,0,.04); border-color:rgba(0,0,0,.10); }
+    .panel h2{ margin:0 0 8px; font-size:20px; }
+    .muted{ opacity:.85; }
+
+    textarea, input[type="text"]{
+      width:100%; max-width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.18); background:transparent; color:inherit; outline:none;
+    }
+    .actions{ display:flex; gap:8px; justify-content:flex-end; }
+    .btn{ border:none; padding:10px 14px; border-radius:10px;
+      background:linear-gradient(135deg,#007bff,#66b2ff); color:#fff; font-weight:700; cursor:pointer; }
+    .btn.secondary{ background:transparent; color:inherit; border:1px solid rgba(255,255,255,.18); }
+
+    .result{ background: rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12);
+      border-radius:12px; padding:12px; margin-top:10px; }
+    body.light-mode .result{ background: rgba(255,255,255,.65); }
+    .row{ margin:6px 0; }
+    .label{ font-weight:700; margin-right:6px; opacity:.9; }
+
+    .badge{ font-size:12px; padding:4px 8px; border-radius:999px;
+      background: rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); }
+
+    /* Verdict pill colors */
+    .badge[data-verdict="Busted"]{ background:rgba(255,77,77,.18); border-color:rgba(255,77,77,.38); color:#ffbfbf; }
+    .badge[data-verdict="Plausible"]{ background:rgba(255,196,0,.18); border-color:rgba(255,196,0,.38); color:#ffe8a3; }
+    .badge[data-verdict="Needs Sources"]{ background:rgba(102,153,255,.18); border-color:rgba(102,153,255,.38); color:#d7e3ff; }
+    .badge[data-verdict="Debated"]{ background:rgba(173,102,255,.18); border-color:rgba(173,102,255,.38); color:#e6d6ff; }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      const isLight = (localStorage.getItem('mode')||'dark')==='light';
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+    });
+    function toggleLightDarkMode(){
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    }
+
+    function assessClaim() {
+      const text = (document.getElementById('claimText').value||'').trim();
+      if (!text){ alert('Please paste a claim or a product URL.'); return; }
+
+      // Simple client-side heuristic (stub)
+      const t = text.toLowerCase();
+      let verdict = 'Needs Sources';
+      let evidence = 'Low';
+      let notes = [];
+
+      if (/(cures|miracle|detox|100%|guaranteed|instantly)/.test(t)) { verdict = 'Busted'; evidence = 'Low'; }
+      if (/(may|might|could|help|supports)/.test(t)) { verdict = verdict === 'Busted' ? 'Busted' : 'Plausible'; evidence = 'Low–Moderate'; }
+      if (/(randomized|double blind|meta-analysis|cochrane|systematic review)/.test(t)) { evidence = 'Higher (claimed)'; }
+      if (/(immune|metabolism|fat burn|anti-aging)/.test(t)) { notes.push('Watch for vague health buzzwords.'); }
+      if (/(link|http|www\.)/.test(t)) { notes.push('Consider checking the actual study/source behind the page.'); }
+
+      showResult({ verdict, evidence, notes });
+    }
+
+    function showResult({ verdict, evidence, notes }){
+      const box = document.getElementById('hcResult');
+      const v = document.getElementById('hcVerdict');
+      const e = document.getElementById('hcEvidence');
+      const n = document.getElementById('hcNotes');
+      v.textContent = verdict;
+      v.className = 'badge';
+      v.setAttribute('data-verdict', verdict);
+      e.textContent = evidence || '—';
+      n.textContent = (notes && notes.length) ? notes.join(' • ') : '—';
+      box.hidden = false;
+      box.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+  </script>
+</head>
+<body>
+  <div id="topbar">
+    <div class="grp"><a href="index.html" class="pill">← Back</a></div>
+    <div class="grp">
+      <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
+      <a href="profile.html" class="pill">Your Profile</a>
+    </div>
+  </div>
+
+  <header>
+    <h1>Health Claims</h1>
+    <p class="sub">Sanity-check product and health claims (not medical advice).</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Check a claim</h2>
+      <textarea id="claimText" rows="5" placeholder="Paste a health claim or product link..."></textarea>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn secondary" type="button" onclick="document.getElementById('claimText').value=''">Clear</button>
+        <button class="btn" type="button" onclick="assessClaim()">Check with AI →</button>
+      </div>
+
+      <div id="hcResult" class="result" hidden>
+        <div class="row"><span class="label">Verdict:</span> <span id="hcVerdict" class="badge" data-verdict="Needs Sources">Needs Sources</span></div>
+        <div class="row"><span class="label">Evidence level:</span> <span id="hcEvidence">—</span></div>
+        <div class="row"><span class="label">Notes:</span> <span id="hcNotes">—</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Disclaimer</h2>
+      <p class="muted">This tool is for awareness and education only and is not medical advice. Always consult qualified professionals.</p>
+      <div class="badge">Moderation</div>
+    </section>
+  </main>
+</body>
+</html>
