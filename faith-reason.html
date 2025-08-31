@@ -376,13 +376,13 @@
     }
 
     function linkifyEvidence(arr){
-      if (!Array.isArray(arr)) return '';
-      return arr.filter(Boolean).map(u=>{
-        const a = document.createElement('a');
-        a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = u;
-        return a;
-      });
-    }
+  if (!Array.isArray(arr)) return [];
+  return arr.filter(Boolean).map(u=>{
+    const a = document.createElement('a');
+    a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = u;
+    return a;
+  });
+}
 
     async function submitNewItem(){
   const btn = document.getElementById('btnSubmit');
@@ -487,6 +487,7 @@
       summary.value = item.summary;
       evidence.value = (item.evidence_links||[]).join('\n');
 
+           dlg.querySelector('.e-cancel').onclick = ()=> dlg.remove();
       dlg.querySelector('.e-submit').onclick = async ()=>{
   const new_title = title.value.trim();
   const new_summary = summary.value.trim();
@@ -504,7 +505,6 @@
   }).select('id').single();
 
   if (error){ msg.textContent = 'Error: '+error.message; return; }
-  // queue AI for edit (optional)
   try { await supabaseClient.rpc('ai_queue_verify_faith_edit', { p_edit_id: ins.id }); } catch(_){}
   msg.textContent = 'Edit submitted. Awaiting review/AI.';
   setTimeout(()=> dlg.remove(), 900);
