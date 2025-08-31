@@ -6,36 +6,137 @@
   <meta name="robots" content="noindex, nofollow"/>
   <title>Faith & Reason — BeAwarely</title>
   <link rel="stylesheet" href="css/style.css"/>
+
+  <!--
+  ──────────────────────────────────────────────────────────────────────────────
+  Faith & Reason (crowd + AI verified)
+  Minimal front-end + Supabase schema assumptions:
+
+  Tables (public):
+    - faith_items:
+        id uuid PK default uuid_generate_v4()
+        author uuid (FK -> auth.users.id) not null
+        religion text not null            -- e.g. "Christianity/Catholic", "Islam/Sunni", "Buddhism", "Other"
+        category text not null            -- 'absurdity' | 'manipulation' | 'positive' | 'history' | 'claim'
+        title text not null
+        summary text not null
+        evidence_links text[] default '{}'::text[]
+        status text not null default 'pending_ai'  -- 'pending_ai' | 'ai_flagged' | 'awaiting_confirmation' | 'confirmed' | 'disputed'
+        ai_score numeric default 0       -- 0..100 confidence
+        ai_notes text                    -- short reasoning/extract
+        created_at timestamptz default now()
+        updated_at timestamptz default now()
+
+    - faith_votes:
+        id bigserial PK
+        item_id uuid references faith_items(id) on delete cascade
+        voter uuid references auth.users(id)
+        verdict text not null            -- 'true' | 'likely' | 'uncertain' | 'false' | 'misleading'
+        note text
+        created_at timestamptz default now()
+        UNIQUE(item_id, voter)
+
+    - faith_flags:
+        id bigserial PK
+        item_id uuid references faith_items(id) on delete cascade
+        reporter uuid references auth.users(id)
+        reason text not null             -- 'spam' | 'porn' | 'hate' | 'privacy' | 'other'
+        details text
+        created_at timestamptz default now()
+
+    - faith_edits:
+        id bigserial PK
+        item_id uuid references faith_items(id) on delete cascade
+        editor uuid references auth.users(id)
+        new_title text
+        new_summary text
+        new_evidence_links text[]
+        justification text not null
+        status text not null default 'pending'  -- 'pending' | 'ai_ok' | 'rejected' | 'applied'
+        created_at timestamptz default now()
+
+  RLS (przykład):
+    faith_items: SELECT true; INSERT author = auth.uid(); UPDATE author = auth.uid(); DELETE false;
+    faith_votes: SELECT true; INSERT voter = auth.uid(); UPDATE voter = auth.uid(); DELETE voter = auth.uid();
+    faith_flags: SELECT false; INSERT reporter = auth.uid();
+    faith_edits: SELECT editor = auth.uid() OR EXISTS(mod role); INSERT editor = auth.uid();
+
+  Edge Functions / RPC (opcjonalnie ale zalecane):
+    - rpc('ai_queue_verify_faith_item', { p_item_id uuid }) -> { status, score, notes }
+      (kolejka/trigger do AI: moderacja treści + ocena wiarygodności, np. ban słów: porn/hate)
+    - rpc('ai_queue_verify_faith_edit', { p_edit_id bigint })
+    - view 'faith_items_public' zwracająca agregaty głosów (true/false) i status
+
+  Ten plik zakłada istnienie powyższych obiektów. Jeśli jeszcze ich nie ma,
+  front i tak zadziała w trybie „submit -> pending_ai”, a wywołania RPC
+  po prostu zwrócą błąd (pokazujemy użytkownikowi info).
+  ──────────────────────────────────────────────────────────────────────────────
+  -->
+
   <style>
     :root{
-      --bg:#0b0d14; --panel:#121625; --muted:#aab2d5; --text:#eaf0ff; --accent:#5aa8ff; --ok:#4ade80; --warn:#fbbf24;
+      --bg:#0b0d14; --panel:#121625; --muted:#aab2d5; --text:#eaf0ff; --accent:#5aa8ff; --ok:#4ade80; --warn:#fbbf24; --bad:#fb7185;
       --ring: rgba(90,168,255,.45);
     }
+    *{box-sizing:border-box}
     body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:#000;color:#fff}
     header.topbar{
       position:sticky;top:0;z-index:50;background:rgba(0,0,0,.7);backdrop-filter:saturate(140%) blur(8px);
       border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;
     }
-    .back-btn{appearance:none;border:1px solid rgba(255,255,255,.15);padding:.45rem .75rem;border-radius:.75rem;
-      color:#fff;background:transparent;cursor:pointer}
+    .back-btn{appearance:none;border:1px solid rgba(255,255,255,.15);padding:.45rem .75rem;border-radius:.75rem;color:#fff;background:transparent;cursor:pointer}
     .back-btn:hover{border-color:rgba(255,255,255,.3)}
-    main{max-width:1080px;margin:0 auto;padding:1.25rem}
+    main{max-width:1100px;margin:0 auto;padding:1.1rem}
+    h1{font-size:1.6rem;margin:.15rem 0 0}
+    h2{font-size:1.05rem;color:var(--muted);margin:.2rem 0 .2rem}
     .card{background:linear-gradient(180deg,#121625,#0c0f1b);border:1px solid rgba(255,255,255,.06);
-      border-radius:16px;padding:1rem 1.1rem;margin:1rem 0}
-    h1{font-size:1.6rem;margin:.25rem 0 0}
-    h2{font-size:1.05rem;color:var(--muted);margin:.2rem 0 0}
-    section h3{margin:0 0 .4rem}
+      border-radius:16px;padding:1rem;margin:.8rem 0}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+    @media (max-width:900px){ .row{grid-template-columns:1fr} }
+    label{display:block;font-size:.9rem;color:#cbd5ff;margin:.25rem 0}
+    input[type="text"], textarea, select{
+      width:100%;background:#0a0e1b;color:#eaf0ff;border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;padding:.6rem .7rem;outline:none;
+    }
+    textarea{min-height:120px;resize:vertical}
+    .chips{display:flex;flex-wrap:wrap;gap:.4rem}
+    .chip{font-size:.8rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:.25rem .6rem;color:#cfd6ff;cursor:pointer}
     .pill{display:inline-block;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:.2rem .55rem;margin:.15rem .25rem 0 0;
       font-size:.8rem;color:#cfd6ff}
     .muted{color:#aab2d5}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem}
-    ul{margin:.4rem 0 .2rem 1.1rem}
-    a.inline{color:#9ec5ff;text-decoration:none;border-bottom:1px dotted rgba(158,197,255,.4)}
-    a.inline:hover{border-bottom-color:transparent}
+    .btn{
+      appearance:none;border:1px solid rgba(255,255,255,.18);background:#121a2e;color:white;border-radius:10px;
+      padding:.55rem .9rem;cursor:pointer
+    }
+    .btn.primary{border-color:rgba(90,168,255,.5);box-shadow:0 0 0 3px transparent}
+    .btn.primary:focus{box-shadow:0 0 0 3px var(--ring)}
+    .btn.warn{border-color:rgba(251,191,36,.5)}
+    .btn.bad{border-color:rgba(251,113,133,.5)}
+    .tools{display:flex;gap:.5rem;flex-wrap:wrap}
+    .status-dot{display:inline-flex;align-items:center;gap:.4rem}
+    .dot{width:8px;height:8px;border-radius:50%}
+    .dot.pending{background:var(--warn)}
+    .dot.confirmed{background:var(--ok)}
+    .dot.disputed{background:var(--bad)}
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:.9rem}
+    @media (max-width:1000px){ .grid{grid-template-columns:1fr} }
+    .item{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.8rem;background:#0c0f1b}
+    .item h4{margin:.1rem 0 .4rem}
+    .meta{font-size:.8rem;color:#aab2d5}
+    .evidence a{color:#9ec5ff;text-decoration:none;border-bottom:1px dotted rgba(158,197,255,.4)}
+    .evidence a:hover{border-bottom-color:transparent}
+    .filters{display:flex;gap:.5rem;flex-wrap:wrap}
+    .reaction-bar{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem}
+    .reaction-bar .btn{font-size:.85rem}
+    .small{font-size:.85rem}
+    .danger{color:#feb2c0}
+    .good{color:#9cf3c1}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;background:#0a0e1b;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.06rem .4rem}
+    .help{font-size:.85rem;color:#c9d1ff}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // === Supabase bootstrap (podmień na swoje env jeśli masz) ===
+    // Supabase bootstrap — korzystamy z tych samych źródeł co pozostałe strony
     const supabaseClient = window.supabase?.createClient?.(
       window.SUPABASE_URL || localStorage.getItem('BA_SUPABASE_URL'),
       window.SUPABASE_ANON_KEY || localStorage.getItem('BA_SUPABASE_ANON')
@@ -52,16 +153,15 @@
       });
     }
 
-    // Brama: wymagaj zalogowania i pamiętaj redirect
+    // Brama: wymagaj zalogowania
     (async () => {
-      try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) {
-          localStorage.setItem('ba_redirect', 'faith-reason.html');
-          location.replace('index.html?login=1');
-          return;
-        }
-      } catch(e) { console.warn(e); }
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        localStorage.setItem('ba_redirect', 'faith-reason.html');
+        location.replace('index.html?login=1');
+        return;
+      }
+      window.BA_SESSION = session;
     })();
   </script>
 </head>
@@ -70,83 +170,426 @@
     <button class="back-btn" onclick="location.href='index.html'">← Back</button>
     <div>
       <h1>Faith & Reason</h1>
-      <h2 class="muted">Mapping religions: rules, absurdities, manipulation — and the good you can keep without an institution.</h2>
+      <h2 class="muted">Religions, rules, absurdities, manipulation — and the good you can keep without any institution.</h2>
     </div>
   </header>
 
   <main>
-    <div class="card">
-      <div class="muted" style="margin-bottom:.35rem">Scope</div>
-      <div class="grid">
-        <div class="pill">World religions</div>
-        <div class="pill">Doctrines & rituals</div>
-        <div class="pill">Contradictions</div>
-        <div class="pill">Manipulation & power</div>
-        <div class="pill">Ethics without religion</div>
-        <div class="pill">Humanism</div>
-        <div class="pill">Community & meaning</div>
+    <!-- Submit new item -->
+    <section class="card">
+      <h3>Contribute a Finding</h3>
+      <p class="help">Logged-in users can add items. AI pre-check will block spam/porn/hate and estimate confidence. Community can later vote and add evidence.</p>
+
+      <div class="row">
+        <div>
+          <label>Religion / Tradition</label>
+          <div class="chips" id="presetReligions"></div>
+          <input id="religion" type="text" placeholder="e.g., Christianity/Catholic, Islam/Sunni, Buddhism, Other…"/>
+
+          <label style="margin-top:.6rem">Category</label>
+          <select id="category">
+            <option value="absurdity">Absurdity</option>
+            <option value="manipulation">Manipulation/Abuse</option>
+            <option value="positive">Positive/Value to keep</option>
+            <option value="history">Historical context</option>
+            <option value="claim">Unconfirmed claim</option>
+          </select>
+
+          <label style="margin-top:.6rem">Title</label>
+          <input id="title" type="text" placeholder="Short, clear headline of the case"/>
+        </div>
+        <div>
+          <label>Summary / Description</label>
+          <textarea id="summary" placeholder="Describe what happened, who, when, why it matters. Avoid insults; stick to facts."></textarea>
+
+          <label style="margin-top:.6rem">Evidence links (one per line)</label>
+          <textarea id="evidence" class="small" placeholder="https://...&#10;https://..."></textarea>
+
+          <div class="tools" style="margin-top:.6rem">
+            <button id="btnSubmit" class="btn primary">Submit for AI pre-check →</button>
+            <span id="submitMsg" class="muted"></span>
+          </div>
+        </div>
       </div>
-    </div>
-
-    <section class="card">
-      <h3>1) World Religions — Overview</h3>
-      <p class="muted">Catalog of major traditions and movements (to expand): Christianity, Islam, Judaism, Hinduism, Buddhism, Taoism/Confucianism, Indigenous/folk, New religious movements.</p>
-      <ul>
-        <li>Origins & key texts</li>
-        <li>Core tenets / practices</li>
-        <li>Internal diversity (denominations, schools)</li>
-      </ul>
     </section>
 
+    <!-- Filters -->
     <section class="card">
-      <h3>2) Rules, Dogmas, Rituals</h3>
-      <ul>
-        <li>What is prescribed/proscribed</li>
-        <li>How doctrine regulates daily life</li>
-        <li>Similarities across traditions</li>
-      </ul>
+      <div class="filters">
+        <select id="filterReligion">
+          <option value="">All religions</option>
+          <option>Christianity/Catholic</option>
+          <option>Christianity/Protestant</option>
+          <option>Christianity/Orthodox</option>
+          <option>Islam/Sunni</option>
+          <option>Islam/Shia</option>
+          <option>Judaism</option>
+          <option>Hinduism</option>
+          <option>Buddhism</option>
+          <option>Taoism</option>
+          <option>Confucianism</option>
+          <option>Indigenous/Folk</option>
+          <option>New Religious Movements</option>
+          <option>Other</option>
+        </select>
+        <select id="filterCategory">
+          <option value="">All categories</option>
+          <option value="absurdity">Absurdity</option>
+          <option value="manipulation">Manipulation/Abuse</option>
+          <option value="positive">Positive</option>
+          <option value="history">Historical</option>
+          <option value="claim">Unconfirmed</option>
+        </select>
+        <select id="filterStatus">
+          <option value="">Any status</option>
+          <option value="pending_ai">AI check pending</option>
+          <option value="ai_flagged">AI flagged</option>
+          <option value="awaiting_confirmation">Awaiting confirmation</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="disputed">Disputed</option>
+        </select>
+        <button id="btnRefresh" class="btn">Refresh</button>
+      </div>
     </section>
 
-    <section class="card">
-      <h3>3) Absurdities & Contradictions</h3>
-      <ul>
-        <li>Logical and historical contradictions</li>
-        <li>Harmful or irrational taboos</li>
-        <li>Notable historical “missteps”</li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h3>4) Manipulation, Abuse & Power</h3>
-      <ul>
-        <li>Political & economic capture</li>
-        <li>Financial abuses and hypocrisy</li>
-        <li>Propaganda, conflict, coercion</li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h3>5) The Good You Can Keep (Without Priests, Imams or Gurus)</h3>
-      <ul>
-        <li>Kindness, empathy, solidarity</li>
-        <li>Rituals as stabilizers (secular versions)</li>
-        <li>Community without dogma</li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h3>6) Ethics Without Religion</h3>
-      <ul>
-        <li>Humanism and secular ethics</li>
-        <li>Reason, responsibility, and agency</li>
-        <li>“Believe in yourself” as a practice</li>
-      </ul>
+    <!-- List -->
+    <section class="grid">
+      <div id="items"></div>
+      <aside>
+        <div class="card">
+          <h3>Status legend</h3>
+          <p class="status-dot"><span class="dot pending"></span>Pending (AI/Confirmation)</p>
+          <p class="status-dot"><span class="dot confirmed"></span>Confirmed</p>
+          <p class="status-dot"><span class="dot disputed"></span>Disputed/Flagged</p>
+          <hr style="border-color:rgba(255,255,255,.08)"/>
+          <p class="small">Reactions:</p>
+          <div class="chips">
+            <span class="chip">“True”</span>
+            <span class="chip">“Likely”</span>
+            <span class="chip">“Uncertain”</span>
+            <span class="chip">“False”</span>
+            <span class="chip">“Misleading”</span>
+          </div>
+          <p class="help" style="margin-top:.4rem">Edits require justification and new evidence; AI screens edits for abuse.</p>
+          <p class="help">Report content to moderators with a clear reason.</p>
+        </div>
+      </aside>
     </section>
   </main>
 
+  <template id="itemTpl">
+    <div class="item">
+      <div class="meta">
+        <span class="pill __religion"></span>
+        <span class="pill __category"></span>
+        <span class="pill __status"></span>
+        <span class="pill">AI: <span class="__aiscore">0</span>%</span>
+      </div>
+      <h4 class="__title">Title</h4>
+      <p class="muted __summary">Summary...</p>
+      <div class="evidence __evidence"></div>
+
+      <div class="reaction-bar">
+        <button class="btn" data-verdict="true">True</button>
+        <button class="btn" data-verdict="likely">Likely</button>
+        <button class="btn" data-verdict="uncertain">Uncertain</button>
+        <button class="btn warn" data-verdict="misleading">Misleading</button>
+        <button class="btn bad" data-verdict="false">False</button>
+        <button class="btn" data-action="edit">Suggest edit</button>
+        <button class="btn bad" data-action="flag">Report</button>
+      </div>
+
+      <div class="small muted __agg" style="margin-top:.35rem"></div>
+    </div>
+  </template>
+
+  <template id="editDlgTpl">
+    <div class="card">
+      <h4>Edit proposal</h4>
+      <label>New title (optional)</label>
+      <input type="text" class="e-title"/>
+      <label style="margin-top:.4rem">New summary (optional)</label>
+      <textarea class="e-summary"></textarea>
+      <label style="margin-top:.4rem">New evidence links (one per line, optional)</label>
+      <textarea class="e-evidence small" placeholder="https://...&#10;https://..."></textarea>
+      <label style="margin-top:.4rem">Justification (required)</label>
+      <textarea class="e-why" placeholder="Explain why this change is needed; add references."></textarea>
+      <div class="tools" style="margin-top:.5rem">
+        <button class="btn primary e-submit">Submit edit</button>
+        <button class="btn e-cancel">Cancel</button>
+        <span class="muted e-msg"></span>
+      </div>
+    </div>
+  </template>
+
+  <template id="flagDlgTpl">
+    <div class="card">
+      <h4>Report item</h4>
+      <label>Reason</label>
+      <select class="f-reason">
+        <option value="spam">Spam</option>
+        <option value="porn">Porn/NSFW</option>
+        <option value="hate">Hate/Harassment</option>
+        <option value="privacy">Privacy violation</option>
+        <option value="other">Other</option>
+      </select>
+      <label style="margin-top:.4rem">Details</label>
+      <textarea class="f-details" placeholder="What is wrong? Provide specifics."></textarea>
+      <div class="tools" style="margin-top:.5rem">
+        <button class="btn bad f-submit">Send report</button>
+        <button class="btn f-cancel">Cancel</button>
+        <span class="muted f-msg"></span>
+      </div>
+    </div>
+  </template>
+
   <script>
-    // (opcjonalnie) lekkie sprawdzenie sesji po załadowaniu
-    (async () => { await waitForInitialSession(); })();
+    const PRESET_RELIGIONS = [
+      "Christianity/Catholic","Christianity/Protestant","Christianity/Orthodox",
+      "Islam/Sunni","Islam/Shia","Judaism","Hinduism","Buddhism",
+      "Taoism","Confucianism","Indigenous/Folk","New Religious Movements","Other"
+    ];
+
+    function el(tag, cls){ const n = document.createElement(tag); if (cls) n.className = cls; return n; }
+
+    function renderPresetChips(){
+      const box = document.getElementById('presetReligions');
+      PRESET_RELIGIONS.forEach(r => {
+        const c = el('span','chip'); c.textContent = r;
+        c.onclick = () => { document.getElementById('religion').value = r; };
+        box.appendChild(c);
+      });
+    }
+
+    function statusLabel(s){
+      if (s === 'confirmed') return 'Confirmed';
+      if (s === 'awaiting_confirmation') return 'Awaiting confirmation';
+      if (s === 'ai_flagged') return 'AI flagged';
+      if (s === 'disputed') return 'Disputed';
+      return 'AI pending';
+    }
+
+    function statusClass(s){
+      if (s === 'confirmed') return 'confirmed';
+      if (s === 'disputed' || s === 'ai_flagged') return 'disputed';
+      return 'pending';
+    }
+
+    function linkifyEvidence(arr){
+      if (!Array.isArray(arr)) return '';
+      return arr.filter(Boolean).map(u=>{
+        const a = document.createElement('a');
+        a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = u;
+        return a;
+      });
+    }
+
+    async function submitNewItem(){
+      const btn = document.getElementById('btnSubmit');
+      const out = document.getElementById('submitMsg');
+      btn.disabled = true; out.textContent = 'Submitting…';
+
+      const religion = document.getElementById('religion').value.trim();
+      const category = document.getElementById('category').value;
+      const title = document.getElementById('title').value.trim();
+      const summary = document.getElementById('summary').value.trim();
+      const evidenceRaw = document.getElementById('evidence').value.split('\n').map(s=>s.trim()).filter(Boolean);
+      if (!religion || !category || !title || !summary){
+        out.textContent = 'Fill religion, category, title, summary.'; btn.disabled = false; return;
+        }
+
+      // INSERT new item
+      const { data: ins, error: insErr } = await supabaseClient
+        .from('faith_items')
+        .insert({
+          religion, category, title, summary, evidence_links: evidenceRaw, status: 'pending_ai'
+        })
+        .select().single();
+
+      if (insErr){
+        out.textContent = 'Save error: '+ (insErr.message || insErr); btn.disabled = false; return;
+      }
+
+      // Optional: queue AI verification via RPC (if exists)
+      try {
+        await supabaseClient.rpc('ai_queue_verify_faith_item', { p_item_id: ins.id });
+        out.textContent = 'Item saved. AI pre-check queued. It will appear after refresh.';
+      } catch(e){
+        out.textContent = 'Item saved. (AI queue not configured yet).';
+      }
+
+      // reset form
+      document.getElementById('title').value='';
+      document.getElementById('summary').value='';
+      document.getElementById('evidence').value='';
+      // Refresh list
+      await refreshList();
+      btn.disabled = false;
+    }
+
+    async function fetchItems(){
+      const r = document.getElementById('filterReligion').value;
+      const c = document.getElementById('filterCategory').value;
+      const s = document.getElementById('filterStatus').value;
+
+      let q = supabaseClient.from('faith_items').select('*').order('created_at',{ascending:false}).limit(100);
+      if (r) q = q.eq('religion', r);
+      if (c) q = q.eq('category', c);
+      if (s) q = q.eq('status', s);
+
+      const { data, error } = await q;
+      if (error){ console.warn(error); return []; }
+      return data || [];
+    }
+
+    async function fetchAggVotes(itemId){
+      const { data, error } = await supabaseClient
+        .from('faith_votes')
+        .select('verdict')
+        .eq('item_id', itemId);
+      if (error || !data) return {};
+      const agg = { true:0, likely:0, uncertain:0, false:0, misleading:0 };
+      data.forEach(v => { if (agg[v.verdict] !== undefined) agg[v.verdict]++; });
+      return agg;
+    }
+
+    async function castVote(itemId, verdict){
+      const { data: sess } = await supabaseClient.auth.getSession();
+      if (!sess?.session){ alert('Login required'); return; }
+
+      // upsert by UNIQUE(item_id, voter)
+      const { error } = await supabaseClient.from('faith_votes').upsert({
+        item_id: itemId, voter: sess.session.user.id, verdict
+      }, { onConflict: 'item_id,voter' });
+
+      if (error){ alert('Vote error: '+error.message); }
+      await refreshList();
+    }
+
+    function openEditDialog(item){
+      const t = document.getElementById('editDlgTpl').content.cloneNode(true);
+      const dlg = el('div'); dlg.appendChild(t);
+      Object.assign(dlg.style,{position:'fixed',inset:'0',background:'rgba(0,0,0,.6)',display:'grid',placeItems:'center',padding:'1rem',zIndex:80});
+      document.body.appendChild(dlg);
+
+      const title = dlg.querySelector('.e-title');
+      const summary = dlg.querySelector('.e-summary');
+      const evidence = dlg.querySelector('.e-evidence');
+      const why = dlg.querySelector('.e-why');
+      const msg = dlg.querySelector('.e-msg');
+
+      title.value = item.title;
+      summary.value = item.summary;
+      evidence.value = (item.evidence_links||[]).join('\n');
+
+      dlg.querySelector('.e-cancel').onclick = ()=> dlg.remove();
+      dlg.querySelector('.e-submit').onclick = async ()=>{
+        const new_title = title.value.trim();
+        const new_summary = summary.value.trim();
+        const new_evidence_links = evidence.value.split('\n').map(s=>s.trim()).filter(Boolean);
+        const justification = why.value.trim();
+        if (!justification){ msg.textContent = 'Justification required.'; return; }
+
+        const { error } = await supabaseClient.from('faith_edits').insert({
+          item_id: item.id, new_title, new_summary, new_evidence_links, justification
+        });
+
+        if (error){ msg.textContent = 'Error: '+error.message; return; }
+        // queue AI for edit (optional)
+        try { await supabaseClient.rpc('ai_queue_verify_faith_edit', { p_edit_id: null /* server resolves last edit for user */ }); } catch(_){}
+        msg.textContent = 'Edit submitted. Awaiting review/AI.';
+        setTimeout(()=> dlg.remove(), 900);
+      };
+    }
+
+    function openFlagDialog(item){
+      const t = document.getElementById('flagDlgTpl').content.cloneNode(true);
+      const dlg = el('div'); dlg.appendChild(t);
+      Object.assign(dlg.style,{position:'fixed',inset:'0',background:'rgba(0,0,0,.6)',display:'grid',placeItems:'center',padding:'1rem',zIndex:80});
+      document.body.appendChild(dlg);
+
+      const reason = dlg.querySelector('.f-reason');
+      const details = dlg.querySelector('.f-details');
+      const msg = dlg.querySelector('.f-msg');
+
+      dlg.querySelector('.f-cancel').onclick = ()=> dlg.remove();
+      dlg.querySelector('.f-submit').onclick = async ()=>{
+        const r = reason.value; const det = details.value.trim();
+        const { error } = await supabaseClient.from('faith_flags').insert({
+          item_id: item.id, reason: r, details: det
+        });
+        if (error){ msg.textContent = 'Error: '+error.message; return; }
+        msg.textContent = 'Report sent to moderators.';
+        setTimeout(()=> dlg.remove(), 800);
+      };
+    }
+
+    function mountItemCard(item){
+      const tpl = document.getElementById('itemTpl').content.cloneNode(true);
+      tpl.querySelector('.__religion').textContent = item.religion;
+      tpl.querySelector('.__category').textContent = item.category;
+      const sLbl = statusLabel(item.status);
+      tpl.querySelector('.__status').textContent = sLbl;
+      tpl.querySelector('.__status').classList.add(statusClass(item.status));
+      tpl.querySelector('.__aiscore').textContent = Math.round(item.ai_score || 0);
+      tpl.querySelector('.__title').textContent = item.title;
+      tpl.querySelector('.__summary').textContent = item.summary;
+
+      const evBox = tpl.querySelector('.__evidence');
+      const links = linkifyEvidence(item.evidence_links);
+      if (links && links.length){
+        const ul = el('ul'); ul.style.margin = '.2rem 0 0 1rem';
+        links.forEach(a => { const li = el('li'); li.appendChild(a); ul.appendChild(li); });
+        evBox.appendChild(ul);
+      } else {
+        evBox.innerHTML = '<span class="muted small">No evidence provided yet.</span>';
+      }
+
+      // wire votes
+      tpl.querySelectorAll('[data-verdict]').forEach(btn=>{
+        btn.onclick = () => castVote(item.id, btn.dataset.verdict);
+      });
+      // edit
+      tpl.querySelector('[data-action="edit"]').onclick = ()=> openEditDialog(item);
+      // flag
+      tpl.querySelector('[data-action="flag"]').onclick = ()=> openFlagDialog(item);
+
+      const container = el('div');
+      container.appendChild(tpl);
+
+      // fetch aggregates
+      fetchAggVotes(item.id).then(agg=>{
+        const aggBox = container.querySelector('.__agg');
+        const parts = [];
+        Object.entries(agg).forEach(([k,v])=> { if (v>0) parts.push(`${k}:${v}`); });
+        aggBox.textContent = parts.length ? `Votes — ${parts.join(' · ')}` : 'No votes yet';
+      });
+
+      return container.firstElementChild;
+    }
+
+    async function refreshList(){
+      const box = document.getElementById('items');
+      box.innerHTML = '';
+      const items = await fetchItems();
+      if (!items.length){
+        const empty = el('div','card'); empty.innerHTML = '<span class="muted">No items match filters.</span>';
+        box.appendChild(empty); return;
+      }
+      items.forEach(item => box.appendChild(mountItemCard(item)));
+    }
+
+    function wireUI(){
+      renderPresetChips();
+      document.getElementById('btnSubmit').onclick = submitNewItem;
+      document.getElementById('btnRefresh').onclick = refreshList;
+      document.getElementById('filterReligion').onchange = refreshList;
+      document.getElementById('filterCategory').onchange = refreshList;
+      document.getElementById('filterStatus').onchange = refreshList;
+      refreshList();
+    }
+
+    document.addEventListener('DOMContentLoaded', wireUI);
   </script>
 </body>
 </html>
