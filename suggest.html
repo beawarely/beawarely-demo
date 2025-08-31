@@ -7,148 +7,268 @@
   <title>Suggest a Tool — BeAwarely</title>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-    .wrap{max-width:900px;margin:0 auto;padding:24px}
-    .card{background:#121625;border-radius:16px;padding:16px;margin:16px 0}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .row > *{flex:1 1 260px}
-    .muted{opacity:.8}
-    .actions{display:flex;gap:8px;align-items:center}
-    .btn{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0b0d14;cursor:pointer}
+    :root { --gap:14px; }
+    body{margin:0}
+    .container{max-width:1000px;margin:0 auto;padding:28px}
+    .back{display:inline-block;margin-bottom:10px}
+    .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gap);margin-bottom:18px}
+    .hero h1{margin:0;font-size:2rem}
+    .sub{opacity:.85;margin:.25rem 0 0}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:var(--gap);margin:18px 0 8px}
+    .stat{background:#121625;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px}
+    .stat .k{font-size:1.25rem;font-weight:600}
+    .row{display:flex;gap:var(--gap);flex-wrap:wrap;align-items:center}
+    .grow{flex:1 1 280px}
+    .seg{display:flex;border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden}
+    .seg button{padding:8px 12px;background:transparent;border:0;cursor:pointer}
+    .seg button.active{background:rgba(255,255,255,.06)}
+    .input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0b0d14;color:#eaf0ff}
+    .card{background:#121625;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
+    .ideas{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+    .idea{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px}
+    .idea h3{margin:0 0 6px 0;font-size:1.05rem}
+    .muted{opacity:.82}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .tag{font-size:.8rem;border:1px solid rgba(255,255,255,.14);padding:2px 8px;border-radius:999px}
+    .actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+    .btn{padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0b0d14;cursor:pointer}
     .btn[disabled]{opacity:.6;cursor:not-allowed}
-    .list{list-style:none;padding:0;margin:0}
-    .list li{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.08)}
-    .tag{display:inline-block;margin-right:6px;padding:2px 8px;border:1px solid rgba(255,255,255,.12);border-radius:999px;font-size:.85rem}
+    .vote{display:inline-flex;align-items:center;gap:6px}
+    .pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+    .empty{padding:16px;border:1px dashed rgba(255,255,255,.2);border-radius:14px;text-align:center}
+    .note{margin-top:10px;opacity:.8}
+    .hide{display:none !important}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <a href="index.html" class="back-btn">← Back to Home</a>
+  <div class="container">
+    <a href="index.html" class="back">← Back to Home</a>
 
-    <h1>Suggest a Tool</h1>
-    <p class="section-sub">Propose ideas, vote, and get updates.</p>
+    <div class="hero">
+      <div>
+        <h1>Suggest a Tool</h1>
+        <p class="sub">Propose ideas, vote, and get updates.</p>
+      </div>
+      <div class="pill" id="modePill" aria-live="polite">Loading…</div>
+    </div>
 
-    <!-- Guest view -->
-    <div id="guestView" class="card" hidden>
-      <p class="muted">Sign in to propose an idea and vote.</p>
-      <div class="actions">
+    <div class="stats">
+      <div class="stat"><div class="k" id="statIdeas">0</div><div class="muted">Ideas</div></div>
+      <div class="stat"><div class="k" id="statVotes">0</div><div class="muted">Votes</div></div>
+      <div class="stat"><div class="k" id="statFollowers">0</div><div class="muted">Followers</div></div>
+    </div>
+
+    <!-- Sign-in prompt -->
+    <div id="guestCard" class="card hide">
+      <div class="row">
+        <div class="grow">
+          <div class="muted">Sign in to propose an idea and vote.</div>
+        </div>
         <button id="signInBtn" class="btn" type="button">Sign in</button>
       </div>
     </div>
 
-    <!-- User view -->
-    <div id="userView" class="card" hidden>
-      <h2 class="h2">Propose a new idea</h2>
-      <form id="ideaForm" class="row">
-        <input id="title" type="text" maxlength="80" placeholder="Title (max 80 chars)" required/>
-        <input id="tags" type="text" placeholder="Tags (comma separated, optional)"/>
-        <textarea id="details" rows="4" maxlength="500" placeholder="Describe the problem/use-case (max 500 chars)"></textarea>
-        <div class="actions" style="width:100%">
+    <!-- Submit form -->
+    <div id="userCard" class="card hide" aria-hidden="true">
+      <form id="ideaForm">
+        <div class="row" style="margin-bottom:var(--gap)">
+          <input id="title" class="input grow" type="text" maxlength="80" placeholder="Title (max 80 chars)" required/>
+          <input id="tags" class="input" type="text" placeholder="Tags (comma separated)"/>
+        </div>
+        <textarea id="details" class="input" rows="4" maxlength="500" placeholder="Describe the problem/use-case (max 500 chars)"></textarea>
+        <div class="row" style="margin-top:var(--gap)">
           <button id="submitBtn" class="btn" type="submit">Submit idea</button>
           <span id="formMsg" class="muted" aria-live="polite"></span>
         </div>
       </form>
     </div>
 
-    <!-- Ideas list (placeholder for now) -->
+    <!-- List & controls -->
     <div class="card">
-      <div class="actions" style="justify-content:space-between">
-        <h2 class="h2" style="margin:0">Top ideas</h2>
-        <select id="sortSelect" class="btn" aria-label="Sort ideas">
-          <option value="top">Top</option>
-          <option value="new">New</option>
-          <option value="trending">Trending</option>
-        </select>
+      <div class="row" style="justify-content:space-between;margin-bottom:var(--gap)">
+        <input id="search" class="input grow" type="search" placeholder="Search ideas…"/>
+        <div class="seg" role="tablist" aria-label="Sort">
+          <button data-sort="top" class="active" role="tab" aria-selected="true">Top</button>
+          <button data-sort="new" role="tab" aria-selected="false">New</button>
+          <button data-sort="trending" role="tab" aria-selected="false">Trending</button>
+        </div>
       </div>
-      <ul id="ideasList" class="list">
-        <li class="muted">Ideas will appear here soon.</li>
-      </ul>
-    </div>
 
-    <p id="setupHint" class="muted"></p>
+      <div id="ideasWrap" class="ideas">
+        <div class="empty muted" id="emptyState">Ideas will appear here soon.</div>
+      </div>
+
+      <p class="note" id="modeNote"></p>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Try to reuse existing client if defined on window
+    // ===== Setup / client detection =====
     let supabaseClient = window.supabaseClient || null;
     if (!supabaseClient && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
       try { supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch(e) {}
     }
+    const demoIdeas = [
+      { id:'d1', title:'Health Claims checker', details:'Verify supplements or therapy claims with sources.', tags:['health','claims'], votes:42, followers:19, created_at: Date.now()-86400000*2 },
+      { id:'d2', title:'Consent Auditor', details:'Explain terms & privacy policies in plain English.', tags:['privacy','law'], votes:31, followers:15, created_at: Date.now()-86400000*4 },
+      { id:'d3', title:'WorkVerify', details:'Confirm job ads and offers to reduce scams.', tags:['work','safety'], votes:27, followers:11, created_at: Date.now()-86400000*1 }
+    ];
 
     const els = {
-      guest: document.getElementById('guestView'),
-      user: document.getElementById('userView'),
+      guest: document.getElementById('guestCard'),
+      user: document.getElementById('userCard'),
       signIn: document.getElementById('signInBtn'),
       form: document.getElementById('ideaForm'),
       submit: document.getElementById('submitBtn'),
       msg: document.getElementById('formMsg'),
-      setupHint: document.getElementById('setupHint'),
-      ideas: document.getElementById('ideasList'),
-      sort: document.getElementById('sortSelect'),
+      ideasWrap: document.getElementById('ideasWrap'),
+      empty: document.getElementById('emptyState'),
+      search: document.getElementById('search'),
+      sortTabs: document.querySelectorAll('.seg button'),
+      statIdeas: document.getElementById('statIdeas'),
+      statVotes: document.getElementById('statVotes'),
+      statFollowers: document.getElementById('statFollowers'),
+      modePill: document.getElementById('modePill'),
+      modeNote: document.getElementById('modeNote')
     };
 
-    function gotoLogin() {
-      try { localStorage.setItem('ba_redirect', 'suggest.html'); } catch(_) {}
+    function setMode(text){ els.modePill.textContent = text; }
+    function show(el){ el.classList.remove('hide'); el.setAttribute('aria-hidden','false'); }
+    function hide(el){ el.classList.add('hide'); el.setAttribute('aria-hidden','true'); }
+
+    function gotoLogin(){
+      try { localStorage.setItem('ba_redirect','suggest.html'); } catch(_) {}
       location.href = 'index.html?login=1';
     }
-
     els.signIn.addEventListener('click', gotoLogin);
 
-    async function init() {
-      const hasClient = !!supabaseClient;
-      if (!hasClient) {
-        els.guest.hidden = false;
-        els.user.hidden = true;
-        els.setupHint.textContent = 'Note: Supabase client not initialized here yet. Sign in from Home, or initialize a global client.';
+    // ===== Rendering =====
+    function renderStats(list){
+      els.statIdeas.textContent = list.length.toString();
+      els.statVotes.textContent = list.reduce((a,i)=>a+(i.votes||0),0);
+      els.statFollowers.textContent = list.reduce((a,i)=>a+(i.followers||0),0);
+    }
+
+    function ideaItem(i, loggedIn){
+      const li = document.createElement('div');
+      li.className = 'idea';
+      li.innerHTML = `
+        <h3>${escapeHtml(i.title)}</h3>
+        ${i.details ? `<div class="muted">${escapeHtml(i.details)}</div>` : ''}
+        <div class="tags">${(i.tags||[]).map(t=>`<span class="tag">#${escapeHtml(t)}</span>`).join('')}</div>
+        <div class="actions">
+          <div class="vote">
+            <button class="btn voteBtn" ${loggedIn?'':'disabled'} aria-pressed="false">▲ Vote</button>
+            <span class="muted count">${(i.votes||0)}</span>
+          </div>
+          <button class="btn followBtn" ${loggedIn?'':'disabled'}>Follow</button>
+        </div>
+      `;
+      const voteBtn = li.querySelector('.voteBtn');
+      const countEl = li.querySelector('.count');
+      voteBtn?.addEventListener('click', ()=>{
+        const pressed = voteBtn.getAttribute('aria-pressed') === 'true';
+        voteBtn.setAttribute('aria-pressed', String(!pressed));
+        const delta = pressed ? -1 : 1;
+        const val = Math.max(0, (parseInt(countEl.textContent||'0',10)+delta));
+        countEl.textContent = String(val);
+      });
+      return li;
+    }
+
+    function renderIdeas(list, loggedIn){
+      els.ideasWrap.innerHTML = '';
+      if(!list.length){ show(els.empty); return; }
+      hide(els.empty);
+      list.forEach(i => els.ideasWrap.appendChild(ideaItem(i, loggedIn)));
+      renderStats(list);
+    }
+
+    function escapeHtml(s){ return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    // ===== Sorting & Search (front-only) =====
+    let currentSort = 'top';
+    let baseIdeas = [...demoIdeas];
+
+    els.sortTabs.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        els.sortTabs.forEach(b=>{b.classList.remove('active'); b.setAttribute('aria-selected','false');});
+        btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+        currentSort = btn.dataset.sort;
+        applyFilters();
+      });
+    });
+    els.search.addEventListener('input', applyFilters);
+
+    function applyFilters(){
+      const q = els.search.value.trim().toLowerCase();
+      let data = [...baseIdeas];
+      if(q){
+        data = data.filter(i => (i.title+i.details+(i.tags||[]).join(' ')).toLowerCase().includes(q));
+      }
+      if(currentSort==='new') data.sort((a,b)=>b.created_at - a.created_at);
+      else if(currentSort==='trending') data.sort((a,b)=>(b.votes/(Date.now()-b.created_at+1)) - (a.votes/(Date.now()-a.created_at+1)));
+      else data.sort((a,b)=>b.votes - a.votes); // top
+      renderIdeas(data, state.loggedIn);
+    }
+
+    // ===== State & Init =====
+    const state = { loggedIn:false, demo:true };
+
+    async function init(){
+      if (!supabaseClient) {
+        state.demo = true;
+        setMode('Demo mode');
+        els.modeNote.textContent = 'Note: Backend not connected yet. This is an interactive demo preview.';
+        show(els.guest); hide(els.user);
+        applyFilters();
         return;
       }
 
       try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session) {
-          els.guest.hidden = true;
-          els.user.hidden = false;
-        } else {
-          els.guest.hidden = false;
-          els.user.hidden = true;
-        }
+        const { data:{ session } } = await supabaseClient.auth.getSession();
+        state.loggedIn = !!session;
+        state.demo = false;
+        setMode(state.loggedIn ? 'Connected' : 'Guest');
+        els.modeNote.textContent = state.loggedIn
+          ? 'You can propose ideas and vote.'
+          : 'Sign in to propose ideas and vote.';
+        if(state.loggedIn){ hide(els.guest); show(els.user); } else { show(els.guest); hide(els.user); }
+
+        // TODO: Replace with real fetch from Supabase when tables are ready
+        baseIdeas = [...demoIdeas];
+        applyFilters();
+
       } catch (e) {
-        els.guest.hidden = false;
-        els.user.hidden = true;
+        state.demo = true;
+        setMode('Demo mode');
+        els.modeNote.textContent = 'Could not connect to backend. Showing demo.';
+        show(els.guest); hide(els.user);
+        applyFilters();
       }
     }
 
-    els.form.addEventListener('submit', async (e) => {
+    // Submit (no backend yet)
+    els.form?.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      if (!supabaseClient) {
-        els.msg.textContent = 'Backend not configured yet.';
-        return;
-      }
-      els.submit.disabled = true;
-      els.msg.textContent = 'Saving...';
-
-      const title = document.getElementById('title').value.trim();
-      const details = document.getElementById('details').value.trim();
-      const tagsRaw = document.getElementById('tags').value.trim();
-      const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
-
+      if (!supabaseClient) { els.msg.textContent = 'Backend not configured yet.'; return; }
+      els.submit.disabled = true; els.msg.textContent = 'Saving…';
       try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) { els.msg.textContent = 'Please sign in first.'; els.submit.disabled = false; return; }
-
-        // Attempt to insert (table & RLS to be created later)
-        const { error } = await supabaseClient.from('tool_ideas').insert({
-          title, details, tags, author: session.user.id, status: 'proposed'
-        });
-
-        if (error) {
-          els.msg.textContent = 'Cannot save yet (backend not set up).';
-        } else {
-          els.msg.textContent = 'Idea submitted! (You may not see it until we enable listing.)';
-          els.form.reset();
-        }
-      } catch (err) {
-        els.msg.textContent = 'Error: ' + (err?.message || 'unknown');
+        const { data:{ session } } = await supabaseClient.auth.getSession();
+        if(!session){ els.msg.textContent='Please sign in first.'; els.submit.disabled=false; return; }
+        // Placeholder insert – will work once table exists + RLS set
+        const payload = {
+          title: document.getElementById('title').value.trim(),
+          details: document.getElementById('details').value.trim(),
+          tags: (document.getElementById('tags').value||'').split(',').map(t=>t.trim()).filter(Boolean),
+          author: session.user.id, status:'proposed'
+        };
+        const { error } = await supabaseClient.from('tool_ideas').insert(payload);
+        if (error) els.msg.textContent = 'Cannot save yet (backend not set up).';
+        else { els.msg.textContent='Idea submitted!'; els.form.reset(); }
+      } catch(err){
+        els.msg.textContent = 'Error: '+(err?.message||'unknown');
       } finally {
         els.submit.disabled = false;
       }
