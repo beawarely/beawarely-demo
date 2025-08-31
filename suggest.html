@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Suggest a Tool — BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .wrap{max-width:900px;margin:0 auto;padding:24px}
+    .card{background:#121625;border-radius:16px;padding:16px;margin:16px 0}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row > *{flex:1 1 260px}
+    .muted{opacity:.8}
+    .actions{display:flex;gap:8px;align-items:center}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0b0d14;cursor:pointer}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+    .list{list-style:none;padding:0;margin:0}
+    .list li{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .tag{display:inline-block;margin-right:6px;padding:2px 8px;border:1px solid rgba(255,255,255,.12);border-radius:999px;font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back-btn">← Back to Home</a>
+
+    <h1>Suggest a Tool</h1>
+    <p class="section-sub">Propose ideas, vote, and get updates.</p>
+
+    <!-- Guest view -->
+    <div id="guestView" class="card" hidden>
+      <p class="muted">Sign in to propose an idea and vote.</p>
+      <div class="actions">
+        <button id="signInBtn" class="btn" type="button">Sign in</button>
+      </div>
+    </div>
+
+    <!-- User view -->
+    <div id="userView" class="card" hidden>
+      <h2 class="h2">Propose a new idea</h2>
+      <form id="ideaForm" class="row">
+        <input id="title" type="text" maxlength="80" placeholder="Title (max 80 chars)" required/>
+        <input id="tags" type="text" placeholder="Tags (comma separated, optional)"/>
+        <textarea id="details" rows="4" maxlength="500" placeholder="Describe the problem/use-case (max 500 chars)"></textarea>
+        <div class="actions" style="width:100%">
+          <button id="submitBtn" class="btn" type="submit">Submit idea</button>
+          <span id="formMsg" class="muted" aria-live="polite"></span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Ideas list (placeholder for now) -->
+    <div class="card">
+      <div class="actions" style="justify-content:space-between">
+        <h2 class="h2" style="margin:0">Top ideas</h2>
+        <select id="sortSelect" class="btn" aria-label="Sort ideas">
+          <option value="top">Top</option>
+          <option value="new">New</option>
+          <option value="trending">Trending</option>
+        </select>
+      </div>
+      <ul id="ideasList" class="list">
+        <li class="muted">Ideas will appear here soon.</li>
+      </ul>
+    </div>
+
+    <p id="setupHint" class="muted"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Try to reuse existing client if defined on window
+    let supabaseClient = window.supabaseClient || null;
+    if (!supabaseClient && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+      try { supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch(e) {}
+    }
+
+    const els = {
+      guest: document.getElementById('guestView'),
+      user: document.getElementById('userView'),
+      signIn: document.getElementById('signInBtn'),
+      form: document.getElementById('ideaForm'),
+      submit: document.getElementById('submitBtn'),
+      msg: document.getElementById('formMsg'),
+      setupHint: document.getElementById('setupHint'),
+      ideas: document.getElementById('ideasList'),
+      sort: document.getElementById('sortSelect'),
+    };
+
+    function gotoLogin() {
+      try { localStorage.setItem('ba_redirect', 'suggest.html'); } catch(_) {}
+      location.href = 'index.html?login=1';
+    }
+
+    els.signIn.addEventListener('click', gotoLogin);
+
+    async function init() {
+      const hasClient = !!supabaseClient;
+      if (!hasClient) {
+        els.guest.hidden = false;
+        els.user.hidden = true;
+        els.setupHint.textContent = 'Note: Supabase client not initialized here yet. Sign in from Home, or initialize a global client.';
+        return;
+      }
+
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+          els.guest.hidden = true;
+          els.user.hidden = false;
+        } else {
+          els.guest.hidden = false;
+          els.user.hidden = true;
+        }
+      } catch (e) {
+        els.guest.hidden = false;
+        els.user.hidden = true;
+      }
+    }
+
+    els.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!supabaseClient) {
+        els.msg.textContent = 'Backend not configured yet.';
+        return;
+      }
+      els.submit.disabled = true;
+      els.msg.textContent = 'Saving...';
+
+      const title = document.getElementById('title').value.trim();
+      const details = document.getElementById('details').value.trim();
+      const tagsRaw = document.getElementById('tags').value.trim();
+      const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { els.msg.textContent = 'Please sign in first.'; els.submit.disabled = false; return; }
+
+        // Attempt to insert (table & RLS to be created later)
+        const { error } = await supabaseClient.from('tool_ideas').insert({
+          title, details, tags, author: session.user.id, status: 'proposed'
+        });
+
+        if (error) {
+          els.msg.textContent = 'Cannot save yet (backend not set up).';
+        } else {
+          els.msg.textContent = 'Idea submitted! (You may not see it until we enable listing.)';
+          els.form.reset();
+        }
+      } catch (err) {
+        els.msg.textContent = 'Error: ' + (err?.message || 'unknown');
+      } finally {
+        els.submit.disabled = false;
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
