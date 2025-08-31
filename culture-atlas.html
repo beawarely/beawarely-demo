@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>CultureAtlas — BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    :root {
+      --bg:#0b0d14; --panel:#121625; --muted:#aab2d5; --text:#eaf0ff; --accent:#5aa8ff; --ring: rgba(90,168,255,.45);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--bg);color:var(--text)}
+    .topbar{position:sticky;top:0;z-index:10;background:rgba(10,12,20,.8);backdrop-filter:blur(8px);border-bottom:1px solid #1b2033}
+    .topbar-inner{display:flex;align-items:center;gap:.75rem;max-width:1100px;margin:0 auto;padding:.75rem 1rem}
+    .back-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:.75rem;background:#0f1423;border:1px solid #1b2033;color:var(--text);text-decoration:none}
+    .back-btn:hover{outline:2px solid var(--ring)}
+    .page{max-width:1100px;margin:0 auto;padding:1.25rem}
+    h1{margin:.5rem 0 1rem 0;font-size:1.6rem}
+    .sub{color:var(--muted);font-size:.95rem}
+
+    /* Filters */
+    .filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem;margin:1rem 0}
+    .filters select,.filters input{width:100%;padding:.6rem .7rem;background:#0f1423;border:1px solid #1b2033;border-radius:.6rem;color:var(--text)}
+    .filters button{padding:.6rem .9rem;border-radius:.6rem;background:var(--accent);border:0;color:#031225;cursor:pointer}
+    .filters button:disabled{opacity:.6;cursor:not-allowed}
+
+    /* Map + list */
+    .layout{display:grid;grid-template-columns: minmax(300px,1fr) 2fr; gap:1rem}
+    .panel{background:#0f1423;border:1px solid #1b2033;border-radius:1rem;padding:1rem}
+    .panel h2{margin:.25rem 0 1rem 0;font-size:1.1rem}
+    #mapBox{height:420px;border-radius:.8rem;border:1px dashed #2a3354;display:flex;align-items:center;justify-content:center;color:#7f8bb5}
+    .list{display:grid;gap:.6rem}
+    .item{padding:.75rem;border:1px solid #1b2033;border-radius:.8rem;background:#0c1220}
+    .item .meta{color:var(--muted);font-size:.85rem;margin:.25rem 0 .5rem}
+    .empty{color:#8a95c2}
+
+    /* Add form (future) */
+    .addbar{margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap}
+    .addbar a{padding:.55rem .8rem;border-radius:.6rem;background:#0f1423;border:1px solid #1b2033;color:var(--text);text-decoration:none}
+    .chip{display:inline-flex;gap:.4rem;align-items:center;padding:.25rem .5rem;border-radius:999px;border:1px solid #243055;color:#a9b4db;font-size:.8rem}
+    @media (max-width: 900px){ .layout{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <!-- Top -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <a class="back-btn" href="index.html" aria-label="Back to Home">← Back</a>
+      <div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:1.25rem">🌍</span>
+          <strong>CultureAtlas</strong>
+        </div>
+        <div class="sub">Explore regional cultures, rituals, beliefs & customs. Community-powered, AI-assisted.</div>
+      </div>
+    </div>
+  </div>
+
+  <main class="page">
+    <!-- Filters -->
+    <section class="panel">
+      <h2>Browse</h2>
+      <div class="filters">
+        <select id="continent">
+          <option value="">All continents</option>
+          <option>Africa</option><option>Asia</option><option>Europe</option>
+          <option>North America</option><option>South America</option>
+          <option>Oceania</option>
+        </select>
+        <input id="country" placeholder="Country (optional)"/>
+        <select id="category">
+          <option value="">All categories</option>
+          <option value="belief">Belief</option>
+          <option value="ritual">Ritual</option>
+          <option value="festival">Festival</option>
+          <option value="custom">Custom</option>
+          <option value="art">Art</option>
+          <option value="other">Other</option>
+        </select>
+        <button id="apply">Apply</button>
+      </div>
+      <div class="addbar">
+        <span class="chip">Status: <strong id="statusChip">preview</strong></span>
+        <a href="#" id="addItemBtn" title="Sign in to add an entry">+ Add entry (soon)</a>
+      </div>
+    </section>
+
+    <!-- Map + List -->
+    <section class="layout">
+      <div class="panel">
+        <h2>World Map</h2>
+        <div id="mapBox">Map preview (interactive map coming soon)</div>
+      </div>
+
+      <div class="panel">
+        <h2>Regional entries</h2>
+        <div id="list" class="list">
+          <div class="empty">Use filters or the map to browse regional cultures.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Minimal client-side preview dataset (replace with Supabase later)
+    const seed = [
+      { id:'pl-kupa', title:'Noc Kupały', continent:'Europe', country:'Poland', region:'Various', category:'festival',
+        summary:'Summer solstice celebration with fires, wreaths and river rituals.' },
+      { id:'jp-matsuri', title:'Matsuri', continent:'Asia', country:'Japan', region:'Nationwide', category:'festival',
+        summary:'Shinto festivals featuring processions, portable shrines, and local traditions.' },
+      { id:'ke-eld', title:'Elders’ Council Blessing', continent:'Africa', country:'Kenya', region:'Various', category:'ritual',
+        summary:'Community blessings by elders marking life milestones and reconciliation.' },
+    ];
+
+    const $ = sel => document.querySelector(sel);
+    const listEl = $('#list');
+
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(!items.length){
+        listEl.innerHTML = '<div class="empty">No entries match your filters yet.</div>';
+        return;
+      }
+      for(const x of items){
+        const card = document.createElement('div');
+        card.className = 'item';
+        card.innerHTML = `
+          <strong>${x.title}</strong>
+          <div class="meta">${x.continent} • ${x.country}${x.region?(' • '+x.region):''} • ${x.category}</div>
+          <p style="margin:.25rem 0 0 0;color:#cfd7fb">${x.summary}</p>
+        `;
+        listEl.appendChild(card);
+      }
+    }
+
+    function applyFilters(){
+      const c = $('#continent').value.trim();
+      const country = $('#country').value.trim().toLowerCase();
+      const cat = $('#category').value.trim();
+
+      const out = seed.filter(x =>
+        (!c || x.continent===c) &&
+        (!cat || x.category===cat) &&
+        (!country || x.country.toLowerCase().includes(country))
+      );
+      renderList(out);
+    }
+
+    $('#apply').addEventListener('click', applyFilters);
+    renderList(seed);
+
+    // TODO: replace seed with Supabase:
+    // - Table: public.culture_items (continent, country, region, category, title, summary, details, sources[], status, author, created_at)
+    // - RLS: read all approved, author can read own pending, insert for authenticated
+    // - On load: fetch approved items; filters query by continent/country/category
+    // - Map: integrate Leaflet/D3 and bind click → filter
+  </script>
+</body>
+</html>
