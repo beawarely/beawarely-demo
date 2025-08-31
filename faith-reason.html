@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Faith & Reason — BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    :root{
+      --bg:#0b0d14; --panel:#121625; --muted:#aab2d5; --text:#eaf0ff; --accent:#5aa8ff; --ok:#4ade80; --warn:#fbbf24;
+      --ring: rgba(90,168,255,.45);
+    }
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:#000;color:#fff}
+    header.topbar{
+      position:sticky;top:0;z-index:50;background:rgba(0,0,0,.7);backdrop-filter:saturate(140%) blur(8px);
+      border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;
+    }
+    .back-btn{appearance:none;border:1px solid rgba(255,255,255,.15);padding:.45rem .75rem;border-radius:.75rem;
+      color:#fff;background:transparent;cursor:pointer}
+    .back-btn:hover{border-color:rgba(255,255,255,.3)}
+    main{max-width:1080px;margin:0 auto;padding:1.25rem}
+    .card{background:linear-gradient(180deg,#121625,#0c0f1b);border:1px solid rgba(255,255,255,.06);
+      border-radius:16px;padding:1rem 1.1rem;margin:1rem 0}
+    h1{font-size:1.6rem;margin:.25rem 0 0}
+    h2{font-size:1.05rem;color:var(--muted);margin:.2rem 0 0}
+    section h3{margin:0 0 .4rem}
+    .pill{display:inline-block;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:.2rem .55rem;margin:.15rem .25rem 0 0;
+      font-size:.8rem;color:#cfd6ff}
+    .muted{color:#aab2d5}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem}
+    ul{margin:.4rem 0 .2rem 1.1rem}
+    a.inline{color:#9ec5ff;text-decoration:none;border-bottom:1px dotted rgba(158,197,255,.4)}
+    a.inline:hover{border-bottom-color:transparent}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // === Supabase bootstrap (podmień na swoje env jeśli masz) ===
+    const supabaseClient = window.supabase?.createClient?.(
+      window.SUPABASE_URL || localStorage.getItem('BA_SUPABASE_URL'),
+      window.SUPABASE_ANON_KEY || localStorage.getItem('BA_SUPABASE_ANON')
+    );
+
+    async function waitForInitialSession() {
+      const { data } = await supabaseClient.auth.getSession();
+      if (data?.session) return data.session;
+      return new Promise(resolve => {
+        const { data: sub } = supabaseClient.auth.onAuthStateChange((_e, session) => {
+          sub.subscription?.unsubscribe?.();
+          resolve(session || null);
+        });
+      });
+    }
+
+    // Brama: wymagaj zalogowania i pamiętaj redirect
+    (async () => {
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) {
+          localStorage.setItem('ba_redirect', 'faith-reason.html');
+          location.replace('index.html?login=1');
+          return;
+        }
+      } catch(e) { console.warn(e); }
+    })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <button class="back-btn" onclick="location.href='index.html'">← Back</button>
+    <div>
+      <h1>Faith & Reason</h1>
+      <h2 class="muted">Mapping religions: rules, absurdities, manipulation — and the good you can keep without an institution.</h2>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="muted" style="margin-bottom:.35rem">Scope</div>
+      <div class="grid">
+        <div class="pill">World religions</div>
+        <div class="pill">Doctrines & rituals</div>
+        <div class="pill">Contradictions</div>
+        <div class="pill">Manipulation & power</div>
+        <div class="pill">Ethics without religion</div>
+        <div class="pill">Humanism</div>
+        <div class="pill">Community & meaning</div>
+      </div>
+    </div>
+
+    <section class="card">
+      <h3>1) World Religions — Overview</h3>
+      <p class="muted">Catalog of major traditions and movements (to expand): Christianity, Islam, Judaism, Hinduism, Buddhism, Taoism/Confucianism, Indigenous/folk, New religious movements.</p>
+      <ul>
+        <li>Origins & key texts</li>
+        <li>Core tenets / practices</li>
+        <li>Internal diversity (denominations, schools)</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>2) Rules, Dogmas, Rituals</h3>
+      <ul>
+        <li>What is prescribed/proscribed</li>
+        <li>How doctrine regulates daily life</li>
+        <li>Similarities across traditions</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>3) Absurdities & Contradictions</h3>
+      <ul>
+        <li>Logical and historical contradictions</li>
+        <li>Harmful or irrational taboos</li>
+        <li>Notable historical “missteps”</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>4) Manipulation, Abuse & Power</h3>
+      <ul>
+        <li>Political & economic capture</li>
+        <li>Financial abuses and hypocrisy</li>
+        <li>Propaganda, conflict, coercion</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>5) The Good You Can Keep (Without Priests, Imams or Gurus)</h3>
+      <ul>
+        <li>Kindness, empathy, solidarity</li>
+        <li>Rituals as stabilizers (secular versions)</li>
+        <li>Community without dogma</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>6) Ethics Without Religion</h3>
+      <ul>
+        <li>Humanism and secular ethics</li>
+        <li>Reason, responsibility, and agency</li>
+        <li>“Believe in yourself” as a practice</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // (opcjonalnie) lekkie sprawdzenie sesji po załadowaniu
+    (async () => { await waitForInitialSession(); })();
+  </script>
+</body>
+</html>
