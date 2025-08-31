@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Consent Auditor – BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    :root{ --safe-top: env(safe-area-inset-top, 0px); }
+    body{ margin:0; font-family:'Segoe UI', system-ui, Arial, sans-serif; background: rgba(0,0,0,.85); color:#fff; }
+    body.light-mode{ background:#f7f7f7; color:#000; }
+
+    #topbar{ position:fixed; top:calc(14px + var(--safe-top)); left:20px; right:20px; z-index:10000;
+      display:flex; justify-content:space-between; align-items:center; pointer-events:none; }
+    #topbar .grp{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
+    .pill{ background:rgba(255,255,255,.10); color:inherit; font-weight:700; text-decoration:none;
+      padding:6px 14px; border-radius:12px; border:none; display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+    .pill:hover{ background:rgba(255,255,255,.20); transform: translateY(-1px); }
+
+    header{ text-align:center; padding: calc(120px + var(--safe-top)) 16px 12px; }
+    header h1{ font-family:'Sriracha', cursive; font-size:56px; margin:0 0 8px; }
+    header p.sub{ opacity:.85; margin:0; }
+
+    main{ max-width:1100px; margin:0 auto; padding:24px 16px 60px; display:grid; gap:16px; }
+    .panel{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:16px; }
+    body.light-mode .panel{ background:rgba(0,0,0,.04); border-color:rgba(0,0,0,.10); }
+    .panel h2{ margin:0 0 8px; font-size:20px; }
+    .muted{ opacity:.85; }
+
+    textarea, input[type="text"]{
+      width:100%; max-width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.18); background:transparent; color:inherit; outline:none;
+    }
+    .actions{ display:flex; gap:8px; justify-content:flex-end; }
+    .btn{ border:none; padding:10px 14px; border-radius:10px;
+      background:linear-gradient(135deg,#007bff,#66b2ff); color:#fff; font-weight:700; cursor:pointer; }
+    .btn.secondary{ background:transparent; color:inherit; border:1px solid rgba(255,255,255,.18); }
+
+    .result{ background: rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.12);
+      border-radius:12px; padding:12px; margin-top:10px; }
+    body.light-mode .result{ background: rgba(255,255,255,.65); }
+    .row{ margin:6px 0; }
+    .label{ font-weight:700; margin-right:6px; opacity:.9; }
+
+    .flags{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    .flag{ font-size:12px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      const isLight = (localStorage.getItem('mode')||'dark')==='light';
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+    });
+    function toggleLightDarkMode(){
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    }
+
+    function auditPolicy(){
+      const url = (document.getElementById('policyUrl').value||'').trim();
+      const text = (document.getElementById('policyText').value||'').trim();
+
+      if (!text && !url){
+        alert('Paste a privacy policy text or provide a URL.');
+        return;
+      }
+      if (!text && url){
+        // We don't fetch remote pages in-browser here (CORS). Ask user to paste text.
+        alert('For now, please paste the policy text (URL fetching is disabled in this prototype).');
+        return;
+      }
+
+      const analysis = analyzeText(text);
+      showResult(analysis);
+    }
+
+    function analyzeText(t){
+      const L = t.toLowerCase();
+      const res = {
+        dataCollected: [],
+        sharing: [],
+        tracking: [],
+        retention: [],
+        userControl: [],
+        risks: []
+      };
+
+      if (/(location|geolocation)/.test(L)) res.dataCollected.push('Location');
+      if (/(contact|email|phone)/.test(L)) res.dataCollected.push('Contact info');
+      if (/(payment|card)/.test(L)) res.dataCollected.push('Payment data');
+      if (/(biometric|face|fingerprint)/.test(L)) res.dataCollected.push('Biometric data');
+
+      if (/(third[- ]?part(y|ies)|partners|affiliates|advertis)/.test(L)) res.sharing.push('Shares with third parties/ads/affiliates');
+      if (/(sell|sale of data)/.test(L)) res.sharing.push('May sell or transfer data');
+
+      if (/(cookie|tracking|beacons|pixels)/.test(L)) res.tracking.push('Cookies/trackers/pixels');
+      if (/(analytics|google analytics|sdk)/.test(L)) res.tracking.push('Analytics SDKs');
+
+      if (/(retain|retention|store for)/.test(L)) res.retention.push('Data retention described');
+      if (/(delete|erasure|right to be forgotten)/.test(L)) res.userControl.push('Deletion/erasure rights');
+      if (/(opt[- ]?out|withdraw consent)/.test(L)) res.userControl.push('Opt-out / withdraw consent');
+
+      if (/(combine|enrich)/.test(L)) res.risks.push('Data combination/enrichment risk');
+      if (/(profiling|automated decision)/.test(L)) res.risks.push('Profiling/automated decisions');
+      if (/(cross[- ]?border|transfer)/.test(L)) res.risks.push('Cross-border data transfers');
+
+      return res;
+    }
+
+    function showResult(a){
+      const out = document.getElementById('caResult');
+      out.innerHTML = `
+        <div class="row"><span class="label">Data collected:</span> ${fmt(a.dataCollected)}</div>
+        <div class="row"><span class="label">Sharing:</span> ${fmt(a.sharing)}</div>
+        <div class="row"><span class="label">Tracking:</span> ${fmt(a.tracking)}</div>
+        <div class="row"><span class="label">Retention:</span> ${fmt(a.retention)}</div>
+        <div class="row"><span class="label">User control:</span> ${fmt(a.userControl)}</div>
+        <div class="row"><span class="label">Risks:</span> ${fmt(a.risks)}</div>
+      `;
+      out.hidden = false;
+      out.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+    function fmt(arr){ return (arr && arr.length) ? `<div class="flags">${arr.map(x=>`<span class="flag">${x}</span>`).join('')}</div>` : '—'; }
+  </script>
+</head>
+<body>
+  <div id="topbar">
+    <div class="grp"><a href="index.html" class="pill">← Back</a></div>
+    <div class="grp">
+      <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
+      <a href="profile.html" class="pill">Your Profile</a>
+    </div>
+  </div>
+
+  <header>
+    <h1>Consent Auditor</h1>
+    <p class="sub">TL;DR of a site's privacy policy: what data, who gets it, how long, which rights.</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>Audit a policy</h2>
+      <input id="policyUrl" type="text" placeholder="Policy URL (optional)"/>
+      <div style="margin-top:10px;">
+        <textarea id="policyText" rows="8" placeholder="Paste the privacy policy text here..."></textarea>
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn secondary" type="button" onclick="document.getElementById('policyUrl').value='';document.getElementById('policyText').value=''">Clear</button>
+        <button class="btn" type="button" onclick="auditPolicy()">Audit →</button>
+      </div>
+
+      <div id="caResult" class="result" hidden></div>
+    </section>
+
+    <section class="panel">
+      <h2>Note</h2>
+      <p class="muted">Prototype parser — for awareness only. Not legal advice. Future version will use AI and site fetching (server-side) for better accuracy.</p>
+    </section>
+  </main>
+</body>
+</html>
