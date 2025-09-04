@@ -382,7 +382,9 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
       storage: window.localStorage,
     },
   });
-  window.supabaseClient = supabaseClient;
+    window.supabaseClient = supabaseClient;
+  // ✅ moderator(s) allowed to open "Soon" cards
+  window.BA_MOD_EMAILS = ['cichy260591@gmail.com']; // dodaj tu swoje konto/y moderatora
 
   // 2) Logowanie Google + bezpieczne przekierowanie (replace)
   async function signInWithGoogle() {
@@ -539,108 +541,108 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 </article>
     
     <!-- Public inventions gallery -->
-<article class="tool-card" data-href="inventions.html" data-requires-auth="false">
+<article class="tool-card" data-href="inventions.html" data-requires-auth="false" data-moderator-only="true">
   <div class="tool-top">
     <span class="tool-icon">🧭</span>
-    <span class="tool-badge">Public</span>
+    <span class="tool-badge">Soon</span>
   </div>
   <h3 class="tool-title">Inventions</h3>
   <div class="tool-cta">
-    <span class="status">Open</span>
+    <span class="status">Soon</span>
     <button class="open-btn" type="button">Open →</button>
   </div>
 </article>
 
 <!-- Moderator panel (login required) -->
-<article class="tool-card" data-href="inventor_review.html" data-requires-auth="true">
+<article class="tool-card" data-href="inventor_review.html" data-requires-auth="true" data-moderator-only="true">
   <div class="tool-top">
     <span class="tool-icon">🛡️</span>
-    <span class="tool-badge">Moderation</span>
+    <span class="tool-badge">Soon</span>
   </div>
   <h3 class="tool-title">Inventor Review</h3>
   <div class="tool-cta">
-    <span class="status">Login required</span>
+    <span class="status">Soon</span>
     <button class="open-btn" type="button">Open →</button>
   </div>
-</article> 
+</article>
 
    <!-- Karta: Foresight (czytelnia prognoz) -->
-<article class="tool-card" data-href="foresight.html" data-requires-auth="false">
+<article class="tool-card" data-href="foresight.html" data-requires-auth="false" data-moderator-only="true">
   <div class="tool-top">
     <span class="tool-icon">🔮</span>
-    <span class="tool-badge">Read‑only</span>
+    <span class="tool-badge">Soon</span>
   </div>
   <h3 class="tool-title">Foresight</h3>
   <div class="tool-cta">
-    <span class="status">Open</span>
+    <span class="status">Soon</span>
     <button class="open-btn" type="button">Open →</button>
   </div>
 </article>
 
     <!-- Karta: AI Inventor -->
-<article class="tool-card" data-href="inventor.html" data-requires-auth="true">
+<article class="tool-card" data-href="inventor.html" data-requires-auth="true" data-moderator-only="true">
   <div class="tool-top">
     <span class="tool-icon">🛠</span>
-    <span class="tool-badge">Prototype</span>
+    <span class="tool-badge">Soon</span>
   </div>
   <h3 class="tool-title">AI Inventor</h3>
   <div class="tool-cta">
-    <span class="status">Open</span>
+    <span class="status">Soon</span>
     <button class="open-btn" type="button">Open →</button>
   </div>
 </article>
 
     <!-- Karta: Mitobuster -->
-  <article class="tool-card" data-href="mitobuster.html" data-requires-auth="false">
-    <div class="tool-top">
-      <span class="tool-icon">🧯</span>
-      <span class="tool-badge">Open</span>
-    </div>
-    <h3 class="tool-title">Mitobuster</h3>
-    <div class="tool-cta">
-      <span class="status">Open</span>
-      <button class="open-btn" type="button">Open →</button>
-    </div>
-  </article>
+  <article class="tool-card" data-href="mitobuster.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🧯</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Mitobuster</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>
 
     <!-- Card: Health Claims -->
-    <article class="tool-card" data-href="healthclaims.html" data-requires-auth="false">
-      <div class="tool-top">
-        <span class="tool-icon">🩺</span>
-        <span class="tool-badge">Moderation</span>
-      </div>
-      <h3 class="tool-title">Health Claims</h3>
-      <div class="tool-cta">
-        <span class="status">Open</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
+    <article class="tool-card" data-href="healthclaims.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🩺</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Health Claims</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>
 
     <!-- Card: Consent Auditor -->
-    <article class="tool-card" data-href="consentauditor.html" data-requires-auth="false">
-      <div class="tool-top">
-        <span class="tool-icon">🔏</span>
-        <span class="tool-badge">Open</span>
-      </div>
-      <h3 class="tool-title">Consent Auditor</h3>
-      <div class="tool-cta">
-        <span class="status">Open</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
+    <article class="tool-card" data-href="consentauditor.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🔏</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Consent Auditor</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>
 
     <!-- Card: CultureAtlas -->
-    <article class="tool-card" data-href="culture-atlas.html" data-requires-auth="false">
-      <div class="tool-top">
-        <span class="tool-icon">🌍</span>
-        <span class="tool-badge">Open</span>
-      </div>
-      <h3 class="tool-title">CultureAtlas</h3>
-      <div class="tool-cta">
-        <span class="status">Open</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
+    <article class="tool-card" data-href="culture-atlas.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🌍</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">CultureAtlas</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>
     
   </div>
 </section>
@@ -1113,26 +1115,54 @@ function closeSupportModal() {
   const grid = document.getElementById('toolsGrid');
   if (!grid) return;
 
-  async function refreshLocks(){
+    async function refreshLocks(){
     const { data: { session } } = await sb.auth.getSession();
     const authed = !!session;
+    const userEmail = session?.user?.email || '';
+    const isMod = Array.isArray(window.BA_MOD_EMAILS) && window.BA_MOD_EMAILS.includes(userEmail);
+
     grid.querySelectorAll('.tool-card').forEach(card=>{
-      const needs = card.dataset.requiresAuth === 'true';
-      card.classList.toggle('locked', needs && !authed);
-      const status = card.querySelector('.status');
-      if(status){ status.textContent = needs ? (authed ? 'Ready' : 'Login required') : 'Open'; }
+      const needsAuth = card.dataset.requiresAuth === 'true';
+      const modOnly   = card.dataset.moderatorOnly === 'true';
+
+      // blokada: wymaga logowania lub mod-only dla nie-modów
+      const lockedForAuth = needsAuth && !authed;
+      const lockedForRole = modOnly && !isMod;
+      const locked = lockedForAuth || lockedForRole;
+
+      card.classList.toggle('locked', locked);
+
+      const statusEl = card.querySelector('.status');
+      const badgeEl  = card.querySelector('.tool-badge');
+
+      // Teksty statusu/badge:
+      if (modOnly && !isMod) {
+        if (statusEl) statusEl.textContent = 'Soon';
+        if (badgeEl)  badgeEl.textContent  = 'Soon';
+      } else if (needsAuth && !authed) {
+        if (statusEl) statusEl.textContent = 'Login required';
+      } else {
+        if (statusEl && statusEl.textContent.trim().length === 0) statusEl.textContent = 'Open';
+      }
+
+      // Kliknięcia:
       card.onclick = () => {
         const href = card.dataset.href;
-        if (needs && !authed) {
+        if (lockedForAuth) {
           localStorage.setItem('ba_redirect', href);
           const modal = document.getElementById('loginModal'); if (modal) modal.classList.add('open');
           if (typeof window.openLoginModal === 'function') window.openLoginModal();
+          return;
+        }
+        if (lockedForRole) {
+          alert('Coming soon.');
           return;
         }
         if (href) window.location.href = href;
       };
     });
   }
+
 
   window.refreshLocks = refreshLocks;
 
