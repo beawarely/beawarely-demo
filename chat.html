@@ -9,13 +9,34 @@
     body{margin:0;font-family:'Segoe UI',sans-serif;color:#fff;background:radial-gradient(ellipse at top,#0d0d2b 0%,#000 100%);}
     .wrap{max-width:960px;margin:0 auto;padding:28px}
     .chat-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
-    .chat-messages{height:min(60vh,520px);overflow:auto;padding:10px;border-radius:12px;background:rgba(0,0,0,.18);display:flex;flex-direction:column;gap:10px}
+    .chat-messages{
+  overflow:auto;padding:10px;border-radius:12px;
+  background:rgba(0,0,0,.18);
+  display:flex;flex-direction:column;gap:10px;
+}
     .msg{max-width:92%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-wrap:break-word;box-shadow:0 4px 14px rgba(0,0,0,.15)}
     .msg.user{align-self:flex-end;background:linear-gradient(135deg,#007bff,#66b2ff);color:#fff;border-bottom-right-radius:6px}
     .msg.ai{align-self:flex-start;background:rgba(255,255,255,.09);color:#eaeaea;border-bottom-left-radius:6px}
     .controls{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px}
-    textarea{resize:none;border-radius:10px;padding:10px}
-    .send{border:none;border-radius:10px;padding:10px 14px;background:linear-gradient(135deg,#007bff,#66b2ff);color:#fff;font-weight:600;cursor:pointer}
+    textarea{
+  resize:none;border-radius:10px;padding:10px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.18);
+  color:#eaeaea;
+}
+.send{
+  border:none;border-radius:10px;padding:10px 14px;
+  background:linear-gradient(135deg,#007bff,#66b2ff);
+  color:#fff;font-weight:600;cursor:pointer;
+  transition: transform .06s ease, opacity .2s ease;
+}
+.send:hover{ transform: translateY(-1px); }
+.send:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+
+.status-note{
+  opacity:.65;margin-top:8px;font-size:.9rem;
+}
+
     .topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
     .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
     a.back{color:#66b2ff;text-decoration:none}
@@ -63,7 +84,7 @@ textarea:focus-visible {
     <div class="topbar">
   <a href="index.html" class="back">← Back</a>
   <h2 style="margin:0">BeAwarely AI Chat</h2>
-  <span class="badge">Mistral-7B-Instruct-Q6_K</span>
+  <span id="modelChip" class="badge" hidden></span>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
     <span id="loginStatus" class="badge" aria-live="polite">Checking session…</span>
     <button id="logoutBtn" class="send" type="button" aria-label="Log out">Log out</button>
@@ -86,7 +107,7 @@ textarea:focus-visible {
 <button id="sendBtn" class="send" aria-label="Send message">Send</button>
 
       </div>
-      <div style="opacity:.7;margin-top:8px;font-size:.9rem">Backend not connected yet</div>
+      <div class="status-note" id="backendStatus" aria-live="polite">Not connected to backend yet</div>
     </div>
   </div>
 
@@ -146,11 +167,27 @@ textarea:focus-visible {
     });
   </script>
 
-  <script>
-    // Prosty handler UI (na razie bez połączenia do Mistrala)
+<script>
+// --- Ustaw widoczny „przydomek” modelu (bez zdradzania konkretu) --- //
+(function initModelChip(){
+  const MODEL_DISPLAY_NAME = (localStorage.getItem('ba_model_name') || 'BeAwarely Core').trim();
+  const chip = document.getElementById('modelChip');
+  if (chip && MODEL_DISPLAY_NAME){
+    chip.textContent = MODEL_DISPLAY_NAME;
+    chip.hidden = false;
+  }
+})();
+</script>
+
+<script>
+    // Prosty handler UI (na razie bez połączenia do backendu)
     const msgs = document.getElementById('chatMessages');
     const input = document.getElementById('chatInput');
     const send = document.getElementById('sendBtn');
+
+function updateSendDisabled(){ send.disabled = !input.value.trim(); }
+input.addEventListener('input', updateSendDisabled);
+document.addEventListener('DOMContentLoaded', updateSendDisabled);
 
     function addMsg(text, who){
       const el = document.createElement('div');
@@ -173,7 +210,11 @@ textarea:focus-visible {
       addMsg(q, 'user');
       input.value = '';
       // tu później wstawisz fetch do swojego endpointu Mistrala
-      setTimeout(()=>addMsg('This is a placeholder response. Connect your Mistral endpoint to get real answers.'), 400);
+      setTimeout(()=>{
+  addMsg('This is a placeholder response. Connect your backend endpoint to get real answers.');
+  const st = document.getElementById('backendStatus');
+  if (st) st.textContent = 'Backend: not connected';
+}, 400);
     };
 
     document.addEventListener('DOMContentLoaded', ()=>{ 
