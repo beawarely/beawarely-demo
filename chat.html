@@ -76,6 +76,36 @@ textarea:focus-visible {
 
   .chat-messages{ overscroll-behavior: contain; }
 #chatInput{ line-height: 22px; } /* spójne z autogrow (22px) */
+
+/* ==== Sidebar / History ==== */
+.app{ display:flex; gap:16px; }
+.sidebar{
+  width:260px; flex:0 0 260px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px; padding:12px; height:fit-content;
+  max-height: min(78dvh, 620px); overflow:auto;
+}
+.side-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.mini{
+  padding:6px 10px; border:none; border-radius:8px; cursor:pointer;
+  background:rgba(255,255,255,.12); color:#fff;
+}
+.conv-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.conv-item{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px; border-radius:10px;
+  background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+}
+.conv-item[aria-selected="true"]{ outline:2px solid #66b2ff; }
+.conv-item .title{ flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.conv-item .del{ background:transparent; border:none; color:#bbb; cursor:pointer; }
+.main{ flex:1 1 auto; }
+@media (max-width: 880px){
+  .app{ flex-direction:column; }
+  .sidebar{ width:100%; flex:0 0 auto; order:2; }
+}
   
   </style>
 </head>
@@ -91,7 +121,16 @@ textarea:focus-visible {
   </div>
 </div>
 
+<div class="app">
+  <aside class="sidebar" aria-label="Conversation history">
+    <div class="side-head">
+      <strong>Conversations</strong>
+      <button id="newConvBtn" class="mini">+ New</button>
+    </div>
+    <ul id="convList" class="conv-list" role="listbox" aria-label="Saved conversations"></ul>
+  </aside>
 
+  <div class="main">
     <div class="chat-card">
       <div id="chatMessages" class="chat-messages" aria-live="polite" aria-atomic="false">
         <div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>
@@ -109,7 +148,8 @@ textarea:focus-visible {
       </div>
       <div class="status-note" id="backendStatus" aria-live="polite">Not connected to backend yet</div>
     </div>
-  </div>
+  </div> <!-- .main -->
+</div>   <!-- .app -->
 
     <script>
     // === Supabase: jeden klient dla całego serwisu (spójnie z index.html) ===
@@ -180,6 +220,127 @@ textarea:focus-visible {
 </script>
 
 <script>
+// ==== Conversation history (localStorage, per-user) ==== //
+const STORAGE_KEY = 'ba_chat_history';
+const CURRENT_KEY = 'ba_current_conv';
+
+function userScopedKey(base){
+  // jeśli chcesz kiedyś wersję per-user z Supabase: dopisz user.id do klucza
+  return base;
+}
+
+function loadHistory(){
+  try{ return JSON.parse(localStorage.getItem(userScopedKey(STORAGE_KEY))) || []; }
+  catch{ return []; }
+}
+function saveHistory(list){
+  localStorage.setItem(userScopedKey(STORAGE_KEY), JSON.stringify(list));
+}
+function getCurrentId(){ return localStorage.getItem(userScopedKey(CURRENT_KEY)); }
+function setCurrentId(id){ localStorage.setItem(userScopedKey(CURRENT_KEY), id); }
+
+function createConversation(title){
+  const id = 'c_' + crypto.randomUUID();
+  const conv = { id, title: (title||'New conversation'), created: Date.now(), messages: [] };
+  const list = loadHistory(); list.unshift(conv); saveHistory(list); setCurrentId(id); return conv;
+}
+function findConv(id){
+  return loadHistory().find(c=>c.id===id) || null;
+}
+function updateConv(conv){
+  const list = loadHistory();
+  const idx = list.findIndex(c=>c.id===conv.id);
+  if(idx>=0){ list[idx]=conv; saveHistory(list); }
+}
+
+function renderHistory(){
+  const ul = document.getElementById('convList');
+  if(!ul) return;
+  const list = loadHistory();
+  const current = getCurrentId();
+  ul.innerHTML = '';
+  list.forEach(c=>{
+    const li = document.createElement('li');
+    li.className='conv-item';
+    li.setAttribute('role','option');
+    li.setAttribute('aria-selected', String(c.id===current));
+    li.dataset.id = c.id;
+
+    const span = document.createElement('span');
+    span.className='title';
+    span.textContent = c.title;
+
+    const del = document.createElement('button');
+    del.className='del'; del.title='Delete';
+    del.textContent='×';
+
+    li.appendChild(span); li.appendChild(del);
+    ul.appendChild(li);
+  });
+}
+
+function selectConversation(id){
+  const conv = findConv(id);
+  if(!conv) return;
+  setCurrentId(id);
+  renderHistory();
+  // załaduj wiadomości do czatu
+  const msgsBox = document.getElementById('chatMessages');
+  msgsBox.innerHTML = '';
+  conv.messages.forEach(m=>{
+    addMsg(m.content, m.role==='user' ? 'user' : 'ai', /*store*/false);
+  });
+  // fokus w input
+  const inputEl = document.getElementById('chatInput'); inputEl?.focus();
+}
+
+function ensureConversation(firstMsg){
+  let id = getCurrentId();
+  let conv = id ? findConv(id) : null;
+  if(!conv){
+    conv = createConversation(firstMsg?.slice(0,40) || 'New conversation');
+    renderHistory();
+  }
+  return conv;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const newBtn = document.getElementById('newConvBtn');
+  const listEl = document.getElementById('convList');
+
+  newBtn?.addEventListener('click', ()=>{
+    createConversation('New conversation');
+    renderHistory();
+    // wyczyść okno
+    const msgsBox = document.getElementById('chatMessages');
+    msgsBox.innerHTML = '<div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>';
+  });
+
+  listEl?.addEventListener('click', (e)=>{
+    const target = e.target;
+    const item = target.closest('.conv-item');
+    if(!item) return;
+    const id = item.dataset.id;
+
+    if(target.classList.contains('del')){
+      const list = loadHistory().filter(c=>c.id!==id);
+      saveHistory(list);
+      if(getCurrentId()===id){ localStorage.removeItem(userScopedKey(CURRENT_KEY)); }
+      renderHistory();
+      return;
+    }
+    selectConversation(id);
+  });
+
+  // pierwsze renderowanie
+  renderHistory();
+  // jeśli coś jest wybrane – załaduj
+  const cur = getCurrentId();
+  if(cur){ selectConversation(cur); }
+});
+</script>
+
+<script>
     // Prosty handler UI (na razie bez połączenia do backendu)
     const msgs = document.getElementById('chatMessages');
     const input = document.getElementById('chatInput');
@@ -189,13 +350,25 @@ function updateSendDisabled(){ send.disabled = !input.value.trim(); }
 input.addEventListener('input', updateSendDisabled);
 document.addEventListener('DOMContentLoaded', updateSendDisabled);
 
-    function addMsg(text, who){
-      const el = document.createElement('div');
-      el.className = 'msg ' + (who || 'ai');
-      el.textContent = text;
-      msgs.appendChild(el);
-      msgs.scrollTop = msgs.scrollHeight;
+    function addMsg(text, who, store = true){
+  const role = (who === 'user') ? 'user' : 'ai';
+  const el = document.createElement('div');
+  el.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+  el.textContent = text;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  if(store){
+    const conv = ensureConversation(role==='user' ? text : undefined);
+    conv.messages.push({ role, content: text, ts: Date.now() });
+    // jeśli to pierwsza wiadomość użytkownika – ustaw tytuł
+    if(conv.messages.length === 1 && role==='user'){
+      conv.title = text.slice(0, 40);
     }
+    updateConv(conv);
+    renderHistory();
+  }
+}
 
     input.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' && !e.shiftKey){
@@ -211,7 +384,7 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
       input.value = '';
       // tu później wstawisz fetch do swojego endpointu Mistrala
       setTimeout(()=>{
-  addMsg('This is a placeholder response. Connect your backend endpoint to get real answers.');
+  addMsg('This is a placeholder response. Connect your backend endpoint to get real answers.', 'ai');
   const st = document.getElementById('backendStatus');
   if (st) st.textContent = 'Backend: not connected';
 }, 400);
