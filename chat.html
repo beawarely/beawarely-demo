@@ -290,8 +290,10 @@ function selectConversation(id){
   conv.messages.forEach(m=>{
     addMsg(m.content, m.role==='user' ? 'user' : 'ai', /*store*/false);
   });
-  // fokus w input
-  const inputEl = document.getElementById('chatInput'); inputEl?.focus();
+   // fokus w input + odświeżenie stanu przycisku
+  const inputEl = document.getElementById('chatInput');
+  inputEl?.focus();
+  updateSendDisabled();
 }
 
 function ensureConversation(firstMsg){
@@ -308,13 +310,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const newBtn = document.getElementById('newConvBtn');
   const listEl = document.getElementById('convList');
 
-  newBtn?.addEventListener('click', ()=>{
-    createConversation('New conversation');
-    renderHistory();
-    // wyczyść okno
-    const msgsBox = document.getElementById('chatMessages');
-    msgsBox.innerHTML = '<div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>';
-  });
+ newBtn?.addEventListener('click', ()=>{
+  createConversation('New conversation');
+  renderHistory();
+  // wyczyść okno
+  const msgsBox = document.getElementById('chatMessages');
+  msgsBox.innerHTML = '<div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>';
+  // dopieszczka: od razu fokus i aktualizacja przycisku
+  document.getElementById('chatInput')?.focus();
+  updateSendDisabled();
+});
 
   listEl?.addEventListener('click', (e)=>{
     const target = e.target;
