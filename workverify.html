@@ -118,6 +118,30 @@
       background: color-mix(in oklab, var(--accent) 16%, transparent);
       border:1px solid var(--border); color: inherit; display:inline-block;
     }
+      /* Smooth theme transitions (1) */
+    @media (prefers-reduced-motion: no-preference){
+      body, .panel, .pill, .btn,
+      input[type="text"], textarea, header, #topbar{
+        transition:
+          background-color .25s ease,
+          color .25s ease,
+          border-color .25s ease,
+          box-shadow .25s ease,
+          filter .25s ease;
+      }
+      /* shorten & synchronize transitions podczas przełączania trybu */
+      body.theme-anim *{ transition-duration:.25s !important; }
+    }
+
+    /* Enhanced header title (3) */
+    header h1{
+      font-family:'Sriracha', cursive; font-size:56px; margin:0 0 8px; letter-spacing:.3px;
+      background: linear-gradient(90deg,
+        color-mix(in oklab, var(--text) 85%, var(--accent) 15%),
+        color-mix(in oklab, var(--accent) 60%, var(--text) 40%));
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      text-shadow: 0 2px 12px color-mix(in oklab, var(--accent) 22%, transparent);
+    }
   </style>
 
 
@@ -133,10 +157,16 @@
   document.body.classList.toggle('dark-mode', !isLight);
 });
     function toggleLightDarkMode(){
-      const isLight = document.body.classList.toggle('light-mode');
-      document.body.classList.toggle('dark-mode', !isLight);
-      localStorage.setItem('mode', isLight ? 'light' : 'dark');
-    }
+  // Smooth theme switch (1) – dodaj krótką klasę animującą
+  document.body.classList.add('theme-anim');
+
+  const isLight = document.body.classList.toggle('light-mode');
+  document.body.classList.toggle('dark-mode', !isLight);
+  localStorage.setItem('mode', isLight ? 'light' : 'dark');
+
+  // usuń klasę po animacji
+  setTimeout(()=> document.body.classList.remove('theme-anim'), 280);
+}
 
     // Tymczasowy placeholder akcji – prawdziwą logikę dodamy później
     function submitExperience(){
