@@ -152,6 +152,19 @@
     .recent-content{ margin:0; color:var(--text); opacity:.95; }
 
   </style>
+<style>
+  /* --- Draft toolbar & AI dock --- */
+  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:10px; }
+  .ai-dock{
+    position:fixed; right:18px; bottom:18px; width:min(360px, 92vw);
+    background: var(--card); border:1px solid var(--border); border-radius:14px; padding:12px;
+    box-shadow: var(--shadow); z-index: 10001;
+  }
+  .ai-dock.collapsed textarea, .ai-dock.collapsed .actions{ display:none; }
+  .ai-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  .ai-toggle{ padding:4px 10px; }
+  #aiInput{ width:100%; box-sizing:border-box; margin:8px 0; }
+</style>
 
 
   <script>
@@ -229,9 +242,11 @@
         <label class="muted">Experience</label>
         <textarea id="expText" rows="5" placeholder="Describe the situation. Keep it factual; avoid personal data."></textarea>
       </div>
-      <div class="actions" style="margin-top:10px;">
-        <button class="btn secondary" type="button" onclick="document.getElementById('expText').value=''">Clear</button>
-        <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Submit</button>
+      <div class="toolbar">
+        <button id="saveDraftBtn" class="btn secondary" type="button">Save draft</button>
+        <button id="loadDraftBtn" class="btn secondary" type="button">Load draft</button>
+        <button id="clearDraftBtn" class="btn secondary" type="button">Clear</button>
+        <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Publish</button>
       </div>
     </section>
 
@@ -251,7 +266,21 @@
         <li>Privacy & moderation pipeline.</li>
       </ul>
     </section>
-  </main>
+    </main>
+
+  <!-- Mini AI assistant dock (context-aware) -->
+  <div id="aiDock" class="ai-dock collapsed">
+    <div class="ai-head">
+      <strong>AI Assist — WorkVerify</strong>
+      <button class="pill ai-toggle" type="button" onclick="document.getElementById('aiDock').classList.toggle('collapsed')">Toggle</button>
+    </div>
+    <textarea id="aiInput" rows="3" placeholder="Ask about tone, legality, or red/green flags…"></textarea>
+    <div class="actions">
+      <button id="aiUseDraftBtn" class="btn secondary" type="button">Use my draft</button>
+      <button id="aiOpenChatBtn" class="btn" type="button">Open in AI Chat →</button>
+    </div>
+  </div>
+
 <!-- Supabase + funkcjonalność strony -->
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -263,23 +292,89 @@
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     window.sb = sb;
 
-    const $ = (sel)=> document.querySelector(sel);
+        const $ = (sel)=> document.querySelector(sel);
     const companyEl = $('#companyName');
     const roleEl = $('#roleName');
     const textEl = $('#expText');
     const submitBtn = $('#submitBtn');
     const recentList = $('#recentList');
 
-    function escapeHTML(s){
+    // Draft & AI controls
+    const saveDraftBtn = $('#saveDraftBtn');
+    const loadDraftBtn = $('#loadDraftBtn');
+    const clearDraftBtn = $('#clearDraftBtn');
+    const aiInputEl = $('#aiInput');
+    const aiUseDraftBtn = $('#aiUseDraftBtn');
+    const aiOpenChatBtn = $('#aiOpenChatBtn');
+
+    // helper: per-user draft key
+    let _lastUserId = 'anon';
+    const draftKey = () => `wv_draft_${_lastUserId}`;
+
+
+        function escapeHTML(s){
       return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
     }
 
-    async function getSession(){
+    /* ------- Drafts (local-only) ------- */
+    function readDraft(){
+      try{ return JSON.parse(localStorage.getItem(draftKey())||'null'); }catch(e){ return null; }
+    }
+    function writeDraft(obj){
+      localStorage.setItem(draftKey(), JSON.stringify({ ...obj, ts: Date.now() }));
+    }
+    function loadDraftIntoForm(){
+      const d = readDraft();
+      if(!d){ alert('No saved draft.'); return; }
+      companyEl.value = d.company || '';
+      roleEl.value = d.role || '';
+      textEl.value = d.content || '';
+      alert('Draft loaded.');
+    }
+    function saveDraftFromForm(){
+      const payload = {
+        company: (companyEl.value||'').trim(),
+        role: (roleEl.value||'').trim(),
+        content: (textEl.value||'').trim()
+      };
+      if(!payload.company && !payload.role && !payload.content){
+        alert('Draft is empty. Type something first.'); return;
+      }
+      writeDraft(payload);
+      alert('Draft saved locally.');
+    }
+
+    /* ------- Mini AI ------- */
+    function buildAIContext(){
+      const company = (companyEl.value||'').trim() || '—';
+      const role = (roleEl.value||'').trim() || '—';
+      const content = (textEl.value||'').trim();
+      const question = (aiInputEl?.value||'').trim();
+      return `Context: WorkVerify user draft
+Company: ${company}
+Role: ${role}
+Text:
+${content || '(no text yet)'}
+---
+Question:
+${question || '(analyze tone, legality, red/green flags, suggestions)'}`;
+    }
+    function openChatWithContext(){
+      const prefill = buildAIContext();
+      const url = `chat.html?prefill=${encodeURIComponent(prefill)}&ctx=workverify`;
+      window.open(url, '_blank');
+    }
+
+
+       async function getSession(){
       const { data:{ session } } = await sb.auth.getSession();
+      // cache last seen user id for per-user drafts
+      _lastUserId = session?.user?.id || 'anon';
       return session || null;
     }
 
-    async function setFormState(){
+
+        async function setFormState(){
       const session = await getSession();
       const authed = !!session?.user;
       const fields = [companyEl, roleEl, textEl];
@@ -293,11 +388,17 @@
       }else{
         fields.forEach(el=> el.disabled = false);
         if (submitBtn){
-          submitBtn.textContent = 'Submit';
+          submitBtn.textContent = 'Publish';
           submitBtn.onclick = () => submitExperience();
         }
       }
+
+      // Draft buttons are always usable (local only)
+      if(saveDraftBtn) saveDraftBtn.disabled = false;
+      if(loadDraftBtn) loadDraftBtn.disabled = false;
+      if(clearDraftBtn) clearDraftBtn.disabled = false;
     }
+
 
     async function loadRecent(){
       if(!recentList) return;
@@ -333,8 +434,15 @@
       }).join('');
     }
 
-    // Implementacja wysyłki – wołana przez wrapper w <head>
+        // Implementacja wysyłki – wołana przez wrapper w <head>
     window._submitExperienceImpl = async function(){
+      // auto-save current form into draft before publishing
+      writeDraft({
+        company: (companyEl.value||'').trim(),
+        role: (roleEl.value||'').trim(),
+        content: (textEl.value||'').trim()
+      });
+
       const session = await getSession();
       if(!session){ alert('Please log in first.'); return; }
 
@@ -369,12 +477,40 @@
       loadRecent();
     };
 
-    // Init
+        // Init
     document.addEventListener('DOMContentLoaded', async ()=>{
       await setFormState();
       await loadRecent();
-      sb.auth.onAuthStateChange(()=> setFormState());
+
+      // Wire draft buttons
+      if(saveDraftBtn) saveDraftBtn.onclick = saveDraftFromForm;
+      if(loadDraftBtn) loadDraftBtn.onclick = loadDraftIntoForm;
+      if(clearDraftBtn) clearDraftBtn.onclick = ()=>{
+        companyEl.value=''; roleEl.value=''; textEl.value='';
+      };
+
+      // AI buttons
+      if(aiUseDraftBtn) aiUseDraftBtn.onclick = ()=>{ aiInputEl.value = (textEl.value||'').trim(); };
+      if(aiOpenChatBtn) aiOpenChatBtn.onclick = openChatWithContext;
+
+      // Simple autosave on input (debounced)
+      let t=null;
+      [companyEl, roleEl, textEl].forEach(el=>{
+        el.addEventListener('input', ()=>{
+          clearTimeout(t);
+          t = setTimeout(()=> writeDraft({
+            company:(companyEl.value||'').trim(),
+            role:(roleEl.value||'').trim(),
+            content:(textEl.value||'').trim()
+          }), 800);
+        });
+      });
+
+      sb.auth.onAuthStateChange(async ()=>{
+        await setFormState();
+      });
     });
+
   </script>
 </body>
 </html>
