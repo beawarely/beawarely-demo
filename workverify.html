@@ -142,6 +142,15 @@
       -webkit-background-clip:text; background-clip:text; color:transparent;
       text-shadow: 0 2px 12px color-mix(in oklab, var(--accent) 22%, transparent);
     }
+  /* Recent list */
+    .recent-list{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .recent-card{
+      padding:10px 12px; border:1px solid var(--border); border-radius:12px;
+      background: color-mix(in oklab, var(--card) 92%, transparent);
+    }
+    .recent-meta{ display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); margin-bottom:6px; }
+    .recent-content{ margin:0; color:var(--text); opacity:.95; }
+
   </style>
 
 
@@ -168,12 +177,10 @@
   setTimeout(()=> document.body.classList.remove('theme-anim'), 280);
 }
 
-    // Tymczasowy placeholder akcji – prawdziwą logikę dodamy później
+    /* wrapper – prawdziwa implementacja w module poniżej */
     function submitExperience(){
-      const txt = (document.getElementById('expText').value||'').trim();
-      if(!txt){ alert('Please write a short experience.'); return; }
-      alert('Saved locally (stub). We will connect Supabase/AI next.');
-      document.getElementById('expText').value='';
+      if (window._submitExperienceImpl) return window._submitExperienceImpl();
+      alert('Loading…');
     }
   </script>
 </head>
@@ -224,8 +231,14 @@
       </div>
       <div class="actions" style="margin-top:10px;">
         <button class="btn secondary" type="button" onclick="document.getElementById('expText').value=''">Clear</button>
-        <button class="btn" type="button" onclick="submitExperience()">Submit</button>
+        <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Submit</button>
       </div>
+    </section>
+
+    <!-- Recent (approved) -->
+    <section class="panel">
+      <h2>Recent experiences (approved)</h2>
+      <div id="recentList" class="recent-list"></div>
     </section>
 
     <!-- Roadmap / coming next -->
@@ -239,5 +252,129 @@
       </ul>
     </section>
   </main>
+<!-- Supabase + funkcjonalność strony -->
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    // KONFIGURACJA: podmień na swoje wartości lub zdefiniuj globalnie window.__SUPABASE_URL / __SUPABASE_ANON_KEY
+    const SUPABASE_URL = window.__SUPABASE_URL || "https://YOUR-PROJECT.supabase.co";
+    const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY || "REPLACE_WITH_ANON_PUBLIC_KEY";
+
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.sb = sb;
+
+    const $ = (sel)=> document.querySelector(sel);
+    const companyEl = $('#companyName');
+    const roleEl = $('#roleName');
+    const textEl = $('#expText');
+    const submitBtn = $('#submitBtn');
+    const recentList = $('#recentList');
+
+    function escapeHTML(s){
+      return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    async function getSession(){
+      const { data:{ session } } = await sb.auth.getSession();
+      return session || null;
+    }
+
+    async function setFormState(){
+      const session = await getSession();
+      const authed = !!session?.user;
+      const fields = [companyEl, roleEl, textEl];
+
+      if(!authed){
+        fields.forEach(el=> el.disabled = true);
+        if (submitBtn){
+          submitBtn.textContent = 'Login to submit';
+          submitBtn.onclick = () => location.href = 'profile.html';
+        }
+      }else{
+        fields.forEach(el=> el.disabled = false);
+        if (submitBtn){
+          submitBtn.textContent = 'Submit';
+          submitBtn.onclick = () => submitExperience();
+        }
+      }
+    }
+
+    async function loadRecent(){
+      if(!recentList) return;
+      recentList.innerHTML = '<span class="muted">Loading…</span>';
+
+      const { data, error } = await sb
+        .from('work_experiences')
+        .select('id, company, role, content, created_at, status')
+        .eq('status','approved')
+        .order('created_at', { ascending:false })
+        .limit(6);
+
+      if(error){
+        recentList.innerHTML = `<span class="muted">Failed to load (${escapeHTML(error.message)})</span>`;
+        return;
+      }
+      if(!data || !data.length){
+        recentList.innerHTML = `<span class="muted">No approved entries yet.</span>`;
+        return;
+      }
+
+      recentList.innerHTML = data.map(r=>{
+        const meta = [
+          r.company ? escapeHTML(r.company) : '—',
+          r.role ? escapeHTML(r.role) : '—',
+          new Date(r.created_at).toLocaleString()
+        ].join(' • ');
+        const content = escapeHTML(r.content.length > 260 ? r.content.slice(0,260)+'…' : r.content);
+        return `<article class="recent-card">
+                  <div class="recent-meta">${meta}</div>
+                  <p class="recent-content">${content}</p>
+                </article>`;
+      }).join('');
+    }
+
+    // Implementacja wysyłki – wołana przez wrapper w <head>
+    window._submitExperienceImpl = async function(){
+      const session = await getSession();
+      if(!session){ alert('Please log in first.'); return; }
+
+      const company = (companyEl.value||'').trim();
+      const role = (roleEl.value||'').trim();
+      const content = (textEl.value||'').trim();
+
+      if(content.length < 40){
+        alert('Please provide at least ~40 characters describing the situation.');
+        return;
+      }
+      if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Saving…'; }
+
+      const payload = {
+        author: session.user.id,
+        company: company || null,
+        role: role || null,
+        content
+        // status = 'pending' (domyślnie po stronie SQL)
+      };
+
+      const { error } = await sb.from('work_experiences').insert(payload);
+      if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
+
+      if(error){
+        alert('Save failed: ' + error.message);
+        return;
+      }
+
+      companyEl.value = ''; roleEl.value = ''; textEl.value = '';
+      alert('Thanks! Your experience was submitted and is pending moderation.');
+      loadRecent();
+    };
+
+    // Init
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      await setFormState();
+      await loadRecent();
+      sb.auth.onAuthStateChange(()=> setFormState());
+    });
+  </script>
 </body>
 </html>
