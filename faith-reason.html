@@ -165,7 +165,11 @@ html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
       <h1>Faith & Reason</h1>
       <h2 class="muted">Religions, rules, absurdities, manipulation — and the good you can keep without any institution.</h2>
     </div>
-    <button id="themeToggle" class="btn" style="margin-left:auto">🌙</button>
+    <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
+      <span id="userBadge" class="pill">…</span>
+      <button id="logoutBtn" class="btn">Logout</button>
+      <button id="themeToggle" class="btn">🌙</button>
+    </div>
   </header>
 
   <main>
@@ -588,15 +592,44 @@ html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
       items.forEach(item => box.appendChild(mountItemCard(item)));
     }
 
-    function wireUI(){
+        function wireUI(){
       renderPresetChips();
       document.getElementById('btnSubmit').onclick = submitNewItem;
       document.getElementById('btnRefresh').onclick = refreshList;
       document.getElementById('filterReligion').onchange = refreshList;
       document.getElementById('filterCategory').onchange = refreshList;
       document.getElementById('filterStatus').onchange = refreshList;
+
+      // ——— Logged-in user badge + logout ———
+      const badge = document.getElementById('userBadge');
+      const logout = document.getElementById('logoutBtn');
+
+      function setUser(session){
+        if (!badge) return;
+        if (session?.user){
+          const u = session.user;
+          const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || (u.id || '').slice(0,8);
+          badge.textContent = `Logged in: ${name}`;
+          if (logout) logout.style.display = '';
+        } else {
+          badge.textContent = 'Not logged in';
+          if (logout) logout.style.display = 'none';
+        }
+      }
+
+      // Initial state + subscribe to changes
+      supabaseClient.auth.getSession().then(({ data }) => setUser(data?.session));
+      supabaseClient.auth.onAuthStateChange((_e, session) => setUser(session));
+
+      if (logout){
+        logout.onclick = async () => {
+          try { await supabaseClient.auth.signOut(); } finally { location.replace('index.html'); }
+        };
+      }
+
       refreshList();
     }
+
 
     document.addEventListener('DOMContentLoaded', wireUI);
   </script>
