@@ -98,6 +98,9 @@
   .note{margin-top:10px;color:var(--muted)}
   .hide{display:none !important}
 
+  /* Form actions alignment (right) */
+  .form-actions{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:12px}
+
   /* Smooth theme switch */
   .anim-theme *{ transition: color .25s, background-color .25s, border-color .25s }
 
@@ -138,14 +141,14 @@
     <!-- Submit form -->
     <div id="userCard" class="card hide" aria-hidden="true">
       <form id="ideaForm">
-        <div class="row" style="margin-bottom:var(--gap)">
+        <div class="row" style="margin-bottom:12px">
           <input id="title" class="input grow" type="text" maxlength="80" placeholder="Title (max 80 chars)" required/>
           <input id="tags" class="input" type="text" placeholder="Tags (comma separated)"/>
         </div>
         <textarea id="details" class="input" rows="4" maxlength="500" placeholder="Describe the problem/use-case (max 500 chars)"></textarea>
-        <div class="row" style="margin-top:var(--gap)">
-          <button id="submitBtn" class="btn" type="submit">Submit idea</button>
+        <div class="form-actions">
           <span id="formMsg" class="muted" aria-live="polite"></span>
+          <button id="submitBtn" class="btn" type="submit">Submit idea</button>
         </div>
       </form>
     </div>
