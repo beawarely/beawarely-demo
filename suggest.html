@@ -7,29 +7,60 @@
   <title>Suggest a Tool — BeAwarely</title>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-  /* High-contrast dark theme (spójne z resztą BeAwarely) */
+    <style>
+  /* Theme tokens — Dark default (matches BeAwarely), Light via .light on <html> */
   :root{
-    --bg:#0b0d14; 
-    --panel:#121625; 
+    /* dark */
+    --bg:#0b0d14;
+    --panel:#121625;
     --surface:#0f1424;
-    --text:#eaf0ff; 
-    --muted:#b9c2e6; 
-    --accent:#5aa8ff; 
+    --text:#eaf0ff;
+    --muted:#b9c2e6;
+    --accent:#5aa8ff;
+    --accent-2:#9ad0ff;
     --ring:rgba(90,168,255,.45);
     --border:rgba(234,240,255,.14);
+    --bg-gradient: radial-gradient(1200px 800px at 10% -10%, #10162a 0%, #070a12 40%, #050811 100%);
+  }
+  /* light overrides */
+  .light{
+    --bg:#f6f8ff;
+    --panel:#ffffff;
+    --surface:#f0f3ff;
+    --text:#0c1222;
+    --muted:#51608b;
+    --accent:#0b67ff;
+    --accent-2:#3fa0ff;
+    --ring:rgba(11,103,255,.35);
+    --border:rgba(12,18,34,.12);
+    --bg-gradient: radial-gradient(1200px 800px at 10% -10%, #ffffff 0%, #eef3ff 45%, #e9f0ff 100%);
   }
 
-  body{margin:0;background:
-    radial-gradient(1200px 800px at 10% -10%, #10162a 0%, #070a12 40%, #050811 100%);
-    color:var(--text);}
+  body{
+    margin:0;
+    background: var(--bg-gradient);
+    color:var(--text);
+  }
   a{color:var(--accent)}
 
   .container{max-width:1000px;margin:0 auto;padding:28px}
   .back{display:inline-block;margin-bottom:10px}
 
-  .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:18px}
-  .hero h1{margin:0;font-size:2rem}
+  /* Centered, prominent header */
+  .hero{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;margin-bottom:18px;text-align:center
+  }
+  .hero h1{
+    margin:0;font-size:2.2rem;letter-spacing:.3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent
+  }
   .sub{color:var(--muted);margin:.25rem 0 0}
+  .hero-controls{display:flex;gap:10px;align-items:center}
+  .btn.ghost{background:transparent;border:1px solid var(--border)}
+  .btn.ghost:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+
 
   .stats{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:14px;margin:18px 0 8px}
   .stat{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px;color:var(--text)}
@@ -75,11 +106,12 @@
     <a href="index.html" class="back">← Back to Home</a>
 
     <div class="hero">
-      <div>
-        <h1>Suggest a Tool</h1>
-        <p class="sub">Propose ideas, vote, and get updates.</p>
+      <h1>Suggest a Tool</h1>
+      <p class="sub">Propose ideas, vote, and get updates.</p>
+      <div class="hero-controls">
+        <button id="themeToggle" class="btn ghost" type="button" aria-pressed="false" aria-label="Toggle theme">🌙</button>
+        <div class="pill" id="modePill" aria-live="polite">Loading…</div>
       </div>
-      <div class="pill" id="modePill" aria-live="polite">Loading…</div>
     </div>
 
     <div class="stats">
@@ -160,10 +192,36 @@
       statVotes: document.getElementById('statVotes'),
       statFollowers: document.getElementById('statFollowers'),
       modePill: document.getElementById('modePill'),
-      modeNote: document.getElementById('modeNote')
+      modeNote: document.getElementById('modeNote'),
+      themeToggle: document.getElementById('themeToggle')
     };
 
     function setMode(text){ els.modePill.textContent = text; }
+
+    /* ===== Theme (Light/Dark with prefers-color-scheme + localStorage) ===== */
+    const THEME_KEY = 'ba_theme';
+    function getPreferredTheme(){
+      try{
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === 'light' || saved === 'dark') return saved;
+      }catch(_){}
+      return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+    }
+    function applyTheme(t){
+      document.documentElement.classList.toggle('light', t === 'light');
+      if (els.themeToggle){
+        els.themeToggle.setAttribute('aria-pressed', String(t === 'light'));
+        els.themeToggle.textContent = (t === 'light') ? '🌞' : '🌙';
+        els.themeToggle.title = (t === 'light') ? 'Switch to dark' : 'Switch to light';
+      }
+    }
+    let currentTheme = getPreferredTheme();
+    applyTheme(currentTheme);
+    els.themeToggle?.addEventListener('click', ()=>{
+      currentTheme = (currentTheme === 'light') ? 'dark' : 'light';
+      try{ localStorage.setItem(THEME_KEY, currentTheme); }catch(_){}
+      applyTheme(currentTheme);
+    });
     function show(el){ el.classList.remove('hide'); el.setAttribute('aria-hidden','false'); }
     function hide(el){ el.classList.add('hide'); el.setAttribute('aria-hidden','true'); }
 
