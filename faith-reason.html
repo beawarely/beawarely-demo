@@ -68,7 +68,22 @@
     .good{color:#9cf3c1}
     .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;background:#0a0e1b;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:.06rem .4rem}
     .help{font-size:.85rem;color:#c9d1ff}
-  </style>
+  /* ——— Light mode overrides ——— */
+html.light body{background:#f7f9ff;color:#0b0d14}
+html.light header.topbar{background:rgba(255,255,255,.75);border-bottom:1px solid rgba(0,0,0,.08)}
+html.light .back-btn{color:#0b0d14;border-color:rgba(0,0,0,.15)}
+html.light .back-btn:hover{border-color:rgba(0,0,0,.3)}
+html.light .card{background:linear-gradient(180deg,#ffffff,#f1f4fb);border:1px solid rgba(0,0,0,.08)}
+html.light label{color:#334155}
+html.light .muted{color:#4b5563}
+html.light input[type="text"],html.light textarea,html.light select{background:#ffffff;color:#0b0d14;border:1px solid rgba(0,0,0,.12)}
+html.light .chip,html.light .pill{border-color:rgba(0,0,0,.14);color:#334155}
+html.light .btn{background:#f4f6fb;color:#0b0d14;border-color:rgba(0,0,0,.12)}
+html.light .btn.primary{border-color:rgba(30,64,175,.45)}
+html.light .item{background:#ffffff;border:1px solid rgba(0,0,0,.08)}
+html.light .evidence a{color:#1d4ed8;border-bottom-color:rgba(29,78,216,.35)}
+html.light .kbd{background:#ffffff;border:1px solid rgba(0,0,0,.12)}
+</style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Supabase bootstrap — korzystamy z tych samych źródeł co pozostałe strony
@@ -99,7 +114,37 @@
       window.BA_SESSION = session;
     })();
   </script>
+<script>
+  // Theme init + toggle (persists in localStorage)
+  (function(){
+    const saved = localStorage.getItem('ba_theme');
+    const prefers = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    const mode = saved || prefers;
+    document.documentElement.classList.toggle('light', mode === 'light');
+
+    function setIcon(){
+      const b = document.getElementById('themeToggle');
+      if(!b) return;
+      const isLight = document.documentElement.classList.contains('light');
+      b.textContent = isLight ? '🌙' : '☀️';
+      b.title = isLight ? 'Switch to dark' : 'Switch to light';
+    }
+
+    window.addEventListener('DOMContentLoaded', ()=>{
+      setIcon();
+      const btn = document.getElementById('themeToggle');
+      if(btn){
+        btn.addEventListener('click', ()=>{
+          const isLight = document.documentElement.classList.toggle('light');
+          localStorage.setItem('ba_theme', isLight ? 'light' : 'dark');
+          setIcon();
+        });
+      }
+    });
+  })();
+</script>
 </head>
+
 <body>
   <header class="topbar">
     <button class="back-btn" onclick="location.href='index.html'">← Back</button>
@@ -107,6 +152,7 @@
       <h1>Faith & Reason</h1>
       <h2 class="muted">Religions, rules, absurdities, manipulation — and the good you can keep without any institution.</h2>
     </div>
+    <button id="themeToggle" class="btn" style="margin-left:auto">🌙</button>
   </header>
 
   <main>
