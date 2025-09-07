@@ -192,6 +192,9 @@
     border:1px solid var(--ai-border);
   }
   #aiInput{ width:100%; box-sizing:border-box; margin:8px 0; background: rgba(255,255,255,.03); border:1px solid var(--ai-border); }
+  .ai-notes{ font-size:12px; line-height:1.35; }
+  .ai-notes ul{ margin:6px 0 0 18px; padding:0; }
+  .ai-notes li{ margin:4px 0; }
 
 </style>
 
@@ -306,8 +309,11 @@
     <textarea id="aiInput" rows="3" placeholder="Ask about tone, legality, or red/green flags…"></textarea>
     <div class="actions">
       <button id="aiUseDraftBtn" class="btn secondary" type="button">Use my draft</button>
-      <button id="aiOpenChatBtn" class="btn" type="button">Open in AI Chat →</button>
+      <button id="aiReviewBtn" class="btn" type="button">Review draft</button>
+      <button id="aiAddNoteBtn" class="btn secondary" type="button">Add note</button>
+      <button id="aiClearNotesBtn" class="btn secondary" type="button">Clear notes</button>
     </div>
+    <div id="aiNotes" class="ai-notes muted" style="margin-top:8px;"></div>
   </div>
 
 <!-- Supabase + funkcjonalność strony -->
@@ -334,7 +340,12 @@
     const clearDraftBtn = $('#clearDraftBtn');
     const aiInputEl = $('#aiInput');
     const aiUseDraftBtn = $('#aiUseDraftBtn');
-    const aiOpenChatBtn = $('#aiOpenChatBtn');
+    const aiReviewBtn = $('#aiReviewBtn');
+    const aiAddNoteBtn = $('#aiAddNoteBtn');
+    const aiClearNotesBtn = $('#aiClearNotesBtn');
+    const aiAddNoteBtn = $('#aiAddNoteBtn');
+    const aiClearNotesBtn = $('#aiClearNotesBtn');
+    const aiNotesEl = $('#aiNotes');
 
     // helper: per-user draft key
     let _lastUserId = 'anon';
@@ -373,26 +384,79 @@
       alert('Draft saved locally.');
     }
 
-    /* ------- Mini AI ------- */
+        /* ------- Mini AI (local helper + notes) ------- */
+    const NOTES_KEY = ()=> `wv_notes_${_lastUserId}`;
+    function readNotes(){
+      try{ return JSON.parse(localStorage.getItem(NOTES_KEY())||'[]'); }catch(e){ return []; }
+    }
+    function writeNotes(arr){
+      localStorage.setItem(NOTES_KEY(), JSON.stringify(arr));
+    }
+    function renderNotes(){
+      const notes = readNotes();
+      if(!aiNotesEl) return;
+      if(!notes.length){ aiNotesEl.innerHTML = '<small>No notes yet.</small>'; return; }
+      aiNotesEl.innerHTML = '<small>Notes:</small><ul>' + notes.map(n=>`<li>${escapeHTML(n)}</li>`).join('') + '</ul>';
+    }
+    function addNote(text){
+      const notes = readNotes();
+      notes.unshift(text);
+      writeNotes(notes.slice(0,30)); // cap
+      renderNotes();
+    }
+
     function buildAIContext(){
       const company = (companyEl.value||'').trim() || '—';
       const role = (roleEl.value||'').trim() || '—';
       const content = (textEl.value||'').trim();
       const question = (aiInputEl?.value||'').trim();
-      return `Context: WorkVerify user draft
+      return `WorkVerify context
 Company: ${company}
 Role: ${role}
-Text:
+Draft:
 ${content || '(no text yet)'}
 ---
-Question:
-${question || '(analyze tone, legality, red/green flags, suggestions)'}`;
+Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral wording without personal data.'}`;
     }
-    function openChatWithContext(){
-      const prefill = buildAIContext();
-      // tryb „WorkVerify Chat”: tekst-only + notatki po stronie czatu
-      const url = `chat.html?ctx=workverify&features=textonly,notes&prefill=${encodeURIComponent(prefill)}`;
-      window.open(url, '_blank');
+
+    // Lightweight local checker (heuristics – no network)
+    function reviewDraftLocally(){
+      const content = (textEl.value||'').trim();
+      const issues = [];
+
+      if(content.length < 40){
+        issues.push('Draft is very short. Add more factual detail.');
+      }
+
+      // Personal data patterns
+      if(/\b\d{2,3}[-\s]?\d{3}[-\s]?\d{3,4}\b/.test(content)) issues.push('Possible phone number detected — remove or anonymize.');
+      if(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(content)) issues.push('Email detected — remove.');
+      if(/\b(ul\.|ulica|adres|address|street)\b/i.test(content)) issues.push('Address detected — avoid precise locations.');
+      if(/\bPESEL\b|\bBSN\b|\bNIP\b|\bVAT\b/i.test(content)) issues.push('Sensitive ID detected — remove.');
+
+      // Names (very naive): Capitalized word followed by capitalized
+      if(/\b[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+\s+[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+/.test(content)){
+        issues.push('Full name found — replace with generic role (e.g., “shift coordinator”).');
+      }
+
+      // Defamation-prone words (examples, extend as needed)
+      const flagged = ['palant','idiota','debil','kasztan','złodziej','oszust','frajer'];
+      const found = flagged.filter(w=> new RegExp(`\\b${w}\\b`, 'i').test(content));
+      if(found.length){
+        issues.push(`Inflammatory words (${found.join(', ')}) — use neutral role-based wording.`);
+      }
+
+      // Company names: if mentioned, advise on neutrality
+      if(/\b(sp\. z o\.o\.|bv|gmbh|inc|llc)\b/i.test(content)){
+        issues.push('If you name a company, stick to verifiable facts and avoid accusations without evidence.');
+      }
+
+      // Output as notes + prefill AI input with a policy-friendly question
+      if(!issues.length){ addNote('No obvious personal data or slurs detected. Consider dates, shifts, who/what/when/where.'); }
+      else issues.forEach(i=> addNote(i));
+
+      aiInputEl.value = 'Please help me rewrite my draft to be factual, neutral, and privacy-safe. Keep details, remove personal data and insults. Suggest red/green flags summary.';
+      alert('Draft reviewed. See notes below the dock.');
     }
 
 
@@ -519,9 +583,21 @@ ${question || '(analyze tone, legality, red/green flags, suggestions)'}`;
         companyEl.value=''; roleEl.value=''; textEl.value='';
       };
 
-      // AI buttons
-      if(aiUseDraftBtn) aiUseDraftBtn.onclick = ()=>{ aiInputEl.value = (textEl.value||'').trim(); };
-      if(aiOpenChatBtn) aiOpenChatBtn.onclick = openChatWithContext;
+           // AI dock buttons (local)
+      if(aiUseDraftBtn) aiUseDraftBtn.onclick = ()=>{
+        const ctx = buildAIContext();
+        aiInputEl.value = ctx;
+      };
+      if(aiReviewBtn) aiReviewBtn.onclick = reviewDraftLocally;
+      if(aiAddNoteBtn) aiAddNoteBtn.onclick = ()=> {
+        const v = (aiInputEl.value||'').trim();
+        if(!v) return alert('Type a note first.');
+        addNote(v);
+        aiInputEl.value = '';
+      };
+      if(aiClearNotesBtn) aiClearNotesBtn.onclick = ()=> { writeNotes([]); renderNotes(); };
+      renderNotes();
+
 
       // Simple autosave on input (debounced)
       let t=null;
