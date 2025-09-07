@@ -169,7 +169,13 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Ensure globals are present on this page as well (same as index.html) -->
+  <script>
+    window.SUPABASE_URL = window.SUPABASE_URL || "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+  </script>
+
   <script>
     // ===== Setup / client detection =====
     let supabaseClient = window.supabaseClient || null;
@@ -369,7 +375,7 @@
         data = data.filter(i => (i.title+i.details+(i.tags||[]).join(' ')).toLowerCase().includes(q));
       }
       if(currentSort==='new') data.sort((a,b)=>b.created_at - a.created_at);
-      else if(currentSort==='trending') data.sort((a,b)=>(b.votes/(Date.now()-b.created_at+1)) - (a.votes/(Date.now()-a_created_at+1)));
+      else if(currentSort==='trending') data.sort((a,b)=>(b.votes/(Date.now()-b.created_at+1)) - (a.votes/(Date.now()-a.created_at+1)));
       else data.sort((a,b)=>b.votes - a.votes); // top
       renderIdeas(data, state.loggedIn);
 
