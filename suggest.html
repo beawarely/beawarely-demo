@@ -40,7 +40,10 @@
     background: var(--bg-gradient);
     color:var(--text);
   }
-  a{color:var(--accent)}
+ a{color:var(--accent)}
+
+  /* Fix: prevent inputs from overflowing containers */
+  *,*::before,*::after{ box-sizing:border-box }
 
   .container{max-width:1000px;margin:0 auto;padding:28px}
   .back{display:inline-block;margin-bottom:10px}
@@ -73,10 +76,23 @@
   .seg button.active{background:rgba(234,240,255,.08)}
   .seg button:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
 
-  .input{width:100%;padding:10px 12px;border-radius:12px;background:var(--surface);color:var(--text);
-         border:1px solid var(--border)}
+    /* Inputs take full width including borders (no overflow) */
+  .input{
+    width:100%;
+    box-sizing:border-box;
+    display:block;
+    padding:10px 12px;
+    border-radius:12px;
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border);
+  }
   .input::placeholder{color:color-mix(in oklab, var(--muted) 70%, transparent)}
-  textarea.input{resize:vertical}
+  textarea.input{
+    resize:vertical;
+    min-height:110px; /* keeps it tidy */
+  }
+
 
   .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;color:var(--text)}
   .ideas{display:flex;flex-direction:column;gap:12px;margin-top:12px}
