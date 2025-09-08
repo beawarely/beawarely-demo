@@ -24,37 +24,70 @@
         body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--bg);color:var(--text)}
 
     header.topbar{
-      position:sticky;top:0;z-index:50;background:rgba(12,20,36,.72);backdrop-filter:saturate(140%) blur(8px);
-      border-bottom:1px solid rgba(126,156,210,.16);display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;
-    }
+  position:sticky;top:0;z-index:50;background:rgba(12,20,36,.72);backdrop-filter:saturate(140%) blur(8px);
+  border-bottom:1px solid rgba(126,156,210,.16);display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+
     .back-btn{appearance:none;border:1px solid rgba(255,255,255,.15);padding:.45rem .75rem;border-radius:.75rem;color:#fff;background:transparent;cursor:pointer}
     .back-btn:hover{border-color:rgba(255,255,255,.3)}
     main{max-width:1100px;margin:0 auto;padding:1.1rem}
     h1{font-size:1.6rem;margin:.15rem 0 0}
     h2{font-size:1.05rem;color:var(--muted);margin:.2rem 0 .2rem}
-    .card{background:linear-gradient(180deg,#101a33,#0c162b);border:1px solid rgba(126,156,210,.16);
-      border-radius:16px;padding:1rem;margin:.8rem 0}
+    .card{
+  background:linear-gradient(180deg,#101a33,#0c162b);
+  border:1px solid rgba(126,156,210,.16);
+  border-radius:16px;padding:1rem;margin:.8rem 0;
+  box-shadow:0 12px 28px rgba(2,8,20,.28);
+}
+
     .row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
     @media (max-width:900px){ .row{grid-template-columns:1fr} }
     label{display:block;font-size:.9rem;color:#cbd5ff;margin:.25rem 0}
-        input[type="text"], textarea, select{
-      width:100%;background:#0b1426;color:var(--text);border:1px solid rgba(126,156,210,.18);
-      border-radius:10px;padding:.6rem .7rem;outline:none;
-    }
+      input[type="text"], textarea, select{
+  width:100%;
+  background:#0b1426; color:var(--text);
+  border:1px solid rgba(126,156,210,.18);
+  border-radius:10px; padding:.6rem .7rem; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+input[type="text"]:focus-visible, textarea:focus-visible, select:focus-visible{
+  border-color:rgba(123,176,255,.6);
+  box-shadow:0 0 0 3px var(--ring);
+}
+
 
     textarea{min-height:120px;resize:vertical}
     .chips{display:flex;flex-wrap:wrap;gap:.4rem}
-        .chip{font-size:.8rem;border:1px solid rgba(126,156,210,.28);border-radius:999px;padding:.25rem .6rem;color:#cfd6ff;cursor:pointer}
+        .chip{
+  font-size:.8rem;border:1px solid rgba(126,156,210,.28);border-radius:999px;
+  padding:.25rem .6rem;color:#cfd6ff;cursor:pointer;
+  transition:border-color .15s ease, background .15s ease;
+}
+.chip:hover{ border-color:rgba(126,156,210,.45); background:#0b1426; }
+
     .chip.active{background:#0b1426;border-color:rgba(126,156,210,.5)}
     html.light .chip.active{background:#eef2f9;border-color:#bfc9e2}
 
-    .pill{display:inline-block;border:1px solid rgba(126,156,210,.26);border-radius:999px;padding:.2rem .55rem;margin:.15rem .25rem 0 0;
-      font-size:.8rem;color:#cfd6ff}
+    .pill{
+  display:inline-block;border:1px solid rgba(126,156,210,.26);border-radius:999px;
+  padding:.2rem .55rem;margin:.15rem .25rem 0 0;font-size:.8rem;color:#cfd6ff
+}
+/* status coloring for item badges */
+.pill.pending{ border-color:rgba(251,191,36,.55); background:rgba(251,191,36,.10); color:#fbd38d; }
+.pill.confirmed{ border-color:rgba(74,222,128,.55); background:rgba(74,222,128,.10); color:#9cf3c1; }
+.pill.disputed{ border-color:rgba(251,113,133,.6); background:rgba(251,113,133,.10); color:#feb2c0; }
+
     .muted{color:#aab2d5}
-        .btn{
-      appearance:none;border:1px solid rgba(126,156,210,.26);background:#13203a;color:var(--text);border-radius:10px;
-      padding:.55rem .9rem;cursor:pointer
-    }
+      .btn{
+  appearance:none;border:1px solid rgba(126,156,210,.26);background:#13203a;color:var(--text);border-radius:10px;
+  padding:.55rem .9rem;cursor:pointer;transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
+  will-change:transform;
+}
+.btn:hover{ transform:translateY(-1px); border-color:rgba(126,156,210,.4); }
+.btn:active{ transform:translateY(0); }
+.btn:focus-visible{ box-shadow:0 0 0 3px var(--ring); }
+
     .btn[disabled]{opacity:.6;cursor:not-allowed;filter:saturate(.7)}
 
     .btn.primary{border-color:rgba(90,168,255,.5);box-shadow:0 0 0 3px transparent}
@@ -71,13 +104,20 @@
 
     .grid{display:grid;grid-template-columns:2fr 1fr;gap:.9rem}
     @media (max-width:1000px){ .grid{grid-template-columns:1fr} }
-        .item{border:1px solid rgba(126,156,210,.16);border-radius:14px;padding:.8rem;background:#0e1830}
+        .item{
+  border:1px solid rgba(126,156,210,.16);border-radius:14px;padding:.8rem;background:#0e1830;
+  transition:border-color .15s ease, transform .12s ease;
+}
+.item:hover{ border-color:rgba(126,156,210,.32); transform:translateY(-1px); }
+
 
     .item h4{margin:.1rem 0 .4rem}
     .meta{font-size:.8rem;color:#aab2d5}
         .evidence a{color:#8fb7ff;text-decoration:none;border-bottom:1px dotted rgba(143,183,255,.45)}
 
     .evidence a:hover{border-bottom-color:transparent}
+.evidence ul{ list-style:disc; margin:.2rem 0 0 1.1rem; padding:0; }
+
     .filters{display:flex;gap:.5rem;flex-wrap:wrap}
     .reaction-bar{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.4rem}
     .reaction-bar .btn{font-size:.85rem}
@@ -104,13 +144,24 @@ html.light .evidence a{color:#1d4ed8;border-bottom-color:rgba(29,78,216,.35)}
 html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
 
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Supabase bootstrap — korzystamy z tych samych źródeł co pozostałe strony
-    const supabaseClient = window.supabase?.createClient?.(
-      window.SUPABASE_URL || localStorage.getItem('BA_SUPABASE_URL'),
-      window.SUPABASE_ANON_KEY || localStorage.getItem('BA_SUPABASE_ANON')
-    );
+    // --- Supabase bootstrap (twarde fallbacki dla bezpośredniego wejścia na stronę) ---
+    const SUPABASE_URL =
+      window.SUPABASE_URL ||
+      localStorage.getItem('BA_SUPABASE_URL') ||
+      'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+
+    const SUPABASE_ANON_KEY =
+      window.SUPABASE_ANON_KEY ||
+      localStorage.getItem('BA_SUPABASE_ANON') ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
+
+    // utrwal fallbacki, by kolejne strony miały te same wartości
+    if (!localStorage.getItem('BA_SUPABASE_URL')) localStorage.setItem('BA_SUPABASE_URL', SUPABASE_URL);
+    if (!localStorage.getItem('BA_SUPABASE_ANON')) localStorage.setItem('BA_SUPABASE_ANON', SUPABASE_ANON_KEY);
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function waitForInitialSession() {
       const { data } = await supabaseClient.auth.getSession();
@@ -134,6 +185,7 @@ html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
       window.BA_SESSION = session;
     })();
   </script>
+
 <script>
   // Theme init + toggle (persists in localStorage)
   (function(){
