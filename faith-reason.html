@@ -143,16 +143,39 @@ html.light .item{background:#ffffff;border:1px solid #d5dbea}
 html.light .evidence a{color:#1d4ed8;border-bottom-color:rgba(29,78,216,.35)}
 html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
 
-/* Mini chat — log + bubbles */
-.mini-log{max-height:280px;overflow:auto;border:1px solid rgba(126,156,210,.18);background:#0b1426;border-radius:10px;padding:.6rem}
-.msg{display:flex;gap:.6rem;margin:.5rem 0}
-.msg .bubble{padding:.5rem .7rem;border-radius:12px;border:1px solid rgba(126,156,210,.2);max-width:100%}
-.msg.user .bubble{background:#0e1830}
-.msg.ai .bubble{background:#0f1a33;border-color:rgba(123,176,255,.35)}
+/* AI dock (jak w WorkVerify, z zielonym akcentem) */
+.ai-dock{
+  position:fixed; right:18px; bottom:18px; width:min(360px, 92vw);
+  background: linear-gradient(180deg, #0d1f14, #12361f);
+  border:1px solid rgba(88,196,140,.25); border-radius:14px; padding:12px;
+  box-shadow: 0 10px 24px rgba(12,20,40,.45); z-index: 10001; color:#DFF7EA;
+}
+.ai-dock .muted, .ai-dock small{ color:#9DD7B8; }
+.ai-dock textarea{ color:#DFF7EA; background: rgba(255,255,255,.03); border:1px solid rgba(88,196,140,.25); }
+.ai-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+.ai-toggle{ padding:4px 10px; }
+.ai-dock .actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.ai-dock .btn{
+  background: linear-gradient(135deg, #2FA36B, #70D39A);
+  border:1px solid rgba(88,196,140,.25);
+  box-shadow: 0 6px 16px rgba(63,173,118,.35);
+}
+.ai-dock .btn.secondary{
+  background: transparent; color: #DFF7EA;
+  border:1px solid rgba(88,196,140,.25); box-shadow: none;
+}
+.ai-dock.collapsed textarea, .ai-dock.collapsed .actions, .ai-dock.collapsed .ai-notes{ display:none; }
+.ai-notes{ font-size:12px; line-height:1.35; margin-top:8px; }
+.ai-notes ul{ margin:6px 0 0 18px; padding:0; }
+.ai-notes li{ margin:4px 0; }
 
-html.light .mini-log{background:#ffffff;border-color:#d5dbea}
-html.light .msg.user .bubble{background:#eef2f9}
-html.light .msg.ai .bubble{background:#f5f8ff;border-color:rgba(43,95,214,.35)}
+html.light .ai-dock{
+  background: linear-gradient(180deg, #ECF5EF, #E3F0E8);
+  border-color: rgba(29,105,76,.18); color:#103322;
+}
+html.light .ai-dock .muted, html.light .ai-dock small{ color:#3a6a52; }
+html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgba(29,105,76,.18); color:#103322; }
+
 
 </style>
 
@@ -322,23 +345,24 @@ html.light .msg.ai .bubble{background:#f5f8ff;border-color:rgba(43,95,214,.35)}
       </div>
     </section>
 
-    <!-- Mini AI Chat (focused on this card) -->
-    <section class="card" id="miniChatCard">
-      <h3>Mini AI Chat — Faith & Reason</h3>
-      <p class="help">The chat focuses on this card. Use <span class="kbd">Ctrl/⌘+Enter</span> to send. “Use my draft” will prefill your message with the form fields above.</p>
-      <div id="miniLog" class="mini-log" aria-live="polite"></div>
-      <div class="row" style="margin-top:.6rem">
-        <div>
-          <label>Your message</label>
-          <textarea id="miniPrompt" placeholder="Ask about a claim, request a summary, propose improvements…"></textarea>
-          <div class="tools" style="margin-top:.4rem">
-            <button id="miniSend" class="btn primary">Ask →</button>
-            <button id="miniUseDraft" class="btn">Use my draft</button>
-            <span id="miniMsg" class="muted"></span>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- AI Assist dock — Faith & Reason -->
+<div id="aiDockFR" class="ai-dock collapsed">
+  <div class="ai-head">
+    <strong>AI Assist — Faith & Reason</strong>
+    <button class="pill ai-toggle" type="button"
+      onclick="document.getElementById('aiDockFR').classList.toggle('collapsed')">Toggle</button>
+  </div>
+  <textarea id="aiInputFR" rows="3" placeholder="Ask for neutrality check, missing evidence, or a concise rewrite…"></textarea>
+  <div class="actions">
+    <button id="aiUseDraftBtnFR" class="btn secondary" type="button">Use my draft</button>
+    <button id="aiReviewBtnFR" class="btn" type="button">Review draft</button>
+    <button id="aiAskBtnFR" class="btn" type="button">Ask AI</button>
+    <button id="aiAddNoteBtnFR" class="btn secondary" type="button">Add note</button>
+    <button id="aiClearNotesBtnFR" class="btn secondary" type="button">Clear notes</button>
+  </div>
+  <div id="aiNotesFR" class="ai-notes muted"></div>
+</div>
+
 
     <!-- List -->
 
@@ -692,86 +716,116 @@ html.light .msg.ai .bubble{background:#f5f8ff;border-color:rgba(43,95,214,.35)}
       items.forEach(item => box.appendChild(mountItemCard(item)));
         }
 
-    // --- Mini Chat (Faith & Reason) ---
-    function getFaithContext(){
-      const religion = (document.getElementById('religion')?.value || '').trim();
-      const category = (document.getElementById('category')?.value || '').trim();
-      const title = (document.getElementById('title')?.value || '').trim();
-      const summary = (document.getElementById('summary')?.value || '').trim();
-      const evidence = (document.getElementById('evidence')?.value || '')
-        .split('\n').map(s=>s.trim()).filter(Boolean);
-      return { religion, category, title, summary, evidence };
-    }
+    // --- AI dock (Faith & Reason, styl WorkVerify) ---
+let _lastUserId = 'anon';
 
-    function appendMsg(role, text){
-      const log = document.getElementById('miniLog'); if(!log) return;
-      const row = el('div','msg '+role);
-      const bubble = el('div','bubble'); bubble.textContent = text;
-      row.appendChild(bubble);
-      log.appendChild(row);
-      log.scrollTop = log.scrollHeight;
-    }
+function getFaithContext(){
+  const religion = (document.getElementById('religion')?.value || '').trim();
+  const category = (document.getElementById('category')?.value || '').trim();
+  const title = (document.getElementById('title')?.value || '').trim();
+  const summary = (document.getElementById('summary')?.value || '').trim();
+  const evidence = (document.getElementById('evidence')?.value || '')
+    .split('\n').map(s=>s.trim()).filter(Boolean);
+  return { religion, category, title, summary, evidence };
+}
 
-    async function sendMiniChat(prompt){
-      const msg = document.getElementById('miniMsg');
-      const btn = document.getElementById('miniSend');
-      if (!prompt){ return; }
-      btn.disabled = true; if (msg) msg.textContent = 'Thinking…';
-      appendMsg('user', prompt);
+function escapeHTML(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#39;' }[m])); }
 
-      const context = getFaithContext();
-      try{
-        const { data, error } = await supabaseClient.functions.invoke('faith-chat', {
-          body: { prompt, context, page: 'faith-reason' }
-        });
-        if (error) throw error;
-        const reply = (data && (data.reply || data.text)) || String(data || 'No reply');
-        appendMsg('ai', reply);
-        if (msg) msg.textContent = '';
-      }catch(e){
-        appendMsg('ai', 'Error: ' + (e?.message || e));
-        if (msg) msg.textContent = 'Error.';
-      }finally{
-        btn.disabled = false;
-      }
-    }
+const NOTES_KEY_FR = ()=> `fr_notes_${_lastUserId}`;
+function readNotesFR(){ try{ return JSON.parse(localStorage.getItem(NOTES_KEY_FR())||'[]'); }catch(e){ return []; } }
+function writeNotesFR(arr){ localStorage.setItem(NOTES_KEY_FR(), JSON.stringify(arr)); }
+function renderNotesFR(){
+  const el = document.getElementById('aiNotesFR'); if(!el) return;
+  const notes = readNotesFR();
+  if(!notes.length){ el.innerHTML = '<small>No notes yet.</small>'; return; }
+  el.innerHTML = '<small>Notes:</small><ul>' + notes.map(n=>`<li>${escapeHTML(n)}</li>`).join('') + '</ul>';
+}
+function addNoteFR(text){
+  const notes = readNotesFR();
+  notes.unshift(text);
+  writeNotesFR(notes.slice(0,30));
+  renderNotesFR();
+}
 
-    function wireMiniChat(){
-      const send = document.getElementById('miniSend');
-      const input = document.getElementById('miniPrompt');
-      const useDraft = document.getElementById('miniUseDraft');
-      if (!send || !input) return;
-
-      send.onclick = ()=> {
-        const p = input.value.trim();
-        if (!p){ input.focus(); return; }
-        sendMiniChat(p);
-      };
-      input.addEventListener('keydown', (ev)=>{
-        if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)){
-          ev.preventDefault(); send.click();
-        }
-      });
-      if (useDraft){
-        useDraft.onclick = ()=>{
-          const ctx = getFaithContext();
-          const draft =
-`Please analyze my Faith & Reason draft.
-
-Religion: ${ctx.religion}
-Category: ${ctx.category}
-Title: ${ctx.title}
-Summary: ${ctx.summary}
-
+function buildFRContext(){
+  const ctx = getFaithContext();
+  return `Faith & Reason context
+Religion: ${ctx.religion || '—'}
+Category: ${ctx.category || '—'}
+Title: ${ctx.title || '—'}
+Summary:
+${ctx.summary || '(no summary)'}
 Evidence:
-${(ctx.evidence||[]).map(x => '- '+x).join('\n')}
+${(ctx.evidence||[]).length ? ctx.evidence.map(x=>'- '+x).join('\n') : '(none)'}
+---
+Task: ${(document.getElementById('aiInputFR')?.value || 'Review neutrality and bias, suggest missing evidence, and provide a concise neutral rewrite.').trim()}`;
+}
 
-Return: strengths, issues, missing evidence, neutrality check, 1 short rewrite.`;
-          input.value = draft;
-          input.focus();
-        };
-      }
-    }
+// Lokalny „review” (bez sieci) – heurystyki dopasowane do tej karty
+function reviewDraftLocallyFR(){
+  const ctx = getFaithContext();
+  const issues = [];
+
+  if ((ctx.summary||'').length < 60) issues.push('Summary is short — add who/what/when/where and outcome.');
+  if (!(ctx.evidence||[]).length) issues.push('No evidence links — add at least one reputable source.');
+  if ((ctx.title||'').length > 90) issues.push('Title is long — aim for under ~80 characters.');
+
+  const generalizations = /\b(always|never|all|everyone|nobody|every|wszyscy|zawsze|nigdy)\b/i;
+  if (generalizations.test(ctx.summary)) issues.push('Avoid blanket generalizations (“always/never/all”). Be specific and contextual.');
+
+  const flagged = ['idiot','debil','stupid','sekta','heretic','infidel','nienawi','hate','idiota','oszust'];
+  const found = flagged.filter(w => new RegExp(`\\b${w}\\w*\\b`, 'i').test(ctx.summary));
+  if (found.length) issues.push(`Inflammatory language detected (${found.join(', ')}) — use neutral wording.`);
+
+  if (!issues.length) addNoteFR('No obvious tone/privacy issues found. Ensure fairness and cite sources.');
+  else issues.forEach(addNoteFR);
+
+  const aiIn = document.getElementById('aiInputFR');
+  if (aiIn) aiIn.value = 'Please help me rewrite my draft to be neutral and respectful. Keep facts, avoid generalizations, and list suggested evidence types.';
+  alert('Draft reviewed. See notes in the dock.');
+}
+
+// Połączenie z Edge Function (opcjonalnie — „Ask AI”)
+async function askAI_FR(){
+  const input = document.getElementById('aiInputFR');
+  const btn = document.getElementById('aiAskBtnFR');
+  if(!input) return;
+  const prompt = (input.value||'').trim();
+  if(!prompt){ input.focus(); return; }
+  btn && (btn.disabled = true);
+  try{
+    const context = getFaithContext();
+    const { data, error } = await supabaseClient.functions.invoke('faith-chat', {
+      body: { prompt, context, page: 'faith-reason' }
+    });
+    if (error) throw error;
+    const reply = (data && (data.reply || data.text)) || 'No reply';
+    addNoteFR('AI: ' + reply);
+    input.value = '';
+  }catch(e){
+    addNoteFR('AI error: ' + (e?.message || e));
+  }finally{
+    btn && (btn.disabled = false);
+  }
+}
+
+function initAIDockFR(){
+  const useDraft = document.getElementById('aiUseDraftBtnFR');
+  const review   = document.getElementById('aiReviewBtnFR');
+  const addBtn   = document.getElementById('aiAddNoteBtnFR');
+  const clearBtn = document.getElementById('aiClearNotesBtnFR');
+  const askBtn   = document.getElementById('aiAskBtnFR');
+  const input    = document.getElementById('aiInputFR');
+
+  renderNotesFR();
+
+  if(useDraft) useDraft.onclick = ()=>{ input.value = buildFRContext(); input.focus(); };
+  if(review)   review.onclick   = reviewDraftLocallyFR;
+  if(addBtn)   addBtn.onclick   = ()=>{ const v=(input.value||'').trim(); if(!v) return alert('Type a note first.'); addNoteFR(v); input.value=''; };
+  if(clearBtn) clearBtn.onclick = ()=>{ writeNotesFR([]); renderNotesFR(); };
+  if(askBtn)   askBtn.onclick   = askAI_FR;
+}
+
 
         function wireUI(){
 
@@ -787,18 +841,20 @@ Return: strengths, issues, missing evidence, neutrality check, 1 short rewrite.`
       const logout = document.getElementById('logoutBtn');
 
       function setUser(session){
-        if (!badge) return;
-        if (session?.user){
-          const u = session.user;
-          const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || (u.id || '').slice(0,8);
-          badge.textContent = `Logged in: ${name}`;
-          if (logout) logout.style.display = '';
-
-        } else {
-          badge.textContent = 'Not logged in';
-          if (logout) logout.style.display = 'none';
-        }
-      }
+  if (!badge) return;
+  if (session?.user){
+    const u = session.user;
+    const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || (u.id || '').slice(0,8);
+    badge.textContent = `Logged in: ${name}`;
+    if (logout) logout.style.display = '';
+    _lastUserId = u.id || 'anon';
+  } else {
+    badge.textContent = 'Not logged in';
+    if (logout) logout.style.display = 'none';
+    _lastUserId = 'anon';
+  }
+  if (typeof renderNotesFR === 'function') renderNotesFR();
+}
 
       // Initial state + subscribe to changes
       supabaseClient.auth.getSession().then(({ data }) => setUser(data?.session));
@@ -810,8 +866,9 @@ Return: strengths, issues, missing evidence, neutrality check, 1 short rewrite.`
         };
       }
 
-      wireMiniChat();
-      refreshList();
+     initAIDockFR();
+refreshList();
+
     }
 
 
