@@ -143,7 +143,19 @@ html.light .item{background:#ffffff;border:1px solid #d5dbea}
 html.light .evidence a{color:#1d4ed8;border-bottom-color:rgba(29,78,216,.35)}
 html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
 
+/* Mini chat — log + bubbles */
+.mini-log{max-height:280px;overflow:auto;border:1px solid rgba(126,156,210,.18);background:#0b1426;border-radius:10px;padding:.6rem}
+.msg{display:flex;gap:.6rem;margin:.5rem 0}
+.msg .bubble{padding:.5rem .7rem;border-radius:12px;border:1px solid rgba(126,156,210,.2);max-width:100%}
+.msg.user .bubble{background:#0e1830}
+.msg.ai .bubble{background:#0f1a33;border-color:rgba(123,176,255,.35)}
+
+html.light .mini-log{background:#ffffff;border-color:#d5dbea}
+html.light .msg.user .bubble{background:#eef2f9}
+html.light .msg.ai .bubble{background:#f5f8ff;border-color:rgba(43,95,214,.35)}
+
 </style>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // --- Supabase bootstrap (twarde fallbacki dla bezpośredniego wejścia na stronę) ---
@@ -310,7 +322,26 @@ html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
       </div>
     </section>
 
+    <!-- Mini AI Chat (focused on this card) -->
+    <section class="card" id="miniChatCard">
+      <h3>Mini AI Chat — Faith & Reason</h3>
+      <p class="help">The chat focuses on this card. Use <span class="kbd">Ctrl/⌘+Enter</span> to send. “Use my draft” will prefill your message with the form fields above.</p>
+      <div id="miniLog" class="mini-log" aria-live="polite"></div>
+      <div class="row" style="margin-top:.6rem">
+        <div>
+          <label>Your message</label>
+          <textarea id="miniPrompt" placeholder="Ask about a claim, request a summary, propose improvements…"></textarea>
+          <div class="tools" style="margin-top:.4rem">
+            <button id="miniSend" class="btn primary">Ask →</button>
+            <button id="miniUseDraft" class="btn">Use my draft</button>
+            <span id="miniMsg" class="muted"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- List -->
+
     <section class="grid">
       <div id="items"></div>
       <aside>
@@ -659,9 +690,91 @@ html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
         box.appendChild(empty); return;
       }
       items.forEach(item => box.appendChild(mountItemCard(item)));
+        }
+
+    // --- Mini Chat (Faith & Reason) ---
+    function getFaithContext(){
+      const religion = (document.getElementById('religion')?.value || '').trim();
+      const category = (document.getElementById('category')?.value || '').trim();
+      const title = (document.getElementById('title')?.value || '').trim();
+      const summary = (document.getElementById('summary')?.value || '').trim();
+      const evidence = (document.getElementById('evidence')?.value || '')
+        .split('\n').map(s=>s.trim()).filter(Boolean);
+      return { religion, category, title, summary, evidence };
+    }
+
+    function appendMsg(role, text){
+      const log = document.getElementById('miniLog'); if(!log) return;
+      const row = el('div','msg '+role);
+      const bubble = el('div','bubble'); bubble.textContent = text;
+      row.appendChild(bubble);
+      log.appendChild(row);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function sendMiniChat(prompt){
+      const msg = document.getElementById('miniMsg');
+      const btn = document.getElementById('miniSend');
+      if (!prompt){ return; }
+      btn.disabled = true; if (msg) msg.textContent = 'Thinking…';
+      appendMsg('user', prompt);
+
+      const context = getFaithContext();
+      try{
+        const { data, error } = await supabaseClient.functions.invoke('faith-chat', {
+          body: { prompt, context, page: 'faith-reason' }
+        });
+        if (error) throw error;
+        const reply = (data && (data.reply || data.text)) || String(data || 'No reply');
+        appendMsg('ai', reply);
+        if (msg) msg.textContent = '';
+      }catch(e){
+        appendMsg('ai', 'Error: ' + (e?.message || e));
+        if (msg) msg.textContent = 'Error.';
+      }finally{
+        btn.disabled = false;
+      }
+    }
+
+    function wireMiniChat(){
+      const send = document.getElementById('miniSend');
+      const input = document.getElementById('miniPrompt');
+      const useDraft = document.getElementById('miniUseDraft');
+      if (!send || !input) return;
+
+      send.onclick = ()=> {
+        const p = input.value.trim();
+        if (!p){ input.focus(); return; }
+        sendMiniChat(p);
+      };
+      input.addEventListener('keydown', (ev)=>{
+        if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)){
+          ev.preventDefault(); send.click();
+        }
+      });
+      if (useDraft){
+        useDraft.onclick = ()=>{
+          const ctx = getFaithContext();
+          const draft =
+`Please analyze my Faith & Reason draft.
+
+Religion: ${ctx.religion}
+Category: ${ctx.category}
+Title: ${ctx.title}
+Summary: ${ctx.summary}
+
+Evidence:
+${(ctx.evidence||[]).map(x => '- '+x).join('\n')}
+
+Return: strengths, issues, missing evidence, neutrality check, 1 short rewrite.`;
+          input.value = draft;
+          input.focus();
+        };
+      }
     }
 
         function wireUI(){
+
       renderPresetChips();
       document.getElementById('btnSubmit').onclick = submitNewItem;
       document.getElementById('btnRefresh').onclick = refreshList;
@@ -697,8 +810,10 @@ html.light .kbd{background:#ffffff;border:1px solid #d5dbea}
         };
       }
 
+      wireMiniChat();
       refreshList();
     }
+
 
 
     document.addEventListener('DOMContentLoaded', wireUI);
