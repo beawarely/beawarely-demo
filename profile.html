@@ -185,13 +185,6 @@
       <button class="btn" onclick="logoutUser()">Log Out</button>
     </div>
 
-    <!-- Upload avatar -->
-    <div class="upload-wrap">
-      <label for="avatar-upload"><strong>Upload your photo</strong> (max 2MB):</label><br><br>
-      <input type="file" id="avatar-upload" accept="image/*" style="margin-bottom: 10px;" />
-      <button class="btn" id="upload-btn" onclick="uploadAvatar()">Upload</button>
-      <div class="helper">TIP: Square images look best. Supported: JPG/PNG/WebP.</div>
-        </div>
 
     <!-- Activity Feed -->
     <div class="section" id="activity-section">
@@ -249,26 +242,50 @@
         profilePic.src = meta.avatar_url + bust;
       }
 
-      // Pola podstawowe
-      const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(" ");
-document.getElementById("user-name").textContent  = fullName || "BeAwarely User";
-document.getElementById("user-email").textContent = "@" + (meta.username || "unknown");
+     // Pobierz dane profilu z tabeli `profiles`
+let profile = null;
+try {
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
 
-      const trust = clamp(meta.trust_score ?? 0, 0, 100);
-      document.getElementById("trust-val").textContent   = `${trust} / 100`;
-      document.getElementById("trust-fill").style.width  = `${trust}%`;
-      document.getElementById("points-val").textContent  = (meta.points ?? 0);
+  if (error) {
+    console.warn('profiles fetch error:', error.message);
+  } else {
+    profile = data;
+  }
+} catch(e) {
+  console.error('profiles query failed:', e);
+}
 
-      // Odznaki
-      const badgeContainer = document.getElementById("badges");
-      badgeContainer.innerHTML = "";
-      const badges = Array.isArray(meta.badges) ? meta.badges : [];
-      badges.forEach(text => {
-        const div = document.createElement("div");
-        div.className = "badge";
-        div.textContent = text;
-        badgeContainer.appendChild(div);
-      });
+// Fallback do user_metadata
+const p = profile || {};
+const meta = user.user_metadata || {};
+
+const fullName = [p.first_name || meta.first_name, p.last_name || meta.last_name]
+  .filter(Boolean).join(" ");
+document.getElementById("user-name").textContent = fullName || "BeAwarely User";
+
+document.getElementById("user-email").textContent = "@" + (p.username || meta.username || "unknown");
+
+const trust = clamp(p.trust_score ?? meta.trust_score ?? 0, 0, 100);
+document.getElementById("trust-val").textContent  = `${trust} / 100`;
+document.getElementById("trust-fill").style.width = `${trust}%`;
+
+document.getElementById("points-val").textContent = (p.points ?? meta.points ?? 0);
+
+const badgeContainer = document.getElementById("badges");
+badgeContainer.innerHTML = "";
+const badges = Array.isArray(p.badges) ? p.badges : (Array.isArray(meta.badges) ? meta.badges : []);
+badges.forEach(text => {
+  const div = document.createElement("div");
+  div.className = "badge";
+  div.textContent = text;
+  badgeContainer.appendChild(div);
+});
+
 
       // Jednorazowe bezpieczne domyślne metadane (opcjonalnie)
       if (meta.role == null || meta.points == null || meta.trust_score == null || meta.badges == null) {
@@ -320,77 +337,6 @@ document.getElementById("user-email").textContent = "@" + (meta.username || "unk
       }
     }
 
-    async function uploadAvatar() {
-      const fileInput = document.getElementById('avatar-upload');
-      const btn = document.getElementById('upload-btn');
-      const file = fileInput.files?.[0];
-
-      if (!file) { alert("Please select an image file."); return; }
-      if (!file.type.startsWith('image/')) { alert("Please select an image file (JPG/PNG/WebP)."); return; }
-
-      const maxSize = 2 * 1024 * 1024; // 2MB
-      if (file.size > maxSize) { alert("Image is too large (max 2MB)."); return; }
-
-      btn.disabled = true; btn.textContent = 'Uploading…';
-
-      const { data: sessionData } = await supabaseClient.auth.getSession();
-      const user = sessionData?.session?.user;
-      if (!user) { alert("User not logged in."); btn.disabled = false; btn.textContent = 'Upload'; return; }
-
-      const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
-      const filePath = `${user.id}/avatar.${fileExt}`; // first segment MUST be user.id (RLS)
-
-      const { error: uploadError } = await supabaseClient.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
-        alert("Upload failed: " + uploadError.message);
-        console.error(uploadError);
-        btn.disabled = false; btn.textContent = 'Upload';
-        return;
-      }
-
-      const { data: urlData } = supabaseClient.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      const avatarUrl = urlData.publicUrl;
-
-      // Save to user metadata
-      const { error: updateError } = await supabaseClient.auth.updateUser({
-        data: { avatar_url: avatarUrl }
-      });
-
-      if (updateError) {
-        alert("Failed to update profile: " + updateError.message);
-        console.error(updateError);
-        btn.disabled = false; btn.textContent = 'Upload';
-        return;
-      }
-
-      // Refresh current image with cache-buster
-      const img = document.getElementById('profile-pic');
-      const bust = avatarUrl.includes("?") ? "&" + Date.now() : "?" + Date.now();
-      img.src = avatarUrl + bust;
-
-            alert("Photo uploaded!");
-
-      // (Best-effort) emit to activity feed
-      try {
-        await supabaseClient.from('activity_events').insert({
-          actor_id: user.id,
-          verb: 'updated_avatar',
-          subject_type: 'profile',
-          subject_id: user.id,
-          summary: 'Updated their profile photo',
-          visibility: 'public'
-        });
-      } catch(e){ /* table may not exist yet – ignore */ }
-
-      btn.disabled = false; btn.textContent = 'Upload';
-
-    }
       // ===== Activity & Friends logic (Supabase) =====
 
     async function loadMyFeed(limit=20){
