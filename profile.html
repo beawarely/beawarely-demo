@@ -162,11 +162,7 @@
     <div class="email" id="user-email">Loading…</div>
 
     <div class="stats">
-      <div class="stat">
-        Role
-        <strong id="role-val">—</strong>
-      </div>
-
+      
       <div class="stat">
         Trust Score
         <div class="trust-bar" aria-label="Trust score">
@@ -254,9 +250,9 @@
       }
 
       // Pola podstawowe
-      document.getElementById("user-name").textContent  = meta.name  || "BeAwarely User";
-      document.getElementById("user-email").textContent = user.email || "Unknown";
-      document.getElementById("role-val").textContent   = meta.role  || "User";
+      const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(" ");
+document.getElementById("user-name").textContent  = fullName || "BeAwarely User";
+document.getElementById("user-email").textContent = "@" + (meta.username || "unknown");
 
       const trust = clamp(meta.trust_score ?? 0, 0, 100);
       document.getElementById("trust-val").textContent   = `${trust} / 100`;
