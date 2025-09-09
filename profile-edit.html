@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Profile – BeAwarely</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body{
+      font-family:'Segoe UI',sans-serif;
+      margin:0;padding:56px 16px 80px;
+      background:linear-gradient(180deg,#0b1220,#060912);
+      color:#eaf2ff;
+    }
+    .back-btn{position:fixed;top:14px;left:14px;padding:10px 14px;border:0;
+      border-radius:10px;background:#3f86ff;color:#fff;cursor:pointer}
+    .edit-box{max-width:600px;margin:70px auto 0;background:rgba(20,24,38,.9);
+      padding:26px;border-radius:16px}
+    h1{margin:0 0 20px;font-size:1.4rem}
+    label{display:block;margin-top:16px;margin-bottom:6px}
+    input,select{
+      width:100%;padding:10px;border-radius:8px;border:1px solid #2c3550;
+      background:#121625;color:#eaf2ff
+    }
+    .btn{margin-top:20px;width:100%;padding:12px;border:0;border-radius:10px;
+      background:#3f86ff;color:#fff;font-size:1rem;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+    .helper{font-size:.85rem;color:#a7b4d9;margin-top:6px}
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="window.location.href='profile.html'">← Back</button>
+
+  <div class="edit-box">
+    <h1>Edit Profile</h1>
+    <form id="edit-form">
+      <label for="first">First name *</label>
+      <input id="first" type="text" required/>
+
+      <label for="last">Last name *</label>
+      <input id="last" type="text" required/>
+
+      <label for="username">Username *</label>
+      <input id="username" type="text" required/>
+      <div class="helper">Unique handle on BeAwarely. Letters, numbers, underscores.</div>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" disabled/>
+
+      <label for="password">New password</label>
+      <input id="password" type="password" placeholder="Leave empty to keep current"/>
+
+      <label for="avatar">Profile photo</label>
+      <input id="avatar" type="file" accept="image/*"/>
+
+      <label for="social">Social links</label>
+      <input id="social" type="url" placeholder="https://..."/>
+      <div class="helper">Only safe networks (no adult content).</div>
+
+      <button class="btn" type="submit">Save changes</button>
+    </form>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const user = session?.user;
+      if(!user){ location.replace('index.html?login=1'); return; }
+
+      // Załaduj dane profilu
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if(profile){
+        document.getElementById('first').value = profile.first_name || "";
+        document.getElementById('last').value = profile.last_name || "";
+        document.getElementById('username').value = profile.username || "";
+        document.getElementById('email').value = user.email || "";
+      }
+
+      document.getElementById('edit-form').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const updates = {
+          first_name: document.getElementById('first').value.trim(),
+          last_name: document.getElementById('last').value.trim(),
+          username: document.getElementById('username').value.trim()
+        };
+        const { error } = await supabaseClient
+          .from('profiles')
+          .update(updates)
+          .eq('id', user.id);
+        if(error){ alert("Update failed: "+error.message); return; }
+
+        // Zmiana hasła (opcjonalnie)
+        const pwd = document.getElementById('password').value;
+        if(pwd){
+          await supabaseClient.auth.updateUser({ password: pwd });
+        }
+
+        // Upload avatara
+        const file = document.getElementById('avatar').files[0];
+        if(file){
+          const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+          const filePath = `${user.id}/avatar.${fileExt}`;
+          await supabaseClient.storage.from('avatars').upload(filePath, file, { upsert:true });
+          const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
+          const avatarUrl = urlData.publicUrl;
+          await supabaseClient.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+        }
+
+        alert("Profile updated!");
+        location.href = "profile.html";
+      });
+    });
+  </script>
+</body>
+</html>
