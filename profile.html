@@ -185,7 +185,25 @@
       .profile-pic { width: 116px; height: 116px; }
       .back-btn { top: 12px; left: 12px; padding: 9px 12px; }
     }
-  </style>
+    /* === Activity & Friends (feed) === */
+  .section{
+    margin-top:26px;padding-top:18px;border-top:1px dashed var(--border);text-align:left
+  }
+  .section h2{font-size:1.1rem;margin:0 0 10px;color:var(--text)}
+  .feed{display:flex;flex-direction:column;gap:10px}
+  .feed-item{
+    border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:rgba(255,255,255,0.03)
+  }
+  .feed-item time{display:block;font-size:.82rem;color:var(--muted);margin-top:4px}
+  .friends-list{display:flex;flex-direction:column;gap:8px}
+  .friend-row{
+    display:flex;align-items:center;justify-content:space-between;
+    border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:rgba(255,255,255,0.03)
+  }
+  .pill{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:.82rem;color:var(--muted)}
+  .row-actions{display:flex;gap:8px}
+</style>
+
 </head>
 <body>
   <!-- 🔙 Back to Homepage -->
@@ -231,10 +249,35 @@
       <input type="file" id="avatar-upload" accept="image/*" style="margin-bottom: 10px;" />
       <button class="btn" id="upload-btn" onclick="uploadAvatar()">Upload</button>
       <div class="helper">TIP: Square images look best. Supported: JPG/PNG/WebP.</div>
+        </div>
+
+    <!-- Activity Feed -->
+    <div class="section" id="activity-section">
+      <h2>Activity</h2>
+      <div id="activity-feed" class="feed" aria-live="polite">
+        <div class="feed-item">Loading activity…</div>
+      </div>
+    </div>
+
+    <!-- Friends -->
+    <div class="section" id="friends-section">
+      <h2>My Friends <span class="pill" id="friends-count">0</span></h2>
+      <div id="friends-list" class="friends-list">
+        <div class="friend-row"><span>Loading…</span></div>
+      </div>
+    </div>
+
+    <!-- Friend Requests -->
+    <div class="section" id="requests-section">
+      <h2>Friend Requests <span class="pill" id="requests-count">0</span></h2>
+      <div id="requests-list" class="friends-list">
+        <div class="friend-row"><span>No pending requests.</span></div>
+      </div>
     </div>
   </div>
 
   <script>
+
     // Supabase init
     const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
@@ -308,8 +351,17 @@
         }
       }
 
+            // === Load social data ===
+      try {
+        await loadMyFeed();
+        await loadFriends();
+        await loadFriendRequests();
+        subscribeRealtimeFeed(); // live updates (INSERT on activity_events)
+      } catch(e) { console.warn('Social init error:', e); }
+
       // Reakcja na zmianę sesji w locie (np. wylogowanie w innej karcie)
       supabaseClient.auth.onAuthStateChange((_ev, newSession) => {
+
         if (!newSession) {
           location.replace('index.html');
         }
@@ -380,9 +432,180 @@
       const bust = avatarUrl.includes("?") ? "&" + Date.now() : "?" + Date.now();
       img.src = avatarUrl + bust;
 
-      alert("Photo uploaded!");
+            alert("Photo uploaded!");
+
+      // (Best-effort) emit to activity feed
+      try {
+        await supabaseClient.from('activity_events').insert({
+          actor_id: user.id,
+          verb: 'updated_avatar',
+          subject_type: 'profile',
+          subject_id: user.id,
+          summary: 'Updated their profile photo',
+          visibility: 'public'
+        });
+      } catch(e){ /* table may not exist yet – ignore */ }
+
       btn.disabled = false; btn.textContent = 'Upload';
+
+    }
+      // ===== Activity & Friends logic (Supabase) =====
+
+    async function loadMyFeed(limit=20){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const uid = session?.user?.id;
+      if(!uid) return;
+
+      // RLS w tabeli activity_events powinno przepuścić: własne, public, friends
+      const { data, error } = await supabaseClient
+        .from('activity_events')
+        .select('id, actor_id, verb, subject_type, summary, created_at')
+        .order('created_at', { ascending:false })
+        .limit(limit);
+
+      const feed = document.getElementById('activity-feed');
+      feed.innerHTML = '';
+      if(error){ feed.innerHTML = `<div class="feed-item">Feed unavailable.</div>`; return; }
+      if(!data?.length){ feed.innerHTML = `<div class="feed-item">No activity yet.</div>`; return; }
+
+      for(const ev of data){
+        const div = document.createElement('div');
+        div.className='feed-item';
+        const text = ev.summary || `${ev.verb} · ${ev.subject_type}`;
+        const t = new Date(ev.created_at).toLocaleString();
+        div.innerHTML = `<div>${text}</div><time datetime="${ev.created_at}">${t}</time>`;
+        feed.appendChild(div);
+      }
+    }
+
+    async function loadFriends(){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const uid = session?.user?.id;
+      if(!uid) return;
+
+      const { data, error } = await supabaseClient
+        .from('friendships')
+        .select('id, requester_id, addressee_id, status')
+        .or(`requester_id.eq.${uid},addressee_id.eq.${uid}`)
+        .eq('status','accepted');
+
+      const list = document.getElementById('friends-list');
+      const count = document.getElementById('friends-count');
+      list.innerHTML = '';
+      if(error){ list.innerHTML = `<div class="friend-row"><span>Friends unavailable.</span></div>`; count.textContent='0'; return; }
+      if(!data?.length){ list.innerHTML = `<div class="friend-row"><span>No friends yet.</span></div>`; count.textContent='0'; return; }
+
+      const rows = [];
+      for(const f of data){
+        const otherId = f.requester_id === uid ? f.addressee_id : f.requester_id;
+        rows.push(otherId);
+      }
+
+      // próbujemy dograć display_name z profiles
+      let names = {};
+      if(rows.length){
+        const { data: profs } = await supabaseClient
+          .from('profiles')
+          .select('id, display_name')
+          .in('id', rows);
+        (profs||[]).forEach(p=>{ names[p.id]=p.display_name || 'User'; });
+      }
+
+      rows.forEach(otherId=>{
+        const row=document.createElement('div');
+        row.className='friend-row';
+        row.innerHTML=`<span>${names[otherId]||'User'}</span>
+          <div class="row-actions">
+            <button class="btn secondary" onclick="unfriend('${otherId}')">Unfriend</button>
+          </div>`;
+        list.appendChild(row);
+      });
+      count.textContent = String(rows.length);
+    }
+
+    async function loadFriendRequests(){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const uid = session?.user?.id;
+      if(!uid) return;
+
+      const { data, error } = await supabaseClient
+        .from('friendships')
+        .select('id, requester_id')
+        .eq('addressee_id', uid)
+        .eq('status','pending');
+
+      const list = document.getElementById('requests-list');
+      const count = document.getElementById('requests-count');
+      list.innerHTML = '';
+      if(error){ list.innerHTML = `<div class="friend-row"><span>Requests unavailable.</span></div>`; count.textContent='0'; return; }
+      if(!data?.length){ list.innerHTML = `<div class="friend-row"><span>No pending requests.</span></div>`; count.textContent='0'; return; }
+
+      // nazwy nadawców
+      const ids = data.map(r=>r.requester_id);
+      let names = {};
+      const { data: profs } = await supabaseClient
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', ids);
+      (profs||[]).forEach(p=>{ names[p.id]=p.display_name || 'User'; });
+
+      data.forEach(req=>{
+        const row=document.createElement('div');
+        row.className='friend-row';
+        row.innerHTML=`<span>${names[req.requester_id]||'User'}</span>
+          <div class="row-actions">
+            <button class="btn" onclick="acceptRequest('${req.id}')">Accept</button>
+            <button class="btn secondary" onclick="rejectRequest('${req.id}')">Reject</button>
+          </div>`;
+        list.appendChild(row);
+      });
+      count.textContent = String(data.length);
+    }
+
+    async function acceptRequest(requestId){
+      const { error } = await supabaseClient
+        .from('friendships')
+        .update({ status: 'accepted' })
+        .eq('id', requestId);
+      if(error){ alert('Failed: '+error.message); return; }
+      await loadFriends(); await loadFriendRequests();
+    }
+
+    async function rejectRequest(requestId){
+      const { error } = await supabaseClient
+        .from('friendships')
+        .update({ status: 'rejected' })
+        .eq('id', requestId);
+      if(error){ alert('Failed: '+error.message); return; }
+      await loadFriendRequests();
+    }
+
+    async function unfriend(otherUserId){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const uid = session?.user?.id;
+      if(!uid) return;
+
+      // usuń rekord (dowolna strona może usunąć)
+      const { error } = await supabaseClient
+        .from('friendships')
+        .delete()
+        .or(`and(requester_id.eq.${uid},addressee_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},addressee_id.eq.${uid})`);
+      if(error){ alert('Failed: '+error.message); return; }
+      await loadFriends();
+    }
+
+    function subscribeRealtimeFeed(){
+      try{
+        supabaseClient
+          .channel('realtime-activity')
+          .on('postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'activity_events' },
+            async () => { await loadMyFeed(); }
+          )
+          .subscribe();
+      }catch(e){ /* ok */ }
     }
   </script>
 </body>
 </html>
+
