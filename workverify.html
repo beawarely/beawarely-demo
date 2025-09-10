@@ -233,8 +233,10 @@
   <!-- Topbar -->
   <div id="topbar">
     <div class="grp">
-      <a href="index.html" class="pill">← Back</a>
-    </div>
+  <a href="index.html" class="pill">← Back</a>
+  <a href="satire.html" class="pill">Satire</a>
+</div>
+
     <div class="grp">
       <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
       <a href="profile.html" class="pill">Your Profile</a>
@@ -510,7 +512,7 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
 
       const { data, error } = await sb
         .from('work_experiences')
-        .select('id, company, role, content, created_at, status')
+        .select('id, author, company, role, content, created_at, status')
         .eq('status','approved')
         .order('created_at', { ascending:false })
         .limit(6);
@@ -532,14 +534,24 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
         ].join(' • ');
         const content = escapeHTML(r.content.length > 260 ? r.content.slice(0,260)+'…' : r.content);
         return `<article class="recent-card">
-                  <div class="recent-meta">${meta}</div>
-                  <p class="recent-content">${content}</p>
-                </article>`;
+          <div class="recent-meta">${meta}</div>
+          <p class="recent-content">${content}</p>
+          <div class="toolbar" style="justify-content:flex-start; margin-top:8px;">
+            <button class="btn secondary" type="button" onclick="goToSatireEntry('${r.id}')">Satire version</button>
+          </div>
+        </article>`;
+
       }).join('');
     }
 
         // --- JSON Export + transfer to satire.html ---
+function goToSatireEntry(id){
+  // przejście do strony satyry powiązanej z konkretnym wpisem
+  location.href = `satire.html?exp=${encodeURIComponent(id)}`;
+}
+
 function exportToJson(){
+
   const payload = {
     company: (companyEl.value||'').trim(),
     role: (roleEl.value||'').trim(),
