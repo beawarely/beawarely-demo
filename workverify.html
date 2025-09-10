@@ -259,28 +259,40 @@
 
     <!-- Quick submit (placeholder) -->
     <section class="panel">
-      <h2>Share an experience (early)</h2>
-      <div class="grid">
-        <div>
-          <label class="muted">Company (optional)</label>
-          <input id="companyName" type="text" placeholder="e.g., ACME Sp. z o.o."/>
-        </div>
-        <div>
-          <label class="muted">Role (optional)</label>
-          <input id="roleName" type="text" placeholder="e.g., Warehouse Worker / HR Manager"/>
-        </div>
-      </div>
-      <div style="margin-top:10px;">
-        <label class="muted">Experience</label>
-        <textarea id="expText" rows="5" placeholder="Describe the situation. Keep it factual; avoid personal data."></textarea>
-      </div>
-      <div class="toolbar">
-        <button id="saveDraftBtn" class="btn secondary" type="button">Save draft</button>
-        <button id="loadDraftBtn" class="btn secondary" type="button">Load draft</button>
-        <button id="clearDraftBtn" class="btn secondary" type="button">Clear</button>
-        <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Publish</button>
-      </div>
-    </section>
+  <h2>Share an experience — <span class="muted">FAKTY (neutral)</span></h2>
+  <div class="grid">
+    <div>
+      <label class="muted">Company (optional)</label>
+      <input id="companyName" type="text" placeholder="e.g., ACME Sp. z o.o."/>
+    </div>
+    <div>
+      <label class="muted">Role (optional)</label>
+      <input id="roleName" type="text" placeholder="e.g., Warehouse Worker / HR Manager"/>
+    </div>
+  </div>
+  <div class="grid" style="margin-top:10px;">
+    <div>
+      <label class="muted">From</label>
+      <input id="periodFrom" type="text" placeholder="e.g., 2022-03"/>
+    </div>
+    <div>
+      <label class="muted">To</label>
+      <input id="periodTo" type="text" placeholder="e.g., 2023-07 or present"/>
+    </div>
+  </div>
+  <div style="margin-top:10px;">
+    <label class="muted">Experience (facts only)</label>
+    <textarea id="expText" rows="5" placeholder="Describe the situation. Neutral, factual, no personal data."></textarea>
+  </div>
+  <div class="toolbar">
+    <button id="saveDraftBtn" class="btn secondary" type="button">Save draft</button>
+    <button id="loadDraftBtn" class="btn secondary" type="button">Load draft</button>
+    <button id="clearDraftBtn" class="btn secondary" type="button">Clear</button>
+    <button id="exportJsonBtn" class="btn secondary" type="button">Export JSON</button>
+    <button id="toSatireBtn" class="btn secondary" type="button">→ Satire version</button>
+    <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Publish</button>
+  </div>
+</section>
 
     <!-- Recent (approved) -->
     <section class="panel">
@@ -341,8 +353,6 @@
     const aiInputEl = $('#aiInput');
     const aiUseDraftBtn = $('#aiUseDraftBtn');
     const aiReviewBtn = $('#aiReviewBtn');
-    const aiAddNoteBtn = $('#aiAddNoteBtn');
-    const aiClearNotesBtn = $('#aiClearNotesBtn');
     const aiAddNoteBtn = $('#aiAddNoteBtn');
     const aiClearNotesBtn = $('#aiClearNotesBtn');
     const aiNotesEl = $('#aiNotes');
@@ -528,7 +538,38 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       }).join('');
     }
 
-        // Implementacja wysyłki – wołana przez wrapper w <head>
+        // --- JSON Export + transfer to satire.html ---
+function exportToJson(){
+  const payload = {
+    company: (companyEl.value||'').trim(),
+    role: (roleEl.value||'').trim(),
+    period:{
+      from:(document.getElementById('periodFrom').value||'').trim(),
+      to:(document.getElementById('periodTo').value||'').trim()
+    },
+    facts_text:(textEl.value||'').trim()
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'workverify_facts.json';
+  a.click();
+}
+
+function goToSatire(){
+  const payload = {
+    company: (companyEl.value||'').trim(),
+    role: (roleEl.value||'').trim(),
+    periodFrom:(document.getElementById('periodFrom').value||'').trim(),
+    periodTo:(document.getElementById('periodTo').value||'').trim(),
+    facts_text:(textEl.value||'').trim()
+  };
+  localStorage.setItem('wv_facts_payload', JSON.stringify(payload));
+  location.href = 'satire.html';
+}
+
+// Implementacja wysyłki – wołana przez wrapper w <head>
+
     window._submitExperienceImpl = async function(){
       // auto-save current form into draft before publishing
       writeDraft({
@@ -595,7 +636,14 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
         addNote(v);
         aiInputEl.value = '';
       };
-      if(aiClearNotesBtn) aiClearNotesBtn.onclick = ()=> { writeNotes([]); renderNotes(); };
+            if(aiClearNotesBtn) aiClearNotesBtn.onclick = ()=> { writeNotes([]); renderNotes(); };
+
+      // JSON export + satire navigation
+      const exportBtn = document.getElementById('exportJsonBtn');
+      if(exportBtn) exportBtn.onclick = exportToJson;
+      const toSatireBtn = document.getElementById('toSatireBtn');
+      if(toSatireBtn) toSatireBtn.onclick = goToSatire;
+
       renderNotes();
 
 
