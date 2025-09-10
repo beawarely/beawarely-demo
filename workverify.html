@@ -291,7 +291,6 @@
     <button id="loadDraftBtn" class="btn secondary" type="button">Load draft</button>
     <button id="clearDraftBtn" class="btn secondary" type="button">Clear</button>
     <button id="exportJsonBtn" class="btn secondary" type="button">Export JSON</button>
-    <button id="toSatireBtn" class="btn secondary" type="button">→ Satire version</button>
     <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Publish</button>
   </div>
 </section>
@@ -568,17 +567,6 @@ function exportToJson(){
   a.click();
 }
 
-function goToSatire(){
-  const payload = {
-    company: (companyEl.value||'').trim(),
-    role: (roleEl.value||'').trim(),
-    periodFrom:(document.getElementById('periodFrom').value||'').trim(),
-    periodTo:(document.getElementById('periodTo').value||'').trim(),
-    facts_text:(textEl.value||'').trim()
-  };
-  localStorage.setItem('wv_facts_payload', JSON.stringify(payload));
-  location.href = 'satire.html';
-}
 
 // Implementacja wysyłki – wołana przez wrapper w <head>
 
@@ -650,14 +638,11 @@ function goToSatire(){
       };
             if(aiClearNotesBtn) aiClearNotesBtn.onclick = ()=> { writeNotes([]); renderNotes(); };
 
-      // JSON export + satire navigation
-      const exportBtn = document.getElementById('exportJsonBtn');
-      if(exportBtn) exportBtn.onclick = exportToJson;
-      const toSatireBtn = document.getElementById('toSatireBtn');
-      if(toSatireBtn) toSatireBtn.onclick = goToSatire;
+// JSON export
+const exportBtn = document.getElementById('exportJsonBtn');
+if(exportBtn) exportBtn.onclick = exportToJson;
 
-      renderNotes();
-
+renderNotes();
 
       // Simple autosave on input (debounced)
       let t=null;
