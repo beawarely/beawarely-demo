@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>WorkVerify — Satire Version</title>
+  <link rel="stylesheet" href="css/style.css"/>
+
+  <style>
+    :root{ --safe-top: env(safe-area-inset-top, 0px); }
+
+    /* DARK */
+    body{
+      --bg:#0B1220; --bg-elev:#0E1730; --card:#111B34;
+      --text:#E6ECF7; --muted:#A9B7D9; --border:rgba(230,236,247,.10);
+      --accent:#3A63FF; --accent-2:#7EA0FF;
+      --pill:rgba(255,255,255,.08); --pill-hover:rgba(255,255,255,.14);
+      --input-bg:rgba(255,255,255,.02); --shadow:0 10px 24px rgba(12,20,40,.45);
+      margin:0; font-family:'Segoe UI',system-ui,Arial,sans-serif;
+      background:var(--bg); color:var(--text);
+    }
+    /* LIGHT */
+    body.light-mode{
+      --bg:#F4F7FB; --bg-elev:#ECF2FA; --card:#fff;
+      --text:#0E1730; --muted:#5A6B89; --border:rgba(14,23,48,.12);
+      --accent:#2F54EB; --accent-2:#69A1FF;
+      --pill:rgba(14,23,48,.06); --pill-hover:rgba(14,23,48,.10);
+      --input-bg:rgba(14,23,48,.025); --shadow:0 10px 22px rgba(18,30,60,.10);
+      color:var(--text); background:linear-gradient(0deg,var(--bg),var(--bg));
+    }
+    body.dark-mode{ background:var(--bg); }
+
+    #topbar{
+      position:fixed; top:calc(14px + var(--safe-top)); left:20px; right:20px; z-index:10000;
+      display:flex; justify-content:space-between; align-items:center; pointer-events:none;
+    }
+    #topbar .grp{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
+    .pill{
+      background:var(--pill); color:inherit; font-weight:700; text-decoration:none;
+      padding:6px 14px; border-radius:12px; border:1px solid var(--border);
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+      backdrop-filter:saturate(160%) blur(4px);
+      transition:background .2s ease, transform .15s ease, border-color .2s ease;
+    }
+    .pill:hover{ background:var(--pill-hover); transform:translateY(-1px); }
+
+    header{ text-align:center; padding: calc(120px + var(--safe-top)) 16px 12px; }
+    header h1{
+      font-family:'Sriracha',cursive; font-size:56px; margin:0 0 8px; letter-spacing:.3px;
+      background:linear-gradient(90deg,
+        color-mix(in oklab,var(--text) 85%,var(--accent) 15%),
+        color-mix(in oklab,var(--accent) 60%,var(--text) 40%));
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      text-shadow:0 2px 12px color-mix(in oklab,var(--accent) 22%, transparent);
+    }
+    header p.sub{ color:var(--muted); margin:0; }
+
+    main{ max-width:1100px; margin:0 auto; padding:24px 16px 60px; display:grid; gap:16px; }
+    .panel{
+      background:linear-gradient(180deg,var(--card),var(--card));
+      border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:var(--shadow);
+    }
+    .panel h2{ margin:0 0 8px; font-size:20px; letter-spacing:.2px; }
+    .muted{ color:var(--muted); }
+    .grid{ display:grid; grid-template-columns:repeat(2, minmax(260px,1fr)); gap:16px; }
+    @media (max-width:900px){ .grid{ grid-template-columns:1fr; } }
+    .btn{
+      border:none; padding:10px 14px; border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      color:#fff; font-weight:800; cursor:pointer;
+      transition: transform .12s ease, filter .2s ease, box-shadow .2s ease;
+      box-shadow:0 6px 16px rgba(48,92,255,.35);
+    }
+    .btn.secondary{ background:transparent; color:inherit; border:1px solid var(--border); box-shadow:none; }
+    .toolbar{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:10px; }
+    textarea, input[type="text"]{
+      width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px;
+      border:1px solid var(--border); background:var(--input-bg); color:inherit; outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+    textarea::placeholder, input::placeholder{ color: color-mix(in oklab,var(--muted) 65%, transparent); }
+    textarea:focus, input[type="text"]:focus{
+      border-color: color-mix(in oklab,var(--accent) 70%, white 30%);
+      box-shadow: 0 0 0 3px color-mix(in oklab,var(--accent) 22%, transparent);
+      background: color-mix(in oklab,var(--input-bg) 70%, white 30%);
+    }
+
+    .badge{ font-size:12px; padding:4px 8px; border-radius:999px;
+      background:color-mix(in oklab,var(--accent) 16%, transparent);
+      border:1px solid var(--border); color:inherit; display:inline-block; }
+
+    .preview{
+      border:1px solid var(--border); border-radius:12px; padding:12px;
+      background:color-mix(in oklab,var(--card) 92%, transparent);
+      min-height:90px; white-space:pre-wrap;
+    }
+    .warn{
+      border:1px solid color-mix(in oklab, #ffb6b6 40%, var(--border));
+      background:color-mix(in oklab, #ffb6b6 10%, transparent);
+      color:inherit; border-radius:12px; padding:10px; font-size:14px; margin-top:10px;
+    }
+    .warn ul{ margin:6px 0 0 18px; }
+  </style>
+
+  <script>
+    // light/dark
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const saved = localStorage.getItem('mode');
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      const isLight = saved ? (saved === 'light') : prefersLight;
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+    });
+    function toggleLightDarkMode(){
+      document.body.classList.add('theme-anim');
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+      setTimeout(()=> document.body.classList.remove('theme-anim'), 280);
+    }
+  </script>
+</head>
+<body>
+  <!-- Topbar -->
+  <div id="topbar">
+    <div class="grp">
+      <a href="workverify.html" class="pill">← Fakty</a>
+    </div>
+    <div class="grp">
+      <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
+      <a href="profile.html" class="pill">Your Profile</a>
+    </div>
+  </div>
+
+  <header>
+    <h1>Satire Version</h1>
+    <p class="sub">Ta sekcja to forma artystyczna tej samej historii. Zero nazw firm, zero imion i nazwisk.</p>
+  </header>
+
+  <main>
+    <!-- Fakty (podgląd tylko do weryfikacji spójności rdzenia) -->
+    <section class="panel">
+      <h2>Rdzeń zdarzeń — <span class="muted">FAKTY (read-only)</span></h2>
+      <div class="grid">
+        <div>
+          <label class="muted">Company</label>
+          <input id="factsCompany" type="text" readonly/>
+        </div>
+        <div>
+          <label class="muted">Role</label>
+          <input id="factsRole" type="text" readonly/>
+        </div>
+      </div>
+      <div class="grid" style="margin-top:10px;">
+        <div>
+          <label class="muted">From</label>
+          <input id="factsFrom" type="text" readonly/>
+        </div>
+        <div>
+          <label class="muted">To</label>
+          <input id="factsTo" type="text" readonly/>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label class="muted">Facts text</label>
+        <div id="factsPreview" class="preview"></div>
+      </div>
+    </section>
+
+    <!-- Satyra -->
+    <section class="panel">
+      <h2>BEZ CENZURY (satyra)</h2>
+      <p class="muted" style="margin:0 0 8px;">
+        „To wersja satyryczna o tych samych zdarzeniach; forma artystyczna bez wskazania osób/firm.”
+      </p>
+      <textarea id="satireText" rows="8" placeholder="Te same zdarzenia, ale ostrym/sarkastycznym językiem. Nie używaj nazw własnych, danych osobowych, NIP/KvK, adresów ani linków."></textarea>
+
+      <div id="lintWarnings" class="warn" style="display:none;">
+        <strong>Uwaga:</strong>
+        <ul id="lintList"></ul>
+      </div>
+
+      <div class="toolbar">
+        <button id="lintBtn" class="btn secondary" type="button">Lint (sprawdź identyfikatory)</button>
+        <button id="toggleFactsBtn" class="btn secondary" type="button">👁️ Fakty</button>
+        <button id="toggleSatireBtn" class="btn secondary" type="button">👁️ Bez cenzury</button>
+        <button id="exportJsonBtn" class="btn secondary" type="button">Eksport JSON</button>
+        <button id="publishBtn" class="btn" type="button">Publikuj (wkrótce)</button>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label class="muted">Podgląd</label>
+        <div id="livePreview" class="preview"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ——— Helpers ———
+    const $ = sel => document.querySelector(sel);
+    function escapeHTML(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+    // Klucze storage
+    const FACTS_KEY = 'wv_facts_payload';
+    const SATIRE_DRAFT_KEY = 'wv_satire_draft';
+
+    // Wczytaj fakty z localStorage (z workverify.html)
+    function loadFacts(){
+      let parsed = null;
+      try{ parsed = JSON.parse(localStorage.getItem(FACTS_KEY) || 'null'); }catch(e){}
+      return parsed || { company:'', role:'', periodFrom:'', periodTo:'', facts_text:'' };
+    }
+
+    function fillFactsReadonly(f){
+      $('#factsCompany').value = f.company || '';
+      $('#factsRole').value = f.role || '';
+      $('#factsFrom').value = f.periodFrom || '';
+      $('#factsTo').value = f.periodTo || '';
+      $('#factsPreview').textContent = f.facts_text || '(brak treści)';
+      // Domyślny podgląd = Fakty
+      $('#livePreview').textContent = f.facts_text || '';
+    }
+
+    // Lint satyry – wykrywa identyfikatory
+    function lintSatire(text){
+      const issues = [];
+
+      // URL
+      if(/https?:\/\/\S+/i.test(text)) issues.push('Znaleziono link/URL — usuń.');
+      // Email
+      if(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)) issues.push('Znaleziono email — usuń.');
+      // Numery identyfikacyjne
+      if(/\b(NIP|VAT|KvK|KRS|REGON|PESEL|BSN)\b/i.test(text)) issues.push('Wzmianka o numerach identyfikacyjnych — usuń.');
+      // Wzorce spółek
+      if(/\b(sp\. z o\.o\.|s\.a\.|bv|gmbh|inc|llc)\b/i.test(text)) issues.push('Wzmianka o typach spółek — nie używaj konkretnych nazw firm.');
+      // Adresy
+      if(/\b(ul\.|ulica|street|straat|avenue|ave\.|road|rd\.|adres|address)\b/i.test(text)) issues.push('Wzmianka o adresie — unikaj precyzyjnych lokalizacji.');
+      // Imię + nazwisko (prosty heurystyczny wzorzec)
+      if(/\b[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+\s+[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+\b/.test(text)) issues.push('Wygląda jak imię i nazwisko — zastąp opisem roli (np. „szef zmiany”).');
+
+      return issues;
+    }
+
+    function renderWarnings(list){
+      const box = $('#lintWarnings');
+      const ul = $('#lintList');
+      if(!list.length){ box.style.display='none'; ul.innerHTML=''; return; }
+      box.style.display='block';
+      ul.innerHTML = list.map(i=>`<li>${escapeHTML(i)}</li>`).join('');
+    }
+
+    function exportJson(){
+      const facts = loadFacts();
+      const satire = ($('#satireText').value||'').trim();
+      const flags = { satire_has_identifiers: lintSatire(satire).length>0 };
+
+      const payload = {
+        company: facts.company || null,
+        role: facts.role || null,
+        period:{ from: facts.periodFrom || null, to: facts.periodTo || null },
+        facts_text: facts.facts_text || '',
+        satire_text: satire,
+        flags
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'workverify_entry.json';
+      a.click();
+    }
+
+    function init(){
+      const facts = loadFacts();
+      fillFactsReadonly(facts);
+
+      // Draft restore
+      try{
+        const d = JSON.parse(localStorage.getItem(SATIRE_DRAFT_KEY) || 'null');
+        if(d && d.text) $('#satireText').value = d.text;
+      }catch(e){}
+
+      // Live preview binding
+      $('#satireText').addEventListener('input', ()=>{
+        const v = $('#satireText').value;
+        $('#livePreview').textContent = v ? v : (facts.facts_text || '');
+        // autosave draft
+        localStorage.setItem(SATIRE_DRAFT_KEY, JSON.stringify({ text:v, ts:Date.now() }));
+      });
+
+      // Buttons
+      $('#lintBtn').onclick = ()=>{
+        const v = ($('#satireText').value||'').trim();
+        const issues = lintSatire(v);
+        renderWarnings(issues);
+        if(!issues.length) alert('OK: nie znaleziono potencjalnych identyfikatorów.');
+      };
+      $('#toggleFactsBtn').onclick = ()=>{ $('#livePreview').textContent = facts.facts_text || ''; };
+      $('#toggleSatireBtn').onclick = ()=>{ $('#livePreview').textContent = ($('#satireText').value||'').trim(); };
+      $('#exportJsonBtn').onclick = exportJson;
+      $('#publishBtn').onclick = ()=>{
+        alert('Publikacja z integracją DB będzie dodana w kolejnym kroku. Na razie użyj „Eksport JSON”.');
+      };
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
