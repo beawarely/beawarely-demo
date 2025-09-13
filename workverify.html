@@ -274,7 +274,7 @@
     <div class="grp">
   <a href="index.html" class="pill">← Back</a>
   <a href="satire.html" class="pill">Satire</a>
-  <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)">📂</button>
+  <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)" aria-expanded="false">📂</button>
 </div>
 
 
@@ -375,7 +375,7 @@
 <div id="draftDock" class="ai-dock collapsed" style="left:18px; right:auto; width:min(360px, 92vw);">
   <div class="ai-head">
     <strong>📂 My Drafts</strong>
-    <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)">📂</button>
+    <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)" aria-expanded="false">📂</button>
   </div>
   <div id="draftList" class="muted small" style="font-size:13px;"></div>
 </div>
@@ -866,15 +866,14 @@ function deleteDraftByKey(key){
     renderDraftList();
   }
 }
-
-  // globalna wersja – widoczna dla inline onclick="toggleDraftDock(this)"
+// Funkcja globalna
 window.toggleDraftDock = function(btn){
   const dock = document.getElementById('draftDock');
   if (!dock) return;
 
   dock.classList.toggle('collapsed');
 
-  // odśwież listę ZA KAŻDYM razem (po zapisie od razu widać wszystkie)
+  // odśwież listę za każdym razem
   if (typeof renderDraftList === 'function') renderDraftList();
 
   // aktualizuj label/ARIA
