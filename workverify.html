@@ -201,15 +201,44 @@
 
   <script>
     // light/dark toggle (spójne z innymi)
-    document.addEventListener('DOMContentLoaded', ()=>{
+    document.addEventListener('DOMContentLoaded', async ()=>{
   // Default: respect saved choice; if none, follow system preference
   const saved = localStorage.getItem('mode');
   const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
   const isLight = saved ? (saved === 'light') : prefersLight;
-
   document.body.classList.toggle('light-mode', isLight);
   document.body.classList.toggle('dark-mode', !isLight);
+
+  // 🔧 Inicjalizacja formularza, listy i notatek
+  await setFormState();
+  await loadRecent();
+  renderNotes();
+
+  // 🔧 Draft buttons
+  if(saveDraftBtn) saveDraftBtn.addEventListener('click', saveDraftFromForm);
+  if(loadDraftBtn) loadDraftBtn.addEventListener('click', loadDraftIntoForm);
+  if(clearDraftBtn) clearDraftBtn.addEventListener('click', () => {
+    localStorage.removeItem(draftKey());
+    alert('Draft cleared.');
+  });
+
+  // 🔧 AI Dock buttons
+  if(aiReviewBtn) aiReviewBtn.addEventListener('click', reviewDraftLocally);
+  if(aiAddNoteBtn) aiAddNoteBtn.addEventListener('click', () => {
+    const note = prompt('Add a note:');
+    if(note && note.trim()) addNote(note.trim());
+  });
+  if(aiClearNotesBtn) aiClearNotesBtn.addEventListener('click', () => {
+    localStorage.removeItem(NOTES_KEY());
+    renderNotes();
+  });
+  if(aiUseDraftBtn) aiUseDraftBtn.addEventListener('click', () => {
+    const d = readDraft();
+    if(!d){ alert('No draft.'); return; }
+    aiInputEl.value = buildAIContext();
+  });
 });
+
     function toggleLightDarkMode(){
   // Smooth theme switch (1) – dodaj krótką klasę animującą
   document.body.classList.add('theme-anim');
@@ -285,6 +314,8 @@
   <div style="margin-top:10px;">
     <label class="muted">Experience (facts only)</label>
     <textarea id="expText" rows="5" placeholder="Describe the situation. Neutral, factual, no personal data."></textarea>
+<div id="charCount" class="muted" style="font-size: 13px; margin-top:4px;">0 / 8000 characters</div>
+
   </div>
   <div class="toolbar">
     <button id="saveDraftBtn" class="btn secondary" type="button">Save draft</button>
@@ -343,6 +374,7 @@
     const companyEl = $('#companyName');
     const roleEl = $('#roleName');
     const textEl = $('#expText');
+    const charCountEl = $('#charCount');
     const submitBtn = $('#submitBtn');
     const recentList = $('#recentList');
 
@@ -379,7 +411,9 @@
       companyEl.value = d.company || '';
       roleEl.value = d.role || '';
       textEl.value = d.content || '';
-      alert('Draft loaded.');
+      validateContentLength();
+alert('Draft loaded.');
+
     }
     function saveDraftFromForm(){
       const payload = {
@@ -569,7 +603,9 @@ function goToSatireEntry(id){
         alert('Please provide at least ~40 characters describing the situation.');
         return;
       }
-      if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Saving…'; }
+            if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Saving…'; }
+      reviewDraftLocally(); // 🔧 lokalna walidacja przed wysłaniem
+
 
       const payload = {
         author: session.user.id,
@@ -624,21 +660,48 @@ renderNotes();
       // Simple autosave on input (debounced)
       let t=null;
       [companyEl, roleEl, textEl].forEach(el=>{
-        el.addEventListener('input', ()=>{
-          clearTimeout(t);
-          t = setTimeout(()=> writeDraft({
-            company:(companyEl.value||'').trim(),
-            role:(roleEl.value||'').trim(),
-            content:(textEl.value||'').trim()
-          }), 800);
-        });
-      });
+  el.addEventListener('input', ()=>{
+    clearTimeout(t);
+    t = setTimeout(()=> writeDraft({
+      company:(companyEl.value||'').trim(),
+      role:(roleEl.value||'').trim(),
+      content:(textEl.value||'').trim()
+    }), 800);
 
-      sb.auth.onAuthStateChange(async ()=>{
-        await setFormState();
-      });
+    validateContentLength(); // 🔧 nowa funkcja walidacji w czasie pisania
+  });
+});
+
+
+      sb.auth.onAuthStateChange(async (_ev, session)=>{
+  handleAuth(session);
+  await setFormState();
+  await loadRecent();
+});
+
     });
 
+  function validateContentLength(){
+  const len = (textEl.value || '').trim().length;
+  if(charCountEl){
+    charCountEl.textContent = `${len} / 8000 characters`;
+    if(len < 40){
+      charCountEl.style.color = 'orange';
+      charCountEl.textContent += ' — too short';
+    } else if(len > 8000){
+      charCountEl.style.color = 'red';
+      charCountEl.textContent += ' — too long';
+    } else {
+      charCountEl.style.color = 'inherit';
+    }
+  }
+
+  // blokuj / odblokuj przycisk Publish
+  if(submitBtn){
+    submitBtn.disabled = (len < 40 || len > 8000);
+  }
+}
+  
   </script>
 </body>
 </html>
