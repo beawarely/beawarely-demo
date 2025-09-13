@@ -264,6 +264,8 @@
     <div class="grp">
   <a href="index.html" class="pill">← Back</a>
   <a href="satire.html" class="pill">Satire</a>
+<button class="pill" onclick="document.getElementById('draftDock').classList.toggle('collapsed')">📂 My Drafts</button>
+
 </div>
 
     <div class="grp">
@@ -359,6 +361,14 @@
     <div id="aiNotes" class="ai-notes muted" style="margin-top:8px;"></div>
   </div>
 
+  <!-- Draft dock (left side) -->
+<div id="draftDock" class="ai-dock collapsed" style="left:18px; right:auto; width:min(360px, 92vw);">
+  <div class="ai-head">
+    <strong>📂 My Drafts</strong>
+    <button class="pill ai-toggle" type="button" onclick="document.getElementById('draftDock').classList.toggle('collapsed')">Toggle</button>
+  </div>
+  <div id="draftList" class="muted small" style="font-size:13px;"></div>
+</div>
 <!-- Supabase + funkcjonalność strony -->
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -543,11 +553,11 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       recentList.innerHTML = '<span class="muted">Loading…</span>';
 
       const { data, error } = await sb
-        .from('work_experiences')
-        .select('id, author, company, role, content, created_at, status')
-        .eq('status','approved')
-        .order('created_at', { ascending:false })
-        .limit(6);
+  .from('work_experiences')
+  .select('id, author, company, role, content, created_at, status')
+  .or(`status.eq.approved,author.eq.${_lastUserId}`)
+  .order('created_at', { ascending:false })
+  .limit(6);
 
       if(error){
         recentList.innerHTML = `<span class="muted">Failed to load (${escapeHTML(error.message)})</span>`;
@@ -566,12 +576,14 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
         ].join(' • ');
         const content = escapeHTML(r.content.length > 260 ? r.content.slice(0,260)+'…' : r.content);
         return `<article class="recent-card">
-          <div class="recent-meta">${meta}</div>
-          <p class="recent-content">${content}</p>
-          <div class="toolbar" style="justify-content:flex-start; margin-top:8px;">
-            <button class="btn secondary" type="button" onclick="goToSatireEntry('${r.id}')">Satire version</button>
-          </div>
-        </article>`;
+  <div class="recent-meta">${meta}</div>
+  <p class="recent-content">${content}</p>
+  ${r.status !== 'approved' ? '<div class="badge">Awaiting approval</div>' : ''}
+  <div class="toolbar" style="justify-content:flex-start; margin-top:8px;">
+    <button class="btn secondary" type="button" onclick="goToSatireEntry('${r.id}')">Satire version</button>
+  </div>
+</article>`;
+
 
       }).join('');
     }
@@ -678,7 +690,7 @@ renderNotes();
   await setFormState();
   await loadRecent();
 });
-
+renderDraftList();
     });
 
   function validateContentLength(){
@@ -701,7 +713,59 @@ renderNotes();
     submitBtn.disabled = (len < 40 || len > 8000);
   }
 }
-  
+  function listDraftKeys(){
+  const keys = Object.keys(localStorage).filter(k=>k.startsWith('wv_draft_'));
+  return keys.map(k=>{
+    try{ return [k, JSON.parse(localStorage.getItem(k))]; }
+    catch{ return null; }
+  }).filter(Boolean).sort((a,b)=> (b[1]?.ts||0) - (a[1]?.ts||0)).slice(0,5);
+}
+
+function renderDraftList(){
+  const listEl = document.getElementById('draftList');
+  if(!listEl){ return; }
+
+  const drafts = listDraftKeys();
+  if(!drafts.length){
+    listEl.innerHTML = '<small>No saved drafts.</small>';
+    return;
+  }
+
+  listEl.innerHTML = '<ul style="margin:6px 0 0 18px; padding:0;">' +
+    drafts.map(([key,d])=>{
+      const dt = new Date(d.ts || 0).toLocaleString().replace(',','');
+      return `<li style="margin:4px 0;">
+        <strong>${escapeHTML(d.company || '—')}</strong>
+        <span style="font-size:11px;">(${dt})</span><br/>
+        <button class="btn secondary" style="margin-top:4px; margin-right:6px;" onclick="loadDraftByKey('${key}')">Load</button>
+        <button class="btn secondary" style="margin-top:4px;" onclick="deleteDraftByKey('${key}')">Delete</button>
+      </li>`;
+    }).join('') +
+    '</ul>';
+}
+
+function loadDraftByKey(key){
+  try{
+    const d = JSON.parse(localStorage.getItem(key)||'null');
+    if(!d) return alert('Draft missing.');
+    companyEl.value = d.company || '';
+    roleEl.value = d.role || '';
+    textEl.value = d.content || '';
+    validateContentLength();
+    alert('Draft loaded.');
+  }catch(e){
+    alert('Error loading draft.');
+  }
+}
+
+function deleteDraftByKey(key){
+  if(confirm('Delete this draft?')){
+    localStorage.removeItem(key);
+    renderDraftList();
+  }
+}
+
   </script>
+
 </body>
 </html>
