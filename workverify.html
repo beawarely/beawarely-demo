@@ -418,24 +418,100 @@ const draftKey = () => `${draftBaseKey()}_${Date.now()}`;
       return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
     }
 
-    /* ------- Drafts (local-only) ------- */
+       /* ------- Drafts (local-only) ------- */
+    // klucz bazowy: wv_draft_${_lastUserId}
+    function listDraftKeys(){
+      const prefix = `${draftBaseKey()}_`;
+      const out = [];
+      for (let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith(prefix)) continue;
+        try {
+          const v = JSON.parse(localStorage.getItem(k) || 'null');
+          const ts = (v && v.ts) ? Number(v.ts) : Number(k.slice(prefix.length));
+          out.push([k, v || null, ts]);
+        } catch(_) {
+          // uszkodzony wpis pomijamy
+        }
+      }
+      // najnowsze na górze
+      out.sort((a,b)=> (b[2]||0) - (a[2]||0));
+      return out;
+    }
+
     function readDraft(){
-      try{ const drafts = listDraftKeys();
-return drafts[0]?.[1] || null; }catch(e){ return null; }
+      try{
+        const arr = listDraftKeys();
+        return arr[0]?.[1] || null;
+      }catch(_){ return null; }
     }
+
     function writeDraft(obj){
-      localStorage.setItem(`${draftBaseKey()}_${Date.now()}`, JSON.stringify({ ...obj, ts: Date.now() }));
+      const now = Date.now();
+      localStorage.setItem(`${draftBaseKey()}_${now}`, JSON.stringify({ ...obj, ts: now }));
+      renderDraftList(); // odśwież listę po zapisie
     }
+
+    function loadDraftByKey(key){
+      try{
+        const d = JSON.parse(localStorage.getItem(key) || 'null');
+        if(!d) return alert('Draft not found.');
+        companyEl.value = d.company || '';
+        roleEl.value = d.role || '';
+        textEl.value = d.content || '';
+        if (typeof validateContentLength === 'function') validateContentLength();
+        alert('Draft loaded.');
+      }catch(_){
+        alert('Cannot load this draft.');
+      }
+    }
+
+    function deleteDraftKey(key){
+      localStorage.removeItem(key);
+      renderDraftList();
+    }
+
+    function renderDraftList(){
+      const host = document.getElementById('draftList');
+      if (!host) return;
+      const arr = listDraftKeys().slice(0,5); // max 5 ostatnich
+      if (!arr.length){
+        host.innerHTML = '<small>No drafts yet.</small>';
+        return;
+      }
+      const fmt = (ts)=>{
+        try{
+          return new Date(ts).toLocaleString(undefined, { hour12:false });
+        }catch(_){ return ''; }
+      };
+      host.innerHTML = arr.map(([key, val, ts])=>{
+        const title = (val?.company || val?.role || (val?.content||'').slice(0,18) || '—').toString();
+        const safe = title.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+        return `
+          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;padding:6px 8px;border:1px solid var(--ai-border);border-radius:10px;margin-top:6px;">
+            <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+              <span aria-hidden="true">•</span>
+              <button type="button" style="background:transparent;border:0;color:inherit;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;"
+                      onclick="loadDraftByKey('${key}')"
+                      title="Load this draft">${safe}</button>
+              <small class="muted">(${fmt(ts)})</small>
+            </div>
+            <button type="button" class="pill" title="Delete"
+                    onclick="deleteDraftKey('${key}')">🗑️</button>
+          </div>`;
+      }).join('');
+    }
+
     function loadDraftIntoForm(){
       const d = readDraft();
       if(!d){ alert('No saved draft.'); return; }
       companyEl.value = d.company || '';
       roleEl.value = d.role || '';
       textEl.value = d.content || '';
-      validateContentLength();
-alert('Draft loaded.');
-
+      if (typeof validateContentLength === 'function') validateContentLength();
+      alert('Draft loaded.');
     }
+
     function saveDraftFromForm(){
       const payload = {
         company: (companyEl.value||'').trim(),
@@ -447,6 +523,16 @@ alert('Draft loaded.');
       }
       writeDraft(payload);
       alert('Draft saved locally.');
+    }
+
+    // Dock expand/collapse – lewa strona
+    function toggleDraftDock(btn){
+      const dock = document.getElementById('draftDock');
+      if (!dock) return;
+      dock.classList.toggle('collapsed');
+      // po rozwinięciu zawsze odśwież listę
+      if (!dock.classList.contains('collapsed')) renderDraftList();
+      if (btn) btn.textContent = '📂';
     }
 
         /* ------- Mini AI (local helper + notes) ------- */
