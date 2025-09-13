@@ -411,8 +411,8 @@
 
     // helper: per-user draft key
     let _lastUserId = 'anon';
-    const draftKey = () => `wv_draft_${_lastUserId}`;
-
+    const draftBaseKey = () => `wv_draft_${_lastUserId}`;
+const draftKey = () => `${draftBaseKey()}_${Date.now()}`;
 
         function escapeHTML(s){
       return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
@@ -420,10 +420,11 @@
 
     /* ------- Drafts (local-only) ------- */
     function readDraft(){
-      try{ return JSON.parse(localStorage.getItem(draftKey())||'null'); }catch(e){ return null; }
+      try{ const drafts = listDraftKeys();
+return drafts[0]?.[1] || null; }catch(e){ return null; }
     }
     function writeDraft(obj){
-      localStorage.setItem(draftKey(), JSON.stringify({ ...obj, ts: Date.now() }));
+      localStorage.setItem(`${draftBaseKey()}_${Date.now()}`, JSON.stringify({ ...obj, ts: Date.now() }));
     }
     function loadDraftIntoForm(){
       const d = readDraft();
