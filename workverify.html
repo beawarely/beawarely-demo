@@ -379,6 +379,7 @@
   </div>
   <div id="draftList" class="muted small" style="font-size:13px;"></div>
 </div>
+
 <!-- Supabase + funkcjonalność strony -->
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -815,77 +816,6 @@ renderDraftList();
     submitBtn.disabled = (len < 40 || len > 8000);
   }
 }
-  function listDraftKeys(){
-  const keys = Object.keys(localStorage).filter(k=>k.startsWith('wv_draft_'));
-  return keys.map(k=>{
-    try{ return [k, JSON.parse(localStorage.getItem(k))]; }
-    catch{ return null; }
-  }).filter(Boolean).sort((a,b)=> (b[1]?.ts||0) - (a[1]?.ts||0)).slice(0,5);
-}
-
-function renderDraftList(){
-  const listEl = document.getElementById('draftList');
-  if(!listEl){ return; }
-
-  const drafts = listDraftKeys();
-  if(!drafts.length){
-    listEl.innerHTML = '<small>No saved drafts.</small>';
-    return;
-  }
-
-  listEl.innerHTML = '<ul style="margin:6px 0 0 18px; padding:0;">' +
-    drafts.map(([key,d])=>{
-      const dt = new Date(d.ts || 0).toLocaleString().replace(',','');
-      return `<li style="margin:4px 0;">
-        <strong>${escapeHTML(d.company || '—')}</strong>
-        <span style="font-size:11px;">(${dt})</span><br/>
-        <button class="btn secondary" style="margin-top:4px; margin-right:6px;" onclick="loadDraftByKey('${key}')">Load</button>
-        <button class="btn secondary" style="margin-top:4px;" onclick="deleteDraftByKey('${key}')">Delete</button>
-      </li>`;
-    }).join('') +
-    '</ul>';
-}
-
-function loadDraftByKey(key){
-  try{
-    const d = JSON.parse(localStorage.getItem(key)||'null');
-    if(!d) return alert('Draft missing.');
-    companyEl.value = d.company || '';
-    roleEl.value = d.role || '';
-    textEl.value = d.content || '';
-    validateContentLength();
-    alert('Draft loaded.');
-  }catch(e){
-    alert('Error loading draft.');
-  }
-}
-
-function deleteDraftByKey(key){
-  if(confirm('Delete this draft?')){
-    localStorage.removeItem(key);
-    renderDraftList();
-  }
-}
-// Funkcja globalna
-window.toggleDraftDock = function(btn){
-  const dock = document.getElementById('draftDock');
-  if (!dock) return;
-
-  dock.classList.toggle('collapsed');
-
-  // odśwież listę za każdym razem
-  if (typeof renderDraftList === 'function') renderDraftList();
-
-  // aktualizuj label/ARIA
-  if (btn) {
-    const isCollapsed = dock.classList.contains('collapsed');
-    btn.textContent = isCollapsed ? '📂' : '📂 My Drafts';
-    btn.setAttribute('aria-expanded', String(!isCollapsed));
-  }
-};
-
-  window.loadDraftByKey = loadDraftByKey;
-window.deleteDraftByKey = deleteDraftByKey;
 </script>
 
 </body>
