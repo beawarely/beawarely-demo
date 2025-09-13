@@ -525,15 +525,20 @@ const draftKey = () => `${draftBaseKey()}_${Date.now()}`;
       alert('Draft saved locally.');
     }
 
-    // Dock expand/collapse – lewa strona
-    function toggleDraftDock(btn){
+        // Dock expand/collapse – lewa strona (GLOBAL for inline onclick)
+    window.toggleDraftDock = function(btn){
       const dock = document.getElementById('draftDock');
       if (!dock) return;
       dock.classList.toggle('collapsed');
-      // po rozwinięciu zawsze odśwież listę
-      if (!dock.classList.contains('collapsed')) renderDraftList();
+
+      // odśwież listę po KAŻDYM kliknięciu (nie tylko przy otwieraniu),
+      // żeby od razu było widać nowo zapisane drafty
+      renderDraftList();
+
+      // zachowaj ikonę
       if (btn) btn.textContent = '📂';
     }
+
 
         /* ------- Mini AI (local helper + notes) ------- */
     const NOTES_KEY = ()=> `wv_notes_${_lastUserId}`;
