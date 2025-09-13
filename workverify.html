@@ -867,11 +867,24 @@ function deleteDraftByKey(key){
   }
 }
 
-  function toggleDraftDock(btn){
+  // globalna wersja – widoczna dla inline onclick="toggleDraftDock(this)"
+window.toggleDraftDock = function(btn){
   const dock = document.getElementById('draftDock');
+  if (!dock) return;
+
   dock.classList.toggle('collapsed');
-  btn.textContent = dock.classList.contains('collapsed') ? '📂' : '📂 My Drafts';
-}  
+
+  // odśwież listę ZA KAŻDYM razem (po zapisie od razu widać wszystkie)
+  if (typeof renderDraftList === 'function') renderDraftList();
+
+  // aktualizuj label/ARIA
+  if (btn) {
+    const isCollapsed = dock.classList.contains('collapsed');
+    btn.textContent = isCollapsed ? '📂' : '📂 My Drafts';
+    btn.setAttribute('aria-expanded', String(!isCollapsed));
+  }
+};
+
   window.loadDraftByKey = loadDraftByKey;
 window.deleteDraftByKey = deleteDraftByKey;
 </script>
