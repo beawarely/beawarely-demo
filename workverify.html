@@ -401,7 +401,7 @@
 
     // helper: per-user draft key
     let _lastUserId = 'anon';
-    const draftKey = () => `wv_draft_${_lastUserId}`;
+    const draftKey = () => `wv_draft_${_lastUserId}_${Date.now()}`;
 
 
         function escapeHTML(s){
@@ -765,7 +765,9 @@ function deleteDraftByKey(key){
   }
 }
 
-  </script>
+  window.loadDraftByKey = loadDraftByKey;
+window.deleteDraftByKey = deleteDraftByKey;
+</script>
 
 </body>
 </html>
