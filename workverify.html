@@ -196,6 +196,16 @@
   .ai-notes ul{ margin:6px 0 0 18px; padding:0; }
   .ai-notes li{ margin:4px 0; }
 
+    /* Draft dock collapse behavior */
+  #draftDock.collapsed {
+    height: 50px;
+    overflow: hidden;
+    padding-bottom: 4px;
+  }
+  #draftDock {
+    transition: all 0.25s ease;
+  }
+
 </style>
 
 
@@ -262,11 +272,12 @@
   <!-- Topbar -->
   <div id="topbar">
     <div class="grp">
+  <div class="grp">
   <a href="index.html" class="pill">← Back</a>
   <a href="satire.html" class="pill">Satire</a>
-<button class="pill ai-toggle" type="button" onclick="document.getElementById('draftDock').classList.toggle('collapsed')">Toggle</button>
-
+  <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)">📂</button>
 </div>
+
 
     <div class="grp">
       <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
@@ -365,7 +376,7 @@
 <div id="draftDock" class="ai-dock collapsed" style="left:18px; right:auto; width:min(360px, 92vw);">
   <div class="ai-head">
     <strong>📂 My Drafts</strong>
-    <button class="pill ai-toggle" type="button" onclick="document.getElementById('draftDock').classList.toggle('collapsed')">Toggle</button>
+    <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)">📂</button>
   </div>
   <div id="draftList" class="muted small" style="font-size:13px;"></div>
 </div>
@@ -667,7 +678,7 @@ function goToSatireEntry(id){
             if(aiClearNotesBtn) aiClearNotesBtn.onclick = ()=> { writeNotes([]); renderNotes(); };
 
 
-renderNotes();
+renderDraftList();
 
       // Simple autosave on input (debounced)
       let t=null;
@@ -765,6 +776,11 @@ function deleteDraftByKey(key){
   }
 }
 
+  function toggleDraftDock(btn){
+  const dock = document.getElementById('draftDock');
+  dock.classList.toggle('collapsed');
+  btn.textContent = dock.classList.contains('collapsed') ? '📂' : '📂 My Drafts';
+}  
   window.loadDraftByKey = loadDraftByKey;
 window.deleteDraftByKey = deleteDraftByKey;
 </script>
