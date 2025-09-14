@@ -170,45 +170,35 @@
 
   </style>
 <style>
-  /* --- Draft toolbar & AI dock --- */
-  .toolbar{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:10px; }
-  .ai-dock{
-    position:fixed; right:18px; bottom:18px; width:min(360px, 92vw);
-    background: linear-gradient(180deg, var(--ai-bg), var(--ai-bg-2));
-    border:1px solid var(--ai-border); border-radius:16px; padding:14px;
-    box-shadow: var(--shadow); z-index: 10001; color: var(--ai-text);
-  }
-  .ai-dock .muted, .ai-dock small{ color: var(--ai-muted); }
-  .ai-dock textarea{ color: var(--ai-text); }
-  .ai-dock.collapsed textarea, .ai-dock.collapsed .actions{ display:none; }
-  .ai-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
-  .ai-toggle{ padding:4px 10px; }
-  .ai-dock .btn{
-    background: linear-gradient(135deg, #2FA36B, #70D39A);
-    box-shadow: 0 6px 16px rgba(63,173,118,.35);
-  }
-  .ai-dock .btn.secondary{
-    background: transparent;
-    color: var(--ai-text);
-    border:1px solid var(--ai-border);
-  }
-  #aiInput{ width:100%; box-sizing:border-box; margin:8px 0; background: rgba(255,255,255,.03); border:1px solid var(--ai-border); }
-  .ai-notes{ font-size:12px; line-height:1.35; }
-  .ai-notes ul{ margin:6px 0 0 18px; padding:0; }
-  .ai-notes li{ margin:4px 0; }
+  /* --- Toolbar (zostaje) --- */
+.toolbar{ display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; margin-top:10px; }
 
-    /* Draft dock collapse behavior */
-  #draftDock.collapsed {
-    height: 56px;
-    overflow: hidden;
-    padding-bottom: 6px;
-  }
-  #draftDock {
-    transition: all 0.25s ease;
-  }
+/* --- Statyczny mini-chat AI jako panel --- */
+.ai-panel textarea{
+  width:100%; box-sizing:border-box; margin-top:8px;
+}
+
+/* --- Formularz + prawa kolumna z draftami --- */
+.form-and-drafts{
+  display:grid; grid-template-columns: 1fr 340px; gap:16px; align-items:start;
+}
+@media (max-width: 1100px){
+  .form-and-drafts{ grid-template-columns: 1fr; }
+}
+
+/* Role + From + To: krótsze daty */
+.dates-grid{
+  display:grid; grid-template-columns: 1fr 180px; gap:16px; margin-top:10px;
+}
+@media (max-width: 600px){
+  .dates-grid{ grid-template-columns: 1fr; }
+}
+
+/* My Drafts panel */
+.drafts-panel{ padding:16px; }
+.drafts-panel .muted small{ opacity:.9; }
 
 </style>
-
 
   <script>
     // light/dark toggle (spójne z innymi)
@@ -275,9 +265,7 @@
     <div class="grp">
   <a href="index.html" class="pill">← Back</a>
   <a href="satire.html" class="pill">Satire</a>
-  <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)" aria-expanded="false">📂</button>
 </div>
-
 
     <div class="grp">
       <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
@@ -292,49 +280,68 @@
 
   <main>
     <!-- Intro / scope -->
-    <section class="panel">
-      <h2>What this tool does</h2>
-      <p class="muted">
-        Collects first-hand experiences from both employees and employers, then uses AI to detect red/green flags,
-        verify claims, and surface balanced insights. (Early prototype.)
-      </p>
-      <div class="badge">Prototype</div>
-    </section>
+    <section class="panel ai-panel">
+  <h2>AI Assist — WorkVerify</h2>
+  <textarea id="aiInput" rows="3" placeholder="Ask about tone, legality, or red/green flags…"></textarea>
+  <div class="toolbar">
+    <button id="aiUseDraftBtn" class="btn secondary" type="button">Use my draft</button>
+    <button id="aiReviewBtn" class="btn" type="button">Review draft</button>
+    <button id="aiAddNoteBtn" class="btn secondary" type="button">Add note</button>
+    <button id="aiClearNotesBtn" class="btn secondary" type="button">Clear notes</button>
+  </div>
+  <div id="aiNotes" class="muted" style="font-size:13px; margin-top:8px;"></div>
+</section>
 
     <!-- Quick submit (placeholder) -->
     <section class="panel">
   <h2>Share an experience — <span class="muted">FAKTY (neutral)</span></h2>
-  <div class="grid">
-    <div>
-      <label class="muted">Company (optional)</label>
-      <input id="companyName" type="text" placeholder="e.g., ACME Sp. z o.o."/>
-    </div>
-    <div>
-      <label class="muted">Role (optional)</label>
-      <input id="roleName" type="text" placeholder="e.g., Warehouse Worker / HR Manager"/>
-    </div>
-  </div>
-  <div class="grid" style="margin-top:10px;">
-    <div>
-      <label class="muted">From</label>
-      <input id="periodFrom" type="text" placeholder="e.g., 2022-03"/>
-    </div>
-    <div>
-      <label class="muted">To</label>
-      <input id="periodTo" type="text" placeholder="e.g., 2023-07 or present"/>
-    </div>
-  </div>
-  <div style="margin-top:10px;">
-    <label class="muted">Experience (facts only)</label>
-    <textarea id="expText" rows="5" placeholder="Describe the situation. Neutral, factual, no personal data."></textarea>
-<div id="charCount" class="muted" style="font-size: 13px; margin-top:4px;">0 / 8000 characters</div>
 
-  </div>
-  <div class="toolbar">
-    <button id="saveDraftBtn" class="btn secondary" type="button">Save draft</button>
-    <button id="loadDraftBtn" class="btn secondary" type="button">Load draft</button>
-    <button id="clearDraftBtn" class="btn secondary" type="button">Clear</button>
-    <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Publish</button>
+  <div class="form-and-drafts">
+    <!-- LEWA KOLUMNA: formularz -->
+    <div>
+      <div class="grid">
+        <div>
+          <label class="muted">Company (optional)</label>
+          <input id="companyName" type="text" placeholder="e.g., ACME Sp. z o.o."/>
+        </div>
+        <div>
+          <!-- From przeniesione w miejsce Role -->
+          <label class="muted">From</label>
+          <input id="periodFrom" type="text" placeholder="e.g., 2022-03"/>
+        </div>
+      </div>
+
+      <div class="dates-grid">
+        <!-- Role przeniesione w miejsce From -->
+        <div>
+          <label class="muted">Role (optional)</label>
+          <input id="roleName" type="text" placeholder="e.g., Warehouse Worker / HR Manager"/>
+        </div>
+        <div>
+          <label class="muted">To</label>
+          <input id="periodTo" type="text" placeholder="e.g., 2023-07 or present"/>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label class="muted">Experience (facts only)</label>
+        <textarea id="expText" rows="5" placeholder="Describe the situation. Neutral, factual, no personal data."></textarea>
+        <div id="charCount" class="muted" style="font-size: 13px; margin-top:4px;">0 / 8000 characters</div>
+      </div>
+
+      <div class="toolbar">
+        <button id="saveDraftBtn" class="btn secondary" type="button">Save draft</button>
+        <button id="loadDraftBtn" class="btn secondary" type="button">Load draft</button>
+        <button id="clearDraftBtn" class="btn secondary" type="button">Clear</button>
+        <button id="submitBtn" class="btn" type="button" onclick="submitExperience()">Publish</button>
+      </div>
+    </div>
+
+    <!-- PRAWA KOLUMNA: My Drafts (statyczne) -->
+    <aside class="panel drafts-panel">
+      <h3 style="margin:0 0 8px;">📂 My Drafts</h3>
+      <div id="draftList" class="muted small" style="font-size:13px;"></div>
+    </aside>
   </div>
 </section>
 
@@ -355,31 +362,6 @@
       </ul>
     </section>
     </main>
-
-  <!-- Mini AI assistant dock (context-aware) -->
-  <div id="aiDock" class="ai-dock collapsed">
-    <div class="ai-head">
-      <strong>AI Assist — WorkVerify</strong>
-      <button class="pill ai-toggle" type="button" onclick="document.getElementById('aiDock').classList.toggle('collapsed')">Toggle</button>
-    </div>
-    <textarea id="aiInput" rows="3" placeholder="Ask about tone, legality, or red/green flags…"></textarea>
-    <div class="actions">
-      <button id="aiUseDraftBtn" class="btn secondary" type="button">Use my draft</button>
-      <button id="aiReviewBtn" class="btn" type="button">Review draft</button>
-      <button id="aiAddNoteBtn" class="btn secondary" type="button">Add note</button>
-      <button id="aiClearNotesBtn" class="btn secondary" type="button">Clear notes</button>
-    </div>
-    <div id="aiNotes" class="ai-notes muted" style="margin-top:8px;"></div>
-  </div>
-
-  <!-- Draft dock (left side) -->
-<div id="draftDock" class="ai-dock collapsed" style="left:18px; right:auto; width:min(360px, 92vw);">
-  <div class="ai-head">
-    <strong>📂 My Drafts</strong>
-    <button class="pill ai-toggle" type="button" onclick="toggleDraftDock(this)" aria-expanded="false">📂</button>
-  </div>
-  <div id="draftList" class="muted small" style="font-size:13px;"></div>
-</div>
 
 <!-- Supabase + funkcjonalność strony -->
   <script type="module">
@@ -526,21 +508,6 @@ const draftKey = () => `${draftBaseKey()}_${Date.now()}`;
       writeDraft(payload);
       alert('Draft saved locally.');
     }
-
-        // Dock expand/collapse – lewa strona (GLOBAL for inline onclick)
-    window.toggleDraftDock = function(btn){
-      const dock = document.getElementById('draftDock');
-      if (!dock) return;
-      dock.classList.toggle('collapsed');
-
-      // odśwież listę po KAŻDYM kliknięciu (nie tylko przy otwieraniu),
-      // żeby od razu było widać nowo zapisane drafty
-      renderDraftList();
-
-      // zachowaj ikonę
-      if (btn) btn.textContent = '📂';
-    }
-
 
         /* ------- Mini AI (local helper + notes) ------- */
     const NOTES_KEY = ()=> `wv_notes_${_lastUserId}`;
@@ -788,13 +755,14 @@ renderDraftList();
   });
 });
 
-
       sb.auth.onAuthStateChange(async (_ev, session)=>{
   handleAuth(session);
+  _lastUserId = session?.user?.id || 'anon'; // przełącz klucz draftów na aktywnego usera
   await setFormState();
   await loadRecent();
+  renderDraftList(); // odśwież listę po zmianie sesji
 });
-renderDraftList();
+
     });
 
   function validateContentLength(){
