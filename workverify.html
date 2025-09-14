@@ -455,6 +455,10 @@ const draftKey = () => `${draftBaseKey()}_${Date.now()}`;
       renderDraftList();
     }
 
+    // make functions callable from inline onclick handlers
+window.loadDraftByKey = loadDraftByKey;
+window.deleteDraftKey = deleteDraftKey;
+
     function renderDraftList(){
       const host = document.getElementById('draftList');
       if (!host) return;
@@ -469,22 +473,26 @@ const draftKey = () => `${draftBaseKey()}_${Date.now()}`;
         }catch(_){ return ''; }
       };
       host.innerHTML = arr.map(([key, val, ts])=>{
-        const title = (val?.company || val?.role || (val?.content||'').slice(0,18) || '—').toString();
-        const safe = title.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-        return `
-          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;padding:6px 8px;border:1px solid var(--ai-border);border-radius:10px;margin-top:6px;">
-            <div style="display:flex;align-items:center;gap:6px;min-width:0;">
-              <span aria-hidden="true">•</span>
-              <button type="button" style="background:transparent;border:0;color:inherit;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;"
-                      onclick="loadDraftByKey('${key}')"
-                      title="Load this draft">${safe}</button>
-              <small class="muted">(${fmt(ts)})</small>
-            </div>
-            <button type="button" class="pill" title="Delete"
-                    onclick="deleteDraftKey('${key}')">🗑️</button>
-          </div>`;
-      }).join('');
-    }
+  const title = (val?.company || val?.role || (val?.content||'').slice(0,18) || '—').toString();
+  const safe = title.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  return `
+    <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;padding:6px 8px;border:1px solid var(--border);border-radius:10px;margin-top:6px;background:var(--input-bg)">
+      <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+        <span aria-hidden="true">•</span>
+        <button type="button"
+                style="background:transparent;border:0;color:inherit;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;"
+                onclick="loadDraftByKey('${key}')"
+                title="Load this draft">${safe}</button>
+        <small class="muted">(${fmt(ts)})</small>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button type="button" class="pill" title="Load"
+                onclick="loadDraftByKey('${key}')">↩</button>
+        <button type="button" class="pill" title="Delete"
+                onclick="deleteDraftKey('${key}')">🗑️</button>
+      </div>
+    </div>`;
+}).join('');
 
     function loadDraftIntoForm(){
       const d = readDraft();
