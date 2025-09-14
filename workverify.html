@@ -24,7 +24,7 @@
       --pill: rgba(255,255,255,.08);
       --pill-hover: rgba(255,255,255,.14);
       --input-bg: rgba(255,255,255,.02);
-      --shadow: 0 10px 24px rgba(12,20,40,.45);
+      --shadow: 0 6px 16px rgba(12,20,40,.32);
 
       /* AI dock (DARK): deep greens */
       --ai-bg: #0d1f14;
@@ -50,7 +50,7 @@
       --pill: rgba(14,23,48,.06);
       --pill-hover: rgba(14,23,48,.10);
       --input-bg: rgba(14,23,48,.025);
-      --shadow: 0 10px 22px rgba(18,30,60,.10);
+      --shadow: 0 6px 14px rgba(18,30,60,.08);
 
       /* AI dock (LIGHT): soft grey-greens */
       --ai-bg:#ECF5EF;
@@ -74,7 +74,7 @@
     #topbar .grp{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
     .pill{
       background: var(--pill); color: inherit; font-weight:700; text-decoration:none;
-      padding:6px 14px; border-radius:12px; border:1px solid var(--border);
+      padding:7px 14px; border-radius:12px; border:1px solid var(--border);
       display:inline-flex; align-items:center; gap:8px; cursor:pointer;
       backdrop-filter: saturate(160%) blur(4px);
       transition: background .2s ease, transform .15s ease, border-color .2s ease;
@@ -90,7 +90,7 @@
     .panel{
       background: linear-gradient(180deg, var(--card), var(--card));
       border:1px solid var(--border);
-      border-radius:16px; padding:16px;
+      border-radius:18px; padding:20px;
       box-shadow: var(--shadow);
     }
 
@@ -99,11 +99,11 @@
 
     .actions{ display:flex; gap:8px; justify-content:flex-end; }
     .btn{
-      border:none; padding:10px 14px; border-radius:10px;
+      border:none; padding:10px 14px; border-radius:12px;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color:#fff; font-weight:800; cursor:pointer;
       transition: transform .12s ease, filter .2s ease, box-shadow .2s ease;
-      box-shadow: 0 6px 16px rgba(48,92,255,.35);
+      box-shadow: 0 4px 12px rgba(48,92,255,.28);
     }
     .btn:hover{ transform: translateY(-1px); filter: brightness(1.05); }
     .btn:active{ transform: translateY(0); }
@@ -115,8 +115,9 @@
     }
 
     textarea, input[type="text"]{
-      width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px;
+      width:100%; box-sizing:border-box; padding:12px 14px; border-radius:12px;
       border:1px solid var(--border); background: var(--input-bg); color:inherit; outline:none;
+      font-size:15px; line-height:1.5;
       transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
     }
     textarea::placeholder, input::placeholder{ color: color-mix(in oklab, var(--muted) 65%, transparent); }
@@ -126,7 +127,7 @@
       background: color-mix(in oklab, var(--input-bg) 70%, white 30%);
     }
 
-    .grid{ display:grid; grid-template-columns:repeat(2, minmax(260px,1fr)); gap:16px; }
+    .grid{ display:grid; grid-template-columns:repeat(2, minmax(260px,1fr)); gap:20px; }
     @media (max-width:900px){ .grid{ grid-template-columns:1fr; } }
 
     .badge{
@@ -161,8 +162,8 @@
   /* Recent list */
     .recent-list{ display:grid; grid-template-columns:1fr; gap:10px; }
     .recent-card{
-      padding:10px 12px; border:1px solid var(--border); border-radius:12px;
-      background: color-mix(in oklab, var(--card) 92%, transparent);
+      padding:12px 14px; border:1px solid var(--border); border-radius:14px;
+      background: color-mix(in oklab, var(--card) 96%, transparent);
     }
     .recent-meta{ display:flex; gap:8px; align-items:center; font-size:12px; color:var(--muted); margin-bottom:6px; }
     .recent-content{ margin:0; color:var(--text); opacity:.95; }
@@ -174,7 +175,7 @@
   .ai-dock{
     position:fixed; right:18px; bottom:18px; width:min(360px, 92vw);
     background: linear-gradient(180deg, var(--ai-bg), var(--ai-bg-2));
-    border:1px solid var(--ai-border); border-radius:14px; padding:12px;
+    border:1px solid var(--ai-border); border-radius:16px; padding:14px;
     box-shadow: var(--shadow); z-index: 10001; color: var(--ai-text);
   }
   .ai-dock .muted, .ai-dock small{ color: var(--ai-muted); }
@@ -198,9 +199,9 @@
 
     /* Draft dock collapse behavior */
   #draftDock.collapsed {
-    height: 50px;
+    height: 56px;
     overflow: hidden;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
   }
   #draftDock {
     transition: all 0.25s ease;
