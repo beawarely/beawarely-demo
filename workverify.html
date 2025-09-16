@@ -657,19 +657,13 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
   <p class="recent-content">${content}</p>
   ${r.status !== 'approved' ? '<div class="badge">Awaiting approval</div>' : ''}
   <div class="toolbar" style="justify-content:flex-start; margin-top:8px;">
-    <button class="btn secondary" type="button" onclick="goToSatireEntry('${r.id}')">Satire version</button>
+    <button class="btn secondary" type="button" onclick="location.href='satire.html?exp=${r.id}'">Satire version</button>
   </div>
 </article>`;
 
 
       }).join('');
     }
-
-        // --- JSON Export + transfer to satire.html ---
-function goToSatireEntry(id){
-  // przejście do strony satyry powiązanej z konkretnym wpisem
-  location.href = `satire.html?exp=${encodeURIComponent(id)}`;
-}
 
 // Implementacja wysyłki – wołana przez wrapper w <head>
 
