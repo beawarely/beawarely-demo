@@ -247,33 +247,36 @@
         .eq("original_id", fact.id)
         .maybeSingle();
 
-      if(satire){
-        // satyra istnieje
-        satireBox.value = satire.content;
+      // === ROZWIĄZANIE SATYRY (3 STANY) ===
+      if (satire) {
+        // 1) satyra istnieje → pokaż w trybie readonly
+        satireBox.value = satire.content || "";
         satireBox.disabled = true;
-        previewBox.textContent = satire.content;
+        previewBox.textContent = satire.content || "";
         $("#publishBtn").disabled = true;
-        return;
-      }
-
-      if(user && user.id === fact.author){
-        // autor → może stworzyć satyrę
-        $("#publishBtn").onclick = async ()=>{
-          const txt = (satireBox.value||"").trim();
-          if(txt.length < 20){ alert("Satire too short."); return; }
+      } else if (user && user.id === fact.author) {
+        // 2) brak satyry + autor → formularz aktywny
+        satireBox.disabled = false;
+        previewBox.textContent = "";
+        $("#publishBtn").disabled = false;
+        $("#publishBtn").onclick = async () => {
+          const txt = (satireBox.value || "").trim();
+          if (txt.length < 20) { alert("Satyra jest za krótka (min 20 znaków)."); return; }
           const { error } = await sb.from("work_experiences_satire").insert({
             original_id: fact.id,
             author: user.id,
             content: txt
           });
-          if(error){ alert("Save failed: "+error.message); return; }
+          if (error) { alert("❌ Zapis nie powiódł się: " + (error.message || error)); return; }
+          alert("✅ Satyra zapisana.");
           location.reload();
         };
-      }else{
-        // brak satyry + nie autor
+      } else {
+        // 3) brak satyry + user ≠ autor → komunikat
+        satireBox.value = "";
         satireBox.disabled = true;
         $("#publishBtn").disabled = true;
-        previewBox.textContent = "No satirical version exists.";
+        previewBox.textContent = "Brak wersji satyrycznej.";
       }
     }
 
