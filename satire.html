@@ -196,115 +196,89 @@
     </section>
   </main>
 
-  <script>
-    // ——— Helpers ———
+    <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = window.__SUPABASE_URL || "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const $ = sel => document.querySelector(sel);
     function escapeHTML(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
-    // Klucze storage
-    const FACTS_KEY = 'wv_facts_payload';
-    const SATIRE_DRAFT_KEY = 'wv_satire_draft';
+    const url = new URL(location.href);
+    const expId = url.searchParams.get("exp");
+    const hostFacts = {
+      company: $("#factsCompany"),
+      role: $("#factsRole"),
+      from: $("#factsFrom"),
+      to: $("#factsTo"),
+      text: $("#factsPreview")
+    };
+    const satireBox = $("#satireText");
+    const previewBox = $("#livePreview");
 
-    // Wczytaj fakty z localStorage (z workverify.html)
-    function loadFacts(){
-      let parsed = null;
-      try{ parsed = JSON.parse(localStorage.getItem(FACTS_KEY) || 'null'); }catch(e){}
-      return parsed || { company:'', role:'', periodFrom:'', periodTo:'', facts_text:'' };
+    async function init(){
+      if(!expId){ previewBox.textContent = "No experience selected."; return; }
+
+      const { data: { session } } = await sb.auth.getSession();
+      const user = session?.user;
+
+      // pobierz fakty
+      const { data: fact, error: err1 } = await sb
+        .from("work_experiences")
+        .select("id, author, company, role, period_from, period_to, content")
+        .eq("id", expId)
+        .maybeSingle();
+
+      if(err1 || !fact){ previewBox.textContent = "Experience not found."; return; }
+
+      // pokaż fakty (readonly)
+      hostFacts.company.value = fact.company || "";
+      hostFacts.role.value = fact.role || "";
+      hostFacts.from.value = fact.period_from || "";
+      hostFacts.to.value = fact.period_to || "";
+      hostFacts.text.textContent = fact.content || "(brak treści)";
+
+      // pobierz satyrę
+      const { data: satire } = await sb
+        .from("work_experiences_satire")
+        .select("id, author, content, created_at")
+        .eq("original_id", fact.id)
+        .maybeSingle();
+
+      if(satire){
+        // satyra istnieje
+        satireBox.value = satire.content;
+        satireBox.disabled = true;
+        previewBox.textContent = satire.content;
+        $("#publishBtn").disabled = true;
+        return;
+      }
+
+      if(user && user.id === fact.author){
+        // autor → może stworzyć satyrę
+        $("#publishBtn").onclick = async ()=>{
+          const txt = (satireBox.value||"").trim();
+          if(txt.length < 20){ alert("Satire too short."); return; }
+          const { error } = await sb.from("work_experiences_satire").insert({
+            original_id: fact.id,
+            author: user.id,
+            content: txt
+          });
+          if(error){ alert("Save failed: "+error.message); return; }
+          location.reload();
+        };
+      }else{
+        // brak satyry + nie autor
+        satireBox.disabled = true;
+        $("#publishBtn").disabled = true;
+        previewBox.textContent = "No satirical version exists.";
+      }
     }
 
-    function fillFactsReadonly(f){
-      $('#factsCompany').value = f.company || '';
-      $('#factsRole').value = f.role || '';
-      $('#factsFrom').value = f.periodFrom || '';
-      $('#factsTo').value = f.periodTo || '';
-      $('#factsPreview').textContent = f.facts_text || '(brak treści)';
-      // Domyślny podgląd = Fakty
-      $('#livePreview').textContent = f.facts_text || '';
-    }
-
-    // Lint satyry – wykrywa identyfikatory
-    function lintSatire(text){
-      const issues = [];
-
-      // URL
-      if(/https?:\/\/\S+/i.test(text)) issues.push('Znaleziono link/URL — usuń.');
-      // Email
-      if(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(text)) issues.push('Znaleziono email — usuń.');
-      // Numery identyfikacyjne
-      if(/\b(NIP|VAT|KvK|KRS|REGON|PESEL|BSN)\b/i.test(text)) issues.push('Wzmianka o numerach identyfikacyjnych — usuń.');
-      // Wzorce spółek
-      if(/\b(sp\. z o\.o\.|s\.a\.|bv|gmbh|inc|llc)\b/i.test(text)) issues.push('Wzmianka o typach spółek — nie używaj konkretnych nazw firm.');
-      // Adresy
-      if(/\b(ul\.|ulica|street|straat|avenue|ave\.|road|rd\.|adres|address)\b/i.test(text)) issues.push('Wzmianka o adresie — unikaj precyzyjnych lokalizacji.');
-      // Imię + nazwisko (prosty heurystyczny wzorzec)
-      if(/\b[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+\s+[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+\b/.test(text)) issues.push('Wygląda jak imię i nazwisko — zastąp opisem roli (np. „szef zmiany”).');
-
-      return issues;
-    }
-
-    function renderWarnings(list){
-      const box = $('#lintWarnings');
-      const ul = $('#lintList');
-      if(!list.length){ box.style.display='none'; ul.innerHTML=''; return; }
-      box.style.display='block';
-      ul.innerHTML = list.map(i=>`<li>${escapeHTML(i)}</li>`).join('');
-    }
-
-    function exportJson(){
-      const facts = loadFacts();
-      const satire = ($('#satireText').value||'').trim();
-      const flags = { satire_has_identifiers: lintSatire(satire).length>0 };
-
-      const payload = {
-        company: facts.company || null,
-        role: facts.role || null,
-        period:{ from: facts.periodFrom || null, to: facts.periodTo || null },
-        facts_text: facts.facts_text || '',
-        satire_text: satire,
-        flags
-      };
-
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'workverify_entry.json';
-      a.click();
-    }
-
-    function init(){
-      const facts = loadFacts();
-      fillFactsReadonly(facts);
-
-      // Draft restore
-      try{
-        const d = JSON.parse(localStorage.getItem(SATIRE_DRAFT_KEY) || 'null');
-        if(d && d.text) $('#satireText').value = d.text;
-      }catch(e){}
-
-      // Live preview binding
-      $('#satireText').addEventListener('input', ()=>{
-        const v = $('#satireText').value;
-        $('#livePreview').textContent = v ? v : (facts.facts_text || '');
-        // autosave draft
-        localStorage.setItem(SATIRE_DRAFT_KEY, JSON.stringify({ text:v, ts:Date.now() }));
-      });
-
-      // Buttons
-      $('#lintBtn').onclick = ()=>{
-        const v = ($('#satireText').value||'').trim();
-        const issues = lintSatire(v);
-        renderWarnings(issues);
-        if(!issues.length) alert('OK: nie znaleziono potencjalnych identyfikatorów.');
-      };
-      $('#toggleFactsBtn').onclick = ()=>{ $('#livePreview').textContent = facts.facts_text || ''; };
-      $('#toggleSatireBtn').onclick = ()=>{ $('#livePreview').textContent = ($('#satireText').value||'').trim(); };
-      $('#exportJsonBtn').onclick = exportJson;
-      $('#publishBtn').onclick = ()=>{
-        alert('Publikacja z integracją DB będzie dodana w kolejnym kroku. Na razie użyj „Eksport JSON”.');
-      };
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener("DOMContentLoaded", init);
   </script>
+
 </body>
 </html>
