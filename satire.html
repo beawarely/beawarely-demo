@@ -221,7 +221,8 @@
       <p class="muted" style="margin:0 0 8px;">
         „To wersja satyryczna o tych samych zdarzeniach; forma artystyczna bez wskazania osób/firm.”
       </p>
-      <textarea id="satireText" rows="8" placeholder="Te same zdarzenia, ale ostrym/sarkastycznym językiem. Nie używaj nazw własnych, danych osobowych, NIP/KvK, adresów ani linków."></textarea>
+            <textarea id="satireText" rows="8" placeholder="Te same zdarzenia, ale ostrym/sarkastycznym językiem. Nie używaj nazw własnych, danych osobowych, NIP/KvK, adresów ani linków."></textarea>
+      <div id="satireCharCount" class="muted" style="font-size:13px; margin-top:4px;">0 / 8000 characters</div>
 
       <div id="lintWarnings" class="warn" style="display:none;">
         <strong>Uwaga:</strong>
@@ -270,7 +271,9 @@
       text: $("#factsPreview")
     };
         const satireBox = $("#satireText");
-    const previewBox = $("#livePreview");
+        const previewBox = $("#livePreview");
+    const charCountEl = $("#satireCharCount");
+
 
     // AI Assist elements
     const aiInputEl = $("#aiInput");
@@ -422,6 +425,12 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
         $("#publishBtn").disabled = true;
         previewBox.textContent = "Brak wersji satyrycznej.";
       }
+            // live char counter
+      satireBox.addEventListener("input", () => {
+        const len = (satireBox.value || "").length;
+        charCountEl.textContent = `${len} / 8000 characters`;
+      });
+
     }
 
     document.addEventListener("DOMContentLoaded", init);
