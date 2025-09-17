@@ -399,7 +399,8 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
         listBox.innerHTML = `<article class="recent-card"><p>${escapeHTML(satire.content)}</p></article>`;
       }
 
-      if (user && user.id === fact.author && !satire) {
+      if (user && String(user.id).trim() === String(fact.author).trim() && !satire) {
+
         // autor + brak satyry → odblokuj formularz
         addBox.style.display = "block";
         satireBox.disabled = false;
