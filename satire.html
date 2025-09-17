@@ -168,8 +168,8 @@
       </div>
     </section>
 
-    <!-- Satyra -->
-    <section class="panel">
+        <!-- Dodawanie satyry (widoczne tylko dla autora i przy ?exp=...) -->
+    <section id="addSatireBox" class="panel" style="display:none;">
       <h2>BEZ CENZURY (satyra)</h2>
       <p class="muted" style="margin:0 0 8px;">
         „To wersja satyryczna o tych samych zdarzeniach; forma artystyczna bez wskazania osób/firm.”
@@ -186,7 +186,7 @@
         <button id="toggleFactsBtn" class="btn secondary" type="button">👁️ Fakty</button>
         <button id="toggleSatireBtn" class="btn secondary" type="button">👁️ Bez cenzury</button>
         <button id="exportJsonBtn" class="btn secondary" type="button">Eksport JSON</button>
-        <button id="publishBtn" class="btn" type="button">Publikuj (wkrótce)</button>
+        <button id="publishBtn" class="btn" type="button">Publikuj</button>
       </div>
 
       <div style="margin-top:10px;">
@@ -194,6 +194,13 @@
         <div id="livePreview" class="preview"></div>
       </div>
     </section>
+
+    <!-- Lista istniejących satyr (zawsze widoczna) -->
+    <section class="panel">
+      <h2>Existing satires</h2>
+      <div id="satireList" class="recent-list muted">No satires yet.</div>
+    </section>
+
   </main>
 
     <script type="module">
@@ -247,19 +254,23 @@
         .eq("original_id", fact.id)
         .maybeSingle();
 
-      // === ROZWIĄZANIE SATYRY (3 STANY) ===
+            // === Warunki wyświetlania formularza satyry ===
+      const addBox = document.getElementById("addSatireBox");
+      const listBox = document.getElementById("satireList");
+
       if (satire) {
-        // 1) satyra istnieje → pokaż w trybie readonly
-        satireBox.value = satire.content || "";
-        satireBox.disabled = true;
-        previewBox.textContent = satire.content || "";
-        $("#publishBtn").disabled = true;
-      } else if (user && user.id === fact.author) {
-        // 2) brak satyry + autor → formularz aktywny
+        // istniejąca satyra → pokaż w liście
+        listBox.innerHTML = `<article class="recent-card"><p>${escapeHTML(satire.content)}</p></article>`;
+      }
+
+      if (user && user.id === fact.author && !satire) {
+        // autor + brak satyry → odblokuj formularz
+        addBox.style.display = "block";
         satireBox.disabled = false;
         previewBox.textContent = "";
         $("#publishBtn").disabled = false;
         $("#publishBtn").onclick = async () => {
+
           const txt = (satireBox.value || "").trim();
           if (txt.length < 20) { alert("Satyra jest za krótka (min 20 znaków)."); return; }
           const { error } = await sb.from("work_experiences_satire").insert({
