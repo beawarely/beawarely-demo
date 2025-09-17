@@ -7,29 +7,62 @@
   <title>WorkVerify — Satire Version</title>
   <link rel="stylesheet" href="css/style.css"/>
 
-  <style>
+    <style>
     :root{ --safe-top: env(safe-area-inset-top, 0px); }
 
-    /* DARK */
+    /* DARK (default) */
     body{
-      --bg:#0B1220; --bg-elev:#0E1730; --card:#111B34;
-      --text:#E6ECF7; --muted:#A9B7D9; --border:rgba(230,236,247,.10);
-      --accent:#3A63FF; --accent-2:#7EA0FF;
-      --pill:rgba(255,255,255,.08); --pill-hover:rgba(255,255,255,.14);
-      --input-bg:rgba(255,255,255,.02); --shadow:0 10px 24px rgba(12,20,40,.45);
-      margin:0; font-family:'Segoe UI',system-ui,Arial,sans-serif;
-      background:var(--bg); color:var(--text);
+      --bg: radial-gradient(1200px 800px at 30% -10%, #0c0a22 0%, #05010f 100%);
+      --bg-elev: #18122e;
+      --card: rgba(20,16,36,0.85);
+      --text: #e0e6ff;
+      --muted: #8aa4c8;
+      --border: rgba(255,255,255,0.12);
+      --accent: #3af2d9;
+      --accent-2: #a24dff;
+      --pill: rgba(255,255,255,.08);
+      --pill-hover: rgba(255,255,255,.14);
+      --input-bg: rgba(255,255,255,.02);
+      --shadow: 0 6px 16px rgba(12,20,40,.32);
+
+      /* AI dock (DARK): deep greens */
+      --ai-bg: #0d1f14;
+      --ai-bg-2:#12361f;
+      --ai-border: rgba(88,196,140,.25);
+      --ai-text:#DFF7EA;
+      --ai-muted:#9DD7B8;
+
+      margin:0; font-family:'Segoe UI', system-ui, Arial, sans-serif;
+      background: var(--bg); color: var(--text);
     }
+
     /* LIGHT */
     body.light-mode{
-      --bg:#F4F7FB; --bg-elev:#ECF2FA; --card:#fff;
-      --text:#0E1730; --muted:#5A6B89; --border:rgba(14,23,48,.12);
-      --accent:#2F54EB; --accent-2:#69A1FF;
-      --pill:rgba(14,23,48,.06); --pill-hover:rgba(14,23,48,.10);
-      --input-bg:rgba(14,23,48,.025); --shadow:0 10px 22px rgba(18,30,60,.10);
-      color:var(--text); background:linear-gradient(0deg,var(--bg),var(--bg));
+      --bg: #F4F7FB;
+      --bg-elev: #ECF2FA;
+      --card: #FFFFFF;
+      --text: #0E1730;
+      --muted: #5A6B89;
+      --border: rgba(14,23,48,0.12);
+      --accent: #2F54EB;
+      --accent-2: #69A1FF;
+      --pill: rgba(14,23,48,.06);
+      --pill-hover: rgba(14,23,48,.10);
+      --input-bg: rgba(14,23,48,.025);
+      --shadow: 0 6px 14px rgba(18,30,60,.08);
+
+      /* AI dock (LIGHT): soft grey-greens */
+      --ai-bg:#ECF5EF;
+      --ai-bg-2:#E3F0E8;
+      --ai-border: rgba(29,105,76,.18);
+      --ai-text:#103322;
+      --ai-muted:#3a6a52;
+
+      color: var(--text);
+      background: linear-gradient(0deg, var(--bg), var(--bg));
     }
-    body.dark-mode{ background:var(--bg); }
+    body.dark-mode{ background: var(--bg); }
+
 
     #topbar{
       position:fixed; top:calc(14px + var(--safe-top)); left:20px; right:20px; z-index:10000;
@@ -138,8 +171,22 @@
     <p class="sub">Ta sekcja to forma artystyczna tej samej historii. Zero nazw firm, zero imion i nazwisk.</p>
   </header>
 
-  <main>
+    <main>
+    <!-- AI Assist -->
+    <section class="panel ai-panel">
+      <h2>AI Assist — Satire</h2>
+      <textarea id="aiInput" rows="3" placeholder="Ask about tone, style, or red/green flags…"></textarea>
+      <div class="toolbar">
+        <button id="aiUseDraftBtn" class="btn secondary" type="button">Use my draft</button>
+        <button id="aiReviewBtn" class="btn" type="button">Review draft</button>
+        <button id="aiAddNoteBtn" class="btn secondary" type="button">Add note</button>
+        <button id="aiClearNotesBtn" class="btn secondary" type="button">Clear notes</button>
+      </div>
+      <div id="aiNotes" class="muted" style="font-size:13px; margin-top:8px;"></div>
+    </section>
+
     <!-- Fakty (podgląd tylko do weryfikacji spójności rdzenia) -->
+
     <section class="panel">
       <h2>Rdzeń zdarzeń — <span class="muted">FAKTY (read-only)</span></h2>
       <div class="grid">
@@ -222,14 +269,100 @@
       to: $("#factsTo"),
       text: $("#factsPreview")
     };
-    const satireBox = $("#satireText");
+        const satireBox = $("#satireText");
     const previewBox = $("#livePreview");
+
+    // AI Assist elements
+    const aiInputEl = $("#aiInput");
+    const aiUseDraftBtn = $("#aiUseDraftBtn");
+    const aiReviewBtn = $("#aiReviewBtn");
+    const aiAddNoteBtn = $("#aiAddNoteBtn");
+    const aiClearNotesBtn = $("#aiClearNotesBtn");
+    const aiNotesEl = $("#aiNotes");
+
+    // helper: per-user notes
+    let _lastUserId = "anon";
+    const NOTES_KEY = () => `satire_notes_${_lastUserId}`;
+    function readNotes(){
+      try{ return JSON.parse(localStorage.getItem(NOTES_KEY())||'[]'); }catch(e){ return []; }
+    }
+    function writeNotes(arr){
+      localStorage.setItem(NOTES_KEY(), JSON.stringify(arr));
+    }
+    function renderNotes(){
+      const notes = readNotes();
+      if(!aiNotesEl) return;
+      if(!notes.length){ aiNotesEl.innerHTML = '<small>No notes yet.</small>'; return; }
+      aiNotesEl.innerHTML = '<small>Notes:</small><ul>' + notes.map(n=>`<li>${escapeHTML(n)}</li>`).join('') + '</ul>';
+    }
+    function addNote(text){
+      const notes = readNotes();
+      notes.unshift(text);
+      writeNotes(notes.slice(0,30)); // cap
+      renderNotes();
+    }
+    function buildAIContext(){
+      const content = (satireBox.value||"").trim();
+      const question = (aiInputEl?.value||"").trim();
+      return `Satire context
+Draft:
+${content || '(no text yet)'}
+---
+Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral satirical wording without personal data.'}`;
+    }
+    function reviewDraftLocally(){
+      const content = (satireBox.value||"").trim();
+      const issues = [];
+
+      if(content.length < 20){
+        issues.push("Satire draft is very short. Add more detail.");
+      }
+      if(/\b\d{2,3}[-\s]?\d{3}[-\s]?\d{3,4}\b/.test(content)) issues.push("Possible phone number detected — remove or anonymize.");
+      if(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(content)) issues.push("Email detected — remove.");
+      if(/\b(ul\.|ulica|adres|address|street)\b/i.test(content)) issues.push("Address detected — avoid precise locations.");
+      if(/\bPESEL\b|\bBSN\b|\bNIP\b|\bVAT\b/i.test(content)) issues.push("Sensitive ID detected — remove.");
+      if(/\b[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+\s+[A-ZŁŚŻŹĆŃ][a-ząćęłńóśźż]+/.test(content)){
+        issues.push("Full name found — replace with generic role.");
+      }
+      const flagged = ["palant","idiota","debil","kasztan","złodziej","oszust","frajer"];
+      const found = flagged.filter(w=> new RegExp(`\\b${w}\\b`, "i").test(content));
+      if(found.length){
+        issues.push(`Inflammatory words (${found.join(", ")}) — use neutral tone.`);
+      }
+      if(/\b(sp\. z o\.o\.|bv|gmbh|inc|llc)\b/i.test(content)){
+        issues.push("If you name a company, stick to verifiable facts and avoid accusations.");
+      }
+
+      if(!issues.length){ addNote("No obvious personal data or slurs detected."); }
+      else issues.forEach(i=> addNote(i));
+
+      aiInputEl.value = "Please help me rewrite my satire draft to be privacy-safe, but keep style sharp.";
+      alert("Satire draft reviewed. See notes below.");
+    }
+
 
     async function init(){
       if(!expId){ previewBox.textContent = "No experience selected."; return; }
 
-      const { data: { session } } = await sb.auth.getSession();
+            const { data: { session } } = await sb.auth.getSession();
       const user = session?.user;
+      _lastUserId = user?.id || "anon";
+      renderNotes();
+
+      // AI Assist buttons
+      if(aiReviewBtn) aiReviewBtn.addEventListener("click", reviewDraftLocally);
+      if(aiAddNoteBtn) aiAddNoteBtn.addEventListener("click", () => {
+        const note = prompt("Add a note:");
+        if(note && note.trim()) addNote(note.trim());
+      });
+      if(aiClearNotesBtn) aiClearNotesBtn.addEventListener("click", () => {
+        localStorage.removeItem(NOTES_KEY());
+        renderNotes();
+      });
+      if(aiUseDraftBtn) aiUseDraftBtn.addEventListener("click", () => {
+        aiInputEl.value = buildAIContext();
+      });
+
 
       // pobierz fakty
       const { data: fact, error: err1 } = await sb
