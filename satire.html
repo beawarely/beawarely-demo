@@ -368,11 +368,13 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
 
 
       // pobierz fakty
-      const { data: fact, error: err1 } = await sb
-        .from("work_experiences")
-        .select("id, author, company, role, period_from, period_to, content")
-        .eq("id", expId)
-        .maybeSingle();
+const { data: fact, error: err1 } = await sb
+  .from("work_experiences")
+  .select("id, user_id, company, role, period_from, period_to, content")
+  .eq("id", expId)
+  .maybeSingle();
+
+console.log("DEBUG user.id =", user?.id, "fact.user_id =", fact?.user_id);
 
       if(err1 || !fact){ previewBox.textContent = "Experience not found."; return; }
 
@@ -387,9 +389,9 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       console.log("DEBUG user.id =", user?.id, "fact.author =", fact.author);
 
       // jeśli zalogowany użytkownik jest autorem → pokaż sekcję BEZ CENZURY
-      if (user && user.id && fact.author && String(user.id) === String(fact.author)) {
-        document.getElementById("addSatireBox").style.display = "block";
-      }
+if (user && user.id && fact.user_id && String(user.id) === String(fact.user_id)) {
+  document.getElementById("addSatireBox").style.display = "block";
+}
 
       // pobierz satyrę
       const { data: satire } = await sb
