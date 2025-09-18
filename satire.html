@@ -376,12 +376,20 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
 
       if(err1 || !fact){ previewBox.textContent = "Experience not found."; return; }
 
-      // pokaż fakty (readonly)
+            // pokaż fakty (readonly)
       hostFacts.company.value = fact.company || "";
       hostFacts.role.value = fact.role || "";
       hostFacts.from.value = fact.period_from || "";
       hostFacts.to.value = fact.period_to || "";
       hostFacts.text.textContent = fact.content || "(brak treści)";
+
+      // 🔧 DEBUG — sprawdź ID autora vs zalogowany użytkownik
+      console.log("DEBUG user.id =", user?.id, "fact.author =", fact.author);
+
+      // jeśli zalogowany użytkownik jest autorem → pokaż sekcję BEZ CENZURY
+      if (user && user.id && fact.author && String(user.id) === String(fact.author)) {
+        document.getElementById("addSatireBox").style.display = "block";
+      }
 
       // pobierz satyrę
       const { data: satire } = await sb
