@@ -393,12 +393,14 @@ if (user && user.id && fact.author && String(user.id) === String(fact.author)) {
   document.getElementById("addSatireBox").style.display = "block";
 }
 
-      // pobierz satyrę
-      const { data: satire } = await sb
+            // pobierz satyrę
+      const { data: satire, error: errSat } = await sb
         .from("work_experiences_satire")
-        .select("id, author, company, role, created_at, content")
+        .select("id, author, created_at, content")
         .eq("original_id", fact.id)
         .maybeSingle();
+
+      if (errSat) console.log("DEBUG satire select error:", errSat.message);
 
             // === Warunki wyświetlania formularza satyry ===
       const addBox = document.getElementById("addSatireBox");
