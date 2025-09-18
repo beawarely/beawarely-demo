@@ -370,7 +370,7 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       // pobierz fakty
 const { data: fact, error: err1 } = await sb
   .from("work_experiences")
-  .select("id, user_id, company, role, period_from, period_to, content")
+  .select("id, user_id, company, role, period_from, period_to, content", { count: "exact" })
   .eq("id", expId)
   .maybeSingle();
 
