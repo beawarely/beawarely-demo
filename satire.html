@@ -370,33 +370,33 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       // pobierz fakty
 const { data: fact, error: err1 } = await sb
   .from("work_experiences")
-  .select("id, user_id, company, role, period_from, period_to, content", { count: "exact" })
+  .select("id, author, company, role, created_at, content")
   .eq("id", expId)
   .maybeSingle();
 
-console.log("DEBUG user.id =", user?.id, "fact.user_id =", fact?.user_id);
+console.log("DEBUG user.id =", user?.id, "fact.author =", fact?.author);
 
       if(err1 || !fact){ previewBox.textContent = "Experience not found."; return; }
 
             // pokaż fakty (readonly)
       hostFacts.company.value = fact.company || "";
       hostFacts.role.value = fact.role || "";
-      hostFacts.from.value = fact.period_from || "";
-      hostFacts.to.value = fact.period_to || "";
+      hostFacts.from.value = fact.created_at || "";
+hostFacts.to.value = ""; // brak kolumny to_date w tabeli
       hostFacts.text.textContent = fact.content || "(brak treści)";
 
       // 🔧 DEBUG — sprawdź ID autora vs zalogowany użytkownik
       console.log("DEBUG user.id =", user?.id, "fact.author =", fact.author);
 
       // jeśli zalogowany użytkownik jest autorem → pokaż sekcję BEZ CENZURY
-if (user && user.id && fact.user_id && String(user.id) === String(fact.user_id)) {
+if (user && user.id && fact.author && String(user.id) === String(fact.author)) {
   document.getElementById("addSatireBox").style.display = "block";
 }
 
       // pobierz satyrę
       const { data: satire } = await sb
         .from("work_experiences_satire")
-        .select("id, author, content, created_at")
+        .select("id, author, company, role, created_at, content")
         .eq("original_id", fact.id)
         .maybeSingle();
 
