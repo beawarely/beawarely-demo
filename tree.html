@@ -379,16 +379,33 @@ drawNeuronCloud();
     }
   });
 
-  // Demo: kliknięcie dodaje nowe dziecko
-  cy.on('tap', 'node', function(evt){
-    const node = evt.target;
-    const id = 'n' + Math.floor(Math.random()*10000);
+  // 🔹 Funkcja "Expand with AI" – dodaje przykładowe dzieci
+function expandWithAI(node){
+  const examples = [
+    { label: "AI Trend", category: "tech" },
+    { label: "Research", category: "sci" },
+    { label: "Fact Check", category: "verified" }
+  ];
+
+  examples.forEach(ex=>{
+    const id = node.id() + "_" + ex.label.replace(/\s+/g,'_') + "_" + Math.floor(Math.random()*1000);
     cy.add([
-      { data: { id: id, label: 'New Node' } },
+      { data: { id: id, label: ex.label, category: ex.category } },
       { data: { source: node.id(), target: id } }
     ]);
-    cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
   });
+
+  cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
+}
+
+// 🔹 Kliknięcie w węzeł → popup z opcją "Expand with AI"
+cy.on('tap', 'node', function(evt){
+  const node = evt.target;
+  if(confirm(`Expand "${node.data('label')}" with AI?`)){
+    expandWithAI(node);
+  }
+});
+
 </script>
 
 </body>
