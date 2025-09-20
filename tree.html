@@ -255,7 +255,10 @@ class Particle {
   }
 }
 
-function getGlowColor() { const hue = Math.floor(Math.random() * 360); return `hsl(${hue}, 100%, 85%)`; }
+function getGlowColor() { 
+  const hue = Math.floor(Math.random() * 360); 
+  return `hsl(${hue}, 100%, 85%)`; 
+}
 
 const particles = Array.from({ length: 120 }, () => new Particle());
 
@@ -392,10 +395,8 @@ function expandWithAI(node){
     ]);
   });
 
-  cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
+    cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
 }
-
-});
 
 // ✅ Ustaw od razu sensowny widok, żeby nic się nie "chowało"
 cy.ready(() => {
@@ -428,7 +429,6 @@ cy.on('tap', 'node', function(evt){
   const node = evt.target;
   const pos = evt.renderedPosition;
 const rect = cy.container().getBoundingClientRect();
-// renderedPosition jest już w px po zoom/pan
 const x = rect.left + pos.x;
 const y = rect.top + pos.y;
 
