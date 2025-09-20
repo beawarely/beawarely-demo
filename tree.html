@@ -401,7 +401,7 @@ function expandWithAI(node){
 // 🔹 Menu kontekstowe (UI popup obok węzła)
 const menu = document.createElement('div');
 menu.id = 'nodeMenu';
-menu.style.position = 'absolute';
+menu.style.position = 'fixed'; // ważne: fixed, nie absolute
 menu.style.display = 'none';
 menu.style.background = 'rgba(20,20,30,0.95)';
 menu.style.border = '1px solid #444';
@@ -409,13 +409,14 @@ menu.style.borderRadius = '8px';
 menu.style.padding = '6px';
 menu.style.fontSize = '14px';
 menu.style.color = '#fff';
-menu.style.zIndex = 9999;
+menu.style.zIndex = '99999'; // wymuszone, nad Cytoscape
+menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
 document.body.appendChild(menu);
 
 // opcje menu
 menu.innerHTML = `
-  <button id="addChildBtn" style="display:block;width:100%;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">➕ Add child</button>
-  <button id="expandAiBtn" style="display:block;width:100%;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
+  <button id="addChildBtn" style="display:block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">➕ Add child</button>
+  <button id="expandAiBtn" style="display:block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
 `;
 
 // logika pokazywania menu
@@ -424,6 +425,7 @@ cy.on('tap', 'node', function(evt){
   const pos = evt.renderedPosition;
   const rect = cy.container().getBoundingClientRect();
 
+  // wylicz absolutną pozycję względem okna
   menu.style.left = (rect.left + pos.x + 20) + 'px';
   menu.style.top = (rect.top + pos.y) + 'px';
   menu.style.display = 'block';
@@ -447,7 +449,7 @@ cy.on('tap', 'node', function(evt){
   };
 });
 
-// ukryj menu po kliknięciu tła
+// ukryj menu po kliknięciu w tło
 cy.on('tap', function(evt){
   if(evt.target === cy){
     menu.style.display = 'none';
