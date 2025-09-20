@@ -330,7 +330,7 @@ drawNeuronCloud();
 </script>
 
 <!-- Cytoscape.js prototyp drzewa -->
-<div id="cyTree" style="width:100%; height:80vh; margin-top:30px; border:1px solid #444; border-radius:12px;"></div>
+<div id="cyTree" style="width:100%; height:90vh; margin:20px auto; border:1px solid #444; border-radius:12px; position:relative; z-index:5;"></div>
 
 <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
 <script>
@@ -395,8 +395,8 @@ function expandWithAI(node){
     ]);
   });
 
-    cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
-}
+      cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
+}});
 
 // ✅ Ustaw od razu sensowny widok, żeby nic się nie "chowało"
 cy.ready(() => {
