@@ -255,10 +255,7 @@ class Particle {
   }
 }
 
-function getGlowColor() {
-  const hue = Math.floor(Math.random() * 360);
-  return `hsl(${hue}, 100%, 85%)`;
-}
+function getGlowColor() { const hue = Math.floor(Math.random() * 360); return `hsl(${hue}, 100%, 85%)`; }
 
 const particles = Array.from({ length: 120 }, () => new Particle());
 
@@ -398,7 +395,13 @@ function expandWithAI(node){
   cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
 }
 
+});
+/* ✅ Ustaw od razu sensowny widok, żeby nic się nie "chowało" przy środku */
+cy.resize();
+cy.fit();
+
 // 🔹 Menu kontekstowe (UI popup obok węzła)
+
 const menu = document.createElement('div');
 menu.id = 'nodeMenu';
 menu.style.position = 'fixed'; // ważne: fixed, nie absolute
@@ -413,7 +416,6 @@ menu.style.zIndex = '99999'; // wymuszone, nad Cytoscape
 menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
 document.body.appendChild(menu);
 
-// opcje menu
 menu.innerHTML = `
   <button id="addChildBtn" style="display:block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">➕ Add child</button>
   <button id="expandAiBtn" style="display:block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
@@ -423,13 +425,10 @@ menu.innerHTML = `
 cy.on('tap', 'node', function(evt){
   const node = evt.target;
   const pos = evt.renderedPosition;
-  const rect = cy.container().getBoundingClientRect();
-
-  // wylicz pozycję na ekranie (uwzględnia zoom/pan)
-const pan = cy.pan();
-const zoom = cy.zoom();
-const x = rect.left + pan.x + pos.x * zoom;
-const y = rect.top + pan.y + pos.y * zoom;
+const rect = cy.container().getBoundingClientRect();
+// renderedPosition jest już w px po zoom/pan
+const x = rect.left + pos.x;
+const y = rect.top + pos.y;
 
 menu.style.left = (x + 20) + 'px';
 menu.style.top = (y - 10) + 'px';
