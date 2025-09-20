@@ -425,10 +425,15 @@ cy.on('tap', 'node', function(evt){
   const pos = evt.renderedPosition;
   const rect = cy.container().getBoundingClientRect();
 
-  // wylicz absolutną pozycję względem okna
-  menu.style.left = (rect.left + pos.x + 20) + 'px';
-  menu.style.top = (rect.top + pos.y) + 'px';
-  menu.style.display = 'block';
+  // wylicz pozycję na ekranie (uwzględnia zoom/pan)
+const pan = cy.pan();
+const zoom = cy.zoom();
+const x = rect.left + pan.x + pos.x * zoom;
+const y = rect.top + pan.y + pos.y * zoom;
+
+menu.style.left = (x + 20) + 'px';
+menu.style.top = (y - 10) + 'px';
+menu.style.display = 'block';
 
   document.getElementById('addChildBtn').onclick = () => {
     const id = 'n' + Math.floor(Math.random()*10000);
