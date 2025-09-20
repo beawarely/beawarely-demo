@@ -398,13 +398,28 @@ function expandWithAI(node){
   cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
 }
 
-// 🔹 Kliknięcie w węzeł → popup z opcją "Expand with AI"
+// 🔹 Kliknięcie w węzeł → menu opcji
 cy.on('tap', 'node', function(evt){
   const node = evt.target;
-  if(confirm(`Expand "${node.data('label')}" with AI?`)){
+  const choice = prompt(`Node: ${node.data('label')}\n1 = Add child\n2 = Expand with AI\n(cancel = nothing)`);
+
+  if(choice === '1'){
+    const id = 'n' + Math.floor(Math.random()*10000);
+    const label = prompt("Enter child label:", "New Node") || "New Node";
+    cy.add([
+      { data: { id: id, label: label } },
+      { data: { source: node.id(), target: id } }
+    ]);
+    cy.layout({ name: 'breadthfirst', directed:true, padding:20 }).run();
+    cy.fit(); // 🔹 dopasuj widok do całego grafu
+  }
+
+  if(choice === '2'){
     expandWithAI(node);
+    cy.fit(); // 🔹 dopasuj widok
   }
 });
+
 
 </script>
 
