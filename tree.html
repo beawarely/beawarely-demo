@@ -396,9 +396,11 @@ function expandWithAI(node){
 }
 
 });
-/* ✅ Ustaw od razu sensowny widok, żeby nic się nie "chowało" przy środku */
-cy.resize();
-cy.fit();
+
+// ✅ Ustaw od razu sensowny widok, żeby nic się nie "chowało"
+cy.ready(() => {
+  cy.fit();
+});
 
 // 🔹 Menu kontekstowe (UI popup obok węzła)
 
