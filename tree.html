@@ -113,35 +113,41 @@
   <canvas id="matrix-bg"></canvas>
   <canvas id="neuronCanvas"></canvas>
 
-  <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px">
+  <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;box-sizing:border-box;width:100%">
 
-  <img id="modeIcon"
-     src="images/icon-neural-orange.svg"
-     onclick="toggleMode()"
-     title="Toggle light/dark mode"
-     style="position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; cursor: pointer; padding: 6px; border-radius: 50%; transition: background-color 0.3s, transform 0.3s; object-fit: contain; z-index: 999;"
-     onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-     onmouseout="this.style.backgroundColor='transparent'" />
+    <!-- Ikona trybu -->
+    <img id="modeIcon"
+      src="images/icon-neural-orange.svg"
+      onclick="toggleMode()"
+      title="Toggle light/dark mode"
+      style="position:absolute;top:20px;right:20px;width:36px;height:36px;cursor:pointer;padding:6px;border-radius:50%;transition:background-color 0.3s,transform 0.3s;object-fit:contain;z-index:999"
+      onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
+      onmouseout="this.style.backgroundColor='transparent'" />
 
-    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-    <h1 style="margin:0;text-align:left">Welcome to the Knowledge Tree</h1>
-    <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
-  </header>
-  <!-- Cytoscape.js prototyp drzewa -->
-  <div id="cyTree" style="width:100%; height:60vh; margin:20px auto; border:1px solid #444; border-radius:0; background:rgba(0,0,0,0.6); position:relative; z-index:1"></div>
+    <!-- Nagłówek -->
+    <header style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;margin-bottom:20px">
+      <h1 style="margin:0;text-align:left">Welcome to the Knowledge Tree</h1>
+      <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+    </header>
 
-  <!-- Mini AI chat pod drzewem -->
-  <div id="miniChat" style="width:100%;max-width:700px;margin:20px auto;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(20,20,30,0.9);color:#fff">
-    <p style="margin:0 0 10px 0;font-weight:bold">AI Mini Chat</p>
-    <textarea id="chatInput" rows="2" style="width:100%;padding:6px;border-radius:6px;border:1px solid #555;background:#111;color:#eee"></textarea>
-    <button style="margin-top:8px;padding:6px 12px;border:none;border-radius:6px;background:#3a63ff;color:#fff;cursor:pointer">Send</button>
-    <div id="chatLog" style="margin-top:10px;max-height:150px;overflow-y:auto;font-size:0.9rem;color:#ccc"></div>
-  </div>
+    <!-- Drzewo -->
+    <div id="cyTree" style="width:100%;max-width:1200px;height:60vh;margin:0 auto 20px auto;border:1px solid #444;border-radius:6px;background:rgba(0,0,0,0.6);position:relative;z-index:1"></div>
 
-</main>
-<footer style="margin-top:auto;text-align:center;padding:10px 0;color:#777;font-size:0.9rem">
-  © 2025 BeAwarely — Tree of Knowledge (demo concept)
-</footer>
+    <!-- Mini AI chat -->
+    <div id="miniChat" style="width:100%;max-width:700px;margin:0 auto 20px auto;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(20,20,30,0.9);color:#fff">
+      <p style="margin:0 0 10px 0;font-weight:bold">AI Mini Chat</p>
+      <textarea id="chatInput" rows="2" style="width:100%;padding:6px;border-radius:6px;border:1px solid #555;background:#111;color:#eee"></textarea>
+      <button style="margin-top:8px;padding:6px 12px;border:none;border-radius:6px;background:#3a63ff;color:#fff;cursor:pointer">Send</button>
+      <div id="chatLog" style="margin-top:10px;max-height:150px;overflow-y:auto;font-size:0.9rem;color:#ccc"></div>
+    </div>
+
+  </main>
+
+  <!-- Stopka -->
+  <footer style="margin-top:auto;text-align:center;padding:10px 0;color:#777;font-size:0.9rem">
+    © 2025 BeAwarely — Tree of Knowledge (demo concept)
+  </footer>
+</body>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
