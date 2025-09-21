@@ -261,9 +261,9 @@ header, footer, #miniChat {
             };
 
             // Wycentrowanie drzewa po załadowaniu
-            cy.ready(() => {
-    cy.layout({ name: 'breadthfirst', directed: true, padding: 50 }).run();
-    cy.fit(undefined, 50);
+            cy.layout({ name: 'cose', padding: 50 }).run();
+cy.fit(cy.nodes(), 50);
+
 
     // poprawka centrowania – wycentruj graf względem całego kontenera
     const pan = cy.pan();
