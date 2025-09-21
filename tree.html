@@ -1,279 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>Knowledge Tree - BeAwarely</title>
-    <link rel="stylesheet" href="css/style.css" />
-    <style>
-        :root {
-            --blue1: #007bff;
-            --blue2: #66b2ff;
-            --blue3: #b3d9ff;
-            --bg-dark: black;
-            --bg-light: #f0f0f0;
-            --text-dark: #eee;
-            --text-light: #333;
-        }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Knowledge Tree - BeAwarely</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        :root {
+            --blue1: #007bff;
+            --blue2: #66b2ff;
+            --blue3: #b3d9ff;
+            --bg-dark: black;
+            --bg-light: #f0f0f0;
+            --text-dark: #eee;
+            --text-light: #333;
+        }
 
-        body.light-mode {
-            background: var(--bg-light);
-            color: var(--text-light);
-        }
+        body.light-mode {
+            background: var(--bg-light);
+            color: var(--text-light);
+        }
 
-        body.light-mode p {
-            color: var(--text-light);
-        }
+        body.light-mode p {
+            color: var(--text-light);
+        }
 
-        body.light-mode .back-btn {
-            background-color: var(--blue2);
-            color: var(--text-light);
-        }
+        body.light-mode .back-btn {
+            background-color: var(--blue2);
+            color: var(--text-light);
+        }
 
-        body.light-mode .back-btn:hover {
-            background-color: var(--blue1);
-        }
+        body.light-mode .back-btn:hover {
+            background-color: var(--blue1);
+        }
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-dark);
-            text-align: center;
-            padding: 40px 20px;
-            transition: background-color 0.5s ease, color 0.5s ease;
-        }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            text-align: center;
+            padding: 40px 20px;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
 
-        .tree-image {
-            max-width: 100%;
-            border-radius: 16px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            margin-top: 30px;
-        }
+        .tree-image {
+            max-width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            margin-top: 30px;
+        }
 
-        h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    color: #fff;
-    text-shadow: 0 0 6px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6);
-    position: relative;
-    z-index: 2;
+        h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #fff;
+    text-shadow: 0 0 6px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6);
+    position: relative;
+    z-index: 2;
 }
 
-        .back-btn {
-            margin-top: 40px;
-            background-color: #007bff;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
-        }
+        .back-btn {
+            margin-top: 40px;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
 
-        .back-btn:hover {
-            background-color: #005fcc;
-            transform: scale(1.05);
-        }
+        .back-btn:hover {
+            background-color: #005fcc;
+            transform: scale(1.05);
+        }
 
-        footer {
-            position: relative;
-            margin-top: 30px;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #777;
-            z-index: 1;
-        }
+        footer {
+            position: relative;
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #777;
+            z-index: 1;
+        }
 
-        body:not(.light-mode) #matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 0;
-            width: 100vw;
-            height: 100vh;
-            background: black;
-        }
+        body:not(.light-mode) #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+        }
 
-        body.light-mode #matrix-bg {
-            display: none;
-        }
+        body.light-mode #matrix-bg {
+            display: none;
+        }
 
-        #neuronCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-            display: none;
-        }
+        #neuronCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            display: none;
+        }
 
-        body.light-mode #neuronCanvas {
-            display: block;
-        }
+        body.light-mode #neuronCanvas {
+            display: block;
+        }
 
-        #cyTree {
-    background: transparent;
-    border: 1px solid var(--text-dark);
-    position: relative;
-    z-index: 2;
+        #cyTree {
+    background: transparent;
+    border: 1px solid var(--text-dark);
+    position: relative;
+    z-index: 2;
 }
 
 header, footer, #miniChat {
-    position: relative;
-    z-index: 2;
+    position: relative;
+    z-index: 2;
 }
 
-        body.light-mode #cyTree {
-            border: 1px solid var(--text-light);
-        }
-    </style>
+        body.light-mode #cyTree {
+            border: 1px solid var(--text-light);
+        }
+    </style>
 </head>
 <body style="margin:0;display:flex;flex-direction:column;min-height:100vh">
-    <canvas id="matrix-bg"></canvas>
-    <canvas id="neuronCanvas"></canvas>
+    <canvas id="matrix-bg"></canvas>
+    <canvas id="neuronCanvas"></canvas>
 
-    <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;box-sizing:border-box;width:100%">
+    <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;box-sizing:border-box;width:100%">
 
-        <img id="modeIcon"
-             src="images/icon-neural-orange.svg"
-             onclick="toggleMode()"
-             title="Toggle light/dark mode"
-             style="position:absolute;top:20px;right:20px;width:36px;height:36px;cursor:pointer;padding:6px;border-radius:50%;transition:background-color 0.3s,transform 0.3s;object-fit:contain;z-index:999"
-             onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
-             onmouseout="this.style.backgroundColor='transparent'" />
+        <img id="modeIcon"
+             src="images/icon-neural-orange.svg"
+             onclick="toggleMode()"
+             title="Toggle light/dark mode"
+             style="position:absolute;top:20px;right:20px;width:36px;height:36px;cursor:pointer;padding:6px;border-radius:50%;transition:background-color 0.3s,transform 0.3s;object-fit:contain;z-index:999"
+             onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
+             onmouseout="this.style.backgroundColor='transparent'" />
 
-        <header style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;margin-bottom:20px">
-            <h1 style="margin:0">Welcome to the Knowledge Tree</h1>
-            <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
-        </header>
+        <header style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;margin-bottom:20px">
+            <h1 style="margin:0">Welcome to the Knowledge Tree</h1>
+            <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+        </header>
 
-        <div style="width:100%;max-width:1200px;margin:0 auto 20px auto;position:relative;z-index:1">
-    <div id="cyTree" style="width:100%;height:80vh"></div>
+        <div style="width:100%;max-width:1200px;margin:0 auto 20px auto;position:relative;z-index:1">
+    <div id="cyTree" style="width:100%;height:80vh"></div>
 </div>
 
-        <div id="miniChat" style="width:100%;max-width:700px;margin:0 auto 20px auto;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(20,20,30,0.9);color:#fff">
-            <p style="margin:0 0 10px 0;font-weight:bold">AI Mini Chat</p>
-            <textarea id="chatInput" rows="2" style="width:100%;padding:6px;border-radius:6px;border:1px solid #555;background:#111;color:#eee"></textarea>
-            <button style="margin-top:8px;padding:6px 12px;border:none;border-radius:6px;background:#3a63ff;color:#fff;cursor:pointer">Send</button>
-            <div id="chatLog" style="margin-top:10px;max-height:150px;overflow-y:auto;font-size:0.9rem;color:#ccc"></div>
-        </div>
+        <div id="miniChat" style="width:100%;max-width:700px;margin:0 auto 20px auto;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(20,20,30,0.9);color:#fff">
+            <p style="margin:0 0 10px 0;font-weight:bold">AI Mini Chat</p>
+            <textarea id="chatInput" rows="2" style="width:100%;padding:6px;border-radius:6px;border:1px solid #555;background:#111;color:#eee"></textarea>
+            <button style="margin-top:8px;padding:6px 12px;border:none;border-radius:6px;background:#3a63ff;color:#fff;cursor:pointer">Send</button>
+            <div id="chatLog" style="margin-top:10px;max-height:150px;overflow-y:auto;font-size:0.9rem;color:#ccc"></div>
+        </div>
 
-    </main>
+    </main>
 
-    <footer style="position:fixed;bottom:0;left:0;width:100%;text-align:center;padding:10px 0;color:#777;font-size:0.9rem;z-index:10;background:transparent;pointer-events:none">
-    © 2025 BeAwarely — Tree of Knowledge (demo concept)
+    <footer style="position:fixed;bottom:0;left:0;width:100%;text-align:center;padding:10px 0;color:#777;font-size:0.9rem;z-index:10;background:transparent;pointer-events:none">
+    © 2025 BeAwarely — Tree of Knowledge (demo concept)
 </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
-    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
 
-    <script>
-        // Inicjalizacja Cytoscape.js po pełnym załadowaniu DOM
-        document.addEventListener('DOMContentLoaded', () => {
-            const cy = cytoscape({
-                container: document.getElementById('cyTree'),
-                style: [
-                    {
-                        selector: 'node',
-                        style: {
-                            'background-color': '#3a63ff',
-                            'label': 'data(label)',
-                            'color': '#fff',
-                            'text-valign': 'center',
-                            'text-halign': 'center',
-                            'font-size': '12px',
-                            'width': '40px',
-                            'height': '40px'
-                        }
-                    },
-                    {
-                        selector: 'edge',
-                        style: {
-                            'width': 2,
-                            'line-color': '#bbb',
-                            'target-arrow-color': '#bbb',
-                            'target-arrow-shape': 'triangle'
-                        }
-                    }
-                ],
-                elements: {
-                    nodes: [
-                        { data: { id: 'root', label: 'Knowledge Tree' } },
-                        { data: { id: 'tech', label: 'Technology' } },
-                        { data: { id: 'sci', label: 'Science' } }
-                    ],
-                    edges: [
-                        { data: { source: 'root', target: 'tech' } },
-                        { data: { source: 'root', target: 'sci' } }
-                    ]
-                },
-                layout: {
-  name: 'cose'
-}
-// dopasowanie drzewa do ramki po zakończeniu layoutu
-function fitTree() {
-    if (!cy || cy.elements().length === 0) return;
-    cy.resize();
-    cy.fit(cy.elements(), 50); // 50 = margines w px
-    cy.center();
-}
+    <script>
+        // Inicjalizacja Cytoscape.js po pełnym załadowaniu DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            const cy = cytoscape({
+                container: document.getElementById('cyTree'),
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#3a63ff',
+                            'label': 'data(label)',
+                            'color': '#fff',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'font-size': '12px',
+                            'width': '40px',
+                            'height': '40px'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 2,
+                            'line-color': '#bbb',
+                            'target-arrow-color': '#bbb',
+                            'target-arrow-shape': 'triangle'
+                        }
+                    }
+                ],
+                elements: {
+                    nodes: [
+                        { data: { id: 'root', label: 'Knowledge Tree' } },
+                        { data: { id: 'tech', label: 'Technology' } },
+                        { data: { id: 'sci', label: 'Science' } }
+                    ],
+                    edges: [
+                        { data: { source: 'root', target: 'tech' } },
+                        { data: { source: 'root', target: 'sci' } }
+                    ]
+                },
+                layout: {
+                    name: 'breadthfirst', // Zmiana layoutu na bardziej stabilny dla drzew
+                    directed: true,
+                    padding: 50
+                }
+            });
 
-// dopasowanie po zmianie rozmiaru okna
-window.addEventListener('resize', fitTree);
+            // Funkcja do dopasowania drzewa do ramki
+            function fitTree() {
+                if (!cy || cy.elements().length === 0) return;
+                cy.resize();
+                cy.fit(cy.elements(), 50); // 50 = margines w px
+                cy.center();
+            }
 
-// dopasowanie po zakończeniu layoutu
-cy.on('layoutstop', fitTree);
+            // Dopasowanie po zmianie rozmiaru okna
+            window.addEventListener('resize', fitTree);
+            
+            // Wymuszenie dopasowania po załadowaniu strony
+            fitTree();
+            cy.on('layoutstop', fitTree);
 
-            });
 
-            // Ustawienia początkowego trybu i tła
-            const mode = localStorage.getItem('mode');
-            const icon = document.getElementById('modeIcon');
-            const matrixCanvas = document.getElementById('matrix-bg');
-            const neuronCanvas = document.getElementById('neuronCanvas');
-            const isLight = mode === 'light';
+            // Ustawienia początkowego trybu i tła
+            const mode = localStorage.getItem('mode');
+            const icon = document.getElementById('modeIcon');
+            const matrixCanvas = document.getElementById('matrix-bg');
+            const neuronCanvas = document.getElementById('neuronCanvas');
+            const isLight = mode === 'light';
 
-            if (isLight) {
-                document.body.classList.add('light-mode');
-                if (icon) icon.src = 'images/icon-neural-orange.svg';
-                if (neuronCanvas) {
-                    neuronCanvas.style.display = 'block';
-                    drawNeuronCloud();
-                }
-            } else {
-                document.body.classList.remove('light-mode');
-                if (icon) icon.src = 'images/icon-darkmode-matrix-pills.svg';
-                if (matrixCanvas) {
-                    matrixCanvas.style.display = 'block';
-                    drawMatrix();
-                }
-            }
+            if (isLight) {
+                document.body.classList.add('light-mode');
+                if (icon) icon.src = 'images/icon-neural-orange.svg';
+                if (neuronCanvas) {
+                    neuronCanvas.style.display = 'block';
+                    drawNeuronCloud();
+                }
+            } else {
+                document.body.classList.remove('light-mode');
+                if (icon) icon.src = 'images/icon-darkmode-matrix-pills.svg';
+                if (matrixCanvas) {
+                    matrixCanvas.style.display = 'block';
+                    drawMatrix();
+                }
+            }
 
-            // Funkcja do przełączania trybów
-            window.toggleMode = function() {
-                const isLight = document.body.classList.toggle('light-mode');
-                localStorage.setItem('mode', isLight ? 'light' : 'dark');
-                
-                if (isLight) {
-                    icon.src = 'images/icon-neural-orange.svg';
-                    neuronCanvas.style.display = 'block';
-                    matrixCanvas.style.display = 'none';
-                    drawNeuronCloud();
-                } else {
-                    icon.src = 'images/icon-darkmode-matrix-pills.svg';
-                    neuronCanvas.style.display = 'none';
-                    matrixCanvas.style.display = 'block';
-                    drawMatrix();
-                }
-                fitTree();
-            };
+            // Funkcja do przełączania trybów
+            window.toggleMode = function() {
+                const isLight = document.body.classList.toggle('light-mode');
+                localStorage.setItem('mode', isLight ? 'light' : 'dark');
+                
+                if (isLight) {
+                    icon.src = 'images/icon-neural-orange.svg';
+                    neuronCanvas.style.display = 'block';
+                    matrixCanvas.style.display = 'none';
+                    drawNeuronCloud();
+                } else {
+                    icon.src = 'images/icon-darkmode-matrix-pills.svg';
+                    neuronCanvas.style.display = 'none';
+                    matrixCanvas.style.display = 'block';
+                    drawMatrix();
+                }
+                fitTree();
+            };
 
-            // Menu stałe nad drzewem
+            // Menu stałe nad drzewem
 let activeNode = null;
 
 const menuContainer = document.createElement('div');
@@ -282,8 +286,8 @@ menuContainer.style.margin = '10px 0';
 menuContainer.style.textAlign = 'center';
 
 menuContainer.innerHTML = `
-    <button id="addChildBtn" style="display:inline-block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">➕ Add child</button>
-    <button id="expandAiBtn" style="display:inline-block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
+    <button id="addChildBtn" style="display:inline-block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">➕ Add child</button>
+    <button id="expandAiBtn" style="display:inline-block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
 `;
 
 // wstawiamy menu NAD ramkę drzewa (zaraz po headerze)
@@ -292,169 +296,170 @@ header.insertAdjacentElement('afterend', menuContainer);
 
 // obsługa kliknięcia węzła → zapisujemy jako aktywny
 cy.on('tap', 'node', function(evt){
-    activeNode = evt.target;
+    activeNode = evt.target;
 });
 
 // Add child
 document.getElementById('addChildBtn').onclick = () => {
-    if (!activeNode) {
-        alert("Najpierw wybierz węzeł klikając w drzewo.");
-        return;
-    }
-    const id = 'n' + Math.floor(Math.random()*10000);
-    const label = prompt("Enter child label:", "New Node") || "New Node";
-    cy.add([
-        { data: { id: id, label: label } },
-        { data: { source: activeNode.id(), target: id } }
-    ]);
-    cy.layout({ name: 'breadthfirst', directed:true, padding:20 }).run();
-    cy.fit();
+    if (!activeNode) {
+        alert("Najpierw wybierz węzeł klikając w drzewo.");
+        return;
+    }
+    const id = 'n' + Math.floor(Math.random()*10000);
+    const label = prompt("Enter child label:", "New Node") || "New Node";
+    cy.add([
+        { data: { id: id, label: label } },
+        { data: { source: activeNode.id(), target: id } }
+    ]);
+    cy.layout({ name: 'breadthfirst', directed:true, padding:20 }).run();
+    fitTree();
 };
 
 // Expand with AI
 document.getElementById('expandAiBtn').onclick = () => {
-    if (!activeNode) {
-        alert("Najpierw wybierz węzeł klikając w drzewo.");
-        return;
-    }
-    expandWithAI(activeNode);
-    cy.fit();
+    if (!activeNode) {
+        alert("Najpierw wybierz węzeł klikając w drzewo.");
+        return;
+    }
+    expandWithAI(activeNode);
+    fitTree();
 };
 
-            // Funkcja "Expand with AI"
-            function expandWithAI(node){
-                const examples = [
-                    { label: "AI Trend", category: "tech" },
-                    { label: "Research", category: "sci" },
-                    { label: "Fact Check", category: "verified" }
-                ];
-                examples.forEach(ex=>{
-                    const id = node.id() + "_" + ex.label.replace(/\s+/g,'_') + "_" + Math.floor(Math.random()*1000);
-                    cy.add([
-                        { data: { id: id, label: ex.label, category: ex.category } },
-                        { data: { source: node.id(), target: id } }
-                    ]);
-                });
-                cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
-            }
+            // Funkcja "Expand with AI"
+            function expandWithAI(node){
+                const examples = [
+                    { label: "AI Trend", category: "tech" },
+                    { label: "Research", category: "sci" },
+                    { label: "Fact Check", category: "verified" }
+                ];
+                examples.forEach(ex=>{
+                    const id = node.id() + "_" + ex.label.replace(/\s+/g,'_') + "_" + Math.floor(Math.random()*1000);
+                    cy.add([
+                        { data: { id: id, label: ex.label, category: ex.category } },
+                        { data: { source: node.id(), target: id } }
+                    ]);
+                });
+                cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
+                fitTree();
+            }
 
-            // Obsługa czatu AI
-            document.querySelector('#miniChat button').addEventListener('click', () => {
-                const input = document.getElementById('chatInput');
-                const log = document.getElementById('chatLog');
-                if (input.value.trim() !== '') {
-                    log.innerHTML += `<div style="padding:4px;background:#222;border-radius:4px;margin-bottom:4px">You: ${input.value}</div>`;
-                    log.scrollTop = log.scrollHeight;
-                    input.value = '';
-                    log.innerHTML += `<div style="padding:4px;background:#3a63ff;border-radius:4px">AI: This is a placeholder response.</div>`;
-                    log.scrollTop = log.scrollHeight;
-                }
-            });
-        });
+            // Obsługa czatu AI
+            document.querySelector('#miniChat button').addEventListener('click', () => {
+                const input = document.getElementById('chatInput');
+                const log = document.getElementById('chatLog');
+                if (input.value.trim() !== '') {
+                    log.innerHTML += `<div style="padding:4px;background:#222;border-radius:4px;margin-bottom:4px">You: ${input.value}</div>`;
+                    log.scrollTop = log.scrollHeight;
+                    input.value = '';
+                    log.innerHTML += `<div style="padding:4px;background:#3a63ff;border-radius:4px">AI: This is a placeholder response.</div>`;
+                    log.scrollTop = log.scrollHeight;
+                }
+            });
+        });
 
-        // Skrypty dla animacji w tle
-        // Matrix Background
-        const canvas = document.getElementById("matrix-bg");
-        const ctx = canvas.getContext('2d');
-        const letters = 'アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const fontSize = 16;
-        let columns;
-        let drops;
+        // Skrypty dla animacji w tle
+        // Matrix Background
+        const canvas = document.getElementById("matrix-bg");
+        const ctx = canvas.getContext('2d');
+        const letters = 'アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const fontSize = 16;
+        let columns;
+        let drops;
 
-        function resizeMatrixCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            columns = Math.floor(canvas.width / fontSize);
-            drops = Array.from({ length: columns }, () => Math.random() * canvas.height / fontSize);
-        }
-        resizeMatrixCanvas();
-        window.addEventListener('resize', resizeMatrixCanvas);
+        function resizeMatrixCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            columns = Math.floor(canvas.width / fontSize);
+            drops = Array.from({ length: columns }, () => Math.random() * canvas.height / fontSize);
+        }
+        resizeMatrixCanvas();
+        window.addEventListener('resize', resizeMatrixCanvas);
 
-        function drawMatrix() {
-            if (document.body.classList.contains('light-mode')) return;
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#0F0';
-            ctx.font = fontSize + 'px monospace';
-            for (let i = 0; i < drops.length; i++) {
-                const text = letters[Math.floor(Math.random() * letters.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-        }
-        setInterval(drawMatrix, 35);
+        function drawMatrix() {
+            if (document.body.classList.contains('light-mode')) return;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
 
-        // Neuron Cloud Background
-        const neuronCanvas = document.getElementById('neuronCanvas');
-        const neuronCtx = neuronCanvas.getContext('2d');
-        let width, height;
-        function resizeNeuronCanvas() {
-            width = neuronCanvas.width = window.innerWidth;
-            height = neuronCanvas.height = window.innerHeight;
-        }
-        resizeNeuronCanvas();
-        window.addEventListener('resize', resizeNeuronCanvas);
+        // Neuron Cloud Background
+        const neuronCanvas = document.getElementById('neuronCanvas');
+        const neuronCtx = neuronCanvas.getContext('2d');
+        let width, height;
+        function resizeNeuronCanvas() {
+            width = neuronCanvas.width = window.innerWidth;
+            height = neuronCanvas.height = window.innerHeight;
+        }
+        resizeNeuronCanvas();
+        window.addEventListener('resize', resizeNeuronCanvas);
 
-        class Particle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.radius = 1 + Math.random() * 2;
-                this.vx = (Math.random() - 0.5) * 0.6;
-                this.vy = (Math.random() - 0.5) * 0.6;
-                this.life = Math.random() * 500 + 300;
-                this.color = getGlowColor();
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.life--;
-                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) { this.reset(); }
-            }
-            draw(ctx) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 8);
-                gradient.addColorStop(0, this.color);
-                gradient.addColorStop(1, 'transparent');
-                ctx.fillStyle = gradient;
-                ctx.fill();
-            }
-        }
-        function getGlowColor() { return `hsl(${Math.floor(Math.random() * 360)}, 100%, 85%)`; }
-        const particles = Array.from({ length: 120 }, () => new Particle());
+        class Particle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.radius = 1 + Math.random() * 2;
+                this.vx = (Math.random() - 0.5) * 0.6;
+                this.vy = (Math.random() - 0.5) * 0.6;
+                this.life = Math.random() * 500 + 300;
+                this.color = getGlowColor();
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) { this.reset(); }
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 8);
+                gradient.addColorStop(0, this.color);
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+        }
+        function getGlowColor() { return `hsl(${Math.floor(Math.random() * 360)}, 100%, 85%)`; }
+        const particles = Array.from({ length: 120 }, () => new Particle());
 
-        function drawNeuronCloud() {
-            if (!document.body.classList.contains('light-mode')) return;
-            neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-            neuronCtx.fillRect(0, 0, width, height);
-            for (let p of particles) {
-                p.update();
-                p.draw(neuronCtx);
-            }
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const a = particles[i];
-                    const b = particles[j];
-                    const dx = a.x - b.x;
-                    const dy = a.y - b.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 120) {
-                        neuronCtx.beginPath();
-                        neuronCtx.moveTo(a.x, a.y);
-                        neuronCtx.lineTo(b.x, b.y);
-                        neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 120})`;
-                        neuronCtx.lineWidth = 0.25;
-                        neuronCtx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(drawNeuronCloud);
-        }
-    </script>
+        function drawNeuronCloud() {
+            if (!document.body.classList.contains('light-mode')) return;
+            neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            neuronCtx.fillRect(0, 0, width, height);
+            for (let p of particles) {
+                p.update();
+                p.draw(neuronCtx);
+            }
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const a = particles[i];
+                    const b = particles[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        neuronCtx.beginPath();
+                        neuronCtx.moveTo(a.x, a.y);
+                        neuronCtx.lineTo(b.x, b.y);
+                        neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 120})`;
+                        neuronCtx.lineWidth = 0.25;
+                        neuronCtx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(drawNeuronCloud);
+        }
+    </script>
 </body>
 </html>
