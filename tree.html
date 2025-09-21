@@ -264,60 +264,54 @@ header, footer, #miniChat {
     
 });
 
-            // Logika dla menu kontekstowego i czatu AI
-            const menu = document.createElement('div');
-            menu.id = 'nodeMenu';
-            menu.style.position = 'fixed';
-            menu.style.display = 'none';
-            menu.style.background = 'rgba(20,20,30,0.95)';
-            menu.style.border = '1px solid #444';
-            menu.style.borderRadius = '8px';
-            menu.style.padding = '6px';
-            menu.style.fontSize = '14px';
-            menu.style.color = '#fff';
-            menu.style.zIndex = '99999';
-            menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-            document.body.appendChild(menu);
+            // Menu stałe pod ramką drzewa
+let activeNode = null;
 
-            menu.innerHTML = `
-                <button id="addChildBtn" style="display:block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">➕ Add child</button>
-                <button id="expandAiBtn" style="display:block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
-            `;
+const menuContainer = document.createElement('div');
+menuContainer.id = 'nodeMenu';
+menuContainer.style.margin = '10px 0';
+menuContainer.style.textAlign = 'center';
 
-            cy.on('tap', 'node', function(evt){
-                const node = evt.target;
-                const pos = evt.renderedPosition;
-                const rect = cy.container().getBoundingClientRect();
-                const x = rect.left + pos.x;
-                const y = rect.top + pos.y;
-                menu.style.left = (x + 20) + 'px';
-                menu.style.top = (y - 10) + 'px';
-                menu.style.display = 'block';
+menuContainer.innerHTML = `
+    <button id="addChildBtn" style="display:inline-block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">➕ Add child</button>
+    <button id="expandAiBtn" style="display:inline-block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
+`;
 
-                document.getElementById('addChildBtn').onclick = () => {
-                    const id = 'n' + Math.floor(Math.random()*10000);
-                    const label = prompt("Enter child label:", "New Node") || "New Node";
-                    cy.add([
-                        { data: { id: id, label: label } },
-                        { data: { source: node.id(), target: id } }
-                    ]);
-                    cy.layout({ name: 'breadthfirst', directed:true, padding:20 }).run();
-                    cy.fit();
-                    menu.style.display = 'none';
-                };
+// wstawiamy menu POD ramkę drzewa (przed miniChat)
+const cyTreeWrapper = document.getElementById('cyTree').parentNode;
+cyTreeWrapper.insertAdjacentElement('afterend', menuContainer);
 
-                document.getElementById('expandAiBtn').onclick = () => {
-                    expandWithAI(node);
-                    cy.fit();
-                    menu.style.display = 'none';
-                };
-            });
+// obsługa kliknięcia węzła → zapisujemy jako aktywny
+cy.on('tap', 'node', function(evt){
+    activeNode = evt.target;
+});
 
-            cy.on('tap', function(evt){
-                if(evt.target === cy){
-                    menu.style.display = 'none';
-                }
-            });
+// Add child
+document.getElementById('addChildBtn').onclick = () => {
+    if (!activeNode) {
+        alert("Najpierw wybierz węzeł klikając w drzewo.");
+        return;
+    }
+    const id = 'n' + Math.floor(Math.random()*10000);
+    const label = prompt("Enter child label:", "New Node") || "New Node";
+    cy.add([
+        { data: { id: id, label: label } },
+        { data: { source: activeNode.id(), target: id } }
+    ]);
+    cy.layout({ name: 'breadthfirst', directed:true, padding:20 }).run();
+    cy.fit();
+};
+
+// Expand with AI
+document.getElementById('expandAiBtn').onclick = () => {
+    if (!activeNode) {
+        alert("Najpierw wybierz węzeł klikając w drzewo.");
+        return;
+    }
+    expandWithAI(activeNode);
+    cy.fit();
+};
+
 
             // Funkcja "Expand with AI"
             function expandWithAI(node){
