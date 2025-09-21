@@ -215,6 +215,15 @@ header, footer, #miniChat {
                 layout: {
   name: 'cose'
 }
+// Funkcja dopasowująca drzewo do ramki
+function fitTree() {
+    cy.resize();
+    cy.fit(cy.elements(), 50); // 50 = margines w px
+    cy.center();
+}
+
+// dopasowanie po zmianie rozmiaru okna
+window.addEventListener('resize', fitTree);
 
             });
 
@@ -257,11 +266,12 @@ header, footer, #miniChat {
                     matrixCanvas.style.display = 'block';
                     drawMatrix();
                 }
+                fitTree();
             };
 
-            // Wycentrowanie drzewa po załadowaniu
-            cy.ready(() => {
-    
+           // Wycentrowanie drzewa po załadowaniu
+cy.ready(() => {
+    fitTree();
 });
 
             // Menu stałe nad drzewem
