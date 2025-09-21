@@ -260,9 +260,10 @@ header, footer, #miniChat {
 
             // Wycentrowanie drzewa po załadowaniu
             cy.ready(() => {
-                cy.fit();
-                cy.layout({ name: 'breadthfirst', directed: true, padding: 20 }).run();
-            });
+    cy.layout({ name: 'breadthfirst', directed: true, padding: 50 }).run();
+    cy.fit(undefined, 50); // wyśrodkuj z marginesem
+    cy.center(); // wycentruj na środku ramki
+});
 
             // Logika dla menu kontekstowego i czatu AI
             const menu = document.createElement('div');
