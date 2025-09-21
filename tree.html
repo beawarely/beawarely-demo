@@ -482,6 +482,58 @@
     });
 
   </script>
+<script>
+// Upewnij się, że drzewo zostanie wygenerowane po załadowaniu całej zawartości
+document.addEventListener('DOMContentLoaded', function() {
+  const cy = cytoscape({
+    container: document.getElementById('cyTree'),
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'background-color': '#3a63ff',
+          'label': 'data(label)',
+          'color': '#fff',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'font-size': '12px',
+          'width': '40px',
+          'height': '40px'
+        }
+      },
+      {
+        selector: 'edge',
+        style: {
+          'width': 2,
+          'line-color': '#bbb',
+          'target-arrow-color': '#bbb',
+          'target-arrow-shape': 'triangle'
+        }
+      }
+    ],
+    elements: {
+      nodes: [
+        { data: { id: 'root', label: 'Knowledge Tree' } },
+        { data: { id: 'tech', label: 'Technology' } },
+        { data: { id: 'sci', label: 'Science' } }
+      ],
+      edges: [
+        { data: { source: 'root', target: 'tech' } },
+        { data: { source: 'root', target: 'sci' } }
+      ]
+    },
+    layout: {
+      name: 'breadthfirst',
+      directed: true,
+      padding: 10
+    }
+  });
 
+  cy.ready(() => {
+    cy.fit(); // Dopasowanie drzewa do ekranu
+    cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run(); // Wycentrowanie
+  });
+});
+</script>
 </body>
 </html>
