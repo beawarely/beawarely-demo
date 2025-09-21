@@ -264,7 +264,7 @@ header, footer, #miniChat {
     
 });
 
-            // Menu stałe pod ramką drzewa
+            // Menu stałe nad drzewem
 let activeNode = null;
 
 const menuContainer = document.createElement('div');
@@ -277,9 +277,9 @@ menuContainer.innerHTML = `
     <button id="expandAiBtn" style="display:inline-block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
 `;
 
-// wstawiamy menu POD ramkę drzewa (przed miniChat)
-const cyTreeWrapper = document.getElementById('cyTree').parentNode;
-cyTreeWrapper.insertAdjacentElement('afterend', menuContainer);
+// wstawiamy menu NAD ramkę drzewa (zaraz po headerze)
+const header = document.querySelector('header');
+header.insertAdjacentElement('afterend', menuContainer);
 
 // obsługa kliknięcia węzła → zapisujemy jako aktywny
 cy.on('tap', 'node', function(evt){
@@ -311,7 +311,6 @@ document.getElementById('expandAiBtn').onclick = () => {
     expandWithAI(activeNode);
     cy.fit();
 };
-
 
             // Funkcja "Expand with AI"
             function expandWithAI(node){
