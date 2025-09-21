@@ -261,17 +261,7 @@ header, footer, #miniChat {
 
             // Wycentrowanie drzewa po załadowaniu
             cy.ready(() => {
-    cy.layout({ 
-        name: 'breadthfirst', 
-        directed: true, 
-        padding: 80, 
-        spacingFactor: 1.5 // zwiększa rozstaw
-    }).run();
-    cy.fit(cy.nodes(), 50); // dopasuj graf do wszystkich węzłów
-cy.zoomingEnabled(true);
-cy.minZoom(0.5);
-cy.maxZoom(2);
-
+    
 });
 
             // Logika dla menu kontekstowego i czatu AI
