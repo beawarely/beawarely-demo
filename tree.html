@@ -11,20 +11,24 @@
       --blue1: #007bff;
       --blue2: #66b2ff;
       --blue3: #b3d9ff;
+      --bg-dark: black;
+      --bg-light: #f0f0f0;
+      --text-dark: #eee;
+      --text-light: #333;
     }
 
     body.light-mode {
-      background: black !important;
-      color: #eee !important;
+      background: var(--bg-light) !important;
+      color: var(--text-light) !important;
     }
 
     body.light-mode p {
-      color: #333;
+      color: var(--text-light);
     }
 
     body.light-mode .back-btn {
       background-color: var(--blue2);
-      color: black;
+      color: var(--text-light);
     }
 
     body.light-mode .back-btn:hover {
@@ -34,8 +38,8 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: black;
-      color: white;
+      background: var(--bg-dark);
+      color: var(--text-dark);
       text-align: center;
       padding: 40px 20px;
       transition: background-color 0.5s ease, color 0.5s ease;
@@ -71,23 +75,23 @@
     }
 
     footer {
-  position: relative;
-  margin-top: 30px;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #777;
-  z-index: 1;
-}
+      position: relative;
+      margin-top: 30px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #777;
+      z-index: 1;
+    }
 
     body:not(.light-mode) #matrix-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;   /* niższy priorytet niż drzewo */
-  width: 100vw;
-  height: 100vh;
-  background: black;
-}
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+    }
 
     body.light-mode #matrix-bg {
       display: none;
@@ -109,13 +113,12 @@
     }
   </style>
 </head>
-<body class="light-mode" style="margin:0;display:flex;flex-direction:column;min-height:100vh">
+<body style="margin:0;display:flex;flex-direction:column;min-height:100vh">
   <canvas id="matrix-bg"></canvas>
   <canvas id="neuronCanvas"></canvas>
 
   <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px;box-sizing:border-box;width:100%">
 
-    <!-- Ikona trybu -->
     <img id="modeIcon"
       src="images/icon-neural-orange.svg"
       onclick="toggleMode()"
@@ -124,16 +127,13 @@
       onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'"
       onmouseout="this.style.backgroundColor='transparent'" />
 
-    <!-- Nagłówek -->
     <header style="display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;margin-bottom:20px">
-      <h1 style="margin:0;text-align:left">Welcome to the Knowledge Tree</h1>
-      <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
+      <h1 style="margin:0">Welcome to the Knowledge Tree</h1>
+      <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
     </header>
 
-    <!-- Drzewo -->
     <div id="cyTree" style="width:100%;max-width:1200px;height:60vh;margin:0 auto 20px auto;border:1px solid #444;border-radius:6px;background:rgba(0,0,0,0.6);position:relative;z-index:1"></div>
 
-    <!-- Mini AI chat -->
     <div id="miniChat" style="width:100%;max-width:700px;margin:0 auto 20px auto;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(20,20,30,0.9);color:#fff">
       <p style="margin:0 0 10px 0;font-weight:bold">AI Mini Chat</p>
       <textarea id="chatInput" rows="2" style="width:100%;padding:6px;border-radius:6px;border:1px solid #555;background:#111;color:#eee"></textarea>
@@ -143,8 +143,7 @@
 
   </main>
 
-  <!-- Stopka -->
-  <footer style="margin-top:auto;text-align:center;padding:10px 0;color:#777;font-size:0.9rem">
+  <footer style="margin-top:auto;text-align:center;padding:10px 0;color:#777;font-size:0.9rem;z-index:1">
     © 2025 BeAwarely — Tree of Knowledge (demo concept)
   </footer>
 </body>
@@ -155,24 +154,24 @@
       const icon = document.getElementById('modeIcon');
 
       if (mode === 'light') {
-  document.body.classList.add('light-mode');
-  if (icon) icon.src = 'images/icon-neural-orange.svg';
-} else {
-  document.body.classList.remove('light-mode');
-  if (icon) icon.src = 'images/icon-darkmode-matrix-pills.svg';
-}
+        document.body.classList.add('light-mode');
+        if (icon) icon.src = 'images/icon-neural-orange.svg';
+      } else {
+        document.body.classList.remove('light-mode');
+        if (icon) icon.src = 'images/icon-darkmode-matrix-pills.svg';
+      }
     });
 
     function toggleMode() {
-  const isLight = document.body.classList.toggle('light-mode');
-  localStorage.setItem('mode', isLight ? 'light' : 'dark');
-  const icon = document.getElementById('modeIcon');
-  if (icon) icon.src = isLight 
-  ? 'images/icon-neural-orange.svg' 
-  : 'images/icon-darkmode-matrix-pills.svg';
+      const isLight = document.body.classList.toggle('light-mode');
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.src = isLight 
+      ? 'images/icon-neural-orange.svg' 
+      : 'images/icon-darkmode-matrix-pills.svg';
 
-  if (isLight) drawNeuronCloud(); // ✅ dodane
-}
+      if (isLight) drawNeuronCloud();
+    }
   </script>
 
   <script>
@@ -215,271 +214,274 @@
     setInterval(drawMatrix, 35);
   </script>
 
+  <script async>
+    // 🌞 NEURON CLOUD BACKGROUND
+    const neuronCanvas = document.getElementById('neuronCanvas');
+    const neuronCtx = neuronCanvas.getContext('2d');
+
+    let width, height;
+    function resizeNeuronCanvas() {
+      width = neuronCanvas.width = window.innerWidth;
+      height = neuronCanvas.height = window.innerHeight;
+    }
+    resizeNeuronCanvas();
+    window.addEventListener('resize', resizeNeuronCanvas);
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.radius = 1 + Math.random() * 2;
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.life = Math.random() * 500 + 300;
+        this.color = getGlowColor();
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+
+        if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) {
+          this.reset();
+        }
+      }
+
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 8);
+        gradient.addColorStop(0, this.color);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    }
+
+    function getGlowColor() { 
+      const hue = Math.floor(Math.random() * 360); 
+      return `hsl(${hue}, 100%, 85%)`; 
+    }
+
+    const particles = Array.from({ length: 120 }, () => new Particle());
+
+    function drawNeuronCloud() {
+      if (!document.body.classList.contains('light-mode')) return;
+
+      neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      neuronCtx.fillRect(0, 0, width, height);
+
+      for (let p of particles) {
+        p.update();
+        p.draw(neuronCtx);
+      }
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i];
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 120) {
+            neuronCtx.beginPath();
+            neuronCtx.moveTo(a.x, a.y);
+            neuronCtx.lineTo(b.x, b.y);
+            neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 120})`;
+            neuronCtx.lineWidth = 0.25;
+            neuronCtx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(drawNeuronCloud);
+    }
+
+    drawNeuronCloud();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
   <script>
-// 🌞 NEURON CLOUD BACKGROUND
-const neuronCanvas = document.getElementById('neuronCanvas');
-const neuronCtx = neuronCanvas.getContext('2d');
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let width, height;
-function resizeNeuronCanvas() {
-  width = neuronCanvas.width = window.innerWidth;
-  height = neuronCanvas.height = window.innerHeight;
-}
-resizeNeuronCanvas();
-window.addEventListener('resize', resizeNeuronCanvas);
-
-class Particle {
-  constructor() {
-    this.reset();
-  }
-
-  reset() {
-    this.x = Math.random() * width;
-    this.y = Math.random() * height;
-    this.radius = 1 + Math.random() * 2;
-    this.vx = (Math.random() - 0.5) * 0.6;
-    this.vy = (Math.random() - 0.5) * 0.6;
-    this.life = Math.random() * 500 + 300;
-    this.color = getGlowColor();
-  }
-
-  update() {
-    this.x += this.vx;
-    this.y += this.vy;
-    this.life--;
-
-    if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) {
-      this.reset();
+    async function waitForInitialSession(){
+      const { data:{ session } } = await sb.auth.getSession();
+      return session;
     }
-  }
 
-  draw(ctx) {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 8);
-    gradient.addColorStop(0, this.color);
-    gradient.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradient;
-    ctx.fill();
-  }
-}
-
-function getGlowColor() { 
-  const hue = Math.floor(Math.random() * 360); 
-  return `hsl(${hue}, 100%, 85%)`; 
-}
-
-const particles = Array.from({ length: 120 }, () => new Particle());
-
-function drawNeuronCloud() {
-  if (!document.body.classList.contains('light-mode')) return;
-
-  neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-  neuronCtx.fillRect(0, 0, width, height);
-
-  for (let p of particles) {
-    p.update();
-    p.draw(neuronCtx);
-  }
-
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const a = particles[i];
-      const b = particles[j];
-      const dx = a.x - b.x;
-      const dy = a.y - b.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist < 120) {
-        neuronCtx.beginPath();
-        neuronCtx.moveTo(a.x, a.y);
-        neuronCtx.lineTo(b.x, b.y);
-        neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 120})`;
-        neuronCtx.lineWidth = 0.25;
-        neuronCtx.stroke();
+    function handleAuth(session){
+      const user = session?.user || null;
+      if(!user){
+        try { localStorage.setItem('ba_redirect','tree.html'); } catch {}
+        location.replace('index.html?login=1');
+        return;
       }
     }
-  }
 
-  requestAnimationFrame(drawNeuronCloud);
-}
+    (async()=>{
+      const session = await waitForInitialSession();
+      handleAuth(session);
+    })();
 
-drawNeuronCloud();
-</script>
+    sb.auth.onAuthStateChange((_ev, session)=>{
+      handleAuth(session);
+    });
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
-  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    // Dodanie nasłuchiwania na kliknięcie w przycisk 'Send'
+    document.querySelector('#miniChat button').addEventListener('click', () => {
+        const input = document.getElementById('chatInput');
+        const log = document.getElementById('chatLog');
+        if (input.value.trim() !== '') {
+            log.innerHTML += `<div style="padding:4px;background:#222;border-radius:4px;margin-bottom:4px">You: ${input.value}</div>`;
+            log.scrollTop = log.scrollHeight;
+            input.value = '';
 
-  async function waitForInitialSession(){
-    const { data:{ session } } = await sb.auth.getSession();
-    return session;
-  }
-
-  function handleAuth(session){
-    const user = session?.user || null;
-    if(!user){
-      try { localStorage.setItem('ba_redirect','tree.html'); } catch {}
-      location.replace('index.html?login=1');
-      return;
-    }
-    // opcjonalnie: console.log("Logged as", user.email);
-  }
-
-  (async()=>{
-    const session = await waitForInitialSession();
-    handleAuth(session);
-  })();
-
-  sb.auth.onAuthStateChange((_ev, session)=>{
-    handleAuth(session);
-  });
-</script>
-
-<!-- Cytoscape.js prototyp drzewa -->
-<div id="cyTree" style="width:100%; height:60vh; margin:20px auto; border:1px solid #444; border-radius:0; background:rgba(0,0,0,0.6); position:relative; z-index:1"></div>
-
-<!-- Mini AI chat pod drzewem -->
-<div id="miniChat" style="width:100%;max-width:700px;margin:20px auto;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(20,20,30,0.9);color:#fff">
-  <p style="margin:0 0 10px 0;font-weight:bold">AI Mini Chat</p>
-  <textarea id="chatInput" rows="2" style="width:100%;padding:6px;border-radius:6px;border:1px solid #555;background:#111;color:#eee"></textarea>
-  <button style="margin-top:8px;padding:6px 12px;border:none;border-radius:6px;background:#3a63ff;color:#fff;cursor:pointer">Send</button>
-  <div id="chatLog" style="margin-top:10px;max-height:150px;overflow-y:auto;font-size:0.9rem;color:#ccc"></div>
-</div>
-
-<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-<script>
-  // Inicjalizacja grafu
-  const cy = cytoscape({
-    container: document.getElementById('cyTree'),
-    style: [
-      {
-        selector: 'node',
-        style: {
-          'background-color': '#3a63ff',
-          'label': 'data(label)',
-          'color': '#fff',
-          'text-valign': 'center',
-          'text-halign': 'center',
-          'font-size': '12px',
-          'width': '40px',
-          'height': '40px'
+            // Tutaj można dodać logikę do wysyłania do AI
+            log.innerHTML += `<div style="padding:4px;background:#3a63ff;border-radius:4px">AI: This is a placeholder response.</div>`;
+            log.scrollTop = log.scrollHeight;
         }
-      },
-      {
-        selector: 'edge',
-        style: {
-          'width': 2,
-          'line-color': '#bbb',
-          'target-arrow-color': '#bbb',
-          'target-arrow-shape': 'triangle'
+    });
+  </script>
+
+  <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+  <script>
+    // Inicjalizacja grafu
+    const cy = cytoscape({
+      container: document.getElementById('cyTree'),
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'background-color': '#3a63ff',
+            'label': 'data(label)',
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '12px',
+            'width': '40px',
+            'height': '40px'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 2,
+            'line-color': '#bbb',
+            'target-arrow-color': '#bbb',
+            'target-arrow-shape': 'triangle'
+          }
         }
-      }
-    ],
-    elements: {
-      nodes: [
-        { data: { id: 'root', label: 'Knowledge Tree' } },
-        { data: { id: 'tech', label: 'Technology' } },
-        { data: { id: 'sci', label: 'Science' } }
       ],
-      edges: [
-        { data: { source: 'root', target: 'tech' } },
-        { data: { source: 'root', target: 'sci' } }
-      ]
-    },
-    layout: {
-      name: 'breadthfirst',
-      directed: true,
-      padding: 10
+      elements: {
+        nodes: [
+          { data: { id: 'root', label: 'Knowledge Tree' } },
+          { data: { id: 'tech', label: 'Technology' } },
+          { data: { id: 'sci', label: 'Science' } }
+        ],
+        edges: [
+          { data: { source: 'root', target: 'tech' } },
+          { data: { source: 'root', target: 'sci' } }
+        ]
+      },
+      layout: {
+        name: 'breadthfirst',
+        directed: true,
+        padding: 10
+      }
+    });
+
+    // 🔹 Funkcja "Expand with AI" – dodaje przykładowe dzieci
+    function expandWithAI(node){
+      const examples = [
+        { label: "AI Trend", category: "tech" },
+        { label: "Research", category: "sci" },
+        { label: "Fact Check", category: "verified" }
+      ];
+
+      examples.forEach(ex=>{
+        const id = node.id() + "_" + ex.label.replace(/\s+/g,'_') + "_" + Math.floor(Math.random()*1000);
+        cy.add([
+          { data: { id: id, label: ex.label, category: ex.category } },
+          { data: { source: node.id(), target: id } }
+        ]);
+      });
+
+      cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
     }
-  });
 
-  // 🔹 Funkcja "Expand with AI" – dodaje przykładowe dzieci
-function expandWithAI(node){
-  const examples = [
-    { label: "AI Trend", category: "tech" },
-    { label: "Research", category: "sci" },
-    { label: "Fact Check", category: "verified" }
-  ];
+    // ✅ Ustaw od razu sensowny widok, żeby nic się nie "chowało"
+    cy.ready(() => {
+      cy.fit();
+    });
 
-  examples.forEach(ex=>{
-    const id = node.id() + "_" + ex.label.replace(/\s+/g,'_') + "_" + Math.floor(Math.random()*1000);
-    cy.add([
-      { data: { id: id, label: ex.label, category: ex.category } },
-      { data: { source: node.id(), target: id } }
-    ]);
-  });
+    // 🔹 Menu kontekstowe (UI popup obok węzła)
 
-            cy.layout({ name: 'breadthfirst', directed:true, padding:10 }).run();
-}
-
-// ✅ Ustaw od razu sensowny widok, żeby nic się nie "chowało"
-cy.ready(() => {
-  cy.fit();
-});
-
-// 🔹 Menu kontekstowe (UI popup obok węzła)
-
-const menu = document.createElement('div');
-menu.id = 'nodeMenu';
-menu.style.position = 'fixed'; // ważne: fixed, nie absolute
-menu.style.display = 'none';
-menu.style.background = 'rgba(20,20,30,0.95)';
-menu.style.border = '1px solid #444';
-menu.style.borderRadius = '8px';
-menu.style.padding = '6px';
-menu.style.fontSize = '14px';
-menu.style.color = '#fff';
-menu.style.zIndex = '99999'; // wymuszone, nad Cytoscape
-menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
-document.body.appendChild(menu);
-
-menu.innerHTML = `
-  <button id="addChildBtn" style="display:block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">➕ Add child</button>
-  <button id="expandAiBtn" style="display:block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
-`;
-
-// logika pokazywania menu
-cy.on('tap', 'node', function(evt){
-  const node = evt.target;
-  const pos = evt.renderedPosition;
-const rect = cy.container().getBoundingClientRect();
-const x = rect.left + pos.x;
-const y = rect.top + pos.y;
-
-menu.style.left = (x + 20) + 'px';
-menu.style.top = (y - 10) + 'px';
-menu.style.display = 'block';
-
-  document.getElementById('addChildBtn').onclick = () => {
-    const id = 'n' + Math.floor(Math.random()*10000);
-    const label = prompt("Enter child label:", "New Node") || "New Node";
-    cy.add([
-      { data: { id: id, label: label } },
-      { data: { source: node.id(), target: id } }
-    ]);
-    cy.layout({ name: 'breadthfirst', directed:true, padding:20 }).run();
-    cy.fit();
+    const menu = document.createElement('div');
+    menu.id = 'nodeMenu';
+    menu.style.position = 'fixed'; // ważne: fixed, nie absolute
     menu.style.display = 'none';
-  };
+    menu.style.background = 'rgba(20,20,30,0.95)';
+    menu.style.border = '1px solid #444';
+    menu.style.borderRadius = '8px';
+    menu.style.padding = '6px';
+    menu.style.fontSize = '14px';
+    menu.style.color = '#fff';
+    menu.style.zIndex = '99999'; // wymuszone, nad Cytoscape
+    menu.style.boxShadow = '0 4px 12px rgba(0,0,0,0.5)';
+    document.body.appendChild(menu);
 
-  document.getElementById('expandAiBtn').onclick = () => {
-    expandWithAI(node);
-    cy.fit();
-    menu.style.display = 'none';
-  };
-});
+    menu.innerHTML = `
+      <button id="addChildBtn" style="display:block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">➕ Add child</button>
+      <button id="expandAiBtn" style="display:block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px 0;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
+    `;
 
-// ukryj menu po kliknięciu w tło
-cy.on('tap', function(evt){
-  if(evt.target === cy){
-    menu.style.display = 'none';
-  }
-});
+    // logika pokazywania menu
+    cy.on('tap', 'node', function(evt){
+      const node = evt.target;
+      const pos = evt.renderedPosition;
+      const rect = cy.container().getBoundingClientRect();
+      const x = rect.left + pos.x;
+      const y = rect.top + pos.y;
 
-</script>
+      menu.style.left = (x + 20) + 'px';
+      menu.style.top = (y - 10) + 'px';
+      menu.style.display = 'block';
+
+      document.getElementById('addChildBtn').onclick = () => {
+        const id = 'n' + Math.floor(Math.random()*10000);
+        const label = prompt("Enter child label:", "New Node") || "New Node";
+        cy.add([
+          { data: { id: id, label: label } },
+          { data: { source: node.id(), target: id } }
+        ]);
+        cy.layout({ name: 'breadthfirst', directed:true, padding:20 }).run();
+        cy.fit();
+        menu.style.display = 'none';
+      };
+
+      document.getElementById('expandAiBtn').onclick = () => {
+        expandWithAI(node);
+        cy.fit();
+        menu.style.display = 'none';
+      };
+    });
+
+    // ukryj menu po kliknięciu w tło
+    cy.on('tap', function(evt){
+      if(evt.target === cy){
+        menu.style.display = 'none';
+      }
+    });
+
+  </script>
 
 </body>
 </html>
