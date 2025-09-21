@@ -268,8 +268,11 @@ header, footer, #miniChat {
         padding: 80, 
         spacingFactor: 1.5 // zwiększa rozstaw
     }).run();
-    cy.fit(cy.nodes(), 50); // dopasuj graf do węzłów
-    cy.center();            // wycentruj na środku kontenera
+    cy.fit(cy.nodes(), 50); // dopasuj graf do wszystkich węzłów
+cy.zoomingEnabled(true);
+cy.minZoom(0.5);
+cy.maxZoom(2);
+
 });
 
             // Logika dla menu kontekstowego i czatu AI
