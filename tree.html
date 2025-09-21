@@ -261,8 +261,22 @@ header, footer, #miniChat {
             // Wycentrowanie drzewa po załadowaniu
             cy.ready(() => {
     cy.layout({ name: 'breadthfirst', directed: true, padding: 50 }).run();
-    cy.fit(undefined, 50); // wyśrodkuj z marginesem
-    cy.center(); // wycentruj na środku ramki
+    cy.fit(undefined, 50);
+
+    // poprawka centrowania – wycentruj graf względem całego kontenera
+    const pan = cy.pan();
+    const containerWidth = cy.container().clientWidth;
+    const cyBBox = cy.boundingBox();
+
+    // oblicz środek grafu i środka kontenera
+    const graphCenterX = (cyBBox.x1 + cyBBox.x2) / 2;
+    const containerCenterX = containerWidth / 2;
+
+    // przesunięcie w poziomie
+    cy.pan({
+        x: pan.x + (containerCenterX - graphCenterX),
+        y: pan.y
+    });
 });
 
             // Logika dla menu kontekstowego i czatu AI
