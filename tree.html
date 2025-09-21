@@ -18,8 +18,8 @@
         }
 
         body.light-mode {
-            background: var(--bg-light) !important;
-            color: var(--text-light) !important;
+            background: var(--bg-light);
+            color: var(--text-light);
         }
 
         body.light-mode p {
@@ -111,6 +111,15 @@
         body.light-mode #neuronCanvas {
             display: block;
         }
+
+        #cyTree {
+            background: transparent;
+            border: 1px solid var(--text-dark);
+        }
+
+        body.light-mode #cyTree {
+            border: 1px solid var(--text-light);
+        }
     </style>
 </head>
 <body style="margin:0;display:flex;flex-direction:column;min-height:100vh">
@@ -132,7 +141,7 @@
             <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
         </header>
 
-        <div id="cyTree" style="width:100%;max-width:1200px;height:60vh;margin:0 auto 20px auto;border:1px solid #444;border-radius:6px;background:rgba(0,0,0,0.6);position:relative;z-index:1"></div>
+        <div id="cyTree" style="width:100%;max-width:1200px;height:60vh;margin:0 auto 20px auto;position:relative;z-index:1"></div>
 
         <div id="miniChat" style="width:100%;max-width:700px;margin:0 auto 20px auto;padding:10px;border:1px solid #444;border-radius:8px;background:rgba(20,20,30,0.9);color:#fff">
             <p style="margin:0 0 10px 0;font-weight:bold">AI Mini Chat</p>
