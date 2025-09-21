@@ -109,9 +109,11 @@
     }
   </style>
 </head>
-<body class="light-mode">
+<body class="light-mode" style="margin:0;display:flex;flex-direction:column;min-height:100vh">
   <canvas id="matrix-bg"></canvas>
   <canvas id="neuronCanvas"></canvas>
+
+  <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px">
 
   <img id="modeIcon"
      src="images/icon-neural-orange.svg"
@@ -125,10 +127,10 @@
     <h1 style="margin:0;text-align:left">Welcome to the Knowledge Tree</h1>
     <button class="back-btn" onclick="window.location.href='index.html'">Back</button>
   </header>
-
-  <footer style="margin-top:30px;position:relative;bottom:auto;z-index:10">
-  © 2025 BeAwarely — Tree of Knowledge (demo concept)
-</footer>
+</main>
+  <footer style="margin-top:auto;text-align:center;padding:10px 0;color:#777;font-size:0.9rem">
+    © 2025 BeAwarely — Tree of Knowledge (demo concept)
+  </footer>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
