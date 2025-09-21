@@ -113,9 +113,16 @@
         }
 
         #cyTree {
-            background: transparent;
-            border: 1px solid var(--text-dark);
-        }
+    background: transparent;
+    border: 1px solid var(--text-dark);
+    position: relative;
+    z-index: 2;
+}
+
+header, footer, #miniChat {
+    position: relative;
+    z-index: 2;
+}
 
         body.light-mode #cyTree {
             border: 1px solid var(--text-light);
