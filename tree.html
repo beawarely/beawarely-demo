@@ -30,7 +30,12 @@
     body.light-mode .back-btn:hover {
       background-color: var(--blue1);
     }
-    
+    
+        body.light-mode #d3tree {
+        background-color: #f0f0f0 !important;
+        border: 1px solid #ccc !important;
+    }
+
     .tree-controls .control-btn {
         background-color: #3a63ff;
         color: white;
@@ -426,10 +431,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     nodes.exit().remove();
   }
+  // Funkcja zmieniająca kolory drzewa w zależności od trybu
+  function updateColors() {
+    const isLightMode = document.body.classList.contains('light-mode');
+    svg.selectAll("g.node circle").attr("fill", isLightMode ? "#007bff" : "#3a63ff");
+    svg.selectAll("g.node text").attr("fill", isLightMode ? "#333" : "white");
+    svg.selectAll("line").attr("stroke", isLightMode ? "#ccc" : "#888");
+  }
+
+  // Obserwator do dynamicznej zmiany kolorów po przełączeniu trybu
+  const observer = new MutationObserver(updateColors);
+  observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // Initial drawing
   update(data);
-
+  updateColors();
   const svgElement = d3.select("#d3tree svg");
 
   document.getElementById("zoomInBtn").addEventListener("click", () => {
