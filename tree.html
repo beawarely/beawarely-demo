@@ -220,7 +220,8 @@
                 if (!cy || cy.elements().length === 0) return;
                 cy.resize();
                 cy.fit(cy.elements(), 50); // 50 = margines w px
-                cy.center();
+// lekkie przesunięcie w prawo, żeby nie ucinało lewej strony
+cy.panBy({ x: 100, y: 0 });
             }
 
             // Dopasowanie po zmianie rozmiaru okna
