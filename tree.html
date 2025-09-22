@@ -330,13 +330,16 @@ cy.panBy({ x: 100, y: 0 });
             menuContainer.innerHTML = `
     <button id="addChildBtn" style="display:inline-block;width:140px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">➕ Add child</button>
     <button id="expandAiBtn" style="display:inline-block;width:140px;background:#22c55e;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">🌱 Expand with AI</button>
-    <button id="panLeftBtn" style="display:inline-block;width:50px;background:#444;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">⬅</button>
-    <button id="panRightBtn" style="display:inline-block;width:50px;background:#444;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">➡</button>
-    <button id="panUpBtn" style="display:inline-block;width:50px;background:#444;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">⬆</button>
-    <button id="panDownBtn" style="display:inline-block;width:50px;background:#444;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">⬇</button>
-    <button id="zoomInBtn" style="display:inline-block;width:50px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">＋</button>
-    <button id="zoomOutBtn" style="display:inline-block;width:50px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:3px;border-radius:6px;cursor:pointer">－</button>
+    <div style="margin-top:6px">
+        <button id="panLeftBtn" style="width:50px;background:#444;color:#fff;border:none;padding:6px;margin:2px;border-radius:6px;cursor:pointer">⬅</button>
+        <button id="panRightBtn" style="width:50px;background:#444;color:#fff;border:none;padding:6px;margin:2px;border-radius:6px;cursor:pointer">➡</button>
+        <button id="panUpBtn" style="width:50px;background:#444;color:#fff;border:none;padding:6px;margin:2px;border-radius:6px;cursor:pointer">⬆</button>
+        <button id="panDownBtn" style="width:50px;background:#444;color:#fff;border:none;padding:6px;margin:2px;border-radius:6px;cursor:pointer">⬇</button>
+        <button id="zoomInBtn" style="width:50px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:2px;border-radius:6px;cursor:pointer">＋</button>
+        <button id="zoomOutBtn" style="width:50px;background:#3a63ff;color:#fff;border:none;padding:6px;margin:2px;border-radius:6px;cursor:pointer">－</button>
+    </div>
 `;
+
 // Sterowanie widokiem drzewa
 document.getElementById('panLeftBtn').onclick = () => cy.panBy({ x: 50, y: 0 });
 document.getElementById('panRightBtn').onclick = () => cy.panBy({ x: -50, y: 0 });
