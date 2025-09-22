@@ -30,6 +30,21 @@
     body.light-mode .back-btn:hover {
       background-color: var(--blue1);
     }
+    
+    .tree-controls .control-btn {
+        background-color: #3a63ff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-left: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s;
+    }
+    .tree-controls .control-btn:hover {
+        background-color: #005fcc;
+    }
 
     body {
       margin: 0;
@@ -131,7 +146,14 @@
     Explore categories, zoom in on specific topics, and help the world grow smarter — together.
   </p>
 
-  <div id="d3tree" style="width:100%;max-width:1000px;height:600px;margin:30px auto;border:1px solid #444;border-radius:8px;background:#111"></div>
+  <div id="d3tree" style="width:100%;max-width:1000px;height:600px;margin:30px auto;border:1px solid #444;border-radius:8px;background:#111">
+    <div class="tree-controls" style="position:absolute; bottom:10px; right:10px;">
+      <button id="zoomInBtn" class="control-btn">+</button>
+      <button id="zoomOutBtn" class="control-btn">-</button>
+      <button id="resetBtn" class="control-btn">Reset</button>
+      <button id="addNodeBtn" class="control-btn">Add Branch</button>
+    </div>
+  </div>
 
   <br>
   <button class="back-btn" onclick="window.location.href='index.html'">← Back to Homepage</button>
@@ -330,8 +352,24 @@ drawNeuronCloud();
 </script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const data = {
+  const width = document.getElementById("d3tree").clientWidth;
+  const height = document.getElementById("d3tree").clientHeight;
+
+  const zoom = d3.zoom()
+    .scaleExtent([0.5, 4])
+    .on("zoom", (e) => {
+      g.attr("transform", e.transform);
+    });
+
+  const svg = d3.select("#d3tree")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .call(zoom)
+    .append("g")
+    .attr("transform", "translate(40,40)");
+
+  let data = {
     name: "Knowledge Tree",
     children: [
       { name: "Technology", children: [
@@ -345,51 +383,82 @@ document.addEventListener("DOMContentLoaded", () => {
     ]
   };
 
-  const width = document.getElementById("d3tree").clientWidth;
-  const height = document.getElementById("d3tree").clientHeight;
-
-  const svg = d3.select("#d3tree")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .call(d3.zoom().on("zoom", (e) => {
-      g.attr("transform", e.transform);
-    }))
-    .append("g")
-    .attr("transform", "translate(40,40)");
-
-  const root = d3.hierarchy(data);
   const treeLayout = d3.tree().size([height - 80, width - 160]);
-  treeLayout(root);
 
-  svg.selectAll("line")
-    .data(root.links())
-    .enter()
-    .append("line")
-    .attr("x1", d => d.source.y)
-    .attr("y1", d => d.source.x)
-    .attr("x2", d => d.target.y)
-    .attr("y2", d => d.target.x)
-    .attr("stroke", "#888");
+  function update(source) {
+    const root = d3.hierarchy(data);
+    treeLayout(root);
 
-  svg.selectAll("circle")
-    .data(root.descendants())
-    .enter()
-    .append("circle")
-    .attr("cx", d => d.y)
-    .attr("cy", d => d.x)
-    .attr("r", 20)
-    .attr("fill", "#3a63ff");
+    // Update links
+    const links = svg.selectAll("line").data(root.links(), d => d.target.data.name);
 
-  svg.selectAll("text")
-    .data(root.descendants())
-    .enter()
-    .append("text")
-    .attr("x", d => d.y)
-    .attr("y", d => d.x - 30)
-    .attr("text-anchor", "middle")
-    .attr("fill", "white")
-    .text(d => d.data.name);
+    links.enter()
+      .append("line")
+      .merge(links)
+      .transition().duration(500)
+      .attr("x1", d => d.source.y)
+      .attr("y1", d => d.source.x)
+      .attr("x2", d => d.target.y)
+      .attr("y2", d => d.target.x)
+      .attr("stroke", "#888");
+
+    links.exit().remove();
+
+    // Update nodes
+    const nodes = svg.selectAll("g.node").data(root.descendants(), d => d.data.name);
+
+    const nodeEnter = nodes.enter()
+      .append("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    nodeEnter.append("circle")
+      .attr("r", 20)
+      .attr("fill", "#3a63ff");
+
+    nodeEnter.append("text")
+      .attr("dy", "-1.5em")
+      .attr("text-anchor", "middle")
+      .attr("fill", "white")
+      .text(d => d.data.name);
+    
+  nodes.transition().duration(500)
+      .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    nodes.exit().remove();
+  }
+
+  // Initial drawing
+  update(data);
+
+  // Control buttons
+  const svgElement = d3.select("#d3tree svg");
+
+  document.getElementById("zoomInBtn").addEventListener("click", () => {
+    svgElement.transition().call(zoom.scaleBy, 1.2);
+  });
+
+  document.getElementById("zoomOutBtn").addEventListener("click", () => {
+    svgElement.transition().call(zoom.scaleBy, 0.8);
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    svgElement.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(40,40));
+  });
+
+  document.getElementById("addNodeBtn").addEventListener("click", () => {
+    const newNodeName = prompt("Enter a name for the new branch:");
+    if (newNodeName) {
+      // Find the parent node to add the new branch to (e.g., the root)
+      let targetNode = data;
+      if (!targetNode.children) {
+        targetNode.children = [];
+      }
+      targetNode.children.push({ name: newNodeName });
+      update(data);
+    }
+  });
+
 });
 </script>
 
