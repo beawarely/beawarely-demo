@@ -99,33 +99,50 @@
     }
 
     body:not(.light-mode) #matrix-bg {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      width: 100vw;
-      height: 100vh;
-      background: black;
-    }
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -2;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+}
 
     body.light-mode #matrix-bg {
       display: none;
     }
 
     #neuronCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      pointer-events: none;
-      display: none;
-    }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  pointer-events: none;
+  display: none;
+}
 
     body.light-mode #neuronCanvas {
       display: block;
     }
+    #d3tree {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  height: 600px;
+  margin: 30px auto;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #111;
+  z-index: 10;
+}
+
+#d3tree svg {
+  width: 100%;
+  height: 100%;
+}
+
   </style>
 </head>
 <body class="light-mode">
@@ -146,7 +163,8 @@
     Explore categories, zoom in on specific topics, and help the world grow smarter — together.
   </p>
 
-  <div id="d3tree" style="width:100%;max-width:1000px;height:600px;margin:30px auto;border:1px solid #444;border-radius:8px;background:#111">
+  <div id="d3tree">
+
     <div class="tree-controls" style="position:absolute; bottom:10px; right:10px;">
       <button id="zoomInBtn" class="control-btn">+</button>
       <button id="zoomOutBtn" class="control-btn">-</button>
