@@ -131,7 +131,7 @@
     Explore categories, zoom in on specific topics, and help the world grow smarter — together.
   </p>
 
-  <img src="images/knowledge-tree-final.png" alt="Knowledge Tree" class="tree-image" />
+  <div id="d3tree" style="width:100%;max-width:1000px;height:600px;margin:30px auto;border:1px solid #444;border-radius:8px;background:#111"></div>
 
   <br>
   <button class="back-btn" onclick="window.location.href='index.html'">← Back to Homepage</button>
@@ -327,6 +327,70 @@ drawNeuronCloud();
   sb.auth.onAuthStateChange((_ev, session)=>{
     handleAuth(session);
   });
+</script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const data = {
+    name: "Knowledge Tree",
+    children: [
+      { name: "Technology", children: [
+        { name: "AI" },
+        { name: "Web" }
+      ]},
+      { name: "Science", children: [
+        { name: "Physics" },
+        { name: "Biology" }
+      ]}
+    ]
+  };
+
+  const width = document.getElementById("d3tree").clientWidth;
+  const height = document.getElementById("d3tree").clientHeight;
+
+  const svg = d3.select("#d3tree")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .call(d3.zoom().on("zoom", (e) => {
+      g.attr("transform", e.transform);
+    }))
+    .append("g")
+    .attr("transform", "translate(40,40)");
+
+  const root = d3.hierarchy(data);
+  const treeLayout = d3.tree().size([height - 80, width - 160]);
+  treeLayout(root);
+
+  svg.selectAll("line")
+    .data(root.links())
+    .enter()
+    .append("line")
+    .attr("x1", d => d.source.y)
+    .attr("y1", d => d.source.x)
+    .attr("x2", d => d.target.y)
+    .attr("y2", d => d.target.x)
+    .attr("stroke", "#888");
+
+  svg.selectAll("circle")
+    .data(root.descendants())
+    .enter()
+    .append("circle")
+    .attr("cx", d => d.y)
+    .attr("cy", d => d.x)
+    .attr("r", 20)
+    .attr("fill", "#3a63ff");
+
+  svg.selectAll("text")
+    .data(root.descendants())
+    .enter()
+    .append("text")
+    .attr("x", d => d.y)
+    .attr("y", d => d.x - 30)
+    .attr("text-anchor", "middle")
+    .attr("fill", "white")
+    .text(d => d.data.name);
+});
 </script>
 
 </body>
