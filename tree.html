@@ -30,16 +30,7 @@
     body.light-mode .back-btn:hover {
       background-color: var(--blue1);
     }
-        body.light-mode #d3tree {
-        background-color: transparent !important;
-        border: 1px solid #444 !important;
-    }
-
-        body.light-mode #d3tree {
-        background-color: #f0f0f0 !important;
-        border: 1px solid #ccc !important;
-    }
-
+    
     .tree-controls .control-btn {
         background-color: #3a63ff;
         color: white;
@@ -360,9 +351,10 @@ drawNeuronCloud();
 </script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
+document.addEventListener("DOMContentLoaded", () => {
   const width = document.getElementById("d3tree").clientWidth;
   const height = document.getElementById("d3tree").clientHeight;
- 
+
   let data = {
     name: "Knowledge Tree",
     children: [
@@ -376,13 +368,13 @@ drawNeuronCloud();
       ]}
     ]
   };
- 
+
   const treeLayout = d3.tree().size([height - 80, width - 160]);
   const svg = d3.select("#d3tree")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
- 
+
   const g = svg.append("g")
     .attr("transform", "translate(40,40)");
  
@@ -393,13 +385,13 @@ drawNeuronCloud();
     });
    
   svg.call(zoom);
- 
+
   function update(source) {
     const root = d3.hierarchy(data);
     treeLayout(root);
- 
+
     const links = g.selectAll("line").data(root.links(), d => d.target.data.name);
- 
+
     links.enter()
       .append("line")
       .merge(links)
@@ -408,58 +400,50 @@ drawNeuronCloud();
       .attr("y1", d => d.source.x)
       .attr("x2", d => d.target.y)
       .attr("y2", d => d.target.x)
-      .attr("stroke", () => document.body.classList.contains('light-mode') ? "#eee" : "#888");
- 
+      .attr("stroke", "#888");
+
     links.exit().remove();
- 
+
     const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
- 
+
     const nodeEnter = nodes.enter()
       .append("g")
       .attr("class", "node")
       .attr("transform", d => `translate(${d.y},${d.x})`);
- 
+
     nodeEnter.append("circle")
       .attr("r", 20)
-      .attr("fill", () => document.body.classList.contains('light-mode') ? "#007bff" : "#3a63ff");
- 
+      .attr("fill", "#3a63ff");
+
     nodeEnter.append("text")
       .attr("dy", "-1.5em")
       .attr("text-anchor", "middle")
-      .attr("fill", () => document.body.classList.contains('light-mode') ? "#333" : "white")
+      .attr("fill", "white")
       .text(d => d.data.name);
     
     nodes.transition().duration(500)
       .attr("transform", d => `translate(${d.y},${d.x})`);
- 
+
     nodes.exit().remove();
   }
- 
-  function updateColors() {
-    update(data);
-  }
- 
+
   // Initial drawing
   update(data);
- 
-  // Listen for mode changes and redraw the tree with new colors
-  const modeObserver = new MutationObserver(() => updateColors());
-  modeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
- 
+
   const svgElement = d3.select("#d3tree svg");
- 
+
   document.getElementById("zoomInBtn").addEventListener("click", () => {
     svgElement.transition().call(zoom.scaleBy, 1.2);
   });
- 
+
   document.getElementById("zoomOutBtn").addEventListener("click", () => {
     svgElement.transition().call(zoom.scaleBy, 0.8);
   });
- 
+
   document.getElementById("resetBtn").addEventListener("click", () => {
     svgElement.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(40,40));
   });
- 
+
   document.getElementById("addNodeBtn").addEventListener("click", () => {
     const newNodeName = prompt("Enter a name for the new branch:");
     if (newNodeName) {
@@ -471,6 +455,7 @@ drawNeuronCloud();
       update(data);
     }
   });
+
 });
 </script>
 
