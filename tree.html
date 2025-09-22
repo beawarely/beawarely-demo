@@ -405,7 +405,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .attr("y1", d => d.source.x)
       .attr("x2", d => d.target.y)
       .attr("y2", d => d.target.x)
-      .attr("stroke", "#888");
+      .attr("stroke", () => document.body.classList.contains('light-mode') ? "#ccc" : "#888");
 
     links.exit().remove();
 
@@ -418,12 +418,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     nodeEnter.append("circle")
       .attr("r", 20)
-      .attr("fill", "#3a63ff");
+      .attr("fill", () => document.body.classList.contains('light-mode') ? "#007bff" : "#3a63ff");
 
     nodeEnter.append("text")
       .attr("dy", "-1.5em")
       .attr("text-anchor", "middle")
-      .attr("fill", "white")
+      .attr("fill", () => document.body.classList.contains('light-mode') ? "#333" : "white")
       .text(d => d.data.name);
     
     nodes.transition().duration(500)
@@ -431,21 +431,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     nodes.exit().remove();
   }
-  // Funkcja zmieniająca kolory drzewa w zależności od trybu
-  function updateColors() {
-    const isLightMode = document.body.classList.contains('light-mode');
-    svg.selectAll("g.node circle").attr("fill", isLightMode ? "#007bff" : "#3a63ff");
-    svg.selectAll("g.node text").attr("fill", isLightMode ? "#333" : "white");
-    svg.selectAll("line").attr("stroke", isLightMode ? "#ccc" : "#888");
-  }
 
-  // Obserwator do dynamicznej zmiany kolorów po przełączeniu trybu
-  const observer = new MutationObserver(updateColors);
-  observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  function updateColors() {
+    update(data);
+  }
 
   // Initial drawing
   update(data);
-  updateColors();
+
+  // Listen for mode changes and redraw the tree with new colors
+  const modeObserver = new MutationObserver(() => updateColors());
+  modeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
   const svgElement = d3.select("#d3tree svg");
 
   document.getElementById("zoomInBtn").addEventListener("click", () => {
@@ -471,7 +468,6 @@ document.addEventListener("DOMContentLoaded", () => {
       update(data);
     }
   });
-
 });
 </script>
 
