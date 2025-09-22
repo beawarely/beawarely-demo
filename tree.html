@@ -37,11 +37,20 @@
         
         /* Poprawka dla kontenera Cytoscape, żeby tło było zawsze przezroczyste */
         #cyTree {
-            background: transparent;
-            border: 1px solid var(--text-dark);
-            position: relative;
-            z-index: 2;
-        }
+    background: transparent;
+    border: 1px solid var(--text-dark);
+    position: relative;
+    z-index: 2;
+}
+
+/* FIX na ucinanie drzewa */
+#cyTree > div {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+}
 
         body.light-mode #cyTree {
             border: 1px solid var(--text-light);
