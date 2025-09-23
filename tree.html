@@ -227,18 +227,30 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   
   <script>
-  // --- INIT MODE FROM LOCALSTORAGE ---
+  // --- INIT MODE FROM LOCALSTORAGE & MAIN TOGGLE FUNCTION ---
 document.addEventListener("DOMContentLoaded", () => {
-  const savedMode = localStorage.getItem("mode");
-  const icon = document.getElementById("modeIcon");
-  if (savedMode === "light") {
-    document.body.classList.add("light-mode");
-    if (icon) icon.src = "images/icon-neural-orange.svg";
-  } else {
-    document.body.classList.remove("light-mode");
-    if (icon) icon.src = "images/icon-darkmode-matrix-pills.svg";
-  }
+  const savedMode = localStorage.getItem("mode");
+  const icon = document.getElementById("modeIcon");
+  if (savedMode === "light") {
+    document.body.classList.add("light-mode");
+    if (icon) icon.src = "images/icon-neural-orange.svg";
+  } else {
+    document.body.classList.remove("light-mode");
+    if (icon) icon.src = "images/icon-darkmode-matrix-pills.svg";
+  }
 });
+
+function toggleMode() {
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('mode', isLight ? 'light' : 'dark');
+  const icon = document.getElementById('modeIcon');
+  if (icon) icon.src = isLight 
+    ? 'images/icon-neural-orange.svg' 
+    : 'images/icon-darkmode-matrix-pills.svg';
+  
+  // Ten przełącznik klasy body wywoła MutationObserver w kodzie D3
+  // oraz bodyObserver i modeIcon.addEventListener('click') w kodzie tła.
+}
 </script>
   
   <script>
@@ -476,12 +488,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let particles = Array.from({ length: 120 }, () => new Particle());
 
   function drawNeuronCloud() {
-    if (!document.body.classList.contains('light-mode')) {
-  return; // pozwól zatrzymać się naturalnie, bez cancel w środku pętli
-}
-
-    // clear with slight alpha to create motion trail
-    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    // Ta funkcja jest wywoływana TYLKO przez requestAnimationFrame,
+    // który jest uruchamiany/zatrzymywany przez startNeuron/stopNeuron w toggleBackgrounds().
+    
+    // clear with slight alpha to create motion trail
+    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
     neuronCtx.fillRect(0, 0, width, height);
 
     for (let p of particles) {
@@ -565,26 +576,23 @@ neuronFrame = requestAnimationFrame(drawNeuronCloud);
     // start proper background depending on current mode
     toggleBackgrounds();
 
-    // observe mode icon clicks (in case toggleMode() changes stored mode)
-    const modeIcon = document.getElementById('modeIcon');
-    if (modeIcon) {
-      modeIcon.addEventListener('click', () => {
-        // small timeout to let toggleMode() toggle class & localStorage first
-        setTimeout(toggleBackgrounds, 60);
-      });
-    }
+   // observe mode icon clicks
+    const modeIcon = document.getElementById('modeIcon');
+    if (modeIcon) {
+      modeIcon.addEventListener('click', toggleBackgrounds);
+    }
 
-    // also observe manual class changes to body (just in case)
-    const bodyObserver = new MutationObserver((mutationsList) => {
-      for (const m of mutationsList) {
-        if (m.type === 'attributes' && m.attributeName === 'class') {
-          toggleBackgrounds();
-        }
-      }
-    });
-    bodyObserver.observe(document.body, { attributes: true });
+    // also observe manual class changes to body (covers localStorage init and modeIcon click)
+    const bodyObserver = new MutationObserver((mutationsList) => {
+      for (const m of mutationsList) {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          toggleBackgrounds();
+        }
+      }
+    });
+    bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-  });
+  });
 </script>
 
 </body>
