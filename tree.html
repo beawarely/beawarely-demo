@@ -361,153 +361,232 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
   <script>
-    // --- MATRIX BACKGROUND ---
-    const canvas = document.getElementById("matrix-bg");
-    const ctx = canvas.getContext('2d');
-    let matrixInterval;
+  // --- UTILS: clear canvas / resize helpers ---
+  function clearCanvas(ctx) {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  }
 
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+  function setCanvasSize(canvas) {
+    if (!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+</script>
 
-    const letters = 'アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const fontSize = 16;
-    const columns = Math.floor(canvas.width / fontSize);
-    const drops = Array.from({ length: columns }, () => Math.random() * canvas.height / fontSize);
+<script>
+  // --- MATRIX + NEURON BACKGROUNDS + TOGGLE LOGIC ---
+  const matrixCanvas = document.getElementById("matrix-bg");
+  const matrixCtx = matrixCanvas.getContext("2d");
 
-    function drawMatrix() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#0F0';
-      ctx.font = fontSize + 'px monospace';
+  const neuronCanvas = document.getElementById("neuronCanvas");
+  const neuronCtx = neuronCanvas.getContext("2d");
 
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+  // state handles
+  let matrixInterval = null;
+  let neuronFrame = null;
 
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
+  // resize both canvases
+  function resizeAllCanvases() {
+    setCanvasSize(matrixCanvas);
+    setCanvasSize(neuronCanvas);
+    // recalc matrix drops when resized
+    initMatrixDrops();
+    // update neuron dims
+    width = neuronCanvas.width;
+    height = neuronCanvas.height;
+  }
+
+  window.addEventListener('resize', resizeAllCanvases);
+
+  // ----- MATRIX -----
+  const letters = 'アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const fontSize = 16;
+  let drops = [];
+  let matrixCols = 0;
+
+  function initMatrixDrops() {
+    if (!matrixCanvas) return;
+    matrixCols = Math.max(1, Math.floor(matrixCanvas.width / fontSize));
+    drops = Array.from({ length: matrixCols }, () => Math.random() * (matrixCanvas.height / fontSize));
+  }
+
+  function drawMatrixStep() {
+    if (!matrixCtx) return;
+    matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+    matrixCtx.fillStyle = '#0F0';
+    matrixCtx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters[Math.floor(Math.random() * letters.length)];
+      matrixCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+      if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
       }
+      drops[i]++;
     }
+  }
 
-    function toggleBackgrounds() {
-        const isLight = document.body.classList.contains('light-mode');
-        
-        if (isLight) {
-            clearInterval(matrixInterval);
-            drawNeuronCloud();
-        } else {
-            matrixInterval = setInterval(drawMatrix, 35);
-        }
+  // ----- NEURON CLOUD -----
+  let width = 0, height = 0;
+  function resizeNeuron() {
+    width = neuronCanvas.width = window.innerWidth;
+    height = neuronCanvas.height = window.innerHeight;
+  }
+  resizeNeuron();
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * width;
+      this.y = Math.random() * height;
+      this.radius = 1 + Math.random() * 2;
+      this.vx = (Math.random() - 0.5) * 0.6;
+      this.vy = (Math.random() - 0.5) * 0.6;
+      this.life = Math.random() * 500 + 300;
+      this.color = getGlowColor();
     }
-
-    // Initial background draw
-    toggleBackgrounds();
-    
-    // Listen for mode changes
-    document.getElementById('modeIcon').addEventListener('click', () => {
-        toggleBackgrounds();
-    });
-  </script>
-
-  <script>
-    // 🌞 NEURON CLOUD BACKGROUND
-    const neuronCanvas = document.getElementById('neuronCanvas');
-    const neuronCtx = neuronCanvas.getContext('2d');
-    let neuronFrame;
-
-    let width, height;
-    function resizeNeuronCanvas() {
-      width = neuronCanvas.width = window.innerWidth;
-      height = neuronCanvas.height = window.innerHeight;
-    }
-    resizeNeuronCanvas();
-    window.addEventListener('resize', resizeNeuronCanvas);
-
-    class Particle {
-      constructor() {
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.life--;
+      if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) {
         this.reset();
       }
+    }
+    draw(ctx) {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+      const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 8);
+      gradient.addColorStop(0, this.color);
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+  }
 
-      reset() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.radius = 1 + Math.random() * 2;
-        this.vx = (Math.random() - 0.5) * 0.6;
-        this.vy = (Math.random() - 0.5) * 0.6;
-        this.life = Math.random() * 500 + 300;
-        this.color = getGlowColor();
-      }
+  function getGlowColor() {
+    const hue = Math.floor(Math.random() * 360);
+    return `hsl(${hue}, 100%, 85%)`;
+  }
 
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.life--;
+  let particles = Array.from({ length: 120 }, () => new Particle());
 
-        if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) {
-          this.reset();
+  function drawNeuronCloud() {
+    if (!document.body.classList.contains('light-mode')) {
+      // safety: stop drawing if not in light mode
+      if (neuronFrame) cancelAnimationFrame(neuronFrame);
+      return;
+    }
+
+    // clear with slight alpha to create motion trail
+    neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+    neuronCtx.fillRect(0, 0, width, height);
+
+    for (let p of particles) {
+      p.update();
+      p.draw(neuronCtx);
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i];
+        const b = particles[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          neuronCtx.beginPath();
+          neuronCtx.moveTo(a.x, a.y);
+          neuronCtx.lineTo(b.x, b.y);
+          neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 120})`;
+          neuronCtx.lineWidth = 0.25;
+          neuronCtx.stroke();
         }
       }
-
-      draw(ctx) {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 8);
-        gradient.addColorStop(0, this.color);
-        gradient.addColorStop(1, 'transparent');
-        ctx.fillStyle = gradient;
-        ctx.fill();
-      }
     }
 
-    function getGlowColor() {
-      const hue = Math.floor(Math.random() * 360);
-      return `hsl(${hue}, 100%, 85%)`;
+    neuronFrame = requestAnimationFrame(drawNeuronCloud);
+  }
+
+  // ----- TOGGLE / START / STOP LOGIC -----
+  function startMatrix() {
+    if (matrixInterval) return;
+    clearCanvas(matrixCtx);
+    initMatrixDrops();
+    matrixInterval = setInterval(drawMatrixStep, 35);
+  }
+
+  function stopMatrix() {
+    if (matrixInterval) {
+      clearInterval(matrixInterval);
+      matrixInterval = null;
+    }
+    clearCanvas(matrixCtx);
+  }
+
+  function startNeuron() {
+    if (neuronFrame) return;
+    resizeNeuron();
+    // reset particles positions for clean visual
+    particles = Array.from({ length: 120 }, () => new Particle());
+    clearCanvas(neuronCtx);
+    drawNeuronCloud();
+  }
+
+  function stopNeuron() {
+    if (neuronFrame) {
+      cancelAnimationFrame(neuronFrame);
+      neuronFrame = null;
+    }
+    clearCanvas(neuronCtx);
+  }
+
+  function toggleBackgrounds() {
+    const isLight = document.body.classList.contains('light-mode');
+    if (isLight) {
+      stopMatrix();
+      startNeuron();
+      // show neuron via CSS opacity handled by styles
+    } else {
+      stopNeuron();
+      startMatrix();
+      // matrix opacity handled by CSS
+    }
+  }
+
+  // --- INIT ON LOAD: set canvas sizes and start appropriate background ---
+  document.addEventListener('DOMContentLoaded', () => {
+    // ensure both canvases correct size
+    resizeAllCanvases();
+
+    // start proper background depending on current mode
+    toggleBackgrounds();
+
+    // observe mode icon clicks (in case toggleMode() changes stored mode)
+    const modeIcon = document.getElementById('modeIcon');
+    if (modeIcon) {
+      modeIcon.addEventListener('click', () => {
+        // small timeout to let toggleMode() toggle class & localStorage first
+        setTimeout(toggleBackgrounds, 60);
+      });
     }
 
-    const particles = Array.from({ length: 120 }, () => new Particle());
-
-    function drawNeuronCloud() {
-      if (!document.body.classList.contains('light-mode')) {
-        cancelAnimationFrame(neuronFrame);
-        return;
-      }
-      
-      neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-      neuronCtx.fillRect(0, 0, width, height);
-
-      for (let p of particles) {
-        p.update();
-        p.draw(neuronCtx);
-      }
-
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i];
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 120) {
-            neuronCtx.beginPath();
-            neuronCtx.moveTo(a.x, a.y);
-            neuronCtx.lineTo(b.x, b.y);
-            neuronCtx.strokeStyle = `rgba(255,255,255,${1 - dist / 120})`;
-            neuronCtx.lineWidth = 0.25;
-            neuronCtx.stroke();
-          }
+    // also observe manual class changes to body (just in case)
+    const bodyObserver = new MutationObserver((mutationsList) => {
+      for (const m of mutationsList) {
+        if (m.type === 'attributes' && m.attributeName === 'class') {
+          toggleBackgrounds();
         }
       }
+    });
+    bodyObserver.observe(document.body, { attributes: true });
 
-      neuronFrame = requestAnimationFrame(drawNeuronCloud);
-    }
-  </script>
+  });
+</script>
 
 </body>
 </html>
