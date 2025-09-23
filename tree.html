@@ -7,148 +7,159 @@
   <title>Knowledge Tree - BeAwarely</title>
   <link rel="stylesheet" href="css/style.css" />
   <style>
-    :root {
-      --blue1: #007bff;
-      --blue2: #66b2ff;
-      --blue3: #b3d9ff;
-    }
+  :root {
+    --blue1: #007bff;
+    --blue2: #66b2ff;
+    --blue3: #b3d9ff;
+  }
 
-    /* GENERAL STYLES */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: black;
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-      transition: background-color 0.5s ease, color 0.5s ease;
-      position: relative;
-    }
+  /* GENERAL STYLES */
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: black;
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    position: relative;
+  }
 
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 5;
+  }
 
-    p {
-      max-width: 700px;
-      margin: 0 auto 30px;
-      font-size: 1.1rem;
-      color: #ccc;
-    }
+  p {
+    max-width: 700px;
+    margin: 0 auto 30px;
+    font-size: 1.1rem;
+    color: #ccc;
+    position: relative;
+    z-index: 5;
+  }
 
-    .back-btn {
-      margin-top: 40px;
-      background-color: #007bff;
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.3s;
-    }
+  .back-btn {
+    margin-top: 40px;
+    background-color: #007bff;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    position: relative;
+    z-index: 5;
+  }
 
-    .back-btn:hover {
-      background-color: #005fcc;
-      transform: scale(1.05);
-    }
+  .back-btn:hover {
+    background-color: #005fcc;
+    transform: scale(1.05);
+  }
 
-    footer {
-      margin-top: 80px;
-      font-size: 0.9rem;
-      color: #777;
-    }
+  footer {
+    margin-top: 80px;
+    font-size: 0.9rem;
+    color: #777;
+    position: relative;
+    z-index: 5;
+  }
 
-    /* D3 TREE CONTAINER */
-    #d3tree {
-      position: relative;
-      width: 100%;
-      max-width: 1000px;
-      height: 600px;
-      margin: 30px auto;
-      border: 1px solid #444;
-      border-radius: 8px;
-      background: rgba(17, 17, 17, 0.9);
-      z-index: 10;
-    }
+  /* D3 TREE CONTAINER */
+  #d3tree {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    height: 600px;
+    margin: 30px auto;
+    border: 1px solid #444;
+    border-radius: 16px;
+    background: rgba(17, 17, 17, 0.9);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+    z-index: 10;
+  }
 
-    #d3tree svg {
-      width: 100%;
-      height: 100%;
-    }
+  #d3tree svg {
+    width: 100%;
+    height: 100%;
+  }
 
-    .tree-controls {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      z-index: 20;
-    }
-    
-    .tree-controls .control-btn {
-      background-color: #3a63ff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 8px 12px;
-      margin-left: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.3s;
-    }
+  .tree-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 20;
+  }
+  
+  .tree-controls .control-btn {
+    background-color: #3a63ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+  }
 
-    .tree-controls .control-btn:hover {
-      background-color: #005fcc;
-    }
+  .tree-controls .control-btn:hover {
+    background-color: #005fcc;
+  }
 
-    /* BACKGROUNDS */
-    #matrix-bg, #neuronCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -2;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-    }
-    
-    #neuronCanvas {
-      display: none;
-    }
+  /* BACKGROUNDS */
+  #matrix-bg, #neuronCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  
+  #neuronCanvas {
+    opacity: 0;
+  }
 
-    /* LIGHT MODE */
-    body.light-mode {
-      background: #f0f0f0 !important;
-      color: #333 !important;
-    }
-    
-    body.light-mode p {
-      color: #666;
-    }
-    
-    body.light-mode #d3tree {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #ccc;
-    }
-    
-    body.light-mode .back-btn {
-      background-color: var(--blue2);
-      color: black;
-    }
-    
-    body.light-mode .back-btn:hover {
-      background-color: var(--blue1);
-    }
-    
-    body.light-mode #matrix-bg {
-      display: none;
-    }
+  /* LIGHT MODE */
+  body.light-mode {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+  }
+  
+  body.light-mode p {
+    color: #666;
+  }
+  
+  body.light-mode #d3tree {
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #ccc;
+  }
 
-    body.light-mode #neuronCanvas {
-      display: block;
-    }
-  </style>
+  body.light-mode .back-btn {
+    background-color: var(--blue2);
+    color: black;
+  }
+  
+  body.light-mode .back-btn:hover {
+    background-color: var(--blue1);
+  }
+  
+  body.light-mode #matrix-bg {
+    opacity: 0;
+  }
+  
+  body.light-mode #neuronCanvas {
+    opacity: 1;
+  }
+</style>
+
 </head>
 <body class="light-mode">
   <canvas id="matrix-bg"></canvas>
@@ -214,126 +225,140 @@
     });
   </script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // --- D3.js SETUP ---
-      const d3treeContainer = document.getElementById("d3tree");
-      const width = d3treeContainer.clientWidth;
-      const height = d3treeContainer.clientHeight;
-      
-      const svg = d3.select(d3treeContainer)
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+  // --- INIT MODE FROM LOCALSTORAGE ---
+document.addEventListener("DOMContentLoaded", () => {
+  const savedMode = localStorage.getItem("mode");
+  const icon = document.getElementById("modeIcon");
+  if (savedMode === "light") {
+    document.body.classList.add("light-mode");
+    if (icon) icon.src = "images/icon-neural-orange.svg";
+  } else {
+    document.body.classList.remove("light-mode");
+    if (icon) icon.src = "images/icon-darkmode-matrix-pills.svg";
+  }
+});
+</script>
+  
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const d3treeContainer = document.getElementById("d3tree");
+  const width = d3treeContainer.clientWidth;
+  const height = d3treeContainer.clientHeight;
+  
+  const svg = d3.select(d3treeContainer)
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
 
-      const g = svg.append("g");
-      
-      const zoom = d3.zoom()
-        .scaleExtent([0.5, 4])
-        .on("zoom", (event) => {
-          g.attr("transform", event.transform);
-        });
-        
-      svg.call(zoom);
-
-      let data = {
-        name: "Knowledge Tree",
-        children: [
-          { name: "Technology", children: [
-            { name: "AI" },
-            { name: "Web" }
-          ]},
-          { name: "Science", children: [
-            { name: "Physics" },
-            { name: "Biology" }
-          ]}
-        ]
-      };
-
-      const treeLayout = d3.tree().size([height - 80, width - 160]);
-
-      function update() {
-        const root = d3.hierarchy(data);
-        treeLayout(root);
-
-        const isLightMode = document.body.classList.contains('light-mode');
-        const nodeColor = isLightMode ? "#007bff" : "#3a63ff";
-        const textColor = isLightMode ? "#333" : "white";
-        const linkColor = isLightMode ? "#ccc" : "#888";
-
-        // Update links
-        const links = g.selectAll("line").data(root.links(), d => d.target.data.name);
-        
-        links.enter()
-          .append("line")
-          .merge(links)
-          .transition().duration(500)
-          .attr("x1", d => d.source.y)
-          .attr("y1", d => d.source.x)
-          .attr("x2", d => d.target.y)
-          .attr("y2", d => d.target.x)
-          .attr("stroke", linkColor);
-
-        links.exit().remove();
-
-        // Update nodes
-        const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
-
-        const nodeEnter = nodes.enter()
-          .append("g")
-          .attr("class", "node")
-          .attr("transform", d => `translate(${d.y},${d.x})`);
-
-        nodeEnter.append("circle")
-          .attr("r", 20)
-          .attr("fill", nodeColor);
-
-        nodeEnter.append("text")
-          .attr("dy", "-1.5em")
-          .attr("text-anchor", "middle")
-          .attr("fill", textColor)
-          .text(d => d.data.name);
-        
-        nodes.transition().duration(500)
-          .attr("transform", d => `translate(${d.y},${d.x})`);
-
-        nodes.exit().remove();
-      }
-
-      // Initial drawing
-      update();
-
-      // Control buttons
-      document.getElementById("zoomInBtn").addEventListener("click", () => {
-        svg.transition().call(zoom.scaleBy, 1.2);
-      });
-
-      document.getElementById("zoomOutBtn").addEventListener("click", () => {
-        svg.transition().call(zoom.scaleBy, 0.8);
-      });
-
-      document.getElementById("resetBtn").addEventListener("click", () => {
-        svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
-      });
-
-      document.getElementById("addNodeBtn").addEventListener("click", () => {
-        const newNodeName = prompt("Enter a name for the new branch:");
-        if (newNodeName) {
-          let targetNode = data;
-          if (!targetNode.children) {
-            targetNode.children = [];
-          }
-          targetNode.children.push({ name: newNodeName });
-          update();
-        }
-      });
-
-      // --- MODE TOGGLE LOGIC ---
-      document.getElementById('modeIcon').addEventListener('click', () => {
-        setTimeout(update, 50);
-      });
+  const g = svg.append("g");
+  
+  const zoom = d3.zoom()
+    .scaleExtent([0.5, 4])
+    .on("zoom", (event) => {
+      g.attr("transform", event.transform);
     });
-  </script>
+    
+  svg.call(zoom);
+
+  let data = {
+    name: "Knowledge Tree",
+    children: [
+      { name: "Technology", children: [
+        { name: "AI" },
+        { name: "Web" }
+      ]},
+      { name: "Science", children: [
+        { name: "Physics" },
+        { name: "Biology" }
+      ]}
+    ]
+  };
+
+  const treeLayout = d3.tree().size([height - 80, width - 160]);
+
+  function update() {
+    const root = d3.hierarchy(data);
+    treeLayout(root);
+
+    const isLightMode = document.body.classList.contains('light-mode');
+    const nodeColor = isLightMode ? "#007bff" : "#3a63ff";
+    const textColor = isLightMode ? "#333" : "white";
+    const linkColor = isLightMode ? "#ccc" : "#888";
+
+    // Update links
+    const links = g.selectAll("line").data(root.links(), d => d.target.data.name);
+    
+    links.enter()
+      .append("line")
+      .merge(links)
+      .transition().duration(500)
+      .attr("x1", d => d.source.y)
+      .attr("y1", d => d.source.x)
+      .attr("x2", d => d.target.y)
+      .attr("y2", d => d.target.x)
+      .attr("stroke", linkColor);
+
+    links.exit().remove();
+
+    // Update nodes
+    const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
+
+    const nodeEnter = nodes.enter()
+      .append("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    nodeEnter.append("circle")
+      .attr("r", 20)
+      .attr("fill", nodeColor);
+
+    nodeEnter.append("text")
+      .attr("dy", "-1.5em")
+      .attr("text-anchor", "middle")
+      .attr("fill", textColor)
+      .text(d => d.data.name);
+    
+    nodes.transition().duration(500)
+      .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    nodes.exit().remove();
+  }
+
+  // Initial drawing
+  update();
+
+  // Control buttons
+  document.getElementById("zoomInBtn").addEventListener("click", () => {
+    svg.transition().call(zoom.scaleBy, 1.2);
+  });
+
+  document.getElementById("zoomOutBtn").addEventListener("click", () => {
+    svg.transition().call(zoom.scaleBy, 0.8);
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+  });
+
+  document.getElementById("addNodeBtn").addEventListener("click", () => {
+    const newNodeName = prompt("Enter a name for the new branch:");
+    if (newNodeName) {
+      let targetNode = data;
+      if (!targetNode.children) {
+        targetNode.children = [];
+      }
+      targetNode.children.push({ name: newNodeName });
+      update();
+    }
+  });
+
+  // --- MODE TOGGLE LOGIC ---
+  const modeObserver = new MutationObserver(() => update());
+  modeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
 
   <script>
     // --- MATRIX BACKGROUND ---
