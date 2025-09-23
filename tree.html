@@ -477,10 +477,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function drawNeuronCloud() {
     if (!document.body.classList.contains('light-mode')) {
-      // safety: stop drawing if not in light mode
-      if (neuronFrame) cancelAnimationFrame(neuronFrame);
-      return;
-    }
+  return; // pozwól zatrzymać się naturalnie, bez cancel w środku pętli
+}
 
     // clear with slight alpha to create motion trail
     neuronCtx.fillStyle = 'rgba(0, 0, 0, 0.08)';
@@ -529,12 +527,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function startNeuron() {
-    if (neuronFrame) return;
-    resizeNeuron();
-    // reset particles positions for clean visual
-    particles = Array.from({ length: 120 }, () => new Particle());
-    clearCanvas(neuronCtx);
-    drawNeuronCloud();
+    if (neuronFrame) cancelAnimationFrame(neuronFrame);
+resizeNeuron();
+// reset particles positions for clean visual
+particles = Array.from({ length: 120 }, () => new Particle());
+clearCanvas(neuronCtx);
+neuronFrame = requestAnimationFrame(drawNeuronCloud);
+
   }
 
   function stopNeuron() {
