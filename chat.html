@@ -383,54 +383,60 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
     });
 
     send.onclick = () => {
-      const q = input.value.trim();
-      if(!q) return;
-      addMsg(q, 'user');
-      input.value = '';
-     (async ()=>{
-  try {
-    const st = document.getElementById('backendStatus');
-    if (st) st.textContent = 'Backend: connecting…';
+  const q = input.value.trim();
+  if (!q) return;
+  addMsg(q, "user");
+  input.value = "";
 
-    const resp = await fetch("https://ai.beawarely.com/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama2:7b",
-        messages: [{ role: "user", content: q }]
-      })
-    });
-
-    const reader = resp.body.getReader();
-const decoder = new TextDecoder();
-let fullText = "";
-
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-  const chunk = decoder.decode(value, { stream: true });
-  for (const line of chunk.split("\n")) {
-    if (!line.trim()) continue;
+  (async () => {
     try {
-      const obj = JSON.parse(line);
-      if (obj.message?.content) {
-        fullText += obj.message.content;
+      const st = document.getElementById("backendStatus");
+      if (st) st.textContent = "Backend: connecting…";
+
+      const resp = await fetch("https://ai.beawarely.com/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "llama2:7b",
+          messages: [{ role: "user", content: q }]
+        })
+      });
+
+      if (!resp.ok || !resp.body) {
+        throw new Error(`HTTP ${resp.status}`);
       }
-    } catch {}
-  }
-}
 
-addMsg(fullText || "[no response]", "ai");
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
 
-    if (st) st.textContent = 'Backend: connected to Ollama';
-  } catch (err) {
-    console.error("Chat error:", err);
-    addMsg("⚠️ Backend error, try again later.", "ai");
-    const st = document.getElementById('backendStatus');
-    if (st) st.textContent = 'Backend: error';
-  }
-})();
-    };
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        for (const line of chunk.split("\n")) {
+          if (!line.trim()) continue;
+          try {
+            const obj = JSON.parse(line);
+            if (obj.message?.content) {
+              fullText += obj.message.content;
+            }
+          } catch (e) {
+            console.warn("Parse error:", e, line);
+          }
+        }
+      }
+
+      addMsg(fullText || "[no response]", "ai");
+      if (st) st.textContent = "Backend: connected to Ollama";
+    } catch (err) {
+      console.error("Chat error:", err);
+      addMsg("⚠️ Backend error, try again later.", "ai");
+      const st = document.getElementById("backendStatus");
+      if (st) st.textContent = "Backend: error";
+    }
+  })();
+};
 
     document.addEventListener('DOMContentLoaded', ()=>{ 
       if(msgs) msgs.scrollTop = msgs.scrollHeight; 
