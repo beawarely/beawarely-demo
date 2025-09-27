@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
     const st = document.getElementById('backendStatus');
     if (st) st.textContent = 'Backend: connecting…';
 
-    const resp = await fetch("http://65.108.74.155:11434/api/chat", {
+    const resp = await fetch("https://ai.beawarely.com/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
