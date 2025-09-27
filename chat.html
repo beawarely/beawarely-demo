@@ -401,9 +401,26 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
       })
     });
 
-    const data = await resp.json();
-    const answer = data?.message?.content || "[no response]";
-    addMsg(answer, 'ai');
+    const reader = resp.body.getReader();
+const decoder = new TextDecoder();
+let fullText = "";
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  const chunk = decoder.decode(value, { stream: true });
+  for (const line of chunk.split("\n")) {
+    if (!line.trim()) continue;
+    try {
+      const obj = JSON.parse(line);
+      if (obj.message?.content) {
+        fullText += obj.message.content;
+      }
+    } catch {}
+  }
+}
+
+addMsg(fullText || "[no response]", "ai");
 
     if (st) st.textContent = 'Backend: connected to Ollama';
   } catch (err) {
