@@ -387,12 +387,32 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
       if(!q) return;
       addMsg(q, 'user');
       input.value = '';
-      // tu później wstawisz fetch do swojego endpointu Mistrala
-      setTimeout(()=>{
-  addMsg('This is a placeholder response. Connect your backend endpoint to get real answers.', 'ai');
-  const st = document.getElementById('backendStatus');
-  if (st) st.textContent = 'Backend: not connected';
-}, 400);
+     (async ()=>{
+  try {
+    const st = document.getElementById('backendStatus');
+    if (st) st.textContent = 'Backend: connecting…';
+
+    const resp = await fetch("http://65.108.74.155:11434/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama2:7b",
+        messages: [{ role: "user", content: q }]
+      })
+    });
+
+    const data = await resp.json();
+    const answer = data?.message?.content || "[no response]";
+    addMsg(answer, 'ai');
+
+    if (st) st.textContent = 'Backend: connected to Ollama';
+  } catch (err) {
+    console.error("Chat error:", err);
+    addMsg("⚠️ Backend error, try again later.", "ai");
+    const st = document.getElementById('backendStatus');
+    if (st) st.textContent = 'Backend: error';
+  }
+})();
     };
 
     document.addEventListener('DOMContentLoaded', ()=>{ 
