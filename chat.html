@@ -428,7 +428,7 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
       }
 
       addMsg(fullText || "[no response]", "ai");
-      if (st) st.textContent = "Backend: connected to Ollama";
+      if (st) st.textContent = "✅ Connected";
     } catch (err) {
       console.error("Chat error:", err);
       addMsg("⚠️ Backend error, try again later.", "ai");
