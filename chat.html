@@ -192,8 +192,10 @@ textarea:focus-visible {
     window.supabaseClient.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') {
     try {
-      localStorage.removeItem('ba_current_conv');
-      localStorage.removeItem('ba_chat_history'); // legacy local cache
+      // wyczyść stan rozmowy (po ponownym logowaniu zaczniemy nowy czat)
+      sessionStorage.removeItem('ba_current_conv');
+      localStorage.removeItem('ba_current_conv');   // cleanup starego podejścia
+      localStorage.removeItem('ba_chat_history');   // legacy local cache
       localStorage.removeItem('ba_last_user');
     } catch {}
     location.replace('index.html');
@@ -230,8 +232,9 @@ const sb = window.supabaseClient;
 const CURRENT_KEY = 'ba_current_conv';
 let USER_ID = null;
 
-function getCurrentId(){ return localStorage.getItem(CURRENT_KEY); }
-function setCurrentId(id){ localStorage.setItem(CURRENT_KEY, id); }
+// sessionStorage = działa po odświeżeniu, znika po zamknięciu karty/okna
+function getCurrentId(){ return sessionStorage.getItem(CURRENT_KEY); }
+function setCurrentId(id){ sessionStorage.setItem(CURRENT_KEY, id); }
 
 async function ensureSession(){
   const { data: { session } } = await sb.auth.getSession();
@@ -273,9 +276,11 @@ function resetChatUI(){
 async function newConversation(title='New conversation'){
   const { data, error } = await sb
     .from('chat_conversations')
-    .insert({ title, user_id: USER_ID })
+    // startujemy z NULL, tytuł nadamy po 1. wiadomości usera
+    .insert({ title: null, user_id: USER_ID })
     .select('id')
     .single();
+
   if (error) { console.warn('create conv error:', error); return null; }
   const convId = data.id;
   setCurrentId(convId);
@@ -306,7 +311,7 @@ async function renderServerHistory(selectedId){
 
     const span = document.createElement('span');
     span.className='title';
-    span.textContent = c.title || 'Conversation';
+    span.textContent = (c.title && c.title.trim()) ? c.title : 'New conversation';
 
     const del = document.createElement('button');
     del.className='del'; del.title='Delete'; del.textContent='×';
