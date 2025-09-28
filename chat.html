@@ -387,14 +387,39 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </script>
 
 <script>
-    // Prosty handler UI (na razie bez połączenia do backendu)
+       // Prosty handler UI
     const msgs = document.getElementById('chatMessages');
     const input = document.getElementById('chatInput');
     const send = document.getElementById('sendBtn');
 
-function updateSendDisabled(){ send.disabled = !input.value.trim(); }
-input.addEventListener('input', updateSendDisabled);
-document.addEventListener('DOMContentLoaded', updateSendDisabled);
+    let isStreaming = false;
+    let abortController = null;
+
+    function setBusyUI(){
+      isStreaming = true;
+      // w trakcie generowania przycisk pełni rolę STOP
+      send.disabled = false;
+      send.textContent = 'Stop';
+      send.setAttribute('aria-label','Stop generating');
+      send.dataset.mode = 'stop';
+      const st = document.getElementById('backendStatus');
+      if (st) st.textContent = 'Generating…';
+    }
+    function setIdleUI(){
+      isStreaming = false;
+      send.dataset.mode = 'send';
+      send.textContent = 'Send';
+      const st = document.getElementById('backendStatus');
+      if (st) st.textContent = '✅ Connected';
+      updateSendDisabled();
+    }
+
+    function updateSendDisabled(){
+      // gdy trwa generowanie – przycisk jest aktywny jako STOP
+      send.disabled = isStreaming ? false : !input.value.trim();
+    }
+    input.addEventListener('input', updateSendDisabled);
+    document.addEventListener('DOMContentLoaded', updateSendDisabled);
 
     function addMsg(text, who, store = true){
   const role = (who === 'user') ? 'user' : 'assistant';
@@ -447,71 +472,89 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
   }
 }
 
-    input.addEventListener('keydown', (e)=>{
+        input.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' && !e.shiftKey){
-        e.preventDefault(); 
+        e.preventDefault();
+        if (isStreaming) return; // blokada wysyłki podczas generowania
         send.click();
       }
     });
 
-    send.onclick = () => {
-  const q = input.value.trim();
-  if (!q) return;
-  addMsg(q, "user");
-  input.value = "";
+        send.onclick = async () => {
+      // tryb STOP: przerwij generowanie
+      if (isStreaming && abortController){
+        try { abortController.abort(); } catch {}
+        return;
+      }
 
-  (async () => {
-    try {
+      const q = input.value.trim();
+      if (!q) return;
+      addMsg(q, "user");
+      input.value = "";
+      updateSendDisabled();
+
       const st = document.getElementById("backendStatus");
       if (st) st.textContent = "Backend: connecting…";
+      setBusyUI();
 
-      const resp = await fetch("https://ai.beawarely.com/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "llama2:13b",
-          messages: [
-    { role: "system", content: "Respond in the same language the user is using. If the user writes in Polish, respond in Polish if possible. If not sure, fall back to English." },
-    { role: "user", content: q }
-  ]
-})
-      });
+      try {
+        abortController = new AbortController();
 
-      if (!resp.ok || !resp.body) {
-        throw new Error(`HTTP ${resp.status}`);
-      }
+        const resp = await fetch("https://ai.beawarely.com/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: abortController.signal,
+          body: JSON.stringify({
+            model: "llama2:13b",
+            messages: [
+              { role: "system", content: "Respond in the same language the user is using. If the user writes in Polish, respond in Polish if possible. If not sure, fall back to English." },
+              { role: "user", content: q }
+            ]
+          })
+        });
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let fullText = "";
+        if (!resp.ok || !resp.body) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split("\n")) {
-          if (!line.trim()) continue;
-          try {
-            const obj = JSON.parse(line);
-            if (obj.message?.content) {
-              fullText += obj.message.content;
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          for (const line of chunk.split("\n")) {
+            if (!line.trim()) continue;
+            try {
+              const obj = JSON.parse(line);
+              if (obj.message?.content) {
+                fullText += obj.message.content;
+              }
+            } catch (e) {
+              console.warn("Parse error:", e, line);
             }
-          } catch (e) {
-            console.warn("Parse error:", e, line);
           }
         }
-      }
 
-      addMsg(fullText || "[no response]", "ai");
-      if (st) st.textContent = "✅ Connected";
-    } catch (err) {
-      console.error("Chat error:", err);
-      addMsg("⚠️ Backend error, try again later.", "ai");
-      const st = document.getElementById("backendStatus");
-      if (st) st.textContent = "Backend: error";
-    }
-  })();
-};
+        addMsg(fullText || "[no response]", "ai");
+      } catch (err) {
+        if (err?.name === 'AbortError'){
+          addMsg("[stopped]", "ai");
+          const st2 = document.getElementById("backendStatus");
+          if (st2) st2.textContent = "Generation stopped";
+        } else {
+          console.error("Chat error:", err);
+          addMsg("⚠️ Backend error, try again later.", "ai");
+          const st2 = document.getElementById("backendStatus");
+          if (st2) st2.textContent = "Backend: error";
+        }
+      } finally {
+        abortController = null;
+        setIdleUI();
+      }
+    };
 
     document.addEventListener('DOMContentLoaded', ()=>{ 
       if(msgs) msgs.scrollTop = msgs.scrollHeight; 
@@ -542,24 +585,6 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
     input.addEventListener('input', autoGrow);
     // pierwsze wyliczenie
     autoGrow();
-
-    // zabezpieczenie przed wielokrotnym klikaniem
-    let sending = false;
-    if (send){
-      const origHandler = send.onclick;
-      send.onclick = async () => {
-        if (sending) return;
-        sending = true;
-        try {
-          await origHandler?.();
-        } finally {
-  sending = false;
-  scrollToBottom();
-  autoGrow();
-  input.focus(); // ⬅️ utrzymaj fokus po wysłaniu
-}
-      };
-    }
 
     // po każdych 300ms – jeśli coś doszło asynchronicznie, dociągnij dół
     // (lekki „watcher”; możesz usunąć, jeśli zbędny)
