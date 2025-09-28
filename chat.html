@@ -190,10 +190,15 @@ textarea:focus-visible {
 
     // === Reakcja na wylogowanie z innej karty ===
     window.supabaseClient.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
-        location.replace('index.html');
-      }
-    });
+  if (event === 'SIGNED_OUT') {
+    try {
+      localStorage.removeItem('ba_current_conv');
+      localStorage.removeItem('ba_chat_history'); // legacy local cache
+      localStorage.removeItem('ba_last_user');
+    } catch {}
+    location.replace('index.html');
+  }
+});
 
     // === Log out (spójny z index.html) ===
     async function logoutUser(){
@@ -220,46 +225,79 @@ textarea:focus-visible {
 </script>
 
 <script>
-// ==== Conversation history (localStorage, per-user) ==== //
-const STORAGE_KEY = 'ba_chat_history';
+// ==== Conversation history in Supabase (per-user) ==== //
+const sb = window.supabaseClient;
 const CURRENT_KEY = 'ba_current_conv';
+let USER_ID = null;
 
-function userScopedKey(base){
-  // jeśli chcesz kiedyś wersję per-user z Supabase: dopisz user.id do klucza
-  return base;
-}
+function getCurrentId(){ return localStorage.getItem(CURRENT_KEY); }
+function setCurrentId(id){ localStorage.setItem(CURRENT_KEY, id); }
 
-function loadHistory(){
-  try{ return JSON.parse(localStorage.getItem(userScopedKey(STORAGE_KEY))) || []; }
-  catch{ return []; }
-}
-function saveHistory(list){
-  localStorage.setItem(userScopedKey(STORAGE_KEY), JSON.stringify(list));
-}
-function getCurrentId(){ return localStorage.getItem(userScopedKey(CURRENT_KEY)); }
-function setCurrentId(id){ localStorage.setItem(userScopedKey(CURRENT_KEY), id); }
+async function ensureSession(){
+  const { data: { session } } = await sb.auth.getSession();
+  USER_ID = session?.user?.id || null;
 
-function createConversation(title){
-  const id = 'c_' + crypto.randomUUID();
-  const conv = { id, title: (title||'New conversation'), created: Date.now(), messages: [] };
-  const list = loadHistory(); list.unshift(conv); saveHistory(list); setCurrentId(id); return conv;
-}
-function findConv(id){
-  return loadHistory().find(c=>c.id===id) || null;
-}
-function updateConv(conv){
-  const list = loadHistory();
-  const idx = list.findIndex(c=>c.id===conv.id);
-  if(idx>=0){ list[idx]=conv; saveHistory(list); }
+  // nowy czat po zmianie użytkownika
+  try {
+    const last = localStorage.getItem('ba_last_user');
+    if (USER_ID && last && last !== USER_ID){
+      localStorage.removeItem('ba_current_conv');
+    }
+    if (USER_ID) localStorage.setItem('ba_last_user', USER_ID);
+  } catch {}
 }
 
-function renderHistory(){
+async function ensureCurrentConversationValid(){
+  const id = getCurrentId();
+  if (!id || !USER_ID) return;
+  const { data, error } = await sb
+    .from('chat_conversations')
+    .select('id')
+    .eq('id', id)
+    .eq('user_id', USER_ID)
+    .maybeSingle();
+  if (error || !data){
+    localStorage.removeItem('ba_current_conv');
+  }
+}
+
+function resetChatUI(){
+  const msgsBox = document.getElementById('chatMessages');
+  if (msgsBox){
+    msgsBox.innerHTML = '<div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>';
+  }
+  document.getElementById('chatInput')?.focus();
+  updateSendDisabled?.();
+}
+
+async function newConversation(title='New conversation'){
+  const { data, error } = await sb
+    .from('chat_conversations')
+    .insert({ title, user_id: USER_ID })
+    .select('id')
+    .single();
+  if (error) { console.warn('create conv error:', error); return null; }
+  const convId = data.id;
+  setCurrentId(convId);
+  await renderServerHistory(convId);
+  resetChatUI();
+  return convId;
+}
+
+async function renderServerHistory(selectedId){
   const ul = document.getElementById('convList');
-  if(!ul) return;
-  const list = loadHistory();
-  const current = getCurrentId();
+  if(!ul || !USER_ID) return;
+  const { data, error } = await sb
+    .from('chat_conversations')
+    .select('id,title,updated_at')
+    .eq('user_id', USER_ID)
+    .order('updated_at', { ascending: false })
+    .limit(100);
+  if (error) { console.warn('list conv error:', error); return; }
+
+  const current = selectedId || getCurrentId();
   ul.innerHTML = '';
-  list.forEach(c=>{
+  (data||[]).forEach(c=>{
     const li = document.createElement('li');
     li.className='conv-item';
     li.setAttribute('role','option');
@@ -268,80 +306,75 @@ function renderHistory(){
 
     const span = document.createElement('span');
     span.className='title';
-    span.textContent = c.title;
+    span.textContent = c.title || 'Conversation';
 
     const del = document.createElement('button');
-    del.className='del'; del.title='Delete';
-    del.textContent='×';
+    del.className='del'; del.title='Delete'; del.textContent='×';
 
     li.appendChild(span); li.appendChild(del);
     ul.appendChild(li);
   });
 }
 
-function selectConversation(id){
-  const conv = findConv(id);
-  if(!conv) return;
+async function selectConversation(id){
+  if(!id) return;
   setCurrentId(id);
-  renderHistory();
-  // załaduj wiadomości do czatu
+  await renderServerHistory(id);
+
+  const { data, error } = await sb
+    .from('chat_messages')
+    .select('role,content,created_at')
+    .eq('conversation_id', id)
+    .order('created_at', { ascending: true });
+  if (error) { console.warn('load msgs error:', error); return; }
+
   const msgsBox = document.getElementById('chatMessages');
   msgsBox.innerHTML = '';
-  conv.messages.forEach(m=>{
+  (data||[]).forEach(m=>{
     addMsg(m.content, m.role==='user' ? 'user' : 'ai', /*store*/false);
   });
-   // fokus w input + odświeżenie stanu przycisku
-  const inputEl = document.getElementById('chatInput');
-  inputEl?.focus();
-  updateSendDisabled();
-}
 
-function ensureConversation(firstMsg){
-  let id = getCurrentId();
-  let conv = id ? findConv(id) : null;
-  if(!conv){
-    conv = createConversation(firstMsg?.slice(0,40) || 'New conversation');
-    renderHistory();
-  }
-  return conv;
+  document.getElementById('chatInput')?.focus();
+  updateSendDisabled?.();
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
   const newBtn = document.getElementById('newConvBtn');
   const listEl = document.getElementById('convList');
 
- newBtn?.addEventListener('click', ()=>{
-  createConversation('New conversation');
-  renderHistory();
-  // wyczyść okno
-  const msgsBox = document.getElementById('chatMessages');
-  msgsBox.innerHTML = '<div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>';
-  // dopieszczka: od razu fokus i aktualizacja przycisku
-  document.getElementById('chatInput')?.focus();
-  updateSendDisabled();
-});
+  newBtn?.addEventListener('click', async ()=>{
+    await newConversation('New conversation');
+  });
 
-  listEl?.addEventListener('click', (e)=>{
+  listEl?.addEventListener('click', async (e)=>{
     const target = e.target;
     const item = target.closest('.conv-item');
     if(!item) return;
     const id = item.dataset.id;
 
-    if(target.classList.contains('del')){
-      const list = loadHistory().filter(c=>c.id!==id);
-      saveHistory(list);
-      if(getCurrentId()===id){ localStorage.removeItem(userScopedKey(CURRENT_KEY)); }
-      renderHistory();
+    if (target.classList.contains('del')){
+      const { error } = await sb
+        .from('chat_conversations')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', USER_ID);
+      if (error) { console.warn('delete conv error:', error); return; }
+      if (getCurrentId()===id){ localStorage.removeItem('ba_current_conv'); }
+      await renderServerHistory();
+      resetChatUI();
       return;
     }
-    selectConversation(id);
+    await selectConversation(id);
   });
 
-  // pierwsze renderowanie
-  renderHistory();
-  // jeśli coś jest wybrane – załaduj
-  const cur = getCurrentId();
-  if(cur){ selectConversation(cur); }
+  (async ()=>{
+    await ensureSession();
+    await ensureCurrentConversationValid();
+    await renderServerHistory();
+    const cur = getCurrentId();
+    if (cur){ await selectConversation(cur); }
+    else { await newConversation('New conversation'); }
+  })();
 });
 </script>
 
@@ -356,22 +389,53 @@ input.addEventListener('input', updateSendDisabled);
 document.addEventListener('DOMContentLoaded', updateSendDisabled);
 
     function addMsg(text, who, store = true){
-  const role = (who === 'user') ? 'user' : 'ai';
+  const role = (who === 'user') ? 'user' : 'assistant';
   const el = document.createElement('div');
   el.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
   el.textContent = text;
   msgs.appendChild(el);
   msgs.scrollTop = msgs.scrollHeight;
 
-  if(store){
-    const conv = ensureConversation(role==='user' ? text : undefined);
-    conv.messages.push({ role, content: text, ts: Date.now() });
-    // jeśli to pierwsza wiadomość użytkownika – ustaw tytuł
-    if(conv.messages.length === 1 && role==='user'){
-      conv.title = text.slice(0, 40);
-    }
-    updateConv(conv);
-    renderHistory();
+  if (store){
+    (async ()=>{
+      // Upewnij się, że mamy aktywną rozmowę
+      let convId = getCurrentId();
+      if (!convId){
+        convId = await newConversation(role==='user' ? text.slice(0,40) : 'New conversation');
+      }
+      if (!convId) return;
+
+      // Insert wiadomości do Supabase
+      const { error: insErr } = await window.supabaseClient
+        .from('chat_messages')
+        .insert({
+          conversation_id: convId,
+          user_id: USER_ID,
+          role,
+          content: text
+        });
+      if (insErr){ console.warn('insert msg error:', insErr); }
+
+      // Ustaw tytuł przy pierwszej wiadomości usera (gdy title jest NULL)
+      if (role === 'user'){
+        await window.supabaseClient
+          .from('chat_conversations')
+          .update({ title: text.slice(0,40) })
+          .eq('id', convId)
+          .eq('user_id', USER_ID)
+          .is('title', null);
+      }
+
+      // Bump updated_at dla sortowania listy
+      await window.supabaseClient
+        .from('chat_conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', convId)
+        .eq('user_id', USER_ID);
+
+      // Odśwież sidebar (zachowaj zaznaczenie)
+      await renderServerHistory(convId);
+    })();
   }
 }
 
