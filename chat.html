@@ -348,8 +348,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const listEl = document.getElementById('convList');
 
   newBtn?.addEventListener('click', async ()=>{
-    await newConversation('New conversation');
-  });
+  // nie twórz rekordu dopóki user nie wyśle 1. wiadomości
+  try { sessionStorage.removeItem(CURRENT_KEY); } catch {}
+  resetChatUI();
+  await renderServerHistory();
+});
 
   listEl?.addEventListener('click', async (e)=>{
     const target = e.target;
@@ -373,13 +376,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   (async ()=>{
-    await ensureSession();
-    await ensureCurrentConversationValid();
-    await renderServerHistory();
-    const cur = getCurrentId();
-    if (cur){ await selectConversation(cur); }
-    else { await newConversation('New conversation'); }
-  })();
+  await ensureSession();
+  await ensureCurrentConversationValid();
+  await renderServerHistory();
+  const cur = getCurrentId();
+  if (cur){ await selectConversation(cur); }
+  else { resetChatUI(); } // nie zapisujemy pustych czatów
+})();
 });
 </script>
 
