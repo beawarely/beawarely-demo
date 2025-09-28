@@ -398,8 +398,11 @@ document.addEventListener('DOMContentLoaded', updateSendDisabled);
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "llama2:13b",
-          messages: [{ role: "user", content: q }]
-        })
+          messages: [
+    { role: "system", content: "Respond in the same language the user is using. If the user writes in Polish, respond in Polish if possible. If not sure, fall back to English." },
+    { role: "user", content: q }
+  ]
+})
       });
 
       if (!resp.ok || !resp.body) {
