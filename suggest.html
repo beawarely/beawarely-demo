@@ -109,20 +109,16 @@
   .seg button:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
 
     /* Inputs take full width including borders (no overflow) */
-      .input{
+        .input{
     width:100%;
     box-sizing:border-box;
     display:block;
-    padding:12px 14px 12px 38px; /* miejsce na ikonę */
+    padding:12px 14px;
     border-radius:12px;
     background:var(--surface);
     color:var(--text);
     border:1px solid var(--border);
     font-size:1rem;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23b9c2e6' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.242.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E");
-    background-repeat:no-repeat;
-    background-position:12px center;
-    background-size:16px;
   }
 
   .input::placeholder{color:color-mix(in oklab, var(--muted) 70%, transparent)}
@@ -131,6 +127,14 @@
     min-height:120px;
   }
 
+     #search{
+    padding-left:38px; /* miejsce na ikonę */
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23b9c2e6' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85zm-5.242.656a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:12px center;
+    background-size:16px;
+  }
+   
   /* Cards & form */
   .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;color:var(--text);box-shadow:var(--shadow)}
   #ideaForm::before{
