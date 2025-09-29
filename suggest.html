@@ -212,9 +212,9 @@
       <h1>Suggest a Tool</h1>
       <p class="sub">Propose ideas, vote, and get updates.</p>
       <div class="hero-controls">
-        <button id="themeToggle" class="btn ghost" type="button" aria-pressed="false" aria-label="Toggle theme">🌙</button>
-        <div class="pill" id="modePill" aria-live="polite">Loading…</div>
-      </div>
+  <button id="themeToggle" class="btn ghost" type="button" aria-pressed="false" aria-label="Toggle theme">🌙</button>
+</div>
+
     </div>
 
     <div class="stats">
@@ -304,12 +304,9 @@
       statIdeas: document.getElementById('statIdeas'),
       statVotes: document.getElementById('statVotes'),
       statFollowers: document.getElementById('statFollowers'),
-      modePill: document.getElementById('modePill'),
       modeNote: document.getElementById('modeNote'),
       themeToggle: document.getElementById('themeToggle')
     };
-
-    function setMode(text){ els.modePill.textContent = text; }
 
     /* ===== LocalStorage helpers for demo vote/follow persistence ===== */
     const LS_VOTES = 'ba_votes';
@@ -514,7 +511,6 @@
 
       if (!supabaseClient) {
         state.demo = true;
-        setMode('Demo mode');
         els.modeNote.textContent = 'Note: Backend not connected yet. This is an interactive demo preview.';
         show(els.guest); hide(els.user);
         applyFilters();
@@ -525,7 +521,6 @@
         const { data:{ session } } = await supabaseClient.auth.getSession();
         state.loggedIn = !!session;
         state.demo = false;
-        setMode(state.loggedIn ? 'Connected' : 'Guest');
         els.modeNote.textContent = state.loggedIn
           ? 'You can propose ideas and vote.'
           : 'Sign in to propose ideas and vote.';
@@ -537,7 +532,6 @@
 
       } catch (e) {
         state.demo = true;
-        setMode('Demo mode');
         els.modeNote.textContent = 'Could not connect to backend. Showing demo.';
         show(els.guest); hide(els.user);
         applyFilters();
