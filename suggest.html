@@ -280,15 +280,6 @@
     if (!supabaseClient && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
       try { supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch(e) {}
     }
-    const demoIdeas = [
-      { id:'i1', title:'Inventions', details:'Share and discover innovative ideas from users.', tags:['creativity','innovation'], votes:12, followers:6, created_at: Date.now()-86400000*2 },
-      { id:'i2', title:'Foresight', details:'Explore future scenarios and predictions.', tags:['future','foresight'], votes:9, followers:4, created_at: Date.now()-86400000*3 },
-      { id:'i3', title:'AI Inventor', details:'Collaborate with AI to generate new inventions.', tags:['ai','invention'], votes:15, followers:7, created_at: Date.now()-86400000*1 },
-      { id:'i4', title:'Mitobuster', details:'Debunk common myths with evidence-based insights.', tags:['myths','facts'], votes:8, followers:3, created_at: Date.now()-86400000*4 },
-      { id:'i5', title:'Health Claims', details:'Verify supplements or therapy claims with sources.', tags:['health','claims'], votes:42, followers:19, created_at: Date.now()-86400000*5 },
-      { id:'i6', title:'Consent Auditor', details:'Explain terms & privacy policies in plain English.', tags:['privacy','law'], votes:31, followers:15, created_at: Date.now()-86400000*6 },
-      { id:'i7', title:'CultureAtlas', details:'Explore global cultures, traditions, and knowledge.', tags:['culture','atlas'], votes:11, followers:5, created_at: Date.now()-86400000*2 }
-    ];
 
     const els = {
       guest: document.getElementById('guestCard'),
@@ -439,7 +430,7 @@
 
     // ===== Sorting & Search (front-only) =====
     let currentSort = 'top';
-    let baseIdeas = [...demoIdeas];
+    let baseIdeas = [];
 
     els.sortTabs.forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -526,9 +517,21 @@
           : 'Sign in to propose ideas and vote.';
         if(state.loggedIn){ hide(els.guest); show(els.user); } else { show(els.guest); hide(els.user); }
 
-        // TODO: Replace with real fetch from Supabase when tables are ready
-        baseIdeas = [...demoIdeas];
-        applyFilters();
+        // Pobierz zaakceptowane pomysły z Supabase
+const { data, error } = await supabaseClient
+  .from('tool_ideas')
+  .select('id, title, details, tags, author, created_at')
+  .eq('status','approved')
+  .order('created_at',{ ascending:false });
+
+if (error) {
+  console.error('Error loading ideas:', error);
+  els.modeNote.textContent = 'Could not load ideas from backend.';
+  baseIdeas = [];
+} else {
+  baseIdeas = data || [];
+}
+applyFilters();
 
       } catch (e) {
         state.demo = true;
@@ -548,12 +551,14 @@
         if(!session){ els.msg.textContent='Please sign in first.'; els.submit.disabled=false; return; }
         // Placeholder insert – will work once table exists + RLS set
         const payload = {
-          title: document.getElementById('title').value.trim(),
-          details: document.getElementById('details').value.trim(),
-          tags: (document.getElementById('tags').value||'').split(',').map(t=>t.trim()).filter(Boolean),
-          author: session.user.id, status:'proposed'
-        };
-        const { error } = await supabaseClient.from('tool_ideas').insert(payload);
+  title: document.getElementById('title').value.trim(),
+  details: document.getElementById('details').value.trim(),
+  tags: (document.getElementById('tags').value||'').split(',').map(t=>t.trim()).filter(Boolean),
+  author: session.user.id,
+  status: 'pending'
+};
+const { error } = await supabaseClient.from('tool_ideas').insert(payload);
+
         if (error) els.msg.textContent = 'Cannot save yet (backend not set up).';
         else { els.msg.textContent='Idea submitted!'; els.form.reset(); }
       } catch(err){
