@@ -19,8 +19,7 @@
     --accent-2:#9ad0ff;
     --ring:rgba(90,168,255,.45);
     --border:rgba(234,240,255,.14);
-    --bg-gradient: linear-gradient(160deg, #ffffff 0%, #ffffff 50%, #dbefff 50%, #dbefff 100%);
-
+    --bg-gradient: linear-gradient(180deg, #0a1526 0%, #133e86 100%);
     --shadow:0 4px 12px rgba(0,0,0,.4);
   }
   /* light overrides */
@@ -34,7 +33,7 @@
     --accent-2:#3fa0ff;
     --ring:rgba(11,103,255,.35);
     --border:rgba(12,18,34,.12);
-    --bg-gradient: linear-gradient(180deg, #ffffff 0%, #d6ebff 100%);
+    --bg-gradient: linear-gradient(180deg, #ffffff 0%, #d9eeff 100%);
     
     --shadow:0 4px 12px rgba(0,0,0,.08);
   }
@@ -54,12 +53,13 @@
   .back{display:inline-block;margin-bottom:16px;font-size:.9rem;color:var(--muted)}
 
   /* Hero header */
-  .hero{
+    .hero{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:12px;margin-bottom:28px;text-align:center;padding:20px 0;
-    background:linear-gradient(135deg, rgba(90,168,255,.15), rgba(154,208,255,.05));
+    background:transparent; /* nie wybiela tła – widać wyraźnie dwukolor */
     border-radius:18px;
   }
+
   .hero h1{
     margin:0;font-size:3rem;letter-spacing:.4px;display:flex;align-items:center;gap:10px;
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
