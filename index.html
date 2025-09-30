@@ -1172,12 +1172,6 @@ if (userId) {
 const lockedForRole = modOnly && !isMod;
 const locked = lockedForAuth || lockedForRole;
 
-// Moderator blackhole button
-const modBtn = document.getElementById('moderatorRedirect');
-if (modBtn) {
-  modBtn.style.display = isMod ? 'block' : 'none';
-}
-
       card.classList.toggle('locked', locked);
 
       const statusEl = card.querySelector('.status');
@@ -1381,6 +1375,26 @@ document.addEventListener('DOMContentLoaded', () => {
     modeBtn.addEventListener('click', toggleLightDarkMode);
   }
 });
+</script>
+<script>
+async function checkModeratorButton() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  const modBtn = document.getElementById('moderatorRedirect');
+  if (!modBtn) return;
+  if (!user) {
+    modBtn.style.display = 'none';
+    return;
+  }
+  const { data } = await supabaseClient
+    .from('moderators')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  modBtn.style.display = data ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', checkModeratorButton);
+supabaseClient.auth.onAuthStateChange(checkModeratorButton);
 </script>
   
 </body>
