@@ -383,8 +383,6 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     },
   });
     window.supabaseClient = supabaseClient;
-  // ✅ moderator(s) allowed to open "Soon" cards
-  window.BA_MOD_EMAILS = ['cichy260591@gmail.com']; // dodaj tu swoje konto/y moderatora
 
   // 2) Logowanie Google + bezpieczne przekierowanie (replace)
   async function signInWithGoogle() {
@@ -713,22 +711,6 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   100% { transform: rotate(360deg); }
 }
 </style>
-
-<script>
-async function toggleModeratorButton(){
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return;
-  const { data } = await supabaseClient
-    .from('moderators')
-    .select('user_id')
-    .eq('user_id', user.id)
-    .single();
-  if(data){
-    document.getElementById('moderatorRedirect').style.display = 'block';
-  }
-}
-document.addEventListener('DOMContentLoaded', toggleModeratorButton);
-</script>
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
   <div class="social-icons" style="margin-bottom: 10px;">
@@ -1170,8 +1152,16 @@ function closeSupportModal() {
     async function refreshLocks(){
     const { data: { session } } = await sb.auth.getSession();
     const authed = !!session;
-    const userEmail = session?.user?.email || '';
-    const isMod = Array.isArray(window.BA_MOD_EMAILS) && window.BA_MOD_EMAILS.includes(userEmail);
+    const userId = session?.user?.id || null;
+let isMod = false;
+if (userId) {
+  const { data: modData } = await sb
+    .from('moderators')
+    .select('user_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  isMod = !!modData;
+}
 
     grid.querySelectorAll('.tool-card').forEach(card=>{
       const needsAuth = card.dataset.requiresAuth === 'true';
