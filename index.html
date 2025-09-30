@@ -671,12 +671,63 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 </section>
   
 <!-- 🔽 Przycisk do profilu (widoczny tylko po zalogowaniu) -->
-<div id="profileRedirect" class="scroll-reveal" style="display: none; text-align: center; margin-top: 40px;">
-  <a href="profile.html" style="background-color: var(--blue1); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-    Go to My Profile
-  </a>
+<div id="moderatorRedirect" class="scroll-reveal" style="display:none; text-align:center; margin-top:40px;">
+  <a href="moderator.html" class="blackhole-btn">🌀 Moderator Panel</a>
 </div>
 
+<style>
+.blackhole-btn {
+  position: relative;
+  display: inline-block;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #000 60%, #111 100%);
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  line-height: 120px;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.9);
+  transition: transform 0.3s ease;
+}
+
+.blackhole-btn::before {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, #3af, #c3f, #3af);
+  animation: swirl 6s linear infinite;
+  mix-blend-mode: screen;
+}
+
+.blackhole-btn:hover {
+  transform: scale(1.1);
+}
+
+@keyframes swirl {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+async function toggleModeratorButton(){
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+  const { data } = await supabaseClient
+    .from('moderators')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .single();
+  if(data){
+    document.getElementById('moderatorRedirect').style.display = 'block';
+  }
+}
+document.addEventListener('DOMContentLoaded', toggleModeratorButton);
+</script>
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
   <div class="social-icons" style="margin-bottom: 10px;">
