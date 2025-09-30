@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moderator Panel — BeAwarely</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0d0d2b;
+      color: #fff;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: rgba(255,255,255,0.1);
+    }
+    tr:nth-child(even) {
+      background: rgba(255,255,255,0.05);
+    }
+    button {
+      margin-right: 8px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .approve {
+      background: #28a745;
+      color: white;
+    }
+    .reject {
+      background: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Moderator Panel</h1>
+  <table id="moderationTable">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Details</th>
+        <th>Tags</th>
+        <th>Author</th>
+        <th>Created At</th>
+        <th>Source</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Rows will be injected here -->
+    </tbody>
+  </table>
+
+  <script>
+    const supabase = supabase.createClient(
+      "https://YOUR_PROJECT_ID.supabase.co",
+      "YOUR_ANON_KEY"
+    );
+
+    async function checkModerator() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("moderators")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error || !data) {
+        window.location.href = "index.html";
+      }
+    }
+
+    async function loadPendingIdeas() {
+      const { data, error } = await supabase
+        .from("tool_ideas")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const tbody = document.querySelector("#moderationTable tbody");
+      tbody.innerHTML = "";
+
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${row.title}</td>
+          <td>${row.details || ""}</td>
+          <td>${row.tags?.join(", ") || ""}</td>
+          <td>${row.author}</td>
+          <td>${new Date(row.created_at).toLocaleString()}</td>
+          <td>Suggest a Tool</td>
+          <td>
+            <button class="approve" onclick="updateStatus('${row.id}', 'approved')">Approve</button>
+            <button class="reject" onclick="updateStatus('${row.id}', 'rejected')">Reject</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function updateStatus(id, status) {
+      const { error } = await supabase
+        .from("tool_ideas")
+        .update({ status })
+        .eq("id", id);
+
+      if (error) {
+        console.error(error);
+        alert("Error updating status");
+      } else {
+        loadPendingIdeas(); // Refresh table
+      }
+    }
+
+    // Init
+    checkModerator().then(loadPendingIdeas);
+  </script>
+</body>
+</html>
