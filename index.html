@@ -1169,8 +1169,14 @@ if (userId) {
 
       // blokada: wymaga logowania lub mod-only dla nie-modów
       const lockedForAuth = needsAuth && !authed;
-      const lockedForRole = modOnly && !isMod;
-      const locked = lockedForAuth || lockedForRole;
+const lockedForRole = modOnly && !isMod;
+const locked = lockedForAuth || lockedForRole;
+
+// Moderator blackhole button
+const modBtn = document.getElementById('moderatorRedirect');
+if (modBtn) {
+  modBtn.style.display = isMod ? 'block' : 'none';
+}
 
       card.classList.toggle('locked', locked);
 
