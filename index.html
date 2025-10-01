@@ -388,7 +388,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   async function signInWithGoogle() {
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://beawarely.com/index.html" },
+      options: { redirectTo: "https://beawarely.github.io/beawarely-demo/index.html" },
     });
     if (error) {
       console.error("OAuth error:", error.message);
@@ -487,7 +487,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Card: WorkVerify -->
-    <article class="tool-card" data-href="workverify.html" data-requires-auth="true">
+    <article class="tool-card" data-href="workverify.html" data-requires-auth="false">
       <div class="tool-top">
         <span class="tool-icon">⚖️</span>
         <span class="tool-badge">Open</span>
@@ -500,7 +500,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Karta 3: Explore the Tree -->
-<article class="tool-card" data-href="tree.html" data-requires-auth="true">
+<article class="tool-card" data-href="tree.html" data-requires-auth="false">
   <div class="tool-top">
     <span class="tool-icon">🌳</span>
     <span class="tool-badge">Open</span>
@@ -526,7 +526,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Suggest a Tool (public ideas & votes) -->
-<article class="tool-card" data-href="suggest.html" data-requires-auth="true">
+<article class="tool-card" data-href="suggest.html" data-requires-auth="false">
   <div class="tool-top">
     <span class="tool-icon">💡</span>
     <span class="tool-badge">Public</span>
@@ -902,6 +902,22 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 }
   
 </style>
+
+  <!-- 🔽 Google Translate dropdown in bottom-right corner -->
+  <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+
+  <!-- 🔽 Google Translate script -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {pageLanguage: 'en'},
+        'google_translate_element'
+      );
+    }
+  </script>
+  <script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+  </script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const elements = document.querySelectorAll('.scroll-reveal');
@@ -1025,11 +1041,14 @@ function closeSupportModal() {
 
 <script>
   async function logoutUser() {
-  try { await supabaseClient.auth.signOut(); }
-  catch (e) { console.error("❌ signOut failed:", e?.message || e); }
-  // UI odświeży się w onAuthStateChange → SIGNED_OUT
-}
-
+    try { await supabaseClient.auth.signOut(); }
+    catch (e) { console.error("❌ signOut failed:", e?.message || e); }
+    localStorage.removeItem('ba_redirect');
+    document.getElementById('loginModal')?.classList.remove('open');
+    document.getElementById('supportModal')?.classList.remove('open');
+    document.body.style.overflow = '';
+    location.replace('index.html');
+  }
 </script>
 
 
@@ -1266,30 +1285,11 @@ if (!support) {
 
 async function ensureProfile(user) {
   if (!user) return;
-
-  // 🔽 DEBUG – sprawdźmy co naprawdę zwraca Google/Supabase
-  console.log("USER OBJECT:", user);
-  console.log("USER METADATA:", user.user_metadata);
-
   const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                    || (user.email ? user.email.split('@')[0] : 'User');
-
-  // upewnij się że nie nadpisujemy avatara jeśli już istnieje
-const { data: existing } = await supabaseClient
-  .from('profiles')
-  .select('avatar_url')
-  .eq('id', user.id)
-  .maybeSingle();
-
-const newProfile = { id: user.id, display_name: baseName };
-if (!existing?.avatar_url && user.user_metadata?.avatar_url) {
-  newProfile.avatar_url = user.user_metadata.avatar_url;
-}
-
-const { error } = await supabaseClient
-  .from('profiles')
-  .upsert(newProfile, { onConflict: 'id' });
-
+  const { error } = await supabaseClient
+    .from('profiles')
+    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
   if (error) console.error('ensureProfile error:', error);
 }
 
@@ -1324,17 +1324,12 @@ function applyProfileToUI(profile) {
     ? `${profile.rank} • ${profile.points ?? 0} pts`
     : `${profile.points ?? 0} pts`;
 
-    let avatarSrc = profile.avatar_url 
-             || profile.user_metadata?.avatar_url 
-             || null;
-
-if (avatarSrc) {
-  const v = Date.now(); // cache-buster
-  avatarEl.src = `${avatarSrc}${avatarSrc.includes('?') ? '&' : '?'}v=${v}`;
-} else {
-  avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.display_name || 'User')}`;
-}
-
+  if (profile.avatar_url) {
+    const v = Date.now(); // lekki cache-buster
+    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
+  } else {
+    avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
+  }
   chip.style.display = 'flex';
 }
 
