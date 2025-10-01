@@ -1025,14 +1025,14 @@ function closeSupportModal() {
 
 <script>
   async function logoutUser() {
-    try { await supabaseClient.auth.signOut(); }
-    catch (e) { console.error("❌ signOut failed:", e?.message || e); }
-    localStorage.removeItem('ba_redirect');
-    document.getElementById('loginModal')?.classList.remove('open');
-    document.getElementById('supportModal')?.classList.remove('open');
-    document.body.style.overflow = '';
-    location.replace('index.html');
-  }
+  try { await supabaseClient.auth.signOut(); }
+  catch (e) { console.error("❌ signOut failed:", e?.message || e); }
+  localStorage.removeItem('ba_redirect');
+  document.getElementById('loginModal')?.classList.remove('open');
+  document.getElementById('supportModal')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 </script>
 
 
@@ -1308,12 +1308,13 @@ function applyProfileToUI(profile) {
     ? `${profile.rank} • ${profile.points ?? 0} pts`
     : `${profile.points ?? 0} pts`;
 
-  if (profile.avatar_url) {
+    if (profile.avatar_url) {
     const v = Date.now(); // lekki cache-buster
     avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
-    } else {
-    avatarEl.src = 'images/avatar.png';
+  } else {
+    avatarEl.src = 'images/avatar.png'; // lokalny fallback
   }
+
   chip.style.display = 'flex';
 }
 
