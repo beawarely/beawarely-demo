@@ -677,14 +677,14 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 .blackhole-btn {
   position: relative;
   display: inline-block;
-  width: 160px;
-  height: 160px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  background: radial-gradient(circle at center, #000 40%, #111 70%);
+  background: radial-gradient(circle at center, #000 70%, #111 100%);
   box-shadow: 
-    0 0 50px rgba(255, 100, 0, 0.6),
-    0 0 100px rgba(255, 60, 0, 0.4),
-    inset 0 0 80px rgba(0,0,0,0.95);
+    0 0 25px rgba(255, 140, 0, 0.4),
+    0 0 50px rgba(255, 80, 0, 0.2),
+    inset 0 0 40px rgba(0,0,0,0.9);
   overflow: hidden;
   transition: transform 0.3s ease;
 }
@@ -692,21 +692,21 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 .blackhole-btn::before {
   content: "";
   position: absolute;
-  top: -40%;
-  left: -40%;
-  width: 180%;
-  height: 180%;
+  top: -25%;
+  left: -25%;
+  width: 150%;
+  height: 150%;
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    rgba(255, 200, 50, 0.8),
-    rgba(255, 80, 0, 0.9),
-    rgba(200, 30, 0, 0.7),
-    rgba(255, 200, 50, 0.8)
+    rgba(255, 200, 50, 0.6),
+    rgba(255, 80, 0, 0.8),
+    rgba(200, 30, 0, 0.6),
+    rgba(255, 200, 50, 0.6)
   );
-  animation: swirl 12s linear infinite;
+  animation: swirl 10s linear infinite;
   mix-blend-mode: screen;
-  filter: blur(8px);
+  filter: blur(6px);
 }
 
 .blackhole-btn:hover {
