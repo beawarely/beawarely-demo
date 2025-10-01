@@ -891,10 +891,28 @@ function closeSupportModal() {
     if (yourProfileBtn) yourProfileBtn.style.display = logged ? 'inline-block' : 'none';
   }
   document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await supabaseClient.auth.getSession();
+  try {
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    console.log("🔎 Session check on load:", session, error);
+
     wireLoginUI(session);
+
+    // jeśli nie ma sesji → wyczyść UI
+    if (!session) {
+      document.getElementById('profileChip')?.style.setProperty("display","none");
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) {
+        loginBtn.textContent = 'Log In';
+        loginBtn.onclick = openLoginModal;
+      }
+    }
+
     await window.refreshLocks?.();
-  });
+  } catch (e) {
+    console.error("❌ Error during session check:", e);
+  }
+});
+
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     wireLoginUI(session);
     await window.refreshLocks?.();
@@ -902,12 +920,23 @@ function closeSupportModal() {
       const dest = localStorage.getItem('ba_redirect');
       if (dest) { localStorage.removeItem('ba_redirect'); location.replace(dest); }
     } else if (event === 'SIGNED_OUT') {
-      localStorage.removeItem('ba_redirect');
-      document.getElementById('loginModal')?.classList.remove('open');
-      document.getElementById('supportModal')?.classList.remove('open');
-      document.body.style.overflow = '';
-      location.replace('index.html');
-    }
+  localStorage.removeItem('ba_redirect');
+  document.getElementById('loginModal')?.classList.remove('open');
+  document.getElementById('supportModal')?.classList.remove('open');
+  document.body.style.overflow = '';
+
+  // reset UI po wylogowaniu
+  const chip = document.getElementById('profileChip');
+  if (chip) chip.style.display = 'none';
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    loginBtn.textContent = 'Log In';
+    loginBtn.onclick = openLoginModal;
+  }
+
+  location.replace('index.html');
+}
+
   });
 </script>
 
