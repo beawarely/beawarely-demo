@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -268,7 +267,7 @@ body:not(.light-mode) #rotating-bg img {
 @media (prefers-reduced-motion: reduce){
   #rotating-bg img{ animation: none; }
 }
-   
+    
 header h1,
 section h2,
 section p,
@@ -289,7 +288,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   pointer-events: none;
 }
 
-#topbar .topbar-left,
+#topbar .topbar-left, 
 #topbar .topbar-right{
   display: flex; gap: 12px; align-items: center;
   pointer-events: auto; /* ale same przyciski mają klikalność */
@@ -299,7 +298,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 .pill{
   background-color: rgba(255,255,255,0.10);
   color: #fff; font-weight: 600; text-decoration: none;
-  padding: 6px 14px; border-radius: 12px;
+  padding: 6px 14px; border-radius: 12px; 
   transition: background-color .25s, transform .2s;
   display: inline-flex; align-items: center; gap: 8px;
 }
@@ -309,7 +308,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 #modeIcon{
   position: static !important;
   top: auto !important; right: auto !important; left: auto !important;
-  font-size: 1.4rem; line-height: 1;
+  font-size: 1.4rem; line-height: 1; 
   background-color: rgba(255,255,255,0.10);
   border-radius: 50%; padding: 8px; width: 36px; height: 36px;
   display: inline-flex; align-items:center; justify-content:center;
@@ -319,7 +318,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
 /* Nadpisanie absolutów na login i profile (żeby nie „uciekały” z topbaru) */
 #loginBtn, #yourProfileBtn{
-  position: static !important;
+  position: static !important; 
   top: auto !important; right: auto !important; left: auto !important;
   font-size: 0.95rem;
   border-radius: 12px;
@@ -352,7 +351,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   background-color: rgba(255,255,255,0.20);
   transform: translateY(-1px);
 }
-   
+    
 /* Support & Login modal – unified open state */
 #loginModal.open { display: flex !important; }
 #supportModal.open { display: flex !important; }
@@ -365,7 +364,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   outline: 2px solid var(--blue2);
   outline-offset: 2px;
 }
-   
+    
 </style>
 
 
@@ -389,7 +388,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   async function signInWithGoogle() {
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://beawarely.com/index.html" },
+      options: { redirectTo: "https://beawarely.github.io/beawarely-demo/index.html" },
     });
     if (error) {
       console.error("OAuth error:", error.message);
@@ -451,8 +450,8 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   </div>
 
   <header style="position: relative;">
- 
-   
+  
+    
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
@@ -488,7 +487,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Card: WorkVerify -->
-    <article class="tool-card" data-href="workverify.html" data-requires-auth="true">
+    <article class="tool-card" data-href="workverify.html" data-requires-auth="false">
       <div class="tool-top">
         <span class="tool-icon">⚖️</span>
         <span class="tool-badge">Open</span>
@@ -501,7 +500,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Karta 3: Explore the Tree -->
-<article class="tool-card" data-href="tree.html" data-requires-auth="true">
+<article class="tool-card" data-href="tree.html" data-requires-auth="false">
   <div class="tool-top">
     <span class="tool-icon">🌳</span>
     <span class="tool-badge">Open</span>
@@ -527,7 +526,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Suggest a Tool (public ideas & votes) -->
-<article class="tool-card" data-href="suggest.html" data-requires-auth="true">
+<article class="tool-card" data-href="suggest.html" data-requires-auth="false">
   <div class="tool-top">
     <span class="tool-icon">💡</span>
     <span class="tool-badge">Public</span>
@@ -538,7 +537,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     <button class="open-btn" type="button" aria-label="Open Suggest a Tool">Open →</button>
   </div>
 </article>
-   
+    
     <!-- Public inventions gallery --> <!--
 <article class="tool-card" data-href="inventions.html" data-requires-auth="false" data-moderator-only="true">
   <div class="tool-top">
@@ -563,7 +562,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     <span class="status">Soon</span>
     <button class="open-btn" type="button">Open →</button>
   </div>
-</article>-->
+</article>--> 
 
    <!-- Karta: Foresight (czytelnia prognoz) --> <!--
 <article class="tool-card" data-href="foresight.html" data-requires-auth="false" data-moderator-only="true">
@@ -642,7 +641,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     <button class="open-btn" type="button">Open →</button>
   </div>
 </article>-->
-   
+    
   </div>
 </section>
 
@@ -668,7 +667,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     <li>Get early access to BeAwarely tools and prototypes</li>
   </ul>
 </section>
- 
+  
 <!-- 🔽 Moderator button (czarna dziura, tylko dla moderatorów) -->
 <div id="moderatorRedirect" class="scroll-reveal" style="display:none; text-align:center; margin-top:40px;">
   <a href="moderator.html" class="blackhole-btn"></a>
@@ -682,7 +681,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   height: 100px;
   border-radius: 50%;
   background: radial-gradient(circle at center, #000 70%, #111 100%);
-  box-shadow:
+  box-shadow: 
     0 0 25px rgba(255, 140, 0, 0.4),
     0 0 50px rgba(255, 80, 0, 0.2),
     inset 0 0 40px rgba(0,0,0,0.9);
@@ -718,7 +717,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
- 
+  
 </style>
 
   <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
@@ -785,7 +784,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   margin-top: clamp(90px, 10vh, 140px);
   margin-bottom: clamp(60px, 6vh, 100px);
 }
- 
+  
 #support-cta button{
   margin: 0 auto;
   position: static !important;  /* zbij ewentualne left:-... */
@@ -873,7 +872,7 @@ body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0
 body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
 
 /* Support button – look & feel jak Your Profile / Hello */
-#supportBtn:hover {
+#supportBtn:hover { 
   background-color: rgba(255,255,255,0.20);
   transform: translateY(-1px);
 }
@@ -889,20 +888,36 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 }
 
 /* Schowaj dawną, środkową sekcję z przyciskiem Support (nic nie usuwamy) */
-#support-cta {
-  display: none !important;
+#support-cta { 
+  display: none !important; 
 }
 
 @media (max-width: 500px){
-  #google_translate_element{
-    bottom: 12px;
+  #google_translate_element{ 
+    bottom: 12px; 
     right: 12px;
     transform: scale(.9);
     transform-origin: bottom right;
   }
 }
- 
+  
 </style>
+
+  <!-- 🔽 Google Translate dropdown in bottom-right corner -->
+  <div id="google_translate_element" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"></div>
+
+  <!-- 🔽 Google Translate script -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {pageLanguage: 'en'},
+        'google_translate_element'
+      );
+    }
+  </script>
+  <script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+  </script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const elements = document.querySelectorAll('.scroll-reveal');
@@ -956,7 +971,7 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
     else if (supportOpen) closeSupportModal();
   });
 </script>
- 
+  
 
   <script>
   function openSupportModal() {
@@ -1026,11 +1041,14 @@ function closeSupportModal() {
 
 <script>
   async function logoutUser() {
-  try { await supabaseClient.auth.signOut(); }
-  catch (e) { console.error("❌ signOut failed:", e?.message || e); }
-  // UI odświeży się w onAuthStateChange → SIGNED_OUT
-}
-
+    try { await supabaseClient.auth.signOut(); }
+    catch (e) { console.error("❌ signOut failed:", e?.message || e); }
+    localStorage.removeItem('ba_redirect');
+    document.getElementById('loginModal')?.classList.remove('open');
+    document.getElementById('supportModal')?.classList.remove('open');
+    document.body.style.overflow = '';
+    location.replace('index.html');
+  }
 </script>
 
 
@@ -1082,7 +1100,7 @@ function closeSupportModal() {
   background: rgba(0,0,0,.55); align-items:center; justify-content:center;">
   <div role="dialog" aria-modal="true" tabindex="-1" style="
       background: rgba(20,20,20,.98);
-      color:#fff; width:min(520px, 92vw); border-radius:16px;
+      color:#fff; width:min(520px, 92vw); border-radius:16px; 
       padding:26px; box-shadow: 0 20px 60px rgba(0,0,0,.5);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
       <h3 style="margin:0; font-size:1.2rem;">Support BeAwarely</h3>
@@ -1099,29 +1117,29 @@ function closeSupportModal() {
       gap:12px; justify-items:stretch;">
 
       <a href="https://github.com/beawarely" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px;
-                background:#ea4aaa; color:#fff; text-decoration:none;
+         style="display:flex; align-items:center; gap:10px; 
+                background:#ea4aaa; color:#fff; text-decoration:none; 
                 padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
         💖 <span>GitHub Sponsors</span>
       </a>
 
       <a href="https://ko-fi.com/beawarely" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px;
-                background:#29abe0; color:#fff; text-decoration:none;
+         style="display:flex; align-items:center; gap:10px; 
+                background:#29abe0; color:#fff; text-decoration:none; 
                 padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
         ☕ <span>Ko‑fi</span>
       </a>
 
       <a href="https://paypal.me/x" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px;
-                background:#0070ba; color:#fff; text-decoration:none;
+         style="display:flex; align-items:center; gap:10px; 
+                background:#0070ba; color:#fff; text-decoration:none; 
                 padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
         💳 <span>PayPal</span>
       </a>
 
-      <button onclick="copyCrypto()"
-              style="display:flex; align-items:center; gap:10px;
-                     background:#f7931a; color:#fff;
+      <button onclick="copyCrypto()" 
+              style="display:flex; align-items:center; gap:10px; 
+                     background:#f7931a; color:#fff; 
                      padding:14px; border:none; border-radius:12px; font-weight:700; justify-content:center; cursor:pointer;">
         ₿ <span>Donate Crypto</span>
       </button>
@@ -1267,30 +1285,11 @@ if (!support) {
 
 async function ensureProfile(user) {
   if (!user) return;
-
-  // 🔽 DEBUG – sprawdźmy co naprawdę zwraca Google/Supabase
-  console.log("USER OBJECT:", user);
-  console.log("USER METADATA:", user.user_metadata);
-
   const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                    || (user.email ? user.email.split('@')[0] : 'User');
-
-  // upewnij się że nie nadpisujemy avatara jeśli już istnieje
-const { data: existing } = await supabaseClient
-  .from('profiles')
-  .select('avatar_url')
-  .eq('id', user.id)
-  .maybeSingle();
-
-const newProfile = { id: user.id, display_name: baseName };
-if (!existing?.avatar_url && user.user_metadata?.avatar_url) {
-  newProfile.avatar_url = user.user_metadata.avatar_url;
-}
-
-const { error } = await supabaseClient
-  .from('profiles')
-  .upsert(newProfile, { onConflict: 'id' });
-
+  const { error } = await supabaseClient
+    .from('profiles')
+    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
   if (error) console.error('ensureProfile error:', error);
 }
 
@@ -1325,17 +1324,12 @@ function applyProfileToUI(profile) {
     ? `${profile.rank} • ${profile.points ?? 0} pts`
     : `${profile.points ?? 0} pts`;
 
-    let avatarSrc = profile.avatar_url
-             || profile.user_metadata?.avatar_url
-             || null;
-
-if (avatarSrc) {
-  const v = Date.now(); // cache-buster
-  avatarEl.src = `${avatarSrc}${avatarSrc.includes('?') ? '&' : '?'}v=${v}`;
-} else {
-  avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.display_name || 'User')}`;
-}
-
+  if (profile.avatar_url) {
+    const v = Date.now(); // lekki cache-buster
+    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
+  } else {
+    avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
+  }
   chip.style.display = 'flex';
 }
 
@@ -1412,6 +1406,6 @@ async function checkModeratorButton() {
 document.addEventListener('DOMContentLoaded', checkModeratorButton);
 supabaseClient.auth.onAuthStateChange(checkModeratorButton);
 </script>
- 
+  
 </body>
 </html>
