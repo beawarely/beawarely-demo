@@ -1278,9 +1278,22 @@ async function ensureProfile(user) {
   const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                    || (user.email ? user.email.split('@')[0] : 'User');
 
-  const { error } = await supabaseClient
-    .from('profiles')
-    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
+  // upewnij się że nie nadpisujemy avatara jeśli już istnieje
+const { data: existing } = await supabaseClient
+  .from('profiles')
+  .select('avatar_url')
+  .eq('id', user.id)
+  .maybeSingle();
+
+const newProfile = { id: user.id, display_name: baseName };
+if (!existing?.avatar_url && user.user_metadata?.avatar_url) {
+  newProfile.avatar_url = user.user_metadata.avatar_url;
+}
+
+const { error } = await supabaseClient
+  .from('profiles')
+  .upsert(newProfile, { onConflict: 'id' });
+
   if (error) console.error('ensureProfile error:', error);
 }
 
@@ -1315,12 +1328,16 @@ function applyProfileToUI(profile) {
     ? `${profile.rank} • ${profile.points ?? 0} pts`
     : `${profile.points ?? 0} pts`;
 
-    if (profile.avatar_url) {
-    const v = Date.now(); // lekki cache-buster
-    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
-  } else {
-    avatarEl.src = 'https://ui-avatars.com/api/?name=User';
-  }
+    let avatarSrc = profile.avatar_url 
+             || profile.user_metadata?.avatar_url 
+             || null;
+
+if (avatarSrc) {
+  const v = Date.now(); // cache-buster
+  avatarEl.src = `${avatarSrc}${avatarSrc.includes('?') ? '&' : '?'}v=${v}`;
+} else {
+  avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.display_name || 'User')}`;
+}
 
   chip.style.display = 'flex';
 }
