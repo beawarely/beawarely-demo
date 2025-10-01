@@ -1388,9 +1388,11 @@ async function checkModeratorButton() {
   const { data } = await supabaseClient
   .from('moderators')
   .select('user_id')
+  .eq('user_id', user.id)
   .maybeSingle();
 
-  modBtn.style.display = data ? 'block' : 'none';
+// brak rekordu = normalny przypadek
+modBtn.style.display = data ? 'block' : 'none';
 }
 
 document.addEventListener('DOMContentLoaded', checkModeratorButton);
