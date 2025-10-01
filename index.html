@@ -1027,11 +1027,7 @@ function closeSupportModal() {
   async function logoutUser() {
   try { await supabaseClient.auth.signOut(); }
   catch (e) { console.error("❌ signOut failed:", e?.message || e); }
-  localStorage.removeItem('ba_redirect');
-  document.getElementById('loginModal')?.classList.remove('open');
-  document.getElementById('supportModal')?.classList.remove('open');
-  document.body.style.overflow = '';
-  location.replace('index.html');
+  // UI odświeży się w onAuthStateChange → SIGNED_OUT
 }
 
 </script>
