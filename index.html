@@ -387,7 +387,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   async function signInWithGoogle() {
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://beawarely.github.io/beawarely-demo/index.html" },
+      options: { redirectTo: "https://beawarely.com/" },
     });
     if (error) {
       console.error("OAuth error:", error.message);
