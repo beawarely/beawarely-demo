@@ -366,6 +366,38 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 }
     
 </style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+
+  // 1) Jeden klient z trwałą sesją i auto-odświeżaniem
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: window.localStorage,
+    },
+  });
+    window.supabaseClient = supabaseClient;
+
+  // 2) Logowanie Google + bezpieczne przekierowanie (replace)
+  async function signInWithGoogle() {
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "https://beawarely.com/index.html" },
+    });
+    if (error) {
+      console.error("OAuth error:", error.message);
+    } else if (data?.url) {
+      window.location.replace(data.url);
+    }
+  }
+</script>
+
     <script>
     // Motyw + znikanie loadera (spójnie)
     document.addEventListener('DOMContentLoaded', () => {
@@ -385,6 +417,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
       if (icon) icon.textContent = isLight ? '🌞' : '🌛';
     }
   </script>
+
 
 </head>
 <body>
@@ -407,6 +440,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   </div>
 </div>
 
+
   <div id="rotating-bg">
   <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
 </div>
@@ -416,7 +450,8 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   </div>
 
   <header style="position: relative;">
-   
+  
+    
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
@@ -429,7 +464,9 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   BeAwarely
 </h1>
 
+
 </header>
+
 
 <section id="ai-hub" class="scroll-reveal">
   <h2>BeAwarely AI Hub</h2>
@@ -450,7 +487,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Card: WorkVerify -->
-    <article class="tool-card" data-href="workverify.html" data-requires-auth="false">
+    <article class="tool-card" data-href="workverify.html" data-requires-auth="true">
       <div class="tool-top">
         <span class="tool-icon">⚖️</span>
         <span class="tool-badge">Open</span>
@@ -463,7 +500,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Karta 3: Explore the Tree -->
-<article class="tool-card" data-href="tree.html" data-requires-auth="false">
+<article class="tool-card" data-href="tree.html" data-requires-auth="true">
   <div class="tool-top">
     <span class="tool-icon">🌳</span>
     <span class="tool-badge">Open</span>
@@ -489,7 +526,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     </article>
 
     <!-- Suggest a Tool (public ideas & votes) -->
-<article class="tool-card" data-href="suggest.html" data-requires-auth="false">
+<article class="tool-card" data-href="suggest.html" data-requires-auth="true">
   <div class="tool-top">
     <span class="tool-icon">💡</span>
     <span class="tool-badge">Public</span>
@@ -500,7 +537,111 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     <button class="open-btn" type="button" aria-label="Open Suggest a Tool">Open →</button>
   </div>
 </article>
-     
+    
+    <!-- Public inventions gallery --> <!--
+<article class="tool-card" data-href="inventions.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🧭</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Inventions</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>-->
+
+<!-- Moderator panel (login required) --> <!--
+<article class="tool-card" data-href="inventor_review.html" data-requires-auth="true" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🛡️</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Inventor Review</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>--> 
+
+   <!-- Karta: Foresight (czytelnia prognoz) --> <!--
+<article class="tool-card" data-href="foresight.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🔮</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Foresight</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>-->
+
+    <!-- Karta: AI Inventor --> <!--
+<article class="tool-card" data-href="inventor.html" data-requires-auth="true" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🛠</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">AI Inventor</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>-->
+
+    <!-- Karta: Mitobuster --> <!--
+  <article class="tool-card" data-href="mitobuster.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🧯</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Mitobuster</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>-->
+
+    <!-- Card: Health Claims --> <!--
+    <article class="tool-card" data-href="healthclaims.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🩺</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Health Claims</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>-->
+
+    <!-- Card: Consent Auditor --> <!--
+    <article class="tool-card" data-href="consentauditor.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🔏</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">Consent Auditor</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>-->
+
+    <!-- Card: CultureAtlas --> <!--
+    <article class="tool-card" data-href="culture-atlas.html" data-requires-auth="false" data-moderator-only="true">
+  <div class="tool-top">
+    <span class="tool-icon">🌍</span>
+    <span class="tool-badge">Soon</span>
+  </div>
+  <h3 class="tool-title">CultureAtlas</h3>
+  <div class="tool-cta">
+    <span class="status">Soon</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>-->
+    
   </div>
 </section>
 
@@ -750,61 +891,19 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 #support-cta { 
   display: none !important; 
 }
+
+@media (max-width: 500px){
+  #google_translate_element{ 
+    bottom: 12px; 
+    right: 12px;
+    transform: scale(.9);
+    transform-origin: bottom right;
+  }
+}
   
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  console.log("✅ Supabase script loaded");
-  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-
-  // 1) Jeden klient z trwałą sesją i auto-odświeżaniem
-  try {
-  console.log("➡️ Tworzę klienta Supabase…");
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storage: window.localStorage,
-    },
-    });
-  window.supabaseClient = supabaseClient;
-  console.log("✅ Klient Supabase utworzony:", supabaseClient);
-
-// 🚦 DIAGNOSTYKA — kolejne kroki
-console.log("STEP 1: supabaseClient gotowy");
-document.addEventListener('DOMContentLoaded', () => {
-  console.log("STEP 2: DOMContentLoaded wystartował");
-});
-supabaseClient.auth.getSession()
-  .then(({ data, error }) => {
-    console.log("STEP 3: getSession zwrócił:", data, error);
-  })
-  .catch(e => console.error("STEP 3 ERROR:", e));
-
-} catch (err) {
-  console.error("❌ Błąd przy tworzeniu klienta Supabase:", err);
-}
-
-  // 2) Logowanie Google + bezpieczne przekierowanie (replace)
-  async function signInWithGoogle() {
-    const { data, error } = await supabaseClient.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: "https://beawarely.com/" },
-    });
-    if (error) {
-      console.error("OAuth error:", error.message);
-    } else if (data?.url) {
-      window.location.replace(data.url);
-    }
-  }
-</script>
-  
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    console.log("📌 DOMContentLoaded → scroll-reveal init start");
     const elements = document.querySelectorAll('.scroll-reveal');
 
     const reveal = () => {
@@ -891,7 +990,6 @@ function closeSupportModal() {
 <!-- 🔽 Spójne sterowanie UI stanem sesji -->
 <script>
   function wireLoginUI(session){
-    console.log("STEP 6: wireLoginUI start, session:", session);
     const logged = !!session;
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
@@ -904,30 +1002,10 @@ function closeSupportModal() {
     if (yourProfileBtn) yourProfileBtn.style.display = logged ? 'inline-block' : 'none';
   }
   document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    console.log("STEP 4: wchodzę do DOMContentLoaded -> getSession");
-    if (!window.supabaseClient) {
-      console.error("❌ Brak supabaseClient w momencie DOMContentLoaded!");
-      return;
-    }
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    console.log("STEP 5: Session check on load:", session, error);
-
-if (session) {
-  // ✅ jeśli sesja istnieje → pokaż UI zalogowanego
-  wireLoginUI(session);
-} else {
-  // ❌ brak sesji → UI wylogowanego
-  wireLoginUI(null);
-  document.getElementById('profileChip')?.style.setProperty("display","none");
-}
-
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    wireLoginUI(session);
     await window.refreshLocks?.();
-  } catch (e) {
-    console.error("❌ Error during session check:", e);
-  }
-});
-
+  });
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     wireLoginUI(session);
     await window.refreshLocks?.();
@@ -935,38 +1013,23 @@ if (session) {
       const dest = localStorage.getItem('ba_redirect');
       if (dest) { localStorage.removeItem('ba_redirect'); location.replace(dest); }
     } else if (event === 'SIGNED_OUT') {
-  localStorage.removeItem('ba_redirect');
-  document.getElementById('loginModal')?.classList.remove('open');
-  document.getElementById('supportModal')?.classList.remove('open');
-  document.body.style.overflow = '';
-
-  // reset UI po wylogowaniu
-  const chip = document.getElementById('profileChip');
-  if (chip) chip.style.display = 'none';
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginBtn) {
-    loginBtn.textContent = 'Log In';
-    loginBtn.onclick = openLoginModal;
-  }
-
-  location.replace('index.html');
-}
-
+      localStorage.removeItem('ba_redirect');
+      document.getElementById('loginModal')?.classList.remove('open');
+      document.getElementById('supportModal')?.classList.remove('open');
+      document.body.style.overflow = '';
+      location.replace('index.html');
+    }
   });
 </script>
 
 
 <script>
   async function logoutUser() {
-    console.log("STEP 10: logoutUser start");
-    try { await supabaseClient.auth.signOut(); }
-    catch (e) { console.error("❌ signOut failed:", e?.message || e); }
-    localStorage.removeItem('ba_redirect');
-    document.getElementById('loginModal')?.classList.remove('open');
-    document.getElementById('supportModal')?.classList.remove('open');
-    document.body.style.overflow = '';
-    location.replace('index.html');
-  }
+  try { await supabaseClient.auth.signOut(); }
+  catch (e) { console.error("❌ signOut failed:", e?.message || e); }
+  // UI odświeży się w onAuthStateChange → SIGNED_OUT
+}
+
 </script>
 
 
@@ -1076,7 +1139,6 @@ if (session) {
   if (!grid) return;
 
     async function refreshLocks(){
-    console.log("STEP 7: refreshLocks start");
     const { data: { session } } = await sb.auth.getSession();
     const authed = !!session;
     const userId = session?.user?.id || null;
@@ -1204,11 +1266,30 @@ if (!support) {
 
 async function ensureProfile(user) {
   if (!user) return;
+
+  // 🔽 DEBUG – sprawdźmy co naprawdę zwraca Google/Supabase
+  console.log("USER OBJECT:", user);
+  console.log("USER METADATA:", user.user_metadata);
+
   const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                    || (user.email ? user.email.split('@')[0] : 'User');
-  const { error } = await supabaseClient
-    .from('profiles')
-    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
+
+  // upewnij się że nie nadpisujemy avatara jeśli już istnieje
+const { data: existing } = await supabaseClient
+  .from('profiles')
+  .select('avatar_url')
+  .eq('id', user.id)
+  .maybeSingle();
+
+const newProfile = { id: user.id, display_name: baseName };
+if (!existing?.avatar_url && user.user_metadata?.avatar_url) {
+  newProfile.avatar_url = user.user_metadata.avatar_url;
+}
+
+const { error } = await supabaseClient
+  .from('profiles')
+  .upsert(newProfile, { onConflict: 'id' });
+
   if (error) console.error('ensureProfile error:', error);
 }
 
@@ -1224,25 +1305,15 @@ async function fetchMyProfile() {
     console.error('fetchMyProfile error:', error);
     return null;
   }
-   // wymuszamy zawsze świeże pobieranie (bez cache)
-  if (data) {
-    return { ...data };
-  }
-  return null;
+  return data;
 }
 
 function applyProfileToUI(profile) {
-  console.log("STEP 9: applyProfileToUI start, profile:", profile);
   const chip    = document.getElementById('profileChip');
   const nameEl  = document.getElementById('profileName');
   const rankEl  = document.getElementById('profileRank');
   const avatarEl= document.getElementById('profileAvatar');
   if (!chip || !nameEl || !rankEl || !avatarEl) return;
-console.log("Profile loaded:", profile);
-(async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  console.log("🔑 Current session:", session);
-})();
 
   if (!profile) {
     chip.style.display = 'none';
@@ -1253,42 +1324,45 @@ console.log("Profile loaded:", profile);
     ? `${profile.rank} • ${profile.points ?? 0} pts`
     : `${profile.points ?? 0} pts`;
 
-  if (profile.avatar_url) {
-    const v = Date.now(); // lekki cache-buster
-    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
-  } else {
-    avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
-  }
+    let avatarSrc = profile.avatar_url 
+             || profile.user_metadata?.avatar_url 
+             || null;
+
+if (avatarSrc) {
+  const v = Date.now(); // cache-buster
+  avatarEl.src = `${avatarSrc}${avatarSrc.includes('?') ? '&' : '?'}v=${v}`;
+} else {
+  avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.display_name || 'User')}`;
+}
+
   chip.style.display = 'flex';
 }
 
 // Start: sesja → profil → chip
 (async () => {
-  const { data: { user } } = await supabaseClient.auth.getUser();
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  const user = session?.user;
   if (user) {
     await ensureProfile(user);
-    // zawsze świeży SELECT profilu z Supabase
     const me = await fetchMyProfile();
-    console.log("🔄 Fresh profile on load:", me);
     applyProfileToUI(me);
   } else {
     applyProfileToUI(null);
   }
 })();
 
+
 // Reakcja na login/logout
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
-  await ensureProfile(session.user);
-  // wymuszamy zawsze świeży SELECT profilu
-  const me = await fetchMyProfile();
-  console.log("✅ Fresh profile on SIGNED_IN:", me);
-  applyProfileToUI(me);
-} 
-  else if (event === 'SIGNED_OUT') {
+    await ensureProfile(session.user);
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+  } else if (event === 'SIGNED_OUT') {
     applyProfileToUI(null);
   }
 });
+
 
 // (opcjonalne) helper do zmiany wyświetlanej nazwy
 async function updateDisplayName(newName) {
@@ -1317,7 +1391,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script>
 async function checkModeratorButton() {
-  console.log("STEP 8: checkModeratorButton start");
   const { data: { user } } = await supabaseClient.auth.getUser();
   const modBtn = document.getElementById('moderatorRedirect');
   if (!modBtn) return;
@@ -1338,18 +1411,6 @@ async function checkModeratorButton() {
 document.addEventListener('DOMContentLoaded', checkModeratorButton);
 supabaseClient.auth.onAuthStateChange(checkModeratorButton);
 </script>
-
-<script>
-// Global error + unhandled promise rejection logger
-console.log("🟢 Global error logger aktywny");
-
-window.addEventListener("error", (e) => {
-  console.error("❌ Global JS error:", e.message, "at", e.filename, ":", e.lineno, "stack:", e.error?.stack);
-});
-window.addEventListener("unhandledrejection", (e) => {
-  console.error("❌ Unhandled Promise rejection:", e.reason);
-});
-</script>
-
+  
 </body>
 </html>
