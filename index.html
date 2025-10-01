@@ -1195,7 +1195,11 @@ async function fetchMyProfile() {
     console.error('fetchMyProfile error:', error);
     return null;
   }
-  return data;
+   // wymuszamy zawsze świeże pobieranie (bez cache)
+  if (data) {
+    return { ...data };
+  }
+  return null;
 }
 
 function applyProfileToUI(profile) {
@@ -1230,29 +1234,31 @@ console.log("Profile loaded:", profile);
 
 // Start: sesja → profil → chip
 (async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  const user = session?.user;
+  const { data: { user } } = await supabaseClient.auth.getUser();
   if (user) {
     await ensureProfile(user);
+    // zawsze świeży SELECT profilu z Supabase
     const me = await fetchMyProfile();
+    console.log("🔄 Fresh profile on load:", me);
     applyProfileToUI(me);
   } else {
     applyProfileToUI(null);
   }
 })();
 
-
 // Reakcja na login/logout
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
-    await ensureProfile(session.user);
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
-  } else if (event === 'SIGNED_OUT') {
+  await ensureProfile(session.user);
+  // wymuszamy zawsze świeży SELECT profilu
+  const me = await fetchMyProfile();
+  console.log("✅ Fresh profile on SIGNED_IN:", me);
+  applyProfileToUI(me);
+} 
+  else if (event === 'SIGNED_OUT') {
     applyProfileToUI(null);
   }
 });
-
 
 // (opcjonalne) helper do zmiany wyświetlanej nazwy
 async function updateDisplayName(newName) {
