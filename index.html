@@ -1293,8 +1293,10 @@ supabaseClient.auth.onAuthStateChange(checkModeratorButton);
 
 <script>
 // Global error + unhandled promise rejection logger
+console.log("🟢 Global error logger aktywny");
+
 window.addEventListener("error", (e) => {
-  console.error("❌ Global JS error:", e.message, "at", e.filename, ":", e.lineno);
+  console.error("❌ Global JS error:", e.message, "at", e.filename, ":", e.lineno, "stack:", e.error?.stack);
 });
 window.addEventListener("unhandledrejection", (e) => {
   console.error("❌ Unhandled Promise rejection:", e.reason);
