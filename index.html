@@ -913,12 +913,12 @@ function closeSupportModal() {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     console.log("STEP 5: Session check on load:", session, error);
 
-// zawsze startuj jako wylogowany
-wireLoginUI(null);
-
 if (session) {
+  // ✅ jeśli sesja istnieje → pokaż UI zalogowanego
   wireLoginUI(session);
 } else {
+  // ❌ brak sesji → UI wylogowanego
+  wireLoginUI(null);
   document.getElementById('profileChip')?.style.setProperty("display","none");
 }
 
