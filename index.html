@@ -366,45 +366,6 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 }
     
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  console.log("✅ Supabase script loaded");
-  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-
-  // 1) Jeden klient z trwałą sesją i auto-odświeżaniem
-  try {
-  console.log("➡️ Tworzę klienta Supabase…");
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storage: window.localStorage,
-    },
-    });
-  window.supabaseClient = supabaseClient;
-  console.log("✅ Klient Supabase utworzony:", supabaseClient);
-} catch (err) {
-  console.error("❌ Błąd przy tworzeniu klienta Supabase:", err);
-}
-
-  // 2) Logowanie Google + bezpieczne przekierowanie (replace)
-  async function signInWithGoogle() {
-    const { data, error } = await supabaseClient.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: "https://beawarely.com/" },
-    });
-    if (error) {
-      console.error("OAuth error:", error.message);
-    } else if (data?.url) {
-      window.location.replace(data.url);
-    }
-  }
-</script>
-
     <script>
     // Motyw + znikanie loadera (spójnie)
     document.addEventListener('DOMContentLoaded', () => {
@@ -791,6 +752,44 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 }
   
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  console.log("✅ Supabase script loaded");
+  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+
+  // 1) Jeden klient z trwałą sesją i auto-odświeżaniem
+  try {
+  console.log("➡️ Tworzę klienta Supabase…");
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: window.localStorage,
+    },
+    });
+  window.supabaseClient = supabaseClient;
+  console.log("✅ Klient Supabase utworzony:", supabaseClient);
+} catch (err) {
+  console.error("❌ Błąd przy tworzeniu klienta Supabase:", err);
+}
+
+  // 2) Logowanie Google + bezpieczne przekierowanie (replace)
+  async function signInWithGoogle() {
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "https://beawarely.com/" },
+    });
+    if (error) {
+      console.error("OAuth error:", error.message);
+    } else if (data?.url) {
+      window.location.replace(data.url);
+    }
+  }
+</script>
+  
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     console.log("📌 DOMContentLoaded → scroll-reveal init start");
