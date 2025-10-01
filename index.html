@@ -893,19 +893,16 @@ function closeSupportModal() {
   document.addEventListener('DOMContentLoaded', async () => {
   try {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
-    console.log("🔎 Session check on load:", session, error);
+console.log("🔎 Session check on load:", session, error);
 
-    wireLoginUI(session);
+// zawsze startuj jako wylogowany
+wireLoginUI(null);
 
-    // jeśli nie ma sesji → wyczyść UI
-    if (!session) {
-      document.getElementById('profileChip')?.style.setProperty("display","none");
-      const loginBtn = document.getElementById('loginBtn');
-      if (loginBtn) {
-        loginBtn.textContent = 'Log In';
-        loginBtn.onclick = openLoginModal;
-      }
-    }
+if (session) {
+  wireLoginUI(session);
+} else {
+  document.getElementById('profileChip')?.style.setProperty("display","none");
+}
 
     await window.refreshLocks?.();
   } catch (e) {
