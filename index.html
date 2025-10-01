@@ -131,6 +131,7 @@ input:focus, textarea:focus {
   transition: opacity 0.5s ease;
 }
 
+
     footer {
       text-align: center;
       font-size: 0.9rem;
@@ -366,6 +367,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     
 </style>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
@@ -416,6 +418,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     }
   </script>
 
+
 </head>
 <body>
 
@@ -437,6 +440,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   </div>
 </div>
 
+
   <div id="rotating-bg">
   <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
 </div>
@@ -447,6 +451,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
   <header style="position: relative;">
   
+    
   <!-- Logo + tekst -->
 <img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
@@ -459,7 +464,9 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   BeAwarely
 </h1>
 
+
 </header>
+
 
 <section id="ai-hub" class="scroll-reveal">
   <h2>BeAwarely AI Hub</h2>
@@ -750,6 +757,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   transform: scale(1.05);
 }
 
+
   @media (max-width: 500px) {
   footer {
     font-size: 13px;
@@ -810,6 +818,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 @media (max-width:639px){
   .tools-grid{ grid-template-columns: 1fr; }
 }
+
 
 .tool-card{
   position:relative;
@@ -932,6 +941,7 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
   }
 </script>
 
+
   <script>
   function openLoginModal() {
     const modal = document.getElementById("loginModal");
@@ -961,6 +971,7 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
     else if (supportOpen) closeSupportModal();
   });
 </script>
+  
 
   <script>
   function openSupportModal() {
@@ -978,6 +989,7 @@ function closeSupportModal() {
   const note = document.getElementById('copiedNote');
   if (note) note.style.display = 'none';
 }
+
 
   // Kopiowanie adresu crypto
   function copyCrypto() {
@@ -1026,6 +1038,7 @@ function closeSupportModal() {
   });
 </script>
 
+
 <script>
   async function logoutUser() {
     try { await supabaseClient.auth.signOut(); }
@@ -1037,6 +1050,7 @@ function closeSupportModal() {
     location.replace('index.html');
   }
 </script>
+
 
 <!-- 🔽 Dodaj to przed </body> -->
 <div id="loginModal" style="
@@ -1199,6 +1213,7 @@ const locked = lockedForAuth || lockedForRole;
     });
   }
 
+
   window.refreshLocks = refreshLocks;
 
   if (new URLSearchParams(location.search).get('login') === '1') {
@@ -1230,6 +1245,8 @@ if (!support) {
   support.textContent = '💲💲💲';
   support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
 }
+
+
 
   // nadaj klasę „pill” istniejącym, by wyglądały spójnie
   if (profile) profile.classList.add('pill');
@@ -1329,6 +1346,7 @@ function applyProfileToUI(profile) {
   }
 })();
 
+
 // Reakcja na login/logout
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
@@ -1339,6 +1357,7 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     applyProfileToUI(null);
   }
 });
+
 
 // (opcjonalne) helper do zmiany wyświetlanej nazwy
 async function updateDisplayName(newName) {
