@@ -388,7 +388,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   async function signInWithGoogle() {
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://beawarely.github.io/beawarely-demo/index.html" },
+      options: { redirectTo: "https://beawarely.com/index.html" },
     });
     if (error) {
       console.error("OAuth error:", error.message);
@@ -1031,6 +1031,7 @@ function closeSupportModal() {
   document.getElementById('loginModal')?.classList.remove('open');
   document.getElementById('supportModal')?.classList.remove('open');
   document.body.style.overflow = '';
+  location.replace('index.html');
 }
 
 </script>
@@ -1312,7 +1313,7 @@ function applyProfileToUI(profile) {
     const v = Date.now(); // lekki cache-buster
     avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
   } else {
-    avatarEl.src = 'images/avatar.png'; // lokalny fallback
+    avatarEl.src = 'https://ui-avatars.com/api/?name=User';
   }
 
   chip.style.display = 'flex';
