@@ -1270,8 +1270,14 @@ if (!support) {
 
 async function ensureProfile(user) {
   if (!user) return;
+
+  // 🔽 DEBUG – sprawdźmy co naprawdę zwraca Google/Supabase
+  console.log("USER OBJECT:", user);
+  console.log("USER METADATA:", user.user_metadata);
+
   const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                    || (user.email ? user.email.split('@')[0] : 'User');
+
   const { error } = await supabaseClient
     .from('profiles')
     .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
