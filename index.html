@@ -772,6 +772,18 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
     });
   window.supabaseClient = supabaseClient;
   console.log("✅ Klient Supabase utworzony:", supabaseClient);
+
+// 🚦 DIAGNOSTYKA — kolejne kroki
+console.log("STEP 1: supabaseClient gotowy");
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("STEP 2: DOMContentLoaded wystartował");
+});
+supabaseClient.auth.getSession()
+  .then(({ data, error }) => {
+    console.log("STEP 3: getSession zwrócił:", data, error);
+  })
+  .catch(e => console.error("STEP 3 ERROR:", e));
+
 } catch (err) {
   console.error("❌ Błąd przy tworzeniu klienta Supabase:", err);
 }
@@ -879,6 +891,7 @@ function closeSupportModal() {
 <!-- 🔽 Spójne sterowanie UI stanem sesji -->
 <script>
   function wireLoginUI(session){
+    console.log("STEP 6: wireLoginUI start, session:", session);
     const logged = !!session;
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
@@ -892,8 +905,13 @@ function closeSupportModal() {
   }
   document.addEventListener('DOMContentLoaded', async () => {
   try {
+    console.log("STEP 4: wchodzę do DOMContentLoaded -> getSession");
+    if (!window.supabaseClient) {
+      console.error("❌ Brak supabaseClient w momencie DOMContentLoaded!");
+      return;
+    }
     const { data: { session }, error } = await supabaseClient.auth.getSession();
-console.log("🔎 Session check on load:", session, error);
+    console.log("STEP 5: Session check on load:", session, error);
 
 // zawsze startuj jako wylogowany
 wireLoginUI(null);
@@ -940,6 +958,7 @@ if (session) {
 
 <script>
   async function logoutUser() {
+    console.log("STEP 10: logoutUser start");
     try { await supabaseClient.auth.signOut(); }
     catch (e) { console.error("❌ signOut failed:", e?.message || e); }
     localStorage.removeItem('ba_redirect');
@@ -1057,6 +1076,7 @@ if (session) {
   if (!grid) return;
 
     async function refreshLocks(){
+    console.log("STEP 7: refreshLocks start");
     const { data: { session } } = await sb.auth.getSession();
     const authed = !!session;
     const userId = session?.user?.id || null;
@@ -1212,6 +1232,7 @@ async function fetchMyProfile() {
 }
 
 function applyProfileToUI(profile) {
+  console.log("STEP 9: applyProfileToUI start, profile:", profile);
   const chip    = document.getElementById('profileChip');
   const nameEl  = document.getElementById('profileName');
   const rankEl  = document.getElementById('profileRank');
@@ -1296,6 +1317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script>
 async function checkModeratorButton() {
+  console.log("STEP 8: checkModeratorButton start");
   const { data: { user } } = await supabaseClient.auth.getUser();
   const modBtn = document.getElementById('moderatorRedirect');
   if (!modBtn) return;
