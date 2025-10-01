@@ -1204,6 +1204,11 @@ function applyProfileToUI(profile) {
   const rankEl  = document.getElementById('profileRank');
   const avatarEl= document.getElementById('profileAvatar');
   if (!chip || !nameEl || !rankEl || !avatarEl) return;
+console.log("Profile loaded:", profile);
+(async () => {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  console.log("🔑 Current session:", session);
+})();
 
   if (!profile) {
     chip.style.display = 'none';
@@ -1296,6 +1301,16 @@ async function checkModeratorButton() {
 document.addEventListener('DOMContentLoaded', checkModeratorButton);
 supabaseClient.auth.onAuthStateChange(checkModeratorButton);
 </script>
-  
+
+<script>
+// Global error + unhandled promise rejection logger
+window.addEventListener("error", (e) => {
+  console.error("❌ Global JS error:", e.message, "at", e.filename, ":", e.lineno);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("❌ Unhandled Promise rejection:", e.reason);
+});
+</script>
+
 </body>
 </html>
