@@ -1204,9 +1204,11 @@ async function fetchMyProfile() {
     return null;
   }
    // wymuszamy zawsze świeże pobieranie (bez cache)
-  if (data) {
+    if (data) {
+    console.log("STEP 12: fetchMyProfile → otrzymane dane:", data);
     return { ...data };
   }
+  console.log("STEP 12: fetchMyProfile → brak danych");
   return null;
 }
 
