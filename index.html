@@ -1207,38 +1207,60 @@ async function ensureProfile(user) {
 }
 
 async function fetchMyProfile() {
+  console.log("STEP 14.1: 🔎 fetchMyProfile ENTER");
   const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return null;
+  if (!user) {
+    console.log("STEP 14.2: brak usera → zwracam null");
+    return null;
+  }
+
   const { data, error } = await supabaseClient
     .from('profiles')
     .select('id, display_name, avatar_url, rank, points, badges')
     .eq('id', user.id)
     .single();
+
   if (error) {
-    console.error('fetchMyProfile error:', error);
+    console.error("STEP 14.3: ❌ fetchMyProfile error:", error);
     return null;
   }
-   // wymuszamy zawsze świeże pobieranie (bez cache)
-    if (data) {
-    console.log("STEP 12: fetchMyProfile → otrzymane dane:", data);
-    return { ...data };
-  }
-  console.log("STEP 12: fetchMyProfile → brak danych");
-  return null;
+
+  console.log("STEP 14.4: ✅ fetchMyProfile SELECT wynik:", data);
+  return data || null;
 }
 
 function applyProfileToUI(profile) {
-  console.log("STEP 9: applyProfileToUI start, profile:", profile);
+  console.log("STEP 15.1: 🎨 applyProfileToUI ENTER, profile:", profile);
   const chip    = document.getElementById('profileChip');
   const nameEl  = document.getElementById('profileName');
   const rankEl  = document.getElementById('profileRank');
   const avatarEl= document.getElementById('profileAvatar');
-  if (!chip || !nameEl || !rankEl || !avatarEl) return;
-console.log("Profile loaded:", profile);
-(async () => {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  console.log("🔑 Current session:", session);
-})();
+  if (!chip || !nameEl || !rankEl || !avatarEl) {
+    console.warn("STEP 15.2: brak elementów UI → przerywam");
+    return;
+  }
+
+  if (!profile) {
+    console.log("STEP 15.3: brak profilu → chowam chip");
+    chip.style.display = 'none';
+    return;
+  }
+
+  nameEl.textContent = profile.display_name || 'User';
+  rankEl.textContent = profile.rank
+    ? `${profile.rank} • ${profile.points ?? 0} pts`
+    : `${profile.points ?? 0} pts`;
+
+  if (profile.avatar_url) {
+    const v = Date.now();
+    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
+  } else {
+    avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
+  }
+  chip.style.display = 'flex';
+
+  console.log("STEP 15.4: ✅ applyProfileToUI EXIT — chip zaktualizowany");
+}
 
   if (!profile) {
     chip.style.display = 'none';
@@ -1270,8 +1292,10 @@ console.log("Profile loaded:", profile);
     await ensureProfile(user);
     // zawsze świeży SELECT profilu z Supabase
     const me = await fetchMyProfile();
-    console.log("🔄 Fresh profile on load:", me);
-    applyProfileToUI(me);
+console.log("STEP 16.1: 🔄 Fresh profile on load wynik fetchMyProfile:", me);
+applyProfileToUI(me);
+console.log("STEP 16.2: 🚀 applyProfileToUI wywołane po fetchMyProfile");
+
   } else {
     applyProfileToUI(null);
   }
