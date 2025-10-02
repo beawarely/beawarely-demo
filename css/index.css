@@ -14,13 +14,13 @@ body{
 }
 body.light-mode{ background:var(--bg-light); color:#000; }
 
-/* topbar */
-.topbar{
+/* topbar (jak w starym kodzie) */
+#topbar{
   position:fixed; top:14px; left:20px; right:20px; z-index:10000;
   display:flex; justify-content:space-between; align-items:center;
   pointer-events:none;
 }
-.topbar .topbar-left,.topbar .topbar-right{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
+#topbar .topbar-left, #topbar .topbar-right{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
 
 .pill{
   background:rgba(255,255,255,.10);
