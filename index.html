@@ -1182,7 +1182,12 @@ if (!support) {
 /* ===== Profiles: ensure + load + UI hook (wersja pod supabaseClient) ===== */
 
 async function ensureProfile(user) {
-  if (!user) return;
+  console.log("STEP 13.1: 🔥 ensureProfile ENTER, user:", user);
+  if (!user) {
+    console.log("STEP 13.2: ensureProfile → brak user, wychodzę");
+    return;
+  }
+
   const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                    || (user.email ? user.email.split('@')[0] : 'User');
   const { error } = await supabaseClient
