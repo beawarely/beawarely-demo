@@ -13,6 +13,21 @@
 
   <!-- New, isolated styles -->
   <link rel="stylesheet" href="css/index.css" />
+  <!-- Supabase SDK + inicjalizacja klienta -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage,
+      },
+    });
+    window.supabaseClient = supabaseClient;
+  </script>
 </head>
 <body>
   <!-- Fixed topbar -->
@@ -143,12 +158,23 @@
     <a href="moderator.html" class="blackhole-btn" aria-label="Moderator"></a>
   </div>
 
-  <!-- Login Modal -->
+    <!-- Login Modal -->
   <div id="loginModal" class="modal" aria-hidden="true">
     <div role="dialog" tabindex="-1" class="modal-card">
       <h3>Sign In</h3>
-      <!-- PRZYCISK TYLKO DEMO – w Kroku 2 podłączymy Supabase -->
-      <button id="demoLogin" class="btn">Continue with Google</button>
+
+      <div class="auth-fields">
+        <input id="loginEmail" type="email" placeholder="Email" autocomplete="email" required />
+        <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password" required />
+        <div class="auth-actions" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+          <button id="loginSubmit" class="btn">Sign In</button>
+          <button id="signUpSubmit" class="btn-secondary">Create Account</button>
+        </div>
+        <div id="authError" class="copied-note" style="display:none; color:#ff6666; text-align:center; margin-top:8px;"></div>
+      </div>
+
+      <hr style="opacity:.3; margin:14px 0;">
+      <button id="googleLogin" class="btn">Continue with Google</button>
       <button id="closeLogin" class="btn-secondary">Close</button>
     </div>
   </div>
