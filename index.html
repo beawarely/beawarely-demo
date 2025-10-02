@@ -1327,11 +1327,11 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 </script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('load', async () => {
   try {
-    console.log("STEP 4: wchodzę do DOMContentLoaded -> getSession (przeniesione na koniec)");
+    console.log("STEP 4: wchodzę do window.load -> getSession");
     if (!window.supabaseClient) {
-      console.error("❌ Brak supabaseClient w momencie DOMContentLoaded!");
+      console.error("❌ Brak supabaseClient w momencie window.load!");
       return;
     }
     const { data: { session }, error } = await supabaseClient.auth.getSession();
