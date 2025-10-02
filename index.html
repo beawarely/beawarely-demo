@@ -1191,13 +1191,17 @@ async function ensureProfile(user) {
   const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
                    || (user.email ? user.email.split('@')[0] : 'User');
     console.log("STEP 13.3: upsert data →", { id: user.id, display_name: baseName });
-  const { error } = await supabaseClient
+    const { data, error, status } = await supabaseClient
     .from('profiles')
-    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' });
+    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' })
+    .select(); // wymusza zwrot danych
+
+  console.log("STEP 13.4: upsert result →", { status, data, error });
+
   if (error) {
     console.error('ensureProfile error:', error);
   } else {
-    console.log("STEP 13.4: ensureProfile SUCCESS dla user.id:", user.id);
+    console.log("STEP 13.5: ensureProfile SUCCESS dla user.id:", user.id);
   }
 
 }
