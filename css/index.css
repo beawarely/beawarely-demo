@@ -167,19 +167,3 @@ body.light-mode #rotating-bg img{ opacity:.4; }
 body.light-mode .tool-card{ background:rgba(0,0,0,.04); border-color:rgba(0,0,0,.08); }
 body.light-mode .tool-badge{ background:rgba(0,0,0,.06); border-color:rgba(0,0,0,.10); }
 
-/* Pasek górny + przycisk login/logout */
-.topbar{
-  position:fixed; top:0; left:0; right:0;
-  display:flex; justify-content:flex-end; align-items:center;
-  padding:12px 20px;
-  background:rgba(0,0,0,.4);
-  z-index:1000;
-}
-.auth-btn{
-  background-color:var(--blue1, #007bff);
-  color:#fff; border:none; border-radius:6px;
-  padding:8px 16px; cursor:pointer;
-  font-size:14px; font-weight:600;
-  transition:background .2s;
-}
-.auth-btn:hover{ background-color:var(--blue2, #3399ff); }
