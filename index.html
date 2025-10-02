@@ -903,30 +903,6 @@ function closeSupportModal() {
     const yourProfileBtn = document.getElementById('yourProfileBtn');
     if (yourProfileBtn) yourProfileBtn.style.display = logged ? 'inline-block' : 'none';
   }
-  document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    console.log("STEP 4: wchodzę do DOMContentLoaded -> getSession");
-    if (!window.supabaseClient) {
-      console.error("❌ Brak supabaseClient w momencie DOMContentLoaded!");
-      return;
-    }
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    console.log("STEP 5: Session check on load:", session, error);
-
-if (session) {
-  // ✅ jeśli sesja istnieje → pokaż UI zalogowanego
-  wireLoginUI(session);
-} else {
-  // ❌ brak sesji → UI wylogowanego
-  wireLoginUI(null);
-  document.getElementById('profileChip')?.style.setProperty("display","none");
-}
-
-    await window.refreshLocks?.();
-  } catch (e) {
-    console.error("❌ Error during session check:", e);
-  }
-});
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     wireLoginUI(session);
@@ -1348,6 +1324,30 @@ window.addEventListener("error", (e) => {
 });
 window.addEventListener("unhandledrejection", (e) => {
   console.error("❌ Unhandled Promise rejection:", e.reason);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    console.log("STEP 4: wchodzę do DOMContentLoaded -> getSession (przeniesione na koniec)");
+    if (!window.supabaseClient) {
+      console.error("❌ Brak supabaseClient w momencie DOMContentLoaded!");
+      return;
+    }
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    console.log("STEP 5: Session check on load:", session, error);
+
+    if (session) {
+      wireLoginUI(session);
+    } else {
+      wireLoginUI(null);
+      document.getElementById('profileChip')?.style.setProperty("display","none");
+    }
+
+    await window.refreshLocks?.();
+  } catch (e) {
+    console.error("❌ Error during session check:", e);
+  }
 });
 </script>
 
