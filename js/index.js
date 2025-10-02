@@ -87,6 +87,6 @@
       }
     });
 
-    console.log('indexx.js ready (no Supabase yet)');
+    console.log('index.js ready (no Supabase yet)');
   });
 })();
