@@ -1364,11 +1364,16 @@ window.addEventListener('load', async () => {
     console.log("STEP 5: Session check on load:", session, error);
 
     if (session) {
-      wireLoginUI(session);
-    } else {
-      wireLoginUI(null);
-      document.getElementById('profileChip')?.style.setProperty("display","none");
-    }
+  wireLoginUI(session);
+  const me = await fetchMyProfile();
+  console.log("STEP 16.1: Fresh profile on load wynik fetchMyProfile:", me);
+  applyProfileToUI(me);
+  console.log("STEP 16.2: 🚀 applyProfileToUI wywołane po fetchMyProfile");
+} else {
+  wireLoginUI(null);
+  document.getElementById('profileChip')?.style.setProperty("display","none");
+  applyProfileToUI(null);
+}
 
     await window.refreshLocks?.();
   } catch (e) {
