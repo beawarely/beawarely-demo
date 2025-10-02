@@ -93,7 +93,12 @@ function updateUI(session){
 
 // init
 document.addEventListener("DOMContentLoaded", async ()=>{
+  // hide loader
+  const loader = document.getElementById('loader');
+  if(loader) loader.style.display = 'none';
+
   // initial session
+
   const { data: { session } } = await supabaseClient.auth.getSession();
   updateUI(session);
 
