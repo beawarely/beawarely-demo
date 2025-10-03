@@ -913,8 +913,12 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
       await new Promise(r => setTimeout(r, 500));
       const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
       wireLoginUI(freshSession);
-      const me = await fetchMyProfile();
-      applyProfileToUI(me);
+      console.log("🧩 DEBUG: przed fetchMyProfile");
+const me = await fetchMyProfile();
+console.log("🧩 DEBUG: po fetchMyProfile wynik =", me);
+applyProfileToUI(me);
+console.log("🧩 DEBUG: po applyProfileToUI – UI powinien się odświeżyć");
+
       if (typeof window.refreshLocks === 'function') await window.refreshLocks();
 
       const dest = localStorage.getItem('ba_redirect');
