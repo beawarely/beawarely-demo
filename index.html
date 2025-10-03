@@ -2,207 +2,1385 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>BeAwarely — Clean Build</title>
-
-  <!-- Fonts -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>BeAwarely</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    :root {
+      --blue1: #007bff;
+      --blue2: #66b2ff;
+      --blue3: #b3d9ff;
+      --safe-top: env(safe-area-inset-top, 0px);
 
-  <!-- New, isolated styles -->
-  <link rel="stylesheet" href="css/index.css" />
-  <!-- Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    }
+
+    body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  color: #fff;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.light-mode {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  color: #000;
+}
+    header,
+section,
+footer {
+  background-color: transparent !important;
+    }
+    header {
+  text-align: center;
+  padding: calc(80px + var(--safe-top)) 20px 40px;
+}
+
+    .logo-placeholder {
+  width: 100px;
+  height: 100px;
+  background-color: #ccc;
+  border-radius: 12px;
+  margin: 0 auto 20px;
+  animation: pulse 3s infinite;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 20px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    button.scroll-btn {
+      background-color: var(--blue1);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    section {
+      padding: 40px 20px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .reasons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px 20px;
+      list-style-type: disc;
+      margin-left: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input, textarea {
+  padding: 12px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #1a1a1a;
+  color: #fff;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+body.light-mode input,
+body.light-mode textarea {
+  background-color: #fff;
+  color: #000;
+  border: 2px solid #ccc;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--blue2);
+  outline: none;
+  box-shadow: 0 0 8px var(--blue2);
+  transform: scale(1.02);
+}
+
+    .send-btn {
+      background-color: var(--blue1);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .confirmation {
+  text-align: center;
+  color: #00cc66;
+  margin-top: 10px;
+  font-weight: bold;
+  background-color: rgba(0, 204, 102, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 204, 102, 0.3);
+  transition: opacity 0.5s ease;
+}
+
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 60px;
+      padding: 30px 10px;
+    }
+
+    .social-icons {
+      margin-top: 10px;
+      font-size: 1.4rem;
+    }
+
+    .mode-toggle {
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 10px 10px rgba(0, 123, 255, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+    }
+
+    /* Spinner loading screen */
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #0e0e0e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #fff;
+  border-top: 5px solid var(--blue1);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-tool-box {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  width: 220px;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  animation: fadeIn 0.6s ease-in-out both;
+}
+
+.ai-tool-box:hover {
+  transform: scale(1.05);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+  #rotating-bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300vw;
+  height: 300vh;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#rotating-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: rotateBackground 240s linear infinite;
+  opacity: 0.3;
+  filter: brightness(1);
+  transition: opacity 0.6s ease, filter 0.6s ease;
+}
+
+body.light-mode #rotating-bg img {
+  content: url("images/galaxy-light.png");
+  opacity: 0.4;
+  filter: brightness(1.2);
+}
+
+body:not(.light-mode) #rotating-bg img {
+  content: url("images/galaxy-dark.png");
+  opacity: 0.25;
+  filter: brightness(0.9);
+}
+
+@keyframes rotateBackground {
+  0%   { transform: rotate(0deg) scale(1.1); }
+  100% { transform: rotate(360deg) scale(1.1); }
+}
+/* Hint dla kompozytora */
+#rotating-bg img { will-change: transform; }
+
+/* Mobile perf: mniejszy canvas i spokojniejsza animacja */
+@media (max-width: 600px){
+  #rotating-bg{
+    width: 200vw;
+    height: 200vh;
+  }
+  #rotating-bg img{
+    animation-duration: 300s;
+  }
+}
+
+/* Osoby z preferencją mniejszych animacji */
+@media (prefers-reduced-motion: reduce){
+  #rotating-bg img{ animation: none; }
+}
+    
+header h1,
+section h2,
+section p,
+section li,
+footer {
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+}
+body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
+
+/* --- Fixed Topbar --- */
+#topbar{
+  position: fixed;
+  top: calc(14px + var(--safe-top));
+  left: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex; justify-content: space-between; align-items: center;
+  pointer-events: none;
+}
+
+#topbar .topbar-left, 
+#topbar .topbar-right{
+  display: flex; gap: 12px; align-items: center;
+  pointer-events: auto; /* ale same przyciski mają klikalność */
+}
+
+/* Uniwersalna pigułka */
+.pill{
+  background-color: rgba(255,255,255,0.10);
+  color: #fff; font-weight: 600; text-decoration: none;
+  padding: 6px 14px; border-radius: 12px; 
+  transition: background-color .25s, transform .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.pill:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+
+/* Ikona trybu jako okrągła pigułka */
+#modeIcon{
+  position: static !important;
+  top: auto !important; right: auto !important; left: auto !important;
+  font-size: 1.4rem; line-height: 1; 
+  background-color: rgba(255,255,255,0.10);
+  border-radius: 50%; padding: 8px; width: 36px; height: 36px;
+  display: inline-flex; align-items:center; justify-content:center;
+  transition: background-color .25s, transform .2s;
+}
+#modeIcon:hover{ background-color: rgba(255,255,255,0.20); transform: translateY(-1px); }
+
+/* Nadpisanie absolutów na login i profile (żeby nie „uciekały” z topbaru) */
+#loginBtn, #yourProfileBtn{
+  position: static !important; 
+  top: auto !important; right: auto !important; left: auto !important;
+  font-size: 0.95rem;
+  border-radius: 12px;
+}
+
+/* Responsywność */
+@media (max-width: 560px){
+  #topbar{ top: 10px; left: 12px; right: 12px; }
+  #topbar .topbar-left, #topbar .topbar-right{ gap: 8px; }
+  #loginBtn{ padding: 4px 10px; font-size: .9rem; }
+  #modeIcon{ width: 32px; height: 32px; padding: 6px; }
+}
+
+/* --- hide old big button --- */
+#supportBtn { display: none !important; }
+
+#supportTopBtn{
+  background-color: rgba(255,255,255,0.10);
+  color:#fff;
+  font-weight:700;
+  padding:6px 10px;
+  border-radius:12px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:1rem;
+  border:none;        /* ważne: zeruje pozostałości po złotej wersji */
+  box-shadow:none;    /* j.w. */
+  letter-spacing:0;
+}
+#supportTopBtn:hover{
+  background-color: rgba(255,255,255,0.20);
+  transform: translateY(-1px);
+}
+    
+/* Support & Login modal – unified open state */
+#loginModal.open { display: flex !important; }
+#supportModal.open { display: flex !important; }
+
+.pill:focus-visible,
+#loginBtn:focus-visible,
+#modeIcon:focus-visible,
+#yourProfileBtn:focus-visible,
+.open-btn:focus-visible {
+  outline: 2px solid var(--blue2);
+  outline-offset: 2px;
+}
+    
+</style>
+    <script>
+    // Motyw + znikanie loadera (spójnie)
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLight = (localStorage.getItem('mode') || 'dark') === 'light';
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+      const loader = document.getElementById('loader');
+      if (loader) { loader.style.opacity = '0'; loader.style.visibility = 'hidden'; setTimeout(() => loader.remove(), 500); }
+    });
+    function toggleLightDarkMode() {
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+      const icon = document.getElementById('modeIcon');
+      if (icon) icon.textContent = isLight ? '🌞' : '🌛';
+    }
+  </script>
+
 </head>
 <body>
-  <!-- Fixed topbar -->
-  <div id="topbar" class="topbar">
-    <div class="topbar-left">
-      <a id="yourProfileBtn" href="profile.html" class="pill" style="display:none">Your Profile</a>
-    </div>
-    <div class="topbar-right">
-      <button id="modeIcon" type="button" class="pill" aria-label="Toggle light/dark mode">🌛</button>
-      <button id="loginBtn" type="button" class="btn">Login</button>>
+<script>
+  console.log("STEP 0: BODY loaded — skrypty startują");
+</script>
 
-      <div id="profileChip" class="profile-chip" style="display:none;">
-        <img id="profileAvatar" src="" alt="Avatar" width="32" height="32" />
-        <div class="profile-meta">
-          <span id="profileName">—</span>
-          <span id="profileRank">—</span>
-        </div>
+  <!-- TOPBAR -->
+<div id="topbar">
+  <div class="topbar-left">
+    <a id="yourProfileBtn" href="profile.html" class="pill" style="display:none">Your Profile</a>
+  </div>
+  <div class="topbar-right">
+    <button id="modeIcon" type="button" class="pill" aria-label="Toggle light/dark mode">🌛</button>
+    <button id="loginBtn" type="button" class="pill">Log In</button>
+    <div id="profileChip" style="display:none; align-items:center; gap:10px;">
+      <img id="profileAvatar" src="" alt="Avatar" width="32" height="32" style="border-radius:50%; object-fit:cover;" />
+      <div style="display:flex; flex-direction:column; line-height:1;">
+        <span id="profileName" style="font-weight:600;">—</span>
+        <span id="profileRank" style="font-size:12px; opacity:.8;">—</span>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Rotating bg (images/galaxy-*.png muszą istnieć jak w Twoim repo) -->
   <div id="rotating-bg">
-    <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
-  </div>
+  <img src="images/galaxy-dark.png" alt="Rotating Galaxy Background" />
+</div>
 
-  <!-- Loader -->
-  <div id="loader" class="loader">
+  <div id="loader">
     <div class="spinner"></div>
   </div>
 
-  <header class="page-header">
-    <img src="images/logo.png" alt="BeAwarely Logo" class="logo" />
-    <h1 class="brand">BeAwarely</h1>
-  </header>
+  <header style="position: relative;">
+   
+  <!-- Logo + tekst -->
+<img src="images/logo.png" alt="BeAwarely Logo" style="height: 120px; margin-bottom: 20px;" />
 
-  <section id="ai-hub" class="section">
-    <h2>BeAwarely AI Hub</h2>
-    <p class="section-sub">Choose a tool to explore. Some require login.</p>
+  <h1 style="
+  font-family: 'Sriracha', cursive;
+  color: black;
+  font-size: 64px;
+  margin-top: 20px;
+">
+  BeAwarely
+</h1>
 
-    <div id="toolsGrid" class="tools-grid">
-      <!-- Example cards (docelowo będzie ich więcej) -->
-      <article class="tool-card" data-href="chat.html" data-requires-auth="true">
-        <div class="tool-top">
-          <span class="tool-icon">🤖</span>
-          <span class="tool-badge">Members</span>
-        </div>
-        <h3 class="tool-title">AI Chat</h3>
-        <div class="tool-cta">
-          <span class="status">Login required</span>
-          <button class="open-btn" type="button">Open →</button>
-        </div>
-      </article>
+</header>
 
-      <article class="tool-card" data-href="workverify.html" data-requires-auth="false">
-        <div class="tool-top">
-          <span class="tool-icon">⚖️</span>
-          <span class="tool-badge">Open</span>
-        </div>
-        <h3 class="tool-title">WorkVerify</h3>
-        <div class="tool-cta">
-          <span class="status">Open</span>
-          <button class="open-btn" type="button">Open →</button>
-        </div>
-      </article>
+<section id="ai-hub" class="scroll-reveal">
+  <h2>BeAwarely AI Hub</h2>
+  <p class="section-sub">Choose a tool to explore. Some require login.</p>
 
-      <article class="tool-card" data-href="tree.html" data-requires-auth="false">
-        <div class="tool-top">
-          <span class="tool-icon">🌳</span>
-          <span class="tool-badge">Open</span>
-        </div>
-        <h3 class="tool-title">Explore the Tree</h3>
-        <div class="tool-cta">
-          <span class="status">Open</span>
-          <button class="open-btn" type="button">Open →</button>
-        </div>
-      </article>
-
-      <article class="tool-card" data-href="faith-reason.html" data-requires-auth="true">
-        <div class="tool-top">
-          <span class="tool-icon">📜</span>
-          <span class="tool-badge">Members</span>
-        </div>
-        <h3 class="tool-title">Faith & Reason</h3>
-        <div class="tool-cta">
-          <span class="status">Login required</span>
-          <button class="open-btn" type="button">Open →</button>
-        </div>
-      </article>
-
-      <article class="tool-card" data-href="suggest.html" data-requires-auth="false">
-        <div class="tool-top">
-          <span class="tool-icon">💡</span>
-          <span class="tool-badge">Public</span>
-        </div>
-        <h3 class="tool-title">Suggest a Tool</h3>
-        <div class="tool-cta">
-          <span class="status">Open to all</span>
-          <button class="open-btn" type="button" aria-label="Open Suggest a Tool">Open →</button>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>About BeAwarely</h2>
-    <p>
-      BeAwarely is a community-driven project focused on helping people understand how AI
-      shapes our lives, work, and choices. We explore both opportunities and risks,
-      translating complex topics into clear, practical guidance.
-    </p>
-  </section>
-
-  <section class="section">
-    <h2>Why Join?</h2>
-    <ul class="reasons">
-      <li>Inform and educate others with clear, vetted resources</li>
-      <li>Contribute to a safer, more transparent AI future</li>
-      <li>Stay up to date on real-world AI advances (not just hype)</li>
-      <li>Support responsible AI development and governance</li>
-      <li>Collaborate with a global community of builders and reviewers</li>
-      <li>Get early access to BeAwarely tools and prototypes</li>
-    </ul>
-  </section>
-
-  <!-- Moderator (ukryty domyślnie) -->
-  <div id="moderatorRedirect" class="section" style="display:none; text-align:center;">
-    <a href="moderator.html" class="blackhole-btn" aria-label="Moderator"></a>
-  </div>
-
- <!-- Login Modal -->
-  <div id="loginModal" class="modal" aria-hidden="true">
-    <div role="dialog" tabindex="-1" class="modal-card">
-      <div class="modal-header">
-        <h3>Sign In / Sign Up</h3>
-        <button id="closeLogin" class="close-btn" aria-label="Close">✖</button>
+  <div id="toolsGrid" class="tools-grid">
+    <!-- Karta 1: AI Chat (Mistral) -->
+    <article class="tool-card" data-href="chat.html" data-requires-auth="true">
+      <div class="tool-top">
+        <span class="tool-icon">🤖</span>
+        <span class="tool-badge">Members</span>
       </div>
-      <p id="authError" class="auth-error"></p>
-      <form id="authForm" class="auth-form">
-        <input type="email" id="emailInput" placeholder="Email" required />
-        <input type="password" id="passwordInput" placeholder="Password" required />
-        <div class="auth-actions">
-          <button type="submit" id="signInBtn" class="btn">Sign In</button>
-          <button type="button" id="signUpBtn" class="btn-secondary">Sign Up</button>
-        </div>
-      </form>
-      <div class="auth-divider">or</div>
-      <button id="googleSignInBtn" class="btn-google">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-        <span>Continue with Google</span>
-      </button>
-    </div>
+      <h3 class="tool-title">AI Chat</h3>
+      <div class="tool-cta">
+        <span class="status">Login required</span>
+        <button class="open-btn" type="button">Open →</button>
+      </div>
+    </article>
+
+    <!-- Card: WorkVerify -->
+    <article class="tool-card" data-href="workverify.html" data-requires-auth="false">
+      <div class="tool-top">
+        <span class="tool-icon">⚖️</span>
+        <span class="tool-badge">Open</span>
+      </div>
+      <h3 class="tool-title">WorkVerify</h3>
+      <div class="tool-cta">
+        <span class="status">Open</span>
+        <button class="open-btn" type="button">Open →</button>
+      </div>
+    </article>
+
+    <!-- Karta 3: Explore the Tree -->
+<article class="tool-card" data-href="tree.html" data-requires-auth="false">
+  <div class="tool-top">
+    <span class="tool-icon">🌳</span>
+    <span class="tool-badge">Open</span>
   </div>
+  <h3 class="tool-title">Explore the Tree</h3>
+  <div class="tool-cta">
+    <span class="status">Open</span>
+    <button class="open-btn" type="button">Open →</button>
+  </div>
+</article>
+
+    <!-- Card: Faith & Reason -->
+    <article class="tool-card" data-href="faith-reason.html" data-requires-auth="true">
+      <div class="tool-top">
+        <span class="tool-icon">📜</span>
+        <span class="tool-badge">Members</span>
+      </div>
+      <h3 class="tool-title">Faith & Reason</h3>
+      <div class="tool-cta">
+        <span class="status">Login required</span>
+        <button class="open-btn" type="button">Open →</button>
+      </div>
+    </article>
+
+    <!-- Suggest a Tool (public ideas & votes) -->
+<article class="tool-card" data-href="suggest.html" data-requires-auth="false">
+  <div class="tool-top">
+    <span class="tool-icon">💡</span>
+    <span class="tool-badge">Public</span>
+  </div>
+  <h3 class="tool-title">Suggest a Tool</h3>
+  <div class="tool-cta">
+    <span class="status">Open to all</span>
+    <button class="open-btn" type="button" aria-label="Open Suggest a Tool">Open →</button>
+  </div>
+</article>
+     
+  </div>
+</section>
+
+<!-- About + Why Join przeniesione POD AI Hub i rozbudowane -->
+<section class="scroll-reveal">
+  <h2>About BeAwarely</h2>
+  <p>
+    BeAwarely is a community-driven project focused on helping people understand how AI
+    shapes our lives, work, and choices. We explore both opportunities and risks,
+    translating complex topics into clear, practical guidance. Our goal is to empower
+    users, creators, and decision-makers to build and use AI responsibly.
+  </p>
+</section>
+
+<section class="scroll-reveal">
+  <h2>Why Join?</h2>
+  <ul class="reasons">
+    <li>Inform and educate others with clear, vetted resources</li>
+    <li>Contribute to a safer, more transparent AI future</li>
+    <li>Stay up to date on real-world AI advances (not just hype)</li>
+    <li>Support responsible AI development and governance</li>
+    <li>Collaborate with a global community of builders and reviewers</li>
+    <li>Get early access to BeAwarely tools and prototypes</li>
+  </ul>
+</section>
+  
+<!-- 🔽 Moderator button (czarna dziura, tylko dla moderatorów) -->
+<div id="moderatorRedirect" class="scroll-reveal" style="display:none; text-align:center; margin-top:40px;">
+  <a href="moderator.html" class="blackhole-btn"></a>
+</div>
+
+<style>
+.blackhole-btn {
+  position: relative;
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, #000 70%, #111 100%);
+  box-shadow: 
+    0 0 25px rgba(255, 140, 0, 0.4),
+    0 0 50px rgba(255, 80, 0, 0.2),
+    inset 0 0 40px rgba(0,0,0,0.9);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.blackhole-btn::before {
+  content: "";
+  position: absolute;
+  top: -25%;
+  left: -25%;
+  width: 150%;
+  height: 150%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 200, 50, 0.6),
+    rgba(255, 80, 0, 0.8),
+    rgba(200, 30, 0, 0.6),
+    rgba(255, 200, 50, 0.6)
+  );
+  animation: swirl 10s linear infinite;
+  mix-blend-mode: screen;
+  filter: blur(6px);
+}
+
+.blackhole-btn:hover {
+  transform: scale(1.1);
+}
+
+@keyframes swirl {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+  
+</style>
+
+  <footer style="text-align: center; padding: 30px 20px; font-size: 14px; color: #999; background-color: transparent;">
+  <div class="social-icons" style="margin-bottom: 10px;">
+    <a href="#" title="Website" style="margin: 0 10px; font-size: 20px;">🌐</a>
+    <a href="#" title="Instagram" style="margin: 0 10px; font-size: 20px;">📸</a>
+    <a href="#" title="Mind" style="margin: 0 10px; font-size: 20px;">🧠</a>
+    <a href="https://discord.gg/a73WKd6DAZ" target="_blank" rel="noopener" aria-label="Join us on Discord" title="Join us on Discord" style="margin: 0 10px;">
+      <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
+    </a>
+  </div>
+  <div style="margin-bottom: 5px;">
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Privacy Policy</a> |
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Contact</a> |
+    <a href="#" style="margin: 0 10px; color: #999; text-decoration: none;">Project Principles</a>
+  </div>
+  <div style="margin-top: 5px;">
+    © 2025 BeAwarely. All rights reserved.
+  </div>
+  <div style="margin-top: 3px; font-size: 12px; color: #777;">
+    This is a demo version – not final.
+  </div>
+</footer>
+
+<style>
+  .discord-icon {
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+    transition: transform 0.3s ease;
+  }
+  .discord-icon:hover {
+    transform: rotate(10deg) scale(1.1);
+  }
+
+  #loginBtn:hover {
+  transform: scale(1.05);
+}
+
+
+  @media (max-width: 500px) {
+  footer {
+    font-size: 13px;
+  }
+  .social-icons a {
+    margin: 0 6px;
+  }
+  .discord-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* przeniesione z drugiego media-query */
+    /* przyciski siedzą w #topbar – bez absolute top/right */
+  #modeIcon, #loginBtn { font-size: 1.1rem; padding: 4px 10px; }
+}
+
+/* Twarde centrowanie sekcji z przyciskiem */
+#support-cta{
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: none;
+  margin-top: clamp(90px, 10vh, 140px);
+  margin-bottom: clamp(60px, 6vh, 100px);
+}
+  
+#support-cta button{
+  margin: 0 auto;
+  position: static !important;  /* zbij ewentualne left:-... */
+  left: auto !important;
+}
+
+.legacy-hide { display: none !important; }
+
+/* --- AI Hub cards --- */
+.section-sub{opacity:.8;margin:-6px 0 18px}
+/* Szerokość i wyśrodkowanie całej sekcji AI Hub (nadpisuje globalne section{max-width:720px}) */
+#ai-hub{
+  max-width:1320px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* Siatka kart – wyśrodkowana horyzontalnie */
+.tools-grid{
+  display:grid;
+  grid-template-columns: repeat(4, minmax(220px,1fr)); /* 4 kolumny na desktopie */
+  gap:16px;
+  justify-content:center; /* wyśrodkuj cały blok kolumn w dostępnej szerokości */
+}
+@media (max-width:1279px){
+  .tools-grid{ grid-template-columns: repeat(3, minmax(220px,1fr)); }
+}
+@media (max-width:1023px){
+  .tools-grid{ grid-template-columns: repeat(2, minmax(200px,1fr)); }
+}
+@media (max-width:639px){
+  .tools-grid{ grid-template-columns: 1fr; }
+}
+
+
+.tool-card{
+  position:relative;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  padding:16px;
+  min-height:130px;                 /* kompaktowa stała wysokość */
+  display:flex;                     /* układ kolumnowy */
+  flex-direction:column;
+  justify-content:space-between;
+  backdrop-filter: blur(3px);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .2s;
+  cursor:pointer;
+}
+
+.tool-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  border-color: rgba(255,255,255,.18);
+}
+.tool-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.tool-icon{font-size:24px}
+.tool-badge{
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  background: rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+}
+.tool-title{
+  margin:6px 0 4px;
+  font-size:20px;
+  font-weight:800;
+  line-height:1.2;
+}
+.tool-desc{display:none !important}  /* bez opisów na kartach */
+.tool-cta{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+/* ukryj dolny status – zostawiamy tylko górny .tool-badge */
+.tool-cta .status{display:none !important}
+.open-btn{
+  border:none; padding:8px 12px; border-radius:10px;
+  background: linear-gradient(135deg, var(--blue1), var(--blue2));
+  color:#fff; font-weight:600; cursor:pointer;
+}
+.tool-card.locked .open-btn{opacity:.7}
+.tool-card.locked .status::before{content:"🔒 ";}
+
+/* tryb jasny */
+body.light-mode .tool-card{background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.08)}
+body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,0,.10)}
+
+/* Support button – look & feel jak Your Profile / Hello */
+#supportBtn:hover { 
+  background-color: rgba(255,255,255,0.20);
+  transform: translateY(-1px);
+}
+
+/* Mobile korekta pozycji (spójnie z #loginBtn / #modeIcon) */
+@media (max-width: 500px) {
+  #supportBtn {
+    top: 56px;      /* trochę bliżej góry na małych ekranach */
+    left: 10px;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+}
+
+/* Schowaj dawną, środkową sekcję z przyciskiem Support (nic nie usuwamy) */
+#support-cta { 
+  display: none !important; 
+}
+  
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  console.log("✅ Supabase script loaded");
+  const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+
+  // 1) Jeden klient z trwałą sesją i auto-odświeżaniem
+  try {
+  console.log("➡️ Tworzę klienta Supabase…");
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: window.localStorage,
+    },
+    });
+  window.supabaseClient = supabaseClient;
+  console.log("✅ Klient Supabase utworzony:", supabaseClient);
+
+// 🚦 DIAGNOSTYKA — kolejne kroki
+console.log("STEP 1: supabaseClient gotowy");
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("STEP 2: DOMContentLoaded wystartował");
+});
+supabaseClient.auth.getSession()
+  .then(({ data, error }) => {
+    console.log("STEP 3: getSession zwrócił:", data, error);
+  })
+  .catch(e => console.error("STEP 3 ERROR:", e));
+
+} catch (err) {
+  console.error("❌ Błąd przy tworzeniu klienta Supabase:", err);
+}
+
+  // 2) Logowanie Google + bezpieczne przekierowanie (replace)
+  async function signInWithGoogle() {
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "https://beawarely.com/" },
+    });
+    if (error) {
+      console.error("OAuth error:", error.message);
+    } else if (data?.url) {
+      window.location.replace(data.url);
+    }
+  }
+</script>
+  
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("📌 DOMContentLoaded → scroll-reveal init start");
+    const elements = document.querySelectorAll('.scroll-reveal');
+
+    const reveal = () => {
+      const windowHeight = window.innerHeight;
+      elements.forEach(el => {
+        const top = el.getBoundingClientRect().top;
+        if (top < windowHeight - 100) {
+          el.classList.add('revealed');
+        }
+      });
+    };
+
+    window.addEventListener('scroll', reveal);
+    reveal();
+  });
+
+  function toggleGalaxyMode() {
+    alert("Galaxy brightness toggle coming soon!");
+  }
+</script>
+
+
+  <script>
+  function openLoginModal() {
+    const modal = document.getElementById("loginModal");
+    if (!modal) return;
+    modal.classList.add("open");
+    document.body.style.overflow = 'hidden';
+    const dialog = modal.querySelector('[role="dialog"]');
+    if (dialog) dialog.focus();
+  }
+  function closeLoginModal() {
+    const modal = document.getElementById("loginModal");
+    if (!modal) return;
+    modal.classList.remove("open");
+    document.body.style.overflow = '';
+  }
+  // Klik w tło (oba modale)
+  window.addEventListener('click', (e) => {
+    const lm = document.getElementById('loginModal');   if (lm && e.target === lm) closeLoginModal();
+    const sm = document.getElementById('supportModal'); if (sm && e.target === sm) closeSupportModal();
+  });
+  // Jeden ESC dla obu
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const loginOpen   = document.getElementById('loginModal')?.classList.contains('open');
+    const supportOpen = document.getElementById('supportModal')?.classList.contains('open');
+    if (loginOpen) closeLoginModal();
+    else if (supportOpen) closeSupportModal();
+  });
+</script>
+  
+
+  <script>
+  function openSupportModal() {
+  const m = document.getElementById('supportModal');
+  if (!m) return;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSupportModal() {
+  const m = document.getElementById('supportModal');
+  if (!m) return;
+  m.classList.remove('open');
+  document.body.style.overflow = '';
+  const note = document.getElementById('copiedNote');
+  if (note) note.style.display = 'none';
+}
+
+
+  // Kopiowanie adresu crypto
+  function copyCrypto() {
+    const address = 'TWÓJ_ADRES_CRYPTO';
+    navigator.clipboard.writeText(address).then(() => {
+      const note = document.getElementById('copiedNote');
+      if (note) note.style.display = 'block';
+      setTimeout(() => note && (note.style.display = 'none'), 1800);
+    });
+  }
+</script>
+
+<!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
+<!-- 🔽 Spójne sterowanie UI stanem sesji -->
+<script>
+  function wireLoginUI(session){
+    console.log("STEP 6: wireLoginUI start, session:", session);
+    const logged = !!session;
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+      loginBtn.textContent = logged ? 'Log out' : 'Log In';
+      loginBtn.onclick = logged ? logoutUser : openLoginModal;
+    }
+    const profileRedirect = document.getElementById('profileRedirect');
+    if (profileRedirect) profileRedirect.style.display = logged ? 'block' : 'none';
+    const yourProfileBtn = document.getElementById('yourProfileBtn');
+    if (yourProfileBtn) yourProfileBtn.style.display = logged ? 'inline-block' : 'none';
+  }
+
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    wireLoginUI(session);
+    await window.refreshLocks?.();
+    if (event === 'SIGNED_IN') {
+      const dest = localStorage.getItem('ba_redirect');
+      if (dest) { localStorage.removeItem('ba_redirect'); location.replace(dest); }
+    } else if (event === 'SIGNED_OUT') {
+  localStorage.removeItem('ba_redirect');
+  document.getElementById('loginModal')?.classList.remove('open');
+  document.getElementById('supportModal')?.classList.remove('open');
+  document.body.style.overflow = '';
+
+  // reset UI po wylogowaniu
+  const chip = document.getElementById('profileChip');
+  if (chip) chip.style.display = 'none';
+  const loginBtn = document.getElementById('loginBtn');
+  if (loginBtn) {
+    loginBtn.textContent = 'Log In';
+    loginBtn.onclick = openLoginModal;
+  }
+
+  location.replace('index.html');
+}
+
+  });
+</script>
+
+
+<script>
+  async function logoutUser() {
+    console.log("STEP 10: logoutUser start");
+    try { await supabaseClient.auth.signOut(); }
+    catch (e) { console.error("❌ signOut failed:", e?.message || e); }
+    localStorage.removeItem('ba_redirect');
+    document.getElementById('loginModal')?.classList.remove('open');
+    document.getElementById('supportModal')?.classList.remove('open');
+    document.body.style.overflow = '';
+    location.replace('index.html');
+  }
+</script>
+
+
+<!-- 🔽 Dodaj to przed </body> -->
+<div id="loginModal" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+">
+  <div role="dialog" tabindex="-1" style="
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    color: black;
+  ">
+    <h2>Sign In</h2>
+    <button onclick="signInWithGoogle()" style="
+      margin-top: 10px;
+      background-color: #4285F4;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    ">
+      Continue with Google
+    </button>
+    <br><br>
+    <button onclick="closeLoginModal()" style="
+      background-color: #999;
+      color: white;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 4px;
+    ">Close</button>
+  </div>
+</div>
 
   <!-- Support Modal -->
-  <div id="supportModal" class="modal" aria-hidden="true">
-    <div role="dialog" tabindex="-1" class="modal-card">
-      <h3>Support BeAwarely</h3>
-      <div class="support-grid">
-        <a href="https://github.com/beawarely" target="_blank" rel="noopener" class="support github">💖 GitHub Sponsors</a>
-        <a href="https://ko-fi.com/beawarely" target="_blank" rel="noopener" class="support kofi">☕ Ko-fi</a>
-        <a href="https://paypal.me/x" target="_blank" rel="noopener" class="support paypal">💳 PayPal</a>
-        <button id="copyCrypto" class="support crypto">₿ Donate Crypto</button>
-      </div>
-      <div id="copiedNote" class="copied-note" style="display:none;">Crypto address copied ✅</div>
-      <button id="closeSupport" class="btn-secondary">Close</button>
+<div id="supportModal" style="
+  display:none; position:fixed; inset:0; z-index:9998;
+  background: rgba(0,0,0,.55); align-items:center; justify-content:center;">
+  <div role="dialog" aria-modal="true" tabindex="-1" style="
+      background: rgba(20,20,20,.98);
+      color:#fff; width:min(520px, 92vw); border-radius:16px; 
+      padding:26px; box-shadow: 0 20px 60px rgba(0,0,0,.5);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="margin:0; font-size:1.2rem;">Support BeAwarely</h3>
+      <button onclick="closeSupportModal()" aria-label="Close"
+              style="background:transparent; border:none; color:#aaa; font-size:1.2rem; cursor:pointer;">✖</button>
+    </div>
+
+    <p style="margin: 0 0 14px; color:#bbb; font-size:.95rem;">
+      Choose your way to support the mission:
+    </p>
+
+    <div style="
+      display:grid; grid-template-columns: repeat(2, minmax(140px,1fr));
+      gap:12px; justify-items:stretch;">
+
+      <a href="https://github.com/beawarely" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; 
+                background:#ea4aaa; color:#fff; text-decoration:none; 
+                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+        💖 <span>GitHub Sponsors</span>
+      </a>
+
+      <a href="https://ko-fi.com/beawarely" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; 
+                background:#29abe0; color:#fff; text-decoration:none; 
+                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+        ☕ <span>Ko‑fi</span>
+      </a>
+
+      <a href="https://paypal.me/x" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; 
+                background:#0070ba; color:#fff; text-decoration:none; 
+                padding:14px; border-radius:12px; font-weight:700; justify-content:center;">
+        💳 <span>PayPal</span>
+      </a>
+
+      <button onclick="copyCrypto()" 
+              style="display:flex; align-items:center; gap:10px; 
+                     background:#f7931a; color:#fff; 
+                     padding:14px; border:none; border-radius:12px; font-weight:700; justify-content:center; cursor:pointer;">
+        ₿ <span>Donate Crypto</span>
+      </button>
+    </div>
+
+    <div id="copiedNote" style="display:none; text-align:center; margin-top:12px; color:#00cc66;">
+      Crypto address copied ✅
     </div>
   </div>
+</div>
 
-  <footer class="footer">
-    <div class="social-icons">
-      <a href="#" title="Website">🌐</a>
-      <a href="#" title="Instagram">📸</a>
-      <a href="#" title="Mind">🧠</a>
-      <a href="https://discord.gg/a73WKd6DAZ" target="_blank" rel="noopener" aria-label="Join us on Discord" title="Join us on Discord">
-        <img src="https://img.icons8.com/ios-filled/50/discord-logo.png" alt="Discord" class="discord-icon" />
-      </a>
-    </div>
-    <div class="footer-links">
-      <a href="#">Privacy Policy</a> |
-      <a href="#">Contact</a> |
-      <a href="#">Project Principles</a>
-    </div>
-    <div>© 2025 BeAwarely. All rights reserved.</div>
-    <div class="demo-note">This is a demo version – not final.</div>
-  </footer>
+<script>
+(function(){
+  const sb = supabaseClient;
+  const grid = document.getElementById('toolsGrid');
+  if (!grid) return;
 
-  <!-- New, isolated script (no Supabase yet) -->
-  <script src="js/index.js"></script>
+    async function refreshLocks(){
+    console.log("STEP 7: refreshLocks start");
+    const { data: { session } } = await sb.auth.getSession();
+    const authed = !!session;
+    const userId = session?.user?.id || null;
+let isMod = false;
+if (userId) {
+  const { data: modData } = await sb
+    .from('moderators')
+    .select('user_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  isMod = !!modData;
+}
+
+    grid.querySelectorAll('.tool-card').forEach(card=>{
+      const needsAuth = card.dataset.requiresAuth === 'true';
+      const modOnly   = card.dataset.moderatorOnly === 'true';
+
+      // blokada: wymaga logowania lub mod-only dla nie-modów
+      const lockedForAuth = needsAuth && !authed;
+const lockedForRole = modOnly && !isMod;
+const locked = lockedForAuth || lockedForRole;
+
+      card.classList.toggle('locked', locked);
+
+      const statusEl = card.querySelector('.status');
+      const badgeEl  = card.querySelector('.tool-badge');
+
+      // Teksty statusu/badge:
+      if (modOnly && !isMod) {
+        if (statusEl) statusEl.textContent = 'Soon';
+        if (badgeEl)  badgeEl.textContent  = 'Soon';
+      } else if (needsAuth && !authed) {
+        if (statusEl) statusEl.textContent = 'Login required';
+      } else {
+        if (statusEl && statusEl.textContent.trim().length === 0) statusEl.textContent = 'Open';
+      }
+
+      // Kliknięcia:
+      card.onclick = () => {
+        const href = card.dataset.href;
+        if (lockedForAuth) {
+          localStorage.setItem('ba_redirect', href);
+          const modal = document.getElementById('loginModal'); if (modal) modal.classList.add('open');
+          if (typeof window.openLoginModal === 'function') window.openLoginModal();
+          return;
+        }
+        if (lockedForRole) {
+          alert('Coming soon.');
+          return;
+        }
+        if (href) window.location.href = href;
+      };
+    });
+  }
+
+
+  window.refreshLocks = refreshLocks;
+
+  if (new URLSearchParams(location.search).get('login') === '1') {
+    const modal = document.getElementById('loginModal');
+    if (modal) modal.classList.add('open');
+    if (typeof window.openLoginModal === 'function') window.openLoginModal();
+  }
+  refreshLocks();
+})();
+
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const left  = document.querySelector('#topbar .topbar-left');
+  const right = document.querySelector('#topbar .topbar-right');
+
+  const profile = document.getElementById('yourProfileBtn'); // już istnieje
+  const login   = document.getElementById('loginBtn');        // już istnieje
+  const mode    = document.getElementById('modeIcon');        // już istnieje
+
+// SUPPORT – topbar $$$ (minimal)
+let support = document.getElementById('supportTopBtn');
+if (!support) {
+  support = document.createElement('a');
+  support.id = 'supportTopBtn';
+  support.href = 'javascript:void(0)';
+  support.className = 'pill';
+  support.textContent = '💲💲💲';
+  support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
+}
+
+
+
+  // nadaj klasę „pill” istniejącym, by wyglądały spójnie
+  if (profile) profile.classList.add('pill');
+  if (login)   login.classList.add('pill');
+
+  // wstaw do odpowiednich grup
+  if (profile) left.appendChild(profile);
+  left.appendChild(support);
+  if (login)   right.appendChild(login);
+  if (mode)    right.appendChild(mode);
+});
+</script>
+
+<script>
+  // Enter/Space aktywują klik
+  function makeKeyboardClickable(el, onActivate){
+    if(!el) return;
+    el.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onActivate();
+      }
+    });
+  }
+    document.addEventListener('DOMContentLoaded', ()=>{
+    makeKeyboardClickable(document.getElementById('loginBtn'), () => {
+      const btn = document.getElementById('loginBtn');
+      if (btn) btn.click(); // używa handlera przypiętego w wireLoginUI
+    });
+  });
+
+</script>
+
+<script>
+/* ===== Profiles: ensure + load + UI hook (wersja pod supabaseClient) ===== */
+
+async function ensureProfile(user) {
+  console.log("STEP 13.1: 🔥 ensureProfile ENTER, user:", user);
+  if (!user) {
+    console.log("STEP 13.2: ensureProfile → brak user, wychodzę");
+    return;
+  }
+
+  const baseName = (user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name))
+                   || (user.email ? user.email.split('@')[0] : 'User');
+    console.log("STEP 13.3: upsert data →", { id: user.id, display_name: baseName });
+    const { data, error, status } = await supabaseClient
+    .from('profiles')
+    .upsert({ id: user.id, display_name: baseName }, { onConflict: 'id' })
+    .select(); // wymusza zwrot danych
+
+  console.log("STEP 13.4: upsert result →", { status, data, error });
+
+  if (error) {
+    console.error('ensureProfile error:', error);
+  } else {
+    console.log("STEP 13.5: ensureProfile SUCCESS dla user.id:", user.id);
+  }
+
+}
+
+async function fetchMyProfile() {
+  console.log("STEP 14.1: 🔎 fetchMyProfile ENTER");
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    console.log("STEP 14.2: brak usera → zwracam null");
+    return null;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('id, display_name, avatar_url, rank, points, badges')
+    .eq('id', user.id)
+    .single();
+
+  if (error) {
+    console.error("STEP 14.3: ❌ fetchMyProfile error:", error);
+    return null;
+  }
+
+  console.log("STEP 14.4: ✅ fetchMyProfile SELECT wynik:", data);
+  return data || null;
+}
+
+function applyProfileToUI(profile) {
+  console.log("STEP 15.1: 🎨 applyProfileToUI ENTER, profile:", profile);
+  const chip    = document.getElementById('profileChip');
+  const nameEl  = document.getElementById('profileName');
+  const rankEl  = document.getElementById('profileRank');
+  const avatarEl= document.getElementById('profileAvatar');
+  if (!chip || !nameEl || !rankEl || !avatarEl) {
+    console.warn("STEP 15.2: brak elementów UI → przerywam");
+    return;
+  }
+
+  if (!profile) {
+    console.log("STEP 15.3: brak profilu → chowam chip");
+    chip.style.display = 'none';
+    return;
+  }
+
+  nameEl.textContent = profile.display_name || 'User';
+  rankEl.textContent = profile.rank
+    ? `${profile.rank} • ${profile.points ?? 0} pts`
+    : `${profile.points ?? 0} pts`;
+
+  if (profile.avatar_url) {
+    const v = Date.now();
+    avatarEl.src = `${profile.avatar_url}${profile.avatar_url.includes('?') ? '&' : '?'}v=${v}`;
+  } else {
+    avatarEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="100%" height="100%" fill="%23ddd"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="22">%F0%9F%98%8A</text></svg>';
+  }
+  chip.style.display = 'flex';
+
+  console.log("STEP 15.4: ✅ applyProfileToUI EXIT — chip zaktualizowany");
+}
+
+// Start: sesja → profil → chip
+(async () => {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (user) {
+    await ensureProfile(user);
+    // zawsze świeży SELECT profilu z Supabase
+    const me = await fetchMyProfile();
+console.log("STEP 16.1: 🔄 Fresh profile on load wynik fetchMyProfile:", me);
+applyProfileToUI(me);
+console.log("STEP 16.2: 🚀 applyProfileToUI wywołane po fetchMyProfile");
+
+  } else {
+    applyProfileToUI(null);
+  }
+})();
+
+// Reakcja na login/logout
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user) {
+  await ensureProfile(session.user);
+  // wymuszamy zawsze świeży SELECT profilu
+  const me = await fetchMyProfile();
+  console.log("✅ Fresh profile on SIGNED_IN:", me);
+  applyProfileToUI(me);
+} 
+  else if (event === 'SIGNED_OUT') {
+    applyProfileToUI(null);
+  }
+});
+
+// (opcjonalne) helper do zmiany wyświetlanej nazwy
+async function updateDisplayName(newName) {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return { error: 'Not logged in' };
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update({ display_name: newName })
+    .eq('id', user.id);
+  if (error) console.error('updateDisplayName error:', error);
+  else {
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+  }
+  return { error: error?.message || null };
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modeBtn = document.getElementById('modeIcon');
+  if (modeBtn) {
+    modeBtn.addEventListener('click', toggleLightDarkMode);
+  }
+});
+</script>
+<script>
+async function checkModeratorButton() {
+  console.log("STEP 8: checkModeratorButton start");
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  const modBtn = document.getElementById('moderatorRedirect');
+  if (!modBtn) return;
+  if (!user) {
+    modBtn.style.display = 'none';
+    return;
+  }
+
+  const { data } = await supabaseClient
+    .from('moderators')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  modBtn.style.display = data ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', checkModeratorButton);
+supabaseClient.auth.onAuthStateChange(checkModeratorButton);
+</script>
+
+<script>
+// Global error + unhandled promise rejection logger
+console.log("🟢 Global error logger aktywny");
+
+window.addEventListener("error", (e) => {
+  console.error("❌ Global JS error:", e.message, "at", e.filename, ":", e.lineno, "stack:", e.error?.stack);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("❌ Unhandled Promise rejection:", e.reason);
+});
+</script>
+<script>
+window.addEventListener('load', async () => {
+  try {
+    console.log("STEP 4: wchodzę do window.load -> getSession");
+    if (!window.supabaseClient) {
+      console.error("❌ Brak supabaseClient w momencie window.load!");
+      return;
+    }
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    console.log("STEP 5: Session check on load:", session, error);
+
+    if (session) {
+  wireLoginUI(session);
+  const me = await fetchMyProfile();
+  console.log("STEP 16.1: Fresh profile on load wynik fetchMyProfile:", me);
+  applyProfileToUI(me);
+  console.log("STEP 16.2: 🚀 applyProfileToUI wywołane po fetchMyProfile");
+} else {
+  wireLoginUI(null);
+  document.getElementById('profileChip')?.style.setProperty("display","none");
+  applyProfileToUI(null);
+}
+
+    await window.refreshLocks?.();
+  } catch (e) {
+    console.error("❌ Error during session check:", e);
+  }
+});
+</script>
+
 </body>
 </html>
