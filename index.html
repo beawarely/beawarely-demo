@@ -926,63 +926,37 @@ function closeSupportModal() {
 
   let loginLock = false;
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  // ✅ Czekaj aż Supabase faktycznie przywróci sesję po reloadzie
-  if (event === 'INITIAL_SESSION' && !session) {
-    console.log("⏳ INITIAL_SESSION = null → czekam aż Supabase przywróci sesję…");
-    for (let i = 0; i < 20; i++) {
-      const { data } = await supabaseClient.auth.getSession();
-      if (data?.session) {
-        console.log("✅ Sesja przywrócona po", i, "iteracjach:", data.session.user?.email || data.session.user?.id);
-        session = data.session;
-        break;
-      }
-      await new Promise(r => setTimeout(r, 300));
-    }
+  console.log("🧩 AUTH STATE CHANGE:", event, session);
+
+  // Zawsze aktualizuj UI
+  wireLoginUI(session);
+  await window.refreshLocks?.();
+
+  // 🔹 tylko po pełnym zalogowaniu
+  if (event === 'SIGNED_IN') {
+    console.log("🔁 SIGNED_IN – pełne odświeżenie profilu");
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+    return;
   }
 
-  console.log("🧠 onAuthStateChange triggered:", event, "loginLock =", loginLock);
-if (loginLock && event !== 'INITIAL_SESSION') return;
-loginLock = (event !== 'SIGNED_OUT');
-console.log("🧩 AUTH STATE CHANGE:", event, session);
+  // 🔹 tylko przy pierwszym uruchomieniu (reload)
+  if (event === 'INITIAL_SESSION' && session) {
+    console.log("🌀 INITIAL_SESSION – sesja przywrócona, ładuję profil");
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+    return;
+  }
 
-    wireLoginUI(session);
-    await window.refreshLocks?.();
-    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-  console.log(`🔁 ${event} – wymuszam pełne odświeżenie UI`);
-      await new Promise(r => setTimeout(r, 500));
-      const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
-      wireLoginUI(freshSession);
-      console.log("🧩 DEBUG: przed fetchMyProfile");
-const me = await fetchMyProfile();
-console.log("🧩 DEBUG: po fetchMyProfile wynik =", me);
-applyProfileToUI(me);
-console.log("🧩 DEBUG: po applyProfileToUI – UI powinien się odświeżyć");
-
-      if (typeof window.refreshLocks === 'function') await window.refreshLocks();
-
-      const dest = localStorage.getItem('ba_redirect');
-      if (dest) {
-        localStorage.removeItem('ba_redirect');
-        location.replace(dest);
-      } else {
-  console.log("✅ SIGNED_IN zakończone – odświeżenie UI bez reload()");
-}
-    } else if (event === 'SIGNED_OUT') {
-  loginLock = false;
-
-      localStorage.removeItem('ba_redirect');
-      document.getElementById('loginModal')?.classList.remove('open');
-      document.getElementById('supportModal')?.classList.remove('open');
-      document.body.style.overflow = '';
-      const chip = document.getElementById('profileChip');
-      if (chip) chip.style.display = 'none';
-      const loginBtn = document.getElementById('loginBtn');
-      if (loginBtn) {
-        loginBtn.textContent = 'Log In';
-        loginBtn.onclick = openLoginModal;
-      }
-      location.replace('index.html');
-    }
+  // 🔹 po wylogowaniu
+  if (event === 'SIGNED_OUT') {
+    console.log("🚪 SIGNED_OUT – czyszczenie UI");
+    localStorage.removeItem('ba_redirect');
+    document.getElementById('profileChip')?.style?.display = 'none';
+    document.getElementById('loginBtn').textContent = 'Log In';
+    document.getElementById('loginBtn').onclick = openLoginModal;
+    return;
+  }
 });
 
 </script>
