@@ -1337,7 +1337,7 @@ async function checkModeratorButton() {
   modBtn.style.display = data ? 'block' : 'none';
 }
 
-document.addEventListener('DOMContentLoaded', checkModeratorButton);
+window.addEventListener('load', checkModeratorButton);
 supabaseClient.auth.onAuthStateChange(checkModeratorButton);
 </script>
 
@@ -1353,7 +1353,7 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 </script>
 <script>
-window.addEventListener('load', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
   try {
     console.log("STEP 4: wchodzę do window.load -> getSession");
     if (!window.supabaseClient) {
