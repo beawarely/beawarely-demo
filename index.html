@@ -409,12 +409,27 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
 <!-- Modal logowania -->
 <div id="loginModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:10001; align-items:center; justify-content:center;">
-  <div style="background:#1e1e1e; padding:24px; border-radius:12px; width:320px; color:#fff;">
-    <h3 style="margin-top:0; text-align:center;">Log In</h3>
+  <div style="background:#1e1e1e; padding:24px; border-radius:12px; width:340px; color:#fff;">
+    <div style="display:flex; justify-content:space-around; margin-bottom:16px;">
+      <button id="tabLogin" class="pill" style="flex:1; margin-right:6px;">Login</button>
+      <button id="tabSignup" class="pill" style="flex:1; margin-left:6px;">Sign Up</button>
+    </div>
+
+    <!-- Login form -->
     <form id="emailLoginForm" style="display:flex; flex-direction:column; gap:12px;">
-      <input type="email" id="emailInput" placeholder="Your email" required />
-      <button type="submit" class="pill" style="justify-content:center;">Send Magic Link</button>
+      <input type="email" id="loginEmail" placeholder="Email" required />
+      <input type="password" id="loginPassword" placeholder="Password" required />
+      <button type="submit" class="pill" style="justify-content:center;">Login</button>
     </form>
+
+    <!-- Sign up form -->
+    <form id="emailSignupForm" style="display:none; flex-direction:column; gap:12px;">
+      <input type="email" id="signupEmail" placeholder="Email" required />
+      <input type="password" id="signupPassword" placeholder="Password" required />
+      <input type="password" id="signupPasswordConfirm" placeholder="Confirm Password" required />
+      <button type="submit" class="pill" style="justify-content:center;">Sign Up</button>
+    </form>
+
     <hr style="margin:20px 0; border:none; border-top:1px solid rgba(255,255,255,.2);" />
     <button id="googleLoginBtn" class="pill" style="width:100%; justify-content:center;">Login with Google</button>
     <button id="closeLoginModal" class="pill" style="width:100%; justify-content:center; margin-top:10px;">Cancel</button>
@@ -937,15 +952,25 @@ window.addEventListener("unhandledrejection", (e) => {
 </script>
 
 <script>
-// 🔑 Supabase: login/logout (Email + Google)
+// 🔑 Supabase: login/logout (Email+Password + Google + Sign up)
 document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById("loginBtn");
   const loginModal = document.getElementById("loginModal");
   const closeLoginModal = document.getElementById("closeLoginModal");
-  const emailLoginForm = document.getElementById("emailLoginForm");
-  const emailInput = document.getElementById("emailInput");
-  const googleLoginBtn = document.getElementById("googleLoginBtn");
 
+  const tabLogin = document.getElementById("tabLogin");
+  const tabSignup = document.getElementById("tabSignup");
+
+  const emailLoginForm = document.getElementById("emailLoginForm");
+  const loginEmail = document.getElementById("loginEmail");
+  const loginPassword = document.getElementById("loginPassword");
+
+  const emailSignupForm = document.getElementById("emailSignupForm");
+  const signupEmail = document.getElementById("signupEmail");
+  const signupPassword = document.getElementById("signupPassword");
+  const signupPasswordConfirm = document.getElementById("signupPasswordConfirm");
+
+  const googleLoginBtn = document.getElementById("googleLoginBtn");
   const profileChip = document.getElementById("profileChip");
   const profileName = document.getElementById("profileName");
   const yourProfileBtn = document.getElementById("yourProfileBtn");
@@ -959,35 +984,63 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // obsługa przycisku login/logout
+  // obsługa login/logout
   loginBtn.addEventListener("click", async () => {
     if (loginBtn.dataset.state === "loggedin") {
-      // LOGOUT
       await supabase.auth.signOut();
       showLoggedOut();
     } else {
-      // LOGIN
       loginModal.style.display = "flex";
+      switchToLogin();
     }
   });
+
+  // przełączanie zakładek
+  function switchToLogin() {
+    emailLoginForm.style.display = "flex";
+    emailSignupForm.style.display = "none";
+  }
+  function switchToSignup() {
+    emailLoginForm.style.display = "none";
+    emailSignupForm.style.display = "flex";
+  }
+  tabLogin.addEventListener("click", switchToLogin);
+  tabSignup.addEventListener("click", switchToSignup);
 
   // zamykanie modala
   closeLoginModal.addEventListener("click", () => loginModal.style.display = "none");
 
-  // logowanie emailem
+  // logowanie emailem+hasłem
   emailLoginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = emailInput.value.trim();
-    if (!email) return;
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true }
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email: loginEmail.value.trim(),
+      password: loginPassword.value
     });
     if (error) {
       alert("❌ " + error.message);
     } else {
-      alert("📧 Magic link wysłany! Sprawdź skrzynkę.");
+      showProfile(data.user);
       loginModal.style.display = "none";
+    }
+  });
+
+  // rejestracja (sign up)
+  emailSignupForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (signupPassword.value !== signupPasswordConfirm.value) {
+      alert("❌ Passwords do not match!");
+      return;
+    }
+    const { error, data } = await supabase.auth.signUp({
+      email: signupEmail.value.trim(),
+      password: signupPassword.value
+    });
+    if (error) {
+      alert("❌ " + error.message);
+    } else {
+      alert("✅ Account created! Please check your email.");
+      switchToLogin();
     }
   });
 
