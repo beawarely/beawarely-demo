@@ -911,9 +911,23 @@ function closeSupportModal() {
     wireLoginUI(session);
     await window.refreshLocks?.();
     if (event === 'SIGNED_IN') {
-      const dest = localStorage.getItem('ba_redirect');
-      if (dest) { localStorage.removeItem('ba_redirect'); location.replace(dest); }
-    } else if (event === 'SIGNED_OUT') {
+  console.log("🔁 SIGNED_IN – wymuszam pełne odświeżenie UI");
+  await new Promise(r => setTimeout(r, 500));
+  const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
+  wireLoginUI(freshSession);
+  const me = await fetchMyProfile();
+  applyProfileToUI(me);
+  if (typeof window.refreshLocks === 'function') await window.refreshLocks();
+
+  const dest = localStorage.getItem('ba_redirect');
+  if (dest) {
+    localStorage.removeItem('ba_redirect');
+    location.replace(dest);
+  } else {
+    location.reload();
+  }
+}
+ else if (event === 'SIGNED_OUT') {
   localStorage.removeItem('ba_redirect');
   document.getElementById('loginModal')?.classList.remove('open');
   document.getElementById('supportModal')?.classList.remove('open');
