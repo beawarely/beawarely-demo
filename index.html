@@ -352,7 +352,6 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 }
     
 /* Support & Login modal – unified open state */
-#loginModal.open { display: flex !important; }
 #supportModal.open { display: flex !important; }
 
 .pill:focus-visible,
@@ -891,20 +890,6 @@ if (!support) {
   if (login)   right.appendChild(login);
   if (mode)    right.appendChild(mode);
 });
-</script>
-
-<script>
-  // Enter/Space aktywują klik
-  function makeKeyboardClickable(el, onActivate){
-    if(!el) return;
-    el.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onActivate();
-      }
-    });
-  }
-    
 </script>
 
 <script>
