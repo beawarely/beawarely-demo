@@ -907,45 +907,48 @@ function closeSupportModal() {
     if (yourProfileBtn) yourProfileBtn.style.display = logged ? 'inline-block' : 'none';
   }
 
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  let loginLock = false;
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  if (loginLock) return; // 🔒 zapobiega wielokrotnemu wywołaniu
+  loginLock = true;
+  console.log("🧩 AUTH STATE CHANGE:", event, session);
+
     wireLoginUI(session);
     await window.refreshLocks?.();
     if (event === 'SIGNED_IN') {
-  console.log("🔁 SIGNED_IN – wymuszam pełne odświeżenie UI");
-  await new Promise(r => setTimeout(r, 500));
-  const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
-  wireLoginUI(freshSession);
-  const me = await fetchMyProfile();
-  applyProfileToUI(me);
-  if (typeof window.refreshLocks === 'function') await window.refreshLocks();
+      console.log("🔁 SIGNED_IN – wymuszam pełne odświeżenie UI");
+      await new Promise(r => setTimeout(r, 500));
+      const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
+      wireLoginUI(freshSession);
+      const me = await fetchMyProfile();
+      applyProfileToUI(me);
+      if (typeof window.refreshLocks === 'function') await window.refreshLocks();
 
-  const dest = localStorage.getItem('ba_redirect');
-  if (dest) {
-    localStorage.removeItem('ba_redirect');
-    location.replace(dest);
-  } else {
-    location.reload();
-  }
-}
- else if (event === 'SIGNED_OUT') {
-  localStorage.removeItem('ba_redirect');
-  document.getElementById('loginModal')?.classList.remove('open');
-  document.getElementById('supportModal')?.classList.remove('open');
-  document.body.style.overflow = '';
+      const dest = localStorage.getItem('ba_redirect');
+      if (dest) {
+        localStorage.removeItem('ba_redirect');
+        location.replace(dest);
+      } else {
+        location.reload();
+      }
+    } else if (event === 'SIGNED_OUT') {
+  loginLock = false;
 
-  // reset UI po wylogowaniu
-  const chip = document.getElementById('profileChip');
-  if (chip) chip.style.display = 'none';
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginBtn) {
-    loginBtn.textContent = 'Log In';
-    loginBtn.onclick = openLoginModal;
-  }
+      localStorage.removeItem('ba_redirect');
+      document.getElementById('loginModal')?.classList.remove('open');
+      document.getElementById('supportModal')?.classList.remove('open');
+      document.body.style.overflow = '';
+      const chip = document.getElementById('profileChip');
+      if (chip) chip.style.display = 'none';
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) {
+        loginBtn.textContent = 'Log In';
+        loginBtn.onclick = openLoginModal;
+      }
+      location.replace('index.html');
+    }
+});
 
-  location.replace('index.html');
-}
-
-  });
 </script>
 
 
@@ -1291,20 +1294,6 @@ console.log("STEP 16.2: 🚀 applyProfileToUI wywołane po fetchMyProfile");
     applyProfileToUI(null);
   }
 })();
-
-// Reakcja na login/logout
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session?.user) {
-  await ensureProfile(session.user);
-  // wymuszamy zawsze świeży SELECT profilu
-  const me = await fetchMyProfile();
-  console.log("✅ Fresh profile on SIGNED_IN:", me);
-  applyProfileToUI(me);
-} 
-  else if (event === 'SIGNED_OUT') {
-    applyProfileToUI(null);
-  }
-});
 
 // (opcjonalne) helper do zmiany wyświetlanej nazwy
 async function updateDisplayName(newName) {
