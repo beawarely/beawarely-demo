@@ -1368,6 +1368,15 @@ window.addEventListener("unhandledrejection", (e) => {
 </script>
 <script>
 window.addEventListener('load', async () => {
+  console.log("🧩 FORCED SESSION SYNC on load");
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    console.log("🧩 Found active session, refreshing UI");
+    wireLoginUI(session);
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+    await window.refreshLocks?.();
+  }
   try {
     console.log("STEP 4: wchodzę do window.load -> getSession");
     if (!window.supabaseClient) {
