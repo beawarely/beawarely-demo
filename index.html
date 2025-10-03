@@ -937,28 +937,17 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   }
 
   // 🔹 Po zalogowaniu
-  if (event === "SIGNED_IN") {
-    console.log("🔁 SIGNED_IN – pełne odświeżenie profilu");
-    try {
-      const me = await fetchMyProfile();
-      applyProfileToUI(me);
-    } catch (err) {
-      console.error("⚠️ fetch/apply profile error:", err);
-    }
-    return;
+  if (event === "SIGNED_IN" || (event === "INITIAL_SESSION" && session)) {
+  console.log(`🔁 ${event} – odświeżam profil i UI`);
+  try {
+    const me = await fetchMyProfile();
+    applyProfileToUI(me);
+    await window.refreshLocks?.();
+  } catch (err) {
+    console.error("⚠️ fetch/apply profile error:", err);
   }
-
-  // 🔹 Przy pierwszym wczytaniu (reload)
-  if (event === "INITIAL_SESSION" && session) {
-    console.log("🌀 INITIAL_SESSION – sesja przywrócona, ładuję profil");
-    try {
-      const me = await fetchMyProfile();
-      applyProfileToUI(me);
-    } catch (err) {
-      console.error("⚠️ fetch/apply profile error:", err);
-    }
-    return;
-  }
+  return;
+}
 
   // 🔹 Po wylogowaniu
   if (event === "SIGNED_OUT") {
