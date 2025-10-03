@@ -893,7 +893,16 @@ function closeSupportModal() {
   }
 
   let loginLock = false;
+let lastAuthEvent = null;
+
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  // 🔒 Blokuj powtórkę tego samego eventu (Supabase wysyła czasem SIGNED_IN zaraz po INITIAL_SESSION)
+  if (event === lastAuthEvent && event !== "SIGNED_OUT") {
+    console.log("⚠️ Pomijam duplikat eventu:", event);
+    return;
+  }
+  lastAuthEvent = event;
+
   console.log("🧩 AUTH STATE CHANGE:", event, session);
 
   // Zawsze aktualizuj UI
