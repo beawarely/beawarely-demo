@@ -1271,22 +1271,6 @@ function applyProfileToUI(profile) {
   console.log("STEP 15.4: ✅ applyProfileToUI EXIT — chip zaktualizowany");
 }
 
-// Start: sesja → profil → chip
-(async () => {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (user) {
-    await ensureProfile(user);
-    // zawsze świeży SELECT profilu z Supabase
-    const me = await fetchMyProfile();
-console.log("STEP 16.1: 🔄 Fresh profile on load wynik fetchMyProfile:", me);
-applyProfileToUI(me);
-console.log("STEP 16.2: 🚀 applyProfileToUI wywołane po fetchMyProfile");
-
-  } else {
-    applyProfileToUI(null);
-  }
-})();
-
 // (opcjonalne) helper do zmiany wyświetlanej nazwy
 async function updateDisplayName(newName) {
   const { data: { user } } = await supabaseClient.auth.getUser();
