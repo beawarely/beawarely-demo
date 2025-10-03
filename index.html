@@ -937,7 +937,21 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   }
 
   // 🔹 Po zalogowaniu
-  if (event === "SIGNED_IN" || (event === "INITIAL_SESSION" && session)) {
+  if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+  // 🔄 Jeśli INITIAL_SESSION nie ma sesji, poczekaj aż Supabase ją przywróci
+  if (event === "INITIAL_SESSION" && !session) {
+    console.log("⏳ INITIAL_SESSION bez sesji – czekam aż Supabase ją odtworzy…");
+    for (let i = 0; i < 15; i++) {
+      const { data } = await supabaseClient.auth.getSession();
+      if (data?.session) {
+        session = data.session;
+        console.log("✅ Sesja odtworzona po", i, "iteracjach");
+        break;
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
+
   console.log(`🔁 ${event} – odświeżam profil i UI`);
   try {
     const me = await fetchMyProfile();
