@@ -911,6 +911,20 @@ function closeSupportModal() {
 
   let loginLock = false;
 supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  // ✅ Czekaj aż Supabase faktycznie przywróci sesję po reloadzie
+  if (event === 'INITIAL_SESSION' && !session) {
+    console.log("⏳ INITIAL_SESSION = null → czekam aż Supabase przywróci sesję…");
+    for (let i = 0; i < 20; i++) {
+      const { data } = await supabaseClient.auth.getSession();
+      if (data?.session) {
+        console.log("✅ Sesja przywrócona po", i, "iteracjach:", data.session.user?.email || data.session.user?.id);
+        session = data.session;
+        break;
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
+
   if (loginLock) return; // 🔒 zapobiega wielokrotnemu wywołaniu
   loginLock = true;
   console.log("🧩 AUTH STATE CHANGE:", event, session);
