@@ -775,38 +775,6 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 
 // 🚦 DIAGNOSTYKA — kolejne kroki
 console.log("STEP 1: supabaseClient gotowy");
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log("STEP 2: DOMContentLoaded wystartował");
-
-  // ⛔️ wstrzymaj UI dopóki nie ma sesji lub minie timeout
-  let tries = 0;
-  while (tries < 20) {
-    const { data } = await supabaseClient.auth.getSession();
-    if (data?.session) {
-      console.log("✅ Sesja przywrócona po", tries, "próbach:", data.session.user?.email || data.session.user?.id);
-      break;
-    }
-    tries++;
-    console.log("⏳ Czekam na sesję...", tries);
-    await new Promise(r => setTimeout(r, 300));
-  }
-
-  if (tries >= 20) console.warn("⚠️ Timeout – nie udało się przywrócić sesji, UI startuje mimo to");
-
-  // 🔄 Poczekaj aż Supabase przywróci sesję z localStorage
-  for (let i = 0; i < 10; i++) {
-    const { data } = await supabaseClient.auth.getSession();
-    if (data?.session) {
-      console.log("✅ Sesja przywrócona po", i, "iteracjach:", data);
-      break;
-    }
-    console.log("⏳ Oczekuję na sesję Supabase…", i);
-    await new Promise(r => setTimeout(r, 300));
-  }
-
-  const { data, error } = await supabaseClient.auth.getSession();
-  console.log("STEP 3: getSession (po oczekiwaniu) →", data, error);
-});
 
 } catch (err) {
   console.error("❌ Błąd przy tworzeniu klienta Supabase:", err);
