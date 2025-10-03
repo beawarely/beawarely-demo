@@ -906,12 +906,13 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   console.log("🧩 AUTH STATE CHANGE:", event, session);
 
   // Zawsze aktualizuj UI
-  try {
-    wireLoginUI(session);
-    await window.refreshLocks?.();
-  } catch (err) {
-    console.error("⚠️ Błąd podczas aktualizacji UI:", err);
-  }
+try {
+  wireLoginUI(session);
+  await window.refreshLocks?.();
+  await checkModeratorButton(); // 🔹 przeniesione tutaj, aby nie dublować eventów
+} catch (err) {
+  console.error("⚠️ Błąd podczas aktualizacji UI:", err);
+}
 
   // 🔹 Po zalogowaniu
   if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
@@ -1329,8 +1330,6 @@ async function checkModeratorButton() {
   modBtn.style.display = data ? 'block' : 'none';
 }
 
-document.addEventListener('DOMContentLoaded', checkModeratorButton);
-supabaseClient.auth.onAuthStateChange(checkModeratorButton);
 </script>
 
 <script>
