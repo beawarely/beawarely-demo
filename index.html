@@ -946,8 +946,8 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
 
     wireLoginUI(session);
     await window.refreshLocks?.();
-    if (event === 'SIGNED_IN') {
-      console.log("🔁 SIGNED_IN – wymuszam pełne odświeżenie UI");
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+  console.log(`🔁 ${event} – wymuszam pełne odświeżenie UI`);
       await new Promise(r => setTimeout(r, 500));
       const { data: { session: freshSession } } = await supabaseClient.auth.getSession();
       wireLoginUI(freshSession);
