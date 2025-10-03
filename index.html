@@ -929,32 +929,52 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
   console.log("🧩 AUTH STATE CHANGE:", event, session);
 
   // Zawsze aktualizuj UI
-  wireLoginUI(session);
-  await window.refreshLocks?.();
+  try {
+    wireLoginUI(session);
+    await window.refreshLocks?.();
+  } catch (err) {
+    console.error("⚠️ Błąd podczas aktualizacji UI:", err);
+  }
 
-  // 🔹 tylko po pełnym zalogowaniu
-  if (event === 'SIGNED_IN') {
+  // 🔹 Po zalogowaniu
+  if (event === "SIGNED_IN") {
     console.log("🔁 SIGNED_IN – pełne odświeżenie profilu");
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
+    try {
+      const me = await fetchMyProfile();
+      applyProfileToUI(me);
+    } catch (err) {
+      console.error("⚠️ fetch/apply profile error:", err);
+    }
     return;
   }
 
-  // 🔹 tylko przy pierwszym uruchomieniu (reload)
-  if (event === 'INITIAL_SESSION' && session) {
+  // 🔹 Przy pierwszym wczytaniu (reload)
+  if (event === "INITIAL_SESSION" && session) {
     console.log("🌀 INITIAL_SESSION – sesja przywrócona, ładuję profil");
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
+    try {
+      const me = await fetchMyProfile();
+      applyProfileToUI(me);
+    } catch (err) {
+      console.error("⚠️ fetch/apply profile error:", err);
+    }
     return;
   }
 
-  // 🔹 po wylogowaniu
-  if (event === 'SIGNED_OUT') {
+  // 🔹 Po wylogowaniu
+  if (event === "SIGNED_OUT") {
     console.log("🚪 SIGNED_OUT – czyszczenie UI");
-    localStorage.removeItem('ba_redirect');
-    document.getElementById('profileChip')?.style?.display = 'none';
-    document.getElementById('loginBtn').textContent = 'Log In';
-    document.getElementById('loginBtn').onclick = openLoginModal;
+    try {
+      localStorage.removeItem("ba_redirect");
+      const chip = document.getElementById("profileChip");
+      if (chip) chip.style.display = "none";
+      const loginBtn = document.getElementById("loginBtn");
+      if (loginBtn) {
+        loginBtn.textContent = "Log In";
+        loginBtn.onclick = openLoginModal;
+      }
+    } catch (err) {
+      console.error("⚠️ cleanup error:", err);
+    }
     return;
   }
 });
