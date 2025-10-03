@@ -940,9 +940,10 @@ supabaseClient.auth.onAuthStateChange(async (event, session) => {
     }
   }
 
-  if (loginLock) return; // 🔒 zapobiega wielokrotnemu wywołaniu
-  loginLock = true;
-  console.log("🧩 AUTH STATE CHANGE:", event, session);
+  console.log("🧠 onAuthStateChange triggered:", event, "loginLock =", loginLock);
+if (loginLock && event !== 'INITIAL_SESSION') return;
+loginLock = (event !== 'SIGNED_OUT');
+console.log("🧩 AUTH STATE CHANGE:", event, session);
 
     wireLoginUI(session);
     await window.refreshLocks?.();
