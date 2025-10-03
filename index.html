@@ -1343,44 +1343,6 @@ window.addEventListener("unhandledrejection", (e) => {
   console.error("❌ Unhandled Promise rejection:", e.reason);
 });
 </script>
-<script>
-window.addEventListener('load', async () => {
-  console.log("🧩 FORCED SESSION SYNC on load");
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session) {
-    console.log("🧩 Found active session, refreshing UI");
-    wireLoginUI(session);
-    const me = await fetchMyProfile();
-    applyProfileToUI(me);
-    await window.refreshLocks?.();
-  }
-  try {
-    console.log("STEP 4: wchodzę do window.load -> getSession");
-    if (!window.supabaseClient) {
-      console.error("❌ Brak supabaseClient w momencie window.load!");
-      return;
-    }
-    const { data: { session }, error } = await supabaseClient.auth.getSession();
-    console.log("STEP 5: Session check on load:", session, error);
-
-    if (session) {
-  wireLoginUI(session);
-  const me = await fetchMyProfile();
-  console.log("STEP 16.1: Fresh profile on load wynik fetchMyProfile:", me);
-  applyProfileToUI(me);
-  console.log("STEP 16.2: 🚀 applyProfileToUI wywołane po fetchMyProfile");
-} else {
-  wireLoginUI(null);
-  document.getElementById('profileChip')?.style.setProperty("display","none");
-  applyProfileToUI(null);
-}
-
-    await window.refreshLocks?.();
-  } catch (e) {
-    console.error("❌ Error during session check:", e);
-  }
-});
-</script>
 
 </body>
 </html>
