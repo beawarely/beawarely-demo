@@ -926,8 +926,8 @@ console.log("🧩 DEBUG: po applyProfileToUI – UI powinien się odświeżyć")
         localStorage.removeItem('ba_redirect');
         location.replace(dest);
       } else {
-        location.reload();
-      }
+  console.log("✅ SIGNED_IN zakończone – odświeżenie UI bez reload()");
+}
     } else if (event === 'SIGNED_OUT') {
   loginLock = false;
 
