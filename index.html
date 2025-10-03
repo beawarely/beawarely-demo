@@ -752,13 +752,6 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
 }
   
 </style>
-
-<script>
-  // 🔌 Supabase odłączone na tej stronie
-  window.supabaseClient = null;
-  window.SUPABASE_DISCONNECTED = true;
-  function signInWithGoogle(){ console.warn("Supabase/logowanie jest wyłączone na tej stronie."); }
-</script>
  
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -838,31 +831,6 @@ function closeSupportModal() {
       if (note) note.style.display = 'block';
       setTimeout(() => note && (note.style.display = 'none'), 1800);
     });
-  }
-</script>
-
-<!-- 🔽 Obsługa logowania i wylogowania użytkownika z debugiem -->
-<!-- 🔽 Spójne sterowanie UI stanem sesji -->
-<script>
-  // UI bez Supabase – chowamy elementy logowania/profilu i odświeżamy blokady
-  function wireLoginUI(){
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn){ loginBtn.style.display = 'none'; loginBtn.onclick = null; }
-    const yourProfileBtn = document.getElementById('yourProfileBtn');
-    if (yourProfileBtn) yourProfileBtn.style.display = 'none';
-    const chip = document.getElementById('profileChip');
-    if (chip) chip.style.display = 'none';
-  }
-  document.addEventListener('DOMContentLoaded', async () => {
-    wireLoginUI();
-    await window.refreshLocks?.();
-    if (typeof checkModeratorButton === 'function') checkModeratorButton();
-  });
-</script>
-
-<script>
-  async function logoutUser() {
-    console.warn("Wylogowanie wyłączone (Supabase odłączone).");
   }
 </script>
 
@@ -966,51 +934,6 @@ function closeSupportModal() {
 </div>
 
 <script>
-(function(){
-  const grid = document.getElementById('toolsGrid');
-  if (!grid) return;
-
-  async function refreshLocks(){
-    const authed = false;   // Supabase off → zawsze brak sesji
-    const isMod  = false;   // Supabase off → ukryj funkcje moderatorskie
-
-    grid.querySelectorAll('.tool-card').forEach(card=>{
-      const needsAuth = card.dataset.requiresAuth === 'true';
-      const modOnly   = card.dataset.moderatorOnly === 'true';
-
-      const lockedForAuth = needsAuth && !authed;
-      const lockedForRole = modOnly && !isMod;
-      const locked = lockedForAuth || lockedForRole;
-
-      card.classList.toggle('locked', locked);
-
-      const statusEl = card.querySelector('.status');
-      const badgeEl  = card.querySelector('.tool-badge');
-
-      if (modOnly && !isMod) {
-        if (statusEl) statusEl.textContent = 'Soon';
-        if (badgeEl)  badgeEl.textContent  = 'Soon';
-      } else if (needsAuth && !authed) {
-        if (statusEl) statusEl.textContent = 'Login disabled';
-      } else {
-        if (statusEl && statusEl.textContent.trim().length === 0) statusEl.textContent = 'Open';
-      }
-
-      card.onclick = () => {
-        const href = card.dataset.href;
-        if (lockedForAuth) { alert('Login is disabled on this page.'); return; }
-        if (lockedForRole) { alert('Coming soon.'); return; }
-        if (href) window.location.href = href;
-      };
-    });
-  }
-
-  window.refreshLocks = refreshLocks;
-  refreshLocks();
-})();
-</script>
-
-<script>
 document.addEventListener('DOMContentLoaded', () => {
   const left  = document.querySelector('#topbar .topbar-left');
   const right = document.querySelector('#topbar .topbar-right');
@@ -1069,12 +992,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modeBtn.addEventListener('click', toggleLightDarkMode);
   }
 });
-</script>
-<script>
-function checkModeratorButton() {
-  const modBtn = document.getElementById('moderatorRedirect');
-  if (modBtn) modBtn.style.display = 'none'; // Supabase off → ukryte
-}
 </script>
 
 <script>
