@@ -68,8 +68,22 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabaseClient.auth.getSession();
-      const user = session?.user;
-      if(!user){ location.replace('index.html?login=1'); return; }
+const user = session?.user;
+
+if (!user) {
+  alert("Sesja wygasła. Zaloguj się ponownie.");
+  location.replace('index.html?login=1');
+  return;
+}
+
+// Dodatkowa kontrola – czy token nadal ważny
+const { data: refreshedSession, error: refreshError } = await supabaseClient.auth.getSession();
+if (refreshError || !refreshedSession?.session) {
+  alert("Nie można zweryfikować sesji. Zaloguj się ponownie.");
+  await supabaseClient.auth.signOut();
+  location.replace('index.html?login=1');
+  return;
+}
 
       // Załaduj dane profilu
       const { data: profile } = await supabaseClient
