@@ -115,9 +115,19 @@ const updates = {
 
         // Upload avatara
         const file = document.getElementById('avatar').files[0];
-        if(file){
-          const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
-          const filePath = `${user.id}/avatar.${fileExt}`;
+if(file){
+  if (!file.type.startsWith('image/')) {
+    alert("Plik musi być obrazem (jpg, png, gif itp.)");
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) { // 2 MB
+    alert("Plik jest za duży. Maksymalny rozmiar to 2 MB.");
+    return;
+  }
+
+  const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+  const filePath = `${user.id}/avatar.${fileExt}`;
+
           await supabaseClient.storage.from('avatars').upload(filePath, file, { upsert:true });
           const { data: publicData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
 if (publicData?.publicUrl) {
