@@ -113,9 +113,34 @@ const updates = {
           await supabaseClient.auth.updateUser({ password: pwd });
         }
 
-        // Upload avatara
-        const file = document.getElementById('avatar').files[0];
-if(file){
+        const summary = [];
+
+const { error: updateError } = await supabaseClient
+  .from('profiles')
+  .update(updates)
+  .eq('id', user.id);
+
+if (updateError) {
+  alert("❌ Nie udało się zaktualizować profilu: " + updateError.message);
+  return;
+} else {
+  summary.push("✅ Dane profilu zapisane.");
+}
+
+// Zmiana hasła (opcjonalnie)
+const pwd = document.getElementById('password').value;
+if (pwd) {
+  const { error: pwdError } = await supabaseClient.auth.updateUser({ password: pwd });
+  if (pwdError) {
+    summary.push("⚠️ Hasło NIE zostało zmienione: " + pwdError.message);
+  } else {
+    summary.push("✅ Hasło zaktualizowane.");
+  }
+}
+
+// Upload avatara
+const file = document.getElementById('avatar').files[0];
+if (file) {
   if (!file.type.startsWith('image/')) {
     alert("Plik musi być obrazem (jpg, png, gif itp.)");
     return;
@@ -127,19 +152,32 @@ if(file){
 
   const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
   const filePath = `${user.id}/avatar.${fileExt}`;
+  const { error: uploadError } = await supabaseClient.storage.from('avatars').upload(filePath, file, { upsert: true });
 
-          await supabaseClient.storage.from('avatars').upload(filePath, file, { upsert:true });
-          const { data: publicData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
-if (publicData?.publicUrl) {
-  const avatarUrl = publicData.publicUrl;
-  await supabaseClient.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
-} else {
-  console.error("Nie udało się uzyskać publicznego URL avatara");
+  if (uploadError) {
+    summary.push("⚠️ Błąd przy uploadzie avatara: " + uploadError.message);
+  } else {
+    const { data: publicData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
+    if (publicData?.publicUrl) {
+      const avatarUrl = publicData.publicUrl;
+      const { error: avatarUrlErr } = await supabaseClient
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', user.id);
+      if (avatarUrlErr) {
+        summary.push("⚠️ Avatar wgrany, ale nie zapisano URL w profilu: " + avatarUrlErr.message);
+      } else {
+        summary.push("✅ Avatar zaktualizowany.");
+      }
+    } else {
+      summary.push("⚠️ Avatar wgrany, ale nie uzyskano publicznego URL.");
+    }
+  }
 }
-        }
 
-        alert("Profile updated!");
-        location.href = "profile.html";
+alert(summary.join("\n"));
+location.href = "profile.html";
+
       });
     });
   </script>
