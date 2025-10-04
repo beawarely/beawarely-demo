@@ -110,9 +110,13 @@
           const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
           const filePath = `${user.id}/avatar.${fileExt}`;
           await supabaseClient.storage.from('avatars').upload(filePath, file, { upsert:true });
-          const { data: urlData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
-          const avatarUrl = urlData.publicUrl;
-          await supabaseClient.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+          const { data: publicData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
+if (publicData?.publicUrl) {
+  const avatarUrl = publicData.publicUrl;
+  await supabaseClient.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+} else {
+  console.error("Nie udało się uzyskać publicznego URL avatara");
+}
         }
 
         alert("Profile updated!");
