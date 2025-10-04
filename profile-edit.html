@@ -87,11 +87,20 @@
 
       document.getElementById('edit-form').addEventListener('submit', async (e)=>{
         e.preventDefault();
-        const updates = {
-          first_name: document.getElementById('first').value.trim(),
-          last_name: document.getElementById('last').value.trim(),
-          username: document.getElementById('username').value.trim()
-        };
+        const usernameInput = document.getElementById('username').value.trim();
+const usernameRegex = /^[a-zA-Z0-9_]+$/;
+
+if (!usernameRegex.test(usernameInput)) {
+  alert("Username może zawierać tylko litery, cyfry i podkreślenia (_).");
+  return;
+}
+
+const updates = {
+  first_name: document.getElementById('first').value.trim(),
+  last_name: document.getElementById('last').value.trim(),
+  username: usernameInput
+};
+
         const { error } = await supabaseClient
           .from('profiles')
           .update(updates)
