@@ -85,100 +85,95 @@
         document.getElementById('email').value = user.email || "";
       }
 
-      document.getElementById('edit-form').addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const usernameInput = document.getElementById('username').value.trim();
-const usernameRegex = /^[a-zA-Z0-9_]+$/;
+      document.getElementById('edit-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-if (!usernameRegex.test(usernameInput)) {
-  alert("Username może zawierać tylko litery, cyfry i podkreślenia (_).");
-  return;
-}
-
-const updates = {
-  first_name: document.getElementById('first').value.trim(),
-  last_name: document.getElementById('last').value.trim(),
-  username: usernameInput
-};
-
-        const { error } = await supabaseClient
-          .from('profiles')
-          .update(updates)
-          .eq('id', user.id);
-        if(error){ alert("Update failed: "+error.message); return; }
-
-        // Zmiana hasła (opcjonalnie)
-        const pwd = document.getElementById('password').value;
-        if(pwd){
-          await supabaseClient.auth.updateUser({ password: pwd });
-        }
-
-        const summary = [];
-
-const { error: updateError } = await supabaseClient
-  .from('profiles')
-  .update(updates)
-  .eq('id', user.id);
-
-if (updateError) {
-  alert("❌ Nie udało się zaktualizować profilu: " + updateError.message);
-  return;
-} else {
-  summary.push("✅ Dane profilu zapisane.");
-}
-
-// Zmiana hasła (opcjonalnie)
-const pwd = document.getElementById('password').value;
-if (pwd) {
-  const { error: pwdError } = await supabaseClient.auth.updateUser({ password: pwd });
-  if (pwdError) {
-    summary.push("⚠️ Hasło NIE zostało zmienione: " + pwdError.message);
-  } else {
-    summary.push("✅ Hasło zaktualizowane.");
-  }
-}
-
-// Upload avatara
-const file = document.getElementById('avatar').files[0];
-if (file) {
-  if (!file.type.startsWith('image/')) {
-    alert("Plik musi być obrazem (jpg, png, gif itp.)");
-    return;
-  }
-  if (file.size > 2 * 1024 * 1024) { // 2 MB
-    alert("Plik jest za duży. Maksymalny rozmiar to 2 MB.");
+  // --- Walidacja nazwy użytkownika ---
+  const usernameInput = document.getElementById('username').value.trim();
+  const usernameRegex = /^[a-zA-Z0-9_]+$/;
+  if (!usernameRegex.test(usernameInput)) {
+    alert("Username może zawierać tylko litery, cyfry i podkreślenia (_).");
     return;
   }
 
-  const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
-  const filePath = `${user.id}/avatar.${fileExt}`;
-  const { error: uploadError } = await supabaseClient.storage.from('avatars').upload(filePath, file, { upsert: true });
+  const updates = {
+    first_name: document.getElementById('first').value.trim(),
+    last_name: document.getElementById('last').value.trim(),
+    username: usernameInput
+  };
 
-  if (uploadError) {
-    summary.push("⚠️ Błąd przy uploadzie avatara: " + uploadError.message);
+  const summary = [];
+
+  // --- Aktualizacja danych profilu ---
+  const { error: updateError } = await supabaseClient
+    .from('profiles')
+    .update(updates)
+    .eq('id', user.id);
+
+  if (updateError) {
+    alert("❌ Nie udało się zaktualizować profilu: " + updateError.message);
+    return;
   } else {
-    const { data: publicData } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
-    if (publicData?.publicUrl) {
-      const avatarUrl = publicData.publicUrl;
-      const { error: avatarUrlErr } = await supabaseClient
-        .from('profiles')
-        .update({ avatar_url: avatarUrl })
-        .eq('id', user.id);
-      if (avatarUrlErr) {
-        summary.push("⚠️ Avatar wgrany, ale nie zapisano URL w profilu: " + avatarUrlErr.message);
-      } else {
-        summary.push("✅ Avatar zaktualizowany.");
-      }
+    summary.push("✅ Dane profilu zapisane.");
+  }
+
+  // --- Zmiana hasła (opcjonalna) ---
+  const newPassword = document.getElementById('password').value;
+  if (newPassword) {
+    const { error: pwdError } = await supabaseClient.auth.updateUser({ password: newPassword });
+    if (pwdError) {
+      summary.push("⚠️ Hasło NIE zostało zmienione: " + pwdError.message);
     } else {
-      summary.push("⚠️ Avatar wgrany, ale nie uzyskano publicznego URL.");
+      summary.push("✅ Hasło zaktualizowane.");
     }
   }
-}
 
-alert(summary.join("\n"));
-location.href = "profile.html";
+  // --- Upload avatara (opcjonalny) ---
+  const file = document.getElementById('avatar').files[0];
+  if (file) {
+    if (!file.type.startsWith('image/')) {
+      alert("Plik musi być obrazem (jpg, png, gif itp.)");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) { // 2 MB
+      alert("Plik jest za duży. Maksymalny rozmiar to 2 MB.");
+      return;
+    }
 
-      });
+    const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+    const filePath = `${user.id}/avatar.${fileExt}`;
+    const { error: uploadError } = await supabaseClient.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      summary.push("⚠️ Błąd przy uploadzie avatara: " + uploadError.message);
+    } else {
+      const { data: publicData } = supabaseClient.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      if (publicData?.publicUrl) {
+        const avatarUrl = publicData.publicUrl;
+        const { error: avatarUrlErr } = await supabaseClient
+          .from('profiles')
+          .update({ avatar_url: avatarUrl })
+          .eq('id', user.id);
+
+        if (avatarUrlErr) {
+          summary.push("⚠️ Avatar wgrany, ale nie zapisano URL w profilu: " + avatarUrlErr.message);
+        } else {
+          summary.push("✅ Avatar zaktualizowany.");
+        }
+      } else {
+        summary.push("⚠️ Avatar wgrany, ale nie uzyskano publicznego URL.");
+      }
+    }
+  }
+
+  alert(summary.join("\n"));
+  location.href = "profile.html";
+});
     });
   </script>
 </body>
