@@ -471,102 +471,143 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 </h1>
 
 </header>
+<section id="feed" class="scroll-reveal">
+  <div class="feed-container">
+    <div class="feed-tabs">
+      <button id="tabPublic" class="feed-tab active">🌍 Public</button>
+      <button id="tabFriends" class="feed-tab">👥 Friends</button>
+    </div>
 
-<section id="ai-hub" class="scroll-reveal">
-  <h2>BeAwarely AI Hub</h2>
-  <p class="section-sub">Choose a tool to explore. Some require login.</p>
+    <div id="feed-login-overlay" class="feed-overlay">
+      <div class="overlay-content">
+        <p>🔒 Zaloguj się, aby zobaczyć tablicę</p>
+        <button id="feedLoginRedirect" class="pill">Log In</button>
+      </div>
+    </div>
 
-  <div id="toolsGrid" class="tools-grid">
-    <!-- Karta 1: AI Chat (Mistral) -->
-    <article class="tool-card" data-href="chat.html" data-requires-auth="true">
-      <div class="tool-top">
-        <span class="tool-icon">🤖</span>
-        <span class="tool-badge">Members</span>
-      </div>
-      <h3 class="tool-title">AI Chat</h3>
-      <div class="tool-cta">
-        <span class="status">Login required</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
+    <div id="feed-postbox" class="feed-postbox">
+      <textarea id="postContent" placeholder="Write something..."></textarea>
+      <button id="postSubmit" class="pill">Post</button>
+    </div>
 
-    <!-- Card: WorkVerify -->
-    <article class="tool-card" data-href="workverify.html" data-requires-auth="false">
-      <div class="tool-top">
-        <span class="tool-icon">⚖️</span>
-        <span class="tool-badge">Open</span>
-      </div>
-      <h3 class="tool-title">WorkVerify</h3>
-      <div class="tool-cta">
-        <span class="status">Open</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
-
-    <!-- Karta 3: Explore the Tree -->
-<article class="tool-card" data-href="tree.html" data-requires-auth="false">
-  <div class="tool-top">
-    <span class="tool-icon">🌳</span>
-    <span class="tool-badge">Open</span>
-  </div>
-  <h3 class="tool-title">Explore the Tree</h3>
-  <div class="tool-cta">
-    <span class="status">Open</span>
-    <button class="open-btn" type="button">Open →</button>
-  </div>
-</article>
-
-    <!-- Card: Faith & Reason -->
-    <article class="tool-card" data-href="faith-reason.html" data-requires-auth="true">
-      <div class="tool-top">
-        <span class="tool-icon">📜</span>
-        <span class="tool-badge">Members</span>
-      </div>
-      <h3 class="tool-title">Faith & Reason</h3>
-      <div class="tool-cta">
-        <span class="status">Login required</span>
-        <button class="open-btn" type="button">Open →</button>
-      </div>
-    </article>
-
-    <!-- Suggest a Tool (public ideas & votes) -->
-<article class="tool-card" data-href="suggest.html" data-requires-auth="false">
-  <div class="tool-top">
-    <span class="tool-icon">💡</span>
-    <span class="tool-badge">Public</span>
-  </div>
-  <h3 class="tool-title">Suggest a Tool</h3>
-  <div class="tool-cta">
-    <span class="status">Open to all</span>
-    <button class="open-btn" type="button" aria-label="Open Suggest a Tool">Open →</button>
-  </div>
-</article>
-     
+    <div id="feedPosts" class="feed-posts">
+      <p style="opacity:0.6;">Loading posts...</p>
+    </div>
   </div>
 </section>
 
-<!-- About + Why Join przeniesione POD AI Hub i rozbudowane -->
-<section class="scroll-reveal">
-  <h2>About BeAwarely</h2>
-  <p>
-    BeAwarely is a community-driven project focused on helping people understand how AI
-    shapes our lives, work, and choices. We explore both opportunities and risks,
-    translating complex topics into clear, practical guidance. Our goal is to empower
-    users, creators, and decision-makers to build and use AI responsibly.
-  </p>
-</section>
+<style>
+.feed-container {
+  max-width: 700px;
+  margin: 40px auto;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(6px);
+}
 
-<section class="scroll-reveal">
-  <h2>Why Join?</h2>
-  <ul class="reasons">
-    <li>Inform and educate others with clear, vetted resources</li>
-    <li>Contribute to a safer, more transparent AI future</li>
-    <li>Stay up to date on real-world AI advances (not just hype)</li>
-    <li>Support responsible AI development and governance</li>
-    <li>Collaborate with a global community of builders and reviewers</li>
-    <li>Get early access to BeAwarely tools and prototypes</li>
-  </ul>
-</section>
+.feed-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.feed-tab {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .25s;
+}
+
+.feed-tab.active {
+  background: linear-gradient(135deg, var(--blue1), var(--blue2));
+}
+
+.feed-postbox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.feed-postbox textarea {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 12px;
+  color: #fff;
+  min-height: 80px;
+  resize: vertical;
+  font-size: 1rem;
+}
+
+.feed-posts .post {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  backdrop-filter: blur(4px);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.post-header img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-author {
+  font-weight: 600;
+}
+
+.post-time {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.feed-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+}
+
+.feed-overlay .overlay-content {
+  color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.5);
+}
+
+body.light-mode .feed-container,
+body.light-mode .feed-posts .post {
+  background: rgba(0,0,0,0.05);
+  color: #000;
+}
+
+</style>
+
+<script src="js/feed.js"></script>
+  
   
 <!-- 🔽 Moderator button (czarna dziura, tylko dla moderatorów) -->
 <div id="moderatorRedirect" class="scroll-reveal" style="display:none; text-align:center; margin-top:40px;">
