@@ -186,13 +186,27 @@
     </div>
 
 
-    <!-- Activity Feed -->
-    <div class="section" id="activity-section">
-      <h2>Activity</h2>
-      <div id="activity-feed" class="feed" aria-live="polite">
-        <div class="feed-item">Loading activity…</div>
-      </div>
-    </div>
+    <!-- New Post -->
+<div class="section" id="newpost-section">
+  <h2>Share something</h2>
+  <textarea id="new-post-content" rows="3" placeholder="Write something..." style="width:100%;padding:10px;border-radius:10px;background:rgba(255,255,255,.05);color:#eaf2ff;border:1px solid var(--border);"></textarea>
+  <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px;">
+    <select id="post-visibility" style="background:#121625;color:#eaf2ff;border:1px solid var(--border);border-radius:8px;padding:6px;">
+      <option value="public">🌍 Public</option>
+      <option value="friends">👥 Friends</option>
+      <option value="private">🔒 Private</option>
+    </select>
+    <button class="btn" onclick="createPost()">Post</button>
+  </div>
+</div>
+
+<!-- Activity Feed -->
+<div class="section" id="activity-section">
+  <h2>Activity</h2>
+  <div id="activity-feed" class="feed" aria-live="polite">
+    <div class="feed-item">Loading activity…</div>
+  </div>
+</div>
 
     <!-- Friends -->
     <div class="section" id="friends-section">
@@ -481,7 +495,7 @@ badges.forEach(text => {
       await loadFriends();
     }
 
-    function subscribeRealtimeFeed(){
+        function subscribeRealtimeFeed(){
       try{
         supabaseClient
           .channel('realtime-activity')
@@ -491,6 +505,65 @@ badges.forEach(text => {
           )
           .subscribe();
       }catch(e){ /* ok */ }
+    }
+
+    // 📝 Create user post
+    async function createPost(){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const user = session?.user;
+      if(!user) return alert("Session expired, please log in again.");
+
+      const content = document.getElementById('new-post-content').value.trim();
+      const visibility = document.getElementById('post-visibility').value;
+
+      if(!content){ alert("Post cannot be empty."); return; }
+
+      const { error } = await supabaseClient.from('user_posts').insert({
+        author_id: user.id,
+        content,
+        visibility
+      });
+
+      if(error){
+        alert("❌ Failed to publish: " + error.message);
+        return;
+      }
+
+      document.getElementById('new-post-content').value = "";
+      alert("✅ Post published!");
+      await loadMyPosts();
+    }
+
+    // 📥 Load posts
+    async function loadMyPosts(){
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const user = session?.user;
+      if(!user) return;
+
+      const { data, error } = await supabaseClient
+        .from('user_posts')
+        .select('content, created_at, visibility')
+        .eq('author_id', user.id)
+        .order('created_at', { ascending: false });
+
+      const feed = document.getElementById('activity-feed');
+      feed.innerHTML = '';
+
+      if(error){ 
+        feed.innerHTML = `<div class="feed-item">Feed unavailable.</div>`;
+        return;
+      }
+      if(!data.length){ 
+        feed.innerHTML = `<div class="feed-item">No posts yet.</div>`;
+        return;
+      }
+
+      data.forEach(p=>{
+        const div=document.createElement('div');
+        div.className='feed-item';
+        div.innerHTML=`<div>${p.content}</div><time>${new Date(p.created_at).toLocaleString()}</time>`;
+        feed.appendChild(div);
+      });
     }
   </script>
 </body>
