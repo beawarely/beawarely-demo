@@ -909,27 +909,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const login   = document.getElementById('loginBtn');        // już istnieje
   const mode    = document.getElementById('modeIcon');        // już istnieje
 
-// SUPPORT – topbar $$$ (minimal)
-let support = document.getElementById('supportTopBtn');
-if (!support) {
-  support = document.createElement('a');
-  support.id = 'supportTopBtn';
-  support.href = 'javascript:void(0)';
-  support.className = 'pill';
-  support.textContent = '💲💲💲';
-  support.onclick = () => typeof openSupportModal === 'function' && openSupportModal();
-}
-
   // nadaj klasę „pill” istniejącym, by wyglądały spójnie
   if (profile) profile.classList.add('pill');
   if (login)   login.classList.add('pill');
 
-  // wstaw do odpowiednich grup
-  if (profile) left.appendChild(profile);
-  left.appendChild(support);
-  if (login)   right.appendChild(login);
-  if (mode)    right.appendChild(mode);
+  // wstaw tylko niezbędne elementy (bez 💲💲💲 i Your Profile)
+  if (login) right.appendChild(login);
+  if (mode)  right.appendChild(mode);
 });
+
 </script>
 
 <script>
