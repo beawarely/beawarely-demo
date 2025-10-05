@@ -401,8 +401,10 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
   <!-- TOPBAR -->
 <div id="topbar">
   <div class="topbar-left">
-    <a id="yourProfileBtn" href="profile.html" class="pill" style="display:none">Your Profile</a>
-  </div>
+  <button id="sidebarToggle" class="pill" aria-label="Open menu" style="font-size:1.1rem;">☰ AI Hub</button>
+  <a id="yourProfileBtn" href="profile.html" class="pill" style="display:none">Your Profile</a>
+</div>
+
   <div class="topbar-right">
     <button id="modeIcon" type="button" class="pill" aria-label="Toggle light/dark mode">🌛</button>
     <button id="loginBtn" type="button" class="pill">Log In</button>
@@ -1089,6 +1091,119 @@ document.addEventListener("DOMContentLoaded", () => {
     profileChip.style.display = "none";
     yourProfileBtn.style.display = "none";
   }
+});
+</script>
+
+<!-- Sidebar + Overlay -->
+<div id="sidebar-overlay"></div>
+<nav id="sidebar" aria-hidden="true" role="dialog">
+  <div class="sidebar-header">
+    <span class="sidebar-title">Menu</span>
+    <button id="sidebarClose" aria-label="Close menu">✖</button>
+  </div>
+
+  <ul class="sidebar-links">
+    <li><a href="chat.html">🤖 AI Chat</a></li>
+    <li><a href="workverify.html">⚖️ WorkVerify</a></li>
+    <li><a href="tree.html">🌳 Knowledge Tree</a></li>
+    <li><a href="faith-reason.html">📜 Faith & Reason</a></li>
+    <li><a href="suggest.html">💡 Suggest a Tool</a></li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <a href="profile.html" id="sidebarProfile">Your Profile</a>
+    <a href="javascript:void(0)" id="sidebarSupport">💲💲💲 Support</a>
+    <a href="javascript:void(0)" id="sidebarLogout">Log Out</a>
+  </div>
+</nav>
+
+<style>
+/* --- Sidebar base --- */
+#sidebar-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(4px);opacity:0;visibility:hidden;
+  transition:opacity .3s ease;z-index:10900;
+}
+#sidebar{
+  position:fixed;top:0;left:0;height:100vh;width:300px;
+  max-width:86vw;background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(12px);
+  border-right:1px solid rgba(255,255,255,0.12);
+  color:#fff;transform:translateX(-100%);
+  transition:transform .3s cubic-bezier(0.22,1,0.36,1);
+  z-index:11000;display:flex;flex-direction:column;justify-content:space-between;
+}
+#sidebar.open{transform:translateX(0);}
+#sidebar-overlay.active{opacity:1;visibility:visible;}
+.sidebar-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.sidebar-title{font-weight:700;font-size:1.1rem;}
+.sidebar-header button{
+  background:none;border:none;color:#ccc;font-size:1.2rem;cursor:pointer;
+}
+.sidebar-links{
+  list-style:none;padding:20px 0;margin:0;flex-grow:1;
+}
+.sidebar-links li a{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 22px;color:inherit;text-decoration:none;
+  border-radius:10px;margin:4px 12px;font-weight:600;
+  transition:background-color .25s,transform .2s;
+}
+.sidebar-links li a:hover{
+  background-color:rgba(255,255,255,0.12);transform:translateX(4px);
+}
+.sidebar-links li a.active{
+  border-left:3px solid var(--blue2);background-color:rgba(255,255,255,0.10);
+}
+.sidebar-footer{
+  border-top:1px solid rgba(255,255,255,0.08);
+  padding:14px 20px;display:flex;flex-direction:column;gap:10px;
+}
+.sidebar-footer a{
+  color:inherit;text-decoration:none;
+  padding:10px 14px;border-radius:10px;
+  background:rgba(255,255,255,0.08);
+  transition:background-color .25s,transform .2s;
+}
+.sidebar-footer a:hover{background:rgba(255,255,255,0.15);transform:translateX(4px);}
+body.sidebar-open{overflow:hidden;}
+body.light-mode #sidebar{background:rgba(0,0,0,0.06);color:#000;}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('sidebar-overlay');
+  const openBtn=document.getElementById('sidebarToggle');
+  const closeBtn=document.getElementById('sidebarClose');
+  const logout=document.getElementById('sidebarLogout');
+  const support=document.getElementById('sidebarSupport');
+
+  function openSidebar(){
+    sidebar.classList.add('open');
+    overlay.classList.add('active');
+    document.body.classList.add('sidebar-open');
+    sidebar.setAttribute('aria-hidden','false');
+  }
+  function closeSidebar(){
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.classList.remove('sidebar-open');
+    sidebar.setAttribute('aria-hidden','true');
+  }
+  openBtn.addEventListener('click',openSidebar);
+  closeBtn.addEventListener('click',closeSidebar);
+  overlay.addEventListener('click',closeSidebar);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSidebar();});
+
+  if(support) support.addEventListener('click',()=>typeof openSupportModal==='function'&&openSupportModal());
+  if(logout) logout.addEventListener('click',async()=>{
+    if(window.supabase){await supabase.auth.signOut();}
+    window.location.reload();
+  });
 });
 </script>
 
