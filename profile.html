@@ -156,7 +156,7 @@
   <button class="back-btn" onclick="window.location.href='index.html'">← Back to Homepage</button>
 
   <div class="profile-box" role="region" aria-label="User profile">
-    <img id="profile-pic" src="https://via.placeholder.com/132?text=Avatar" alt="Your profile photo" class="profile-pic" />
+    <img id="profile-pic" src="img/default-avatar.png" alt="Your profile photo" class="profile-pic" />
 
     <h1 id="user-name">Loading…</h1>
     <div class="email" id="user-email">Loading…</div>
@@ -249,19 +249,6 @@
 
       const meta = user.user_metadata || {};
 
-     // Avatar (cache-busting)
-const profilePic = document.getElementById("profile-pic");
-
-let url = profile?.avatar_url || meta.avatar_url;
-if (url) {
-  // jeśli ścieżka nie zawiera pełnego linku – dodaj prefix do Supabase Storage
-  if (!url.startsWith("https")) {
-    url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
-  }
-  const bust = url.includes("?") ? "&" + Date.now() : "?" + Date.now();
-  profilePic.src = url + bust;
-}
-
      // Pobierz dane profilu z tabeli `profiles`
 let profile = null;
 try {
@@ -275,6 +262,17 @@ try {
     console.warn('profiles fetch error:', error.message);
   } else {
     profile = data;
+
+    // Avatar (cache-busting)
+    const profilePic = document.getElementById("profile-pic");
+    let url = profile?.avatar_url || meta.avatar_url;
+    if (url) {
+      if (!url.startsWith("https")) {
+        url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
+      }
+      const bust = url.includes("?") ? "&" + Date.now() : "?" + Date.now();
+      profilePic.src = url + bust;
+    }
   }
 } catch(e) {
   console.error('profiles query failed:', e);
