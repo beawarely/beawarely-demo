@@ -193,7 +193,11 @@ if (refreshError || !refreshedSession?.session) {
   alert(summary.join("\n"));
 saveBtn.disabled = false;
 saveBtn.textContent = originalText;
-location.href = "profile.html";
+
+// Krótkie opóźnienie dla pełnej propagacji zmian w bazie
+setTimeout(() => {
+  location.href = "profile.html";
+}, 500);
 });
     });
   </script>
