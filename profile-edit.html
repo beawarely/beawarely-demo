@@ -102,6 +102,11 @@ if (refreshError || !refreshedSession?.session) {
       document.getElementById('edit-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const saveBtn = document.querySelector('.btn');
+  saveBtn.disabled = true;
+  const originalText = saveBtn.textContent;
+  saveBtn.textContent = "Saving...";
+
   // --- Walidacja nazwy użytkownika ---
   const usernameInput = document.getElementById('username').value.trim();
   const usernameRegex = /^[a-zA-Z0-9_]+$/;
@@ -186,7 +191,9 @@ if (refreshError || !refreshedSession?.session) {
   }
 
   alert(summary.join("\n"));
-  location.href = "profile.html";
+saveBtn.disabled = false;
+saveBtn.textContent = originalText;
+location.href = "profile.html";
 });
     });
   </script>
