@@ -1053,13 +1053,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if (error) console.error("Login error:", error.message);
   });
 
-  function showProfile(user) {
-    loginBtn.textContent = "Log Out";
-    loginBtn.dataset.state = "loggedin";
-    profileChip.style.display = "flex";
-    yourProfileBtn.style.display = "inline-flex";
-    profileName.textContent = user.email || "User";
+  async function showProfile(user) {
+  loginBtn.textContent = "Log Out";
+  loginBtn.dataset.state = "loggedin";
+  profileChip.style.display = "flex";
+  yourProfileBtn.style.display = "inline-flex";
+  profileName.textContent = user.email || "User";
+
+  // 🔹 Pobierz avatar z tabeli profiles (jeśli istnieje)
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', user.id)
+      .single();
+
+    const avatarEl = document.getElementById("profileAvatar");
+    if (data?.avatar_url) {
+      let url = data.avatar_url;
+      if (!url.startsWith("https")) {
+        url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
+      }
+      avatarEl.src = url + (url.includes("?") ? "&" : "?") + Date.now();
+    } else {
+      avatarEl.src = "https://via.placeholder.com/32?text=👤";
+    }
+  } catch (e) {
+    console.warn("Avatar fetch failed:", e);
   }
+}
 
   function showLoggedOut() {
     loginBtn.textContent = "Log In";
