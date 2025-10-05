@@ -252,9 +252,14 @@
       // Avatar (cache-busting)
       const profilePic = document.getElementById("profile-pic");
       if (meta.avatar_url) {
-        const bust = meta.avatar_url.includes("?") ? "&" + Date.now() : "?" + Date.now();
-        profilePic.src = meta.avatar_url + bust;
-      }
+  let url = meta.avatar_url;
+  // jeśli ścieżka nie zawiera pełnego linku – dodaj prefix do Supabase Storage
+  if (!url.startsWith("https")) {
+    url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
+  }
+  const bust = url.includes("?") ? "&" + Date.now() : "?" + Date.now();
+  profilePic.src = url + bust;
+}
 
      // Pobierz dane profilu z tabeli `profiles`
 let profile = null;
