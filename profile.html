@@ -156,7 +156,7 @@
   <button class="back-btn" onclick="window.location.href='index.html'">← Back to Homepage</button>
 
   <div class="profile-box" role="region" aria-label="User profile">
-    <img id="profile-pic" src="images/default-avatar.png" alt="Your profile photo" class="profile-pic" />
+    <img id="profile-pic" src="https://via.placeholder.com/132?text=Avatar" alt="Your profile photo" class="profile-pic" />
 
     <h1 id="user-name">Loading…</h1>
     <div class="email" id="user-email">Loading…</div>
@@ -262,7 +262,6 @@ try {
 
 // Fallback do user_metadata
 const p = profile || {};
-const meta = user.user_metadata || {};
 
 const fullName = [p.first_name || meta.first_name, p.last_name || meta.last_name]
   .filter(Boolean).join(" ");
