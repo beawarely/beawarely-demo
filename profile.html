@@ -325,10 +325,10 @@ badges.forEach(text => {
 
             // === Load social data ===
       try {
-        await loadMyFeed();
+        await loadMyPosts();
         await loadFriends();
         await loadFriendRequests();
-        subscribeRealtimeFeed(); // live updates (INSERT on activity_events)
+        // subscribeRealtimeFeed(); // disabled: we’re using user_posts now
       } catch(e) { console.warn('Social init error:', e); }
 
       // Reakcja na zmianę sesji w locie (np. wylogowanie w innej karcie)
