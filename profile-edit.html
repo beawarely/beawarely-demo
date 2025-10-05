@@ -76,9 +76,10 @@ if (!user) {
   return;
 }
 
-// Dodatkowa kontrola – czy token nadal ważny
+// Dodatkowa weryfikacja: token nadal ważny
 const { data: refreshedSession, error: refreshError } = await supabaseClient.auth.getSession();
 if (refreshError || !refreshedSession?.session) {
+  console.error("❌ Błąd sesji Supabase:", refreshError);
   alert("Nie można zweryfikować sesji. Zaloguj się ponownie.");
   await supabaseClient.auth.signOut();
   location.replace('index.html?login=1');
@@ -116,10 +117,30 @@ if (refreshError || !refreshedSession?.session) {
   }
 
   const updates = {
-    first_name: document.getElementById('first').value.trim(),
-    last_name: document.getElementById('last').value.trim(),
-    username: usernameInput
-  };
+  first_name: document.getElementById('first').value.trim(),
+  last_name: document.getElementById('last').value.trim(),
+  username: usernameInput
+};
+
+// Pobierz aktualne dane profilu do porównania
+const { data: currentProfile } = await supabaseClient
+  .from('profiles')
+  .select('first_name, last_name, username')
+  .eq('id', user.id)
+  .single();
+
+// Sprawdź, czy coś faktycznie się zmieniło
+const hasChanges =
+  updates.first_name !== currentProfile.first_name ||
+  updates.last_name !== currentProfile.last_name ||
+  updates.username !== currentProfile.username;
+
+if (!hasChanges) {
+  alert("Brak zmian – nic nie zapisano.");
+  saveBtn.disabled = false;
+  saveBtn.textContent = originalText;
+  return;
+}
 
   const summary = [];
 
