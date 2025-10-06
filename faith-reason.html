@@ -7,7 +7,6 @@
   <title>Faith & Reason — BeAwarely</title>
   <link rel="stylesheet" href="css/style.css"/>
 
-
   <style>
         :root{
       /* Dark navy palette */
@@ -55,7 +54,6 @@ input[type="text"]:focus-visible, textarea:focus-visible, select:focus-visible{
   border-color:rgba(123,176,255,.6);
   box-shadow:0 0 0 3px var(--ring);
 }
-
 
     textarea{min-height:120px;resize:vertical}
     .chips{display:flex;flex-wrap:wrap;gap:.4rem}
@@ -109,7 +107,6 @@ input[type="text"]:focus-visible, textarea:focus-visible, select:focus-visible{
   transition:border-color .15s ease, transform .12s ease;
 }
 .item:hover{ border-color:rgba(126,156,210,.32); transform:translateY(-1px); }
-
 
     .item h4{margin:.1rem 0 .4rem}
     .meta{font-size:.8rem;color:#aab2d5}
@@ -175,7 +172,6 @@ html.light .ai-dock{
 }
 html.light .ai-dock .muted, html.light .ai-dock small{ color:#3a6a52; }
 html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgba(29,105,76,.18); color:#103322; }
-
 
 </style>
 
@@ -262,7 +258,6 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
     <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center">
     <span class="dot online" style="margin-right:.25rem"></span><span id="userBadge" class="pill">…</span>
 
-      <button id="logoutBtn" class="btn" style="display:none">Logout</button>
       <button id="themeToggle" class="btn">🌙</button>
     </div>
   </header>
@@ -362,7 +357,6 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
   </div>
   <div id="aiNotesFR" class="ai-notes muted"></div>
 </div>
-
 
     <!-- List -->
 
@@ -481,7 +475,6 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
       // sync when user types manually (clear visual)
       input.addEventListener('input', ()=> box.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')));
     }
-
 
     function statusLabel(s){
       if (s === 'confirmed') return 'Confirmed';
@@ -826,7 +819,6 @@ function initAIDockFR(){
   if(askBtn)   askBtn.onclick   = askAI_FR;
 }
 
-
         function wireUI(){
 
       renderPresetChips();
@@ -836,23 +828,20 @@ function initAIDockFR(){
       document.getElementById('filterCategory').onchange = refreshList;
       document.getElementById('filterStatus').onchange = refreshList;
 
-      // ——— Logged-in user badge + logout ———
-      const badge = document.getElementById('userBadge');
-      const logout = document.getElementById('logoutBtn');
+      // ——— Logged-in user badge (bez logout) ———
+const badge = document.getElementById('userBadge');
 
       function setUser(session){
   if (!badge) return;
   if (session?.user){
-    const u = session.user;
-    const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || (u.id || '').slice(0,8);
-    badge.textContent = `Logged in: ${name}`;
-    if (logout) logout.style.display = '';
-    _lastUserId = u.id || 'anon';
-  } else {
-    badge.textContent = 'Not logged in';
-    if (logout) logout.style.display = 'none';
-    _lastUserId = 'anon';
-  }
+  const u = session.user;
+  const name = (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || u.email || (u.id || '').slice(0,8);
+  badge.textContent = `Logged in: ${name}`;
+  _lastUserId = u.id || 'anon';
+} else {
+  badge.textContent = 'Not logged in';
+  _lastUserId = 'anon';
+}
   if (typeof renderNotesFR === 'function') renderNotesFR();
 }
 
@@ -860,18 +849,10 @@ function initAIDockFR(){
       supabaseClient.auth.getSession().then(({ data }) => setUser(data?.session));
       supabaseClient.auth.onAuthStateChange((_e, session) => setUser(session));
 
-      if (logout){
-        logout.onclick = async () => {
-          try { await supabaseClient.auth.signOut(); } finally { location.replace('index.html'); }
-        };
-      }
-
      initAIDockFR();
 refreshList();
 
     }
-
-
 
     document.addEventListener('DOMContentLoaded', wireUI);
   </script>
