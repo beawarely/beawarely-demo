@@ -116,8 +116,7 @@ textarea:focus-visible {
   <h2 style="margin:0">BeAwarely AI Chat</h2>
   <span id="modelChip" class="badge" hidden></span>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-    <span id="loginStatus" class="badge" aria-live="polite">Checking session…</span>
-    <button id="logoutBtn" class="send" type="button" aria-label="Log out">Log out</button>
+        <span id="loginStatus" class="badge" aria-live="polite">Checking session…</span>
   </div>
 </div>
 
@@ -202,16 +201,6 @@ textarea:focus-visible {
   }
 });
 
-    // === Log out (spójny z index.html) ===
-    async function logoutUser(){
-      try { await window.supabaseClient.auth.signOut(); }
-      catch(e){ console.warn('signOut failed:', e?.message || e); }
-      finally { location.replace('index.html'); }
-    }
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const btn = document.getElementById('logoutBtn');
-      if (btn) btn.addEventListener('click', logoutUser);
-    });
   </script>
 
 <script>
