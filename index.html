@@ -607,6 +607,40 @@ body.light-mode .feed-posts .post {
 </style>
 
 <script src="js/feed.js"></script>
+
+<script>
+// 🔒 Blokada wejścia w karty dla niezalogowanych
+document.addEventListener("DOMContentLoaded", async () => {
+  const { data } = await supabase.auth.getUser();
+  const user = data?.user || null;
+
+  // Lista stron, które mają być dostępne tylko dla zalogowanych
+  const protectedLinks = [
+    "chat.html",
+    "workverify.html",
+    "suggest.html",
+    "culture-atlas.html",
+    "faith-reason.html"
+  ];
+
+  // Szukamy linków w sidebarze
+  const sidebarLinks = document.querySelectorAll("a[href]");
+  sidebarLinks.forEach(link => {
+    const href = link.getAttribute("href");
+    if (protectedLinks.includes(href)) {
+      if (!user) {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          alert("🔒 Zaloguj się, aby uzyskać dostęp do tej sekcji.");
+        });
+        link.style.opacity = "0.5";
+        link.style.pointerEvents = "auto"; // by klik był aktywny, ale zablokowany JS-em
+      }
+    }
+  });
+});
+</script>
+
   
   
 <!-- 🔽 Moderator button (czarna dziura, tylko dla moderatorów) -->
