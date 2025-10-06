@@ -515,7 +515,13 @@
         els.modeNote.textContent = state.loggedIn
           ? 'You can propose ideas and vote.'
           : 'Sign in to propose ideas and vote.';
-        if(state.loggedIn){ hide(els.guest); show(els.user); } else { show(els.guest); hide(els.user); }
+        if(state.loggedIn){
+  hide(els.guest); show(els.user);
+} else {
+  // 🔒 Redirect if user not logged in (direct access protection)
+  window.location.href = "index.html";
+  return;
+}
 
         // Pobierz zaakceptowane pomysły z Supabase
 const { data, error } = await supabaseClient
