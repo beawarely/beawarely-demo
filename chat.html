@@ -505,32 +505,39 @@ document.addEventListener('DOMContentLoaded', ()=>{
   })
 });
 
-        if (!resp.ok || !resp.body) {
-          throw new Error(`HTTP ${resp.status}`);
-        }
+if (!resp.ok || !resp.body) {
+  throw new Error(`HTTP ${resp.status}`);
+}
 
-        const reader = resp.body.getReader();
-        const decoder = new TextDecoder();
-        let fullText = "";
+// --- STREAM RESPONSE poprawione ---
+const reader = resp.body.getReader();
+const decoder = new TextDecoder();
+let buffer = "";
+let fullText = "";
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          for (const line of chunk.split("\n")) {
-            if (!line.trim()) continue;
-            try {
-              const obj = JSON.parse(line);
-              if (obj.message?.content) {
-                fullText += obj.message.content;
-              }
-            } catch (e) {
-              console.warn("Parse error:", e, line);
-            }
-          }
-        }
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  buffer += decoder.decode(value, { stream: true });
+  const lines = buffer.split("\n");
+  buffer = lines.pop(); // zostaje niedokończona linia
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    try {
+      const obj = JSON.parse(line);
+      if (obj.response) {
+        fullText += obj.response;
+        addMsg(obj.response, "ai", false); // na żywo dopisuje tokeny
+      }
+    } catch (e) {
+      console.warn("Parse error:", e, line);
+    }
+  }
+}
 
-        addMsg(fullText || "[no response]", "ai");
+// po zakończeniu — jeśli nic nie doszło, pokaż placeholder
+if (!fullText.trim()) addMsg("[no response]", "ai");
+
       } catch (err) {
         if (err?.name === 'AbortError'){
           addMsg("[stopped]", "ai");
