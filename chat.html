@@ -489,18 +489,21 @@ document.addEventListener('DOMContentLoaded', ()=>{
       try {
         abortController = new AbortController();
 
-        const resp = await fetch("https://ai.beawarely.com/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: abortController.signal,
-          body: JSON.stringify({
-            model: "llama2:13b",
-            messages: [
-              { role: "system", content: "Respond in the same language the user is using. If the user writes in Polish, respond in Polish if possible. If not sure, fall back to English." },
-              { role: "user", content: q }
-            ]
-          })
-        });
+        const resp = await fetch("http://65.108.74.155:11434/api/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  signal: abortController.signal,
+  body: JSON.stringify({
+    model: "llama3-lingyang",
+    prompt: q,
+    system: "You are John — friendly, insightful and natural in conversation. You answer clearly and in a balanced way, not too short and not too long.",
+    options: {
+      temperature: 0.45,
+      top_p: 0.9,
+      num_predict: 250
+    }
+  })
+});
 
         if (!resp.ok || !resp.body) {
           throw new Error(`HTTP ${resp.status}`);
