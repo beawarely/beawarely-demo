@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   signal: abortController.signal,
   body: JSON.stringify({
     model: "llama3-lingyang:latest",
-    prompt: `You are John — a balanced, intelligent assistant for BeAwarely. You respond in a calm, natural tone. Avoid emojis, filler phrases, or exaggerated friendliness. Keep replies factual, concise (2–5 sentences), and well-structured. If a question is unclear, ask a short clarifying question instead of guessing.\n\nUser: ${q}\nJohn:`,
+    prompt: `\n\nUser: ${q}\nJohn:`,
     options: {
       temperature: 0.45,
       top_p: 0.9,
