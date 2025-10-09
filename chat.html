@@ -495,7 +495,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
   signal: abortController.signal,
   body: JSON.stringify({
     model: "llama3-lingyang:latest",
-    prompt: `\n\nUser: ${q}\nJohn:`,
+    prompt: `You are John — a balanced AI assistant for BeAwarely. 
+Be clear, concise, and calm. 
+Avoid repetition, filler, emojis, and excessive politeness. 
+If unsure, say you need more details. 
+End naturally after your point is made.
+
+User: ${q}
+John:`,
+
     options: {
       temperature: 0.45,
       top_p: 0.9,
