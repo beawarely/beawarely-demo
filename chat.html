@@ -494,14 +494,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
   body: JSON.stringify({
-    model: "llama3-lingyang",
-    prompt: q,
-    system: "You are John — friendly, insightful and natural in conversation. You answer clearly and in a balanced way, not too short and not too long.",
+    model: "llama3-lingyang:latest",
+    prompt: `You are John — friendly, insightful and natural in conversation. You answer clearly and in a balanced way, not too short and not too long.\n\nUser: ${q}\nJohn:`,
     options: {
       temperature: 0.45,
       top_p: 0.9,
       num_predict: 250
-    }
+    },
+    stream: true
   })
 });
 
