@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       try {
         abortController = new AbortController();
 
-        const resp = await fetch("http://65.108.74.155:11434/api/generate", {
+        const resp = await fetch("https://ai.beawarely.com/api/generate", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
