@@ -526,14 +526,27 @@ while (true) {
     try {
       const obj = JSON.parse(line);
       if (obj.response) {
-        fullText += obj.response;
-        addMsg(obj.response, "ai", false); // na żywo dopisuje tokeny
-      }
+  fullText += obj.response;
+  // jeśli nie ma jeszcze aktywnego dymka AI — utwórz go raz
+  if (!window._currentAIbubble) {
+    const el = document.createElement("div");
+    el.className = "msg ai";
+    el.textContent = "";
+    document.getElementById("chatMessages").appendChild(el);
+    window._currentAIbubble = el;
+  }
+  // dopisuj kolejne tokeny do istniejącego bąbelka
+  window._currentAIbubble.textContent = fullText;
+  window._currentAIbubble.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
     } catch (e) {
       console.warn("Parse error:", e, line);
     }
   }
 }
+// po zakończeniu strumienia — zamknij bąbelek
+window._currentAIbubble = null;
 
 // po zakończeniu — jeśli nic nie doszło, pokaż placeholder
 if (!fullText.trim()) addMsg("[no response]", "ai");
