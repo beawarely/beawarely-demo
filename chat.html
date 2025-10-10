@@ -511,9 +511,7 @@ John:`,
 })
 });
 
-if (!resp.ok || !resp.body) {
-  throw new Error(`HTTP ${resp.status}`);
-}
+if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
 // --- STREAM RESPONSE poprawione ---
 const reader = resp.body.getReader();
