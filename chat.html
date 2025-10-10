@@ -495,11 +495,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   signal: abortController.signal,
   body: JSON.stringify({
   model: "llama3",
-  prompt: `You are John — BeAwarely Core. Respond like a precise scientist.
-Never greet, never apologize, never say "have a nice day". 
-Give your answer and stop. No fluff, no filler.
+  prompt: `Jesteś John — BeAwarely Core. Odpowiadaj zawsze po polsku, rzeczowo i precyzyjnie.
+Nigdy nie przepraszaj, nie używaj zbędnych uprzejmości.
+Udzielaj krótkich, merytorycznych odpowiedzi na temat, bez wstępów i zakończeń.
 
-User: ${q}
+Użytkownik: ${q}
 John:`,
         stream: true,
       options: {
