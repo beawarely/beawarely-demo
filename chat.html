@@ -494,22 +494,21 @@ document.addEventListener('DOMContentLoaded', ()=>{
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
   body: JSON.stringify({
-    model: "llama3",
-    prompt: `You are John — BeAwarely Core. Respond like a precise scientist.
+  model: "llama3",
+  prompt: `You are John — BeAwarely Core. Respond like a precise scientist.
 Never greet, never apologize, never say "have a nice day". 
 Give your answer and stop. No fluff, no filler.
 
 User: ${q}
 John:`,
-
-    options: {
-  temperature: 0.3,
-  top_p: 0.8,
-  num_predict: 120,
-  repeat_penalty: 1.3,
-},
-    stream: true
-  })
+  stream: true,
+  options: {
+    temperature: 0.3,
+    top_p: 0.8,
+    num_predict: 120,
+    repeat_penalty: 1.3
+  }
+})
 });
 
 if (!resp.ok || !resp.body) {
