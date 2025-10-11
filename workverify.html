@@ -11,57 +11,61 @@
     /* --- Design tokens (dark navy by default, light = cool grey/blue) --- */
     :root{ --safe-top: env(safe-area-inset-top, 0px); }
 
-    /* DARK (default) */
-    body{
-      --bg: radial-gradient(1200px 800px at 30% -10%, #0c0a22 0%, #05010f 100%);
---bg-elev: #18122e;
---card: rgba(20,16,36,0.85);
---text: #e0e6ff;
---muted: #8aa4c8;
---border: rgba(255,255,255,0.12);
---accent: #3af2d9;
---accent-2: #a24dff;
-      --pill: rgba(255,255,255,.08);
-      --pill-hover: rgba(255,255,255,.14);
-      --input-bg: rgba(255,255,255,.02);
-      --shadow: 0 6px 16px rgba(12,20,40,.32);
+    /* === BeAwarely Background Theme (Dark + Light) === */
 
-      /* AI dock (DARK): deep greens */
-      --ai-bg: #0d1f14;
-      --ai-bg-2:#12361f;
-      --ai-border: rgba(88,196,140,.25);
-      --ai-text:#DFF7EA;
-      --ai-muted:#9DD7B8;
+/* DARK (default) */
+body {
+  --bg: #0b0d14;
+  --bg-gradient: linear-gradient(180deg, #060b14 0%, #133e86 100%);
+  --text: #eaf0ff;
+  --muted: #8aa4c8;
+  --border: rgba(255,255,255,0.12);
+  --accent: #3af2d9;
+  --accent-2: #a24dff;
+  --pill: rgba(255,255,255,.08);
+  --pill-hover: rgba(255,255,255,.14);
+  --input-bg: rgba(255,255,255,.02);
+  --shadow: 0 6px 16px rgba(12,20,40,.32);
 
-      margin:0; font-family:'Segoe UI', system-ui, Arial, sans-serif;
-      background: var(--bg); color: var(--text);
-    }
+  /* AI dock (DARK): deep greens */
+  --ai-bg: #0d1f14;
+  --ai-bg-2:#12361f;
+  --ai-border: rgba(88,196,140,.25);
+  --ai-text:#DFF7EA;
+  --ai-muted:#9DD7B8;
 
-    /* LIGHT */
-    body.light-mode{
-      --bg: #F4F7FB;             /* soft paper */
-      --bg-elev: #ECF2FA;        /* section background */
-      --card: #FFFFFF;           /* cards */
-      --text: #0E1730;           /* ink */
-      --muted: #5A6B89;
-      --border: rgba(14,23,48,0.12);
-      --accent: #2F54EB;
-      --accent-2: #69A1FF;
-      --pill: rgba(14,23,48,.06);
-      --pill-hover: rgba(14,23,48,.10);
-      --input-bg: rgba(14,23,48,.025);
-      --shadow: 0 6px 14px rgba(18,30,60,.08);
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+}
 
-      /* AI dock (LIGHT): soft grey-greens */
-      --ai-bg:#ECF5EF;
-      --ai-bg-2:#E3F0E8;
-      --ai-border: rgba(29,105,76,.18);
-      --ai-text:#103322;
-      --ai-muted:#3a6a52;
+/* LIGHT */
+body.light-mode {
+  --bg: #f6f8ff;
+  --bg-gradient: linear-gradient(180deg, #b5e0ff 0%, #ffffff 100%);
+  --text: #0E1730;
+  --muted: #5A6B89;
+  --border: rgba(14,23,48,0.12);
+  --accent: #2F54EB;
+  --accent-2: #69A1FF;
+  --pill: rgba(14,23,48,.06);
+  --pill-hover: rgba(14,23,48,.10);
+  --input-bg: rgba(14,23,48,.025);
+  --shadow: 0 6px 14px rgba(18,30,60,.08);
 
-      color: var(--text);
-      background: linear-gradient(0deg, var(--bg), var(--bg));
-    }
+  /* AI dock (LIGHT): soft grey-greens */
+  --ai-bg:#ECF5EF;
+  --ai-bg-2:#E3F0E8;
+  --ai-border: rgba(29,105,76,.18);
+  --ai-text:#103322;
+  --ai-muted:#3a6a52;
+
+  background: var(--bg-gradient);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+}
 
     /* Optional helper if you want to target explicitly */
     body.dark-mode{ background: var(--bg); }
