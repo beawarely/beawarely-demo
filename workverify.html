@@ -217,14 +217,6 @@ body.light-mode {
 
   // 🔧 Tylko ustawienie trybu kolorów – resztę inicjalizuje moduł niżej
 
-  // 🔧 Draft buttons
- //  if(saveDraftBtn) saveDraftBtn.addEventListener('click', saveDraftFromForm);
-  if(loadDraftBtn) loadDraftBtn.addEventListener('click', loadDraftIntoForm);
-  if(clearDraftBtn) clearDraftBtn.addEventListener('click', () => {
-    localStorage.removeItem(draftKey());
-    alert('Draft cleared.');
-  });
-
   // 🔧 AI Dock buttons
   if(aiReviewBtn) aiReviewBtn.addEventListener('click', reviewDraftLocally);
   if(aiAddNoteBtn) aiAddNoteBtn.addEventListener('click', () => {
