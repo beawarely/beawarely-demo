@@ -200,7 +200,7 @@
 
   <script>
     // light/dark toggle (spójne z innymi)
-    document.addEventListener('DOMContentLoaded', async ()=>{
+    document.addEventListener('DOMContentLoaded', async ()=> {
   // Default: respect saved choice; if none, follow system preference
   const saved = localStorage.getItem('mode');
   const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -208,10 +208,7 @@
   document.body.classList.toggle('light-mode', isLight);
   document.body.classList.toggle('dark-mode', !isLight);
 
-  // 🔧 Inicjalizacja formularza, listy i notatek
-  await setFormState();
-  await loadRecent();
-  renderNotes();
+  // 🔧 Tylko ustawienie trybu kolorów – resztę inicjalizuje moduł niżej
 
   // 🔧 Draft buttons
   if(saveDraftBtn) saveDraftBtn.addEventListener('click', saveDraftFromForm);
@@ -590,14 +587,12 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       alert('Draft reviewed. See notes below the dock.');
     }
 
-
        async function getSession(){
       const { data:{ session } } = await sb.auth.getSession();
       // cache last seen user id for per-user drafts
       _lastUserId = session?.user?.id || 'anon';
       return session || null;
     }
-
 
         async function setFormState(){
       const session = await getSession();
@@ -623,7 +618,6 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       if(loadDraftBtn) loadDraftBtn.disabled = false;
       if(clearDraftBtn) clearDraftBtn.disabled = false;
     }
-
 
     async function loadRecent(){
       if(!recentList) return;
@@ -661,7 +655,6 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
   </div>
 </article>`;
 
-
       }).join('');
     }
 
@@ -688,7 +681,6 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       }
             if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Saving…'; }
       reviewDraftLocally(); // 🔧 lokalna walidacja przed wysłaniem
-
 
       const payload = {
         author: session.user.id,
@@ -744,7 +736,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       };
             if(aiClearNotesBtn) aiClearNotesBtn.onclick = ()=> { writeNotes([]); renderNotes(); };
 
-
 renderDraftList();
 
       // Simple autosave on input (debounced)
@@ -762,8 +753,7 @@ renderDraftList();
   });
 });
 
-      sb.auth.onAuthStateChange(async (_ev, session)=>{
-  handleAuth(session);
+      sb.auth.onAuthStateChange(async (_ev, session)=> {
   _lastUserId = session?.user?.id || 'anon'; // przełącz klucz draftów na aktywnego usera
   await setFormState();
   await loadRecent();
