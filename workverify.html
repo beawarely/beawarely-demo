@@ -216,22 +216,6 @@ body.light-mode {
   document.body.classList.toggle('dark-mode', !isLight);
 
   // 🔧 Tylko ustawienie trybu kolorów – resztę inicjalizuje moduł niżej
-
-  // 🔧 AI Dock buttons
-  if(aiReviewBtn) aiReviewBtn.addEventListener('click', reviewDraftLocally);
-  if(aiAddNoteBtn) aiAddNoteBtn.addEventListener('click', () => {
-    const note = prompt('Add a note:');
-    if(note && note.trim()) addNote(note.trim());
-  });
-  if(aiClearNotesBtn) aiClearNotesBtn.addEventListener('click', () => {
-    localStorage.removeItem(NOTES_KEY());
-    renderNotes();
-  });
-  if(aiUseDraftBtn) aiUseDraftBtn.addEventListener('click', () => {
-    const d = readDraft();
-    if(!d){ alert('No draft.'); return; }
-    aiInputEl.value = buildAIContext();
-  });
 });
 
     function toggleLightDarkMode(){
