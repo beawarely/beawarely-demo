@@ -670,12 +670,25 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
         // status = 'pending' (domyślnie po stronie SQL)
       };
 
-      const { error } = await sb.from('work_experiences').insert(payload);
+      const { data: ins, error } = await sb.from('work_experiences').insert(payload).select().single();
       if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Publish'; }
 
       if(error){
         alert('Save failed: ' + error.message);
         return;
+      }
+
+      // 🔹 Rejestracja aktywności w globalnym feedzie
+      try{
+        await sb.from('activity_events').insert({
+          actor_id: session.user.id,
+          verb: 'added',
+          subject_type: 'work_experience',
+          subject_id: ins.id,
+          summary: `Added new WorkVerify entry: "${payload.role || 'Experience'}" at "${payload.company || 'unknown company'}"`
+        });
+      }catch(e){
+        console.warn('activity_events insert failed', e);
       }
 
       companyEl.value = ''; roleEl.value = ''; textEl.value = '';
