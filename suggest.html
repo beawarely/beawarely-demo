@@ -547,32 +547,55 @@ applyFilters();
       }
     }
 
-    // Submit (no backend yet)
-    els.form?.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      if (!supabaseClient) { els.msg.textContent = 'Backend not configured yet.'; return; }
-      els.submit.disabled = true; els.msg.textContent = 'Saving…';
-      try {
-        const { data:{ session } } = await supabaseClient.auth.getSession();
-        if(!session){ els.msg.textContent='Please sign in first.'; els.submit.disabled=false; return; }
-        // Placeholder insert – will work once table exists + RLS set
-        const payload = {
-  title: document.getElementById('title').value.trim(),
-  details: document.getElementById('details').value.trim(),
-  tags: (document.getElementById('tags').value||'').split(/[\s,]+/).map(t=>t.trim()).filter(Boolean),
-  author: session.user.id, // to jest FK -> profiles.id
-  status: 'pending'
-};
-const { error } = await supabaseClient.from('tool_ideas').insert(payload);
+    // Submit (backend)
+els.form?.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  if (!supabaseClient) { els.msg.textContent = 'Backend not configured yet.'; return; }
+  els.submit.disabled = true; els.msg.textContent = 'Saving…';
+  try {
+    const { data:{ session } } = await supabaseClient.auth.getSession();
+    if(!session){ els.msg.textContent='Please sign in first.'; els.submit.disabled=false; return; }
 
-        if (error) els.msg.textContent = 'Cannot save yet (backend not set up).';
-        else { els.msg.textContent='Idea submitted!'; els.form.reset(); }
-      } catch(err){
-        els.msg.textContent = 'Error: '+(err?.message||'unknown');
-      } finally {
-        els.submit.disabled = false;
+    const payload = {
+      title: document.getElementById('title').value.trim(),
+      details: document.getElementById('details').value.trim(),
+      tags: (document.getElementById('tags').value||'').split(/[\s,]+/).map(t=>t.trim()).filter(Boolean),
+      author: session.user.id, // FK -> profiles.id
+      status: 'pending'
+    };
+
+    const { data: ins, error } = await supabaseClient
+      .from('tool_ideas')
+      .insert(payload)
+      .select()
+      .single();
+
+    if (error) {
+      els.msg.textContent = 'Save error: ' + (error.message || error);
+    } else {
+      // 🔹 Rejestruj aktywność w globalnym feedzie
+      try {
+        await supabaseClient.from('activity_events').insert({
+          actor_id: session.user.id,
+          verb: 'suggested',
+          subject_type: 'tool_idea',
+          subject_id: ins.id,
+          summary: `Suggested a new tool: "${payload.title || 'Unnamed idea'}"`
+        });
+      } catch(e){
+        console.warn('activity_events insert failed', e);
       }
-    });
+
+      els.msg.textContent = 'Idea submitted!'; 
+      els.form.reset();
+      if (typeof applyFilters === 'function') applyFilters();
+    }
+  } catch(err){
+    els.msg.textContent = 'Error: '+(err?.message||'unknown');
+  } finally {
+    els.submit.disabled = false;
+  }
+});
 
     init();
   </script>
