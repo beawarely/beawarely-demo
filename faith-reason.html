@@ -518,7 +518,7 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
   if (!sess){ out.textContent = 'Login required.'; btn.disabled = false; return; }
 
   // INSERT new item (z autorem dla RLS)
-  const { data: ins, error: insErr } = await supabaseClient
+    const { data: ins, error: insErr } = await supabaseClient
     .from('faith_items')
     .insert({
       author: sess.user.id,
@@ -529,6 +529,19 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
 
   if (insErr){
     out.textContent = 'Save error: '+ (insErr.message || insErr); btn.disabled = false; return;
+  }
+
+  // 🔹 Zarejestruj aktywność użytkownika w globalnym feedzie
+  try {
+    await supabaseClient.from('activity_events').insert({
+      actor_id: sess.user.id,
+      verb: 'added',
+      subject_type: 'faith_item',
+      subject_id: ins.id,
+      summary: `Added new Faith & Reason entry: "${title}"`
+    });
+  } catch(e){
+    console.warn('activity_events insert failed', e);
   }
 
   // Kolejka AI (jeśli RPC istnieje)
