@@ -608,6 +608,41 @@ body.light-mode .feed-posts .post {
 
 <script src="js/feed.js"></script>
 
+<!-- 🔹 Global activity feed (Faith, WorkVerify, Suggest) -->
+<script>
+async function loadActivityFeed() {
+  const { data, error } = await supabase
+    .from('activity_events')
+    .select('id, actor_id, summary, created_at')
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  const feed = document.getElementById('feedPosts');
+  if (!feed) return;
+  if (error) {
+    console.warn('activity_events fetch error:', error);
+    return;
+  }
+
+  data.forEach(ev => {
+    const div = document.createElement('div');
+    div.className = 'post';
+    div.innerHTML = `
+      <div class="post-header">
+        <div class="post-author">Activity</div>
+        <div class="post-time">${new Date(ev.created_at).toLocaleString()}</div>
+      </div>
+      <div>${ev.summary}</div>
+    `;
+    feed.appendChild(div);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadActivityFeed();
+});
+</script>
+
 <script>
 // 🔒 Blokada wejścia w karty dla niezalogowanych
 document.addEventListener("DOMContentLoaded", async () => {
