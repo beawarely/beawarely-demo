@@ -581,7 +581,6 @@ try {
       actor_id: session.user.id,
       verb: 'suggested',
       subject_type: 'tool_idea',
-      subject_id: inserted.id,
       summary: `Suggested a new tool: "${inserted.title || payload.title || 'Unnamed idea'}"`
     });
   } else {
