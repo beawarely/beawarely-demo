@@ -564,27 +564,32 @@ els.form?.addEventListener('submit', async (e)=>{
       status: 'pending'
     };
 
-    const { data: ins, error } = await supabaseClient
-      .from('tool_ideas')
-      .insert(payload)
-      .select()
-      .single();
+    const { data: inserted, error } = await supabaseClient
+  .from('tool_ideas')
+  .insert(payload)
+  .select('id, title')
+  .maybeSingle();
 
     if (error) {
       els.msg.textContent = 'Save error: ' + (error.message || error);
     } else {
       // 🔹 Rejestruj aktywność w globalnym feedzie
-      try {
-        await supabaseClient.from('activity_events').insert({
-          actor_id: session.user.id,
-          verb: 'suggested',
-          subject_type: 'tool_idea',
-          subject_id: ins.id,
-          summary: `Suggested a new tool: "${payload.title || 'Unnamed idea'}"`
-        });
-      } catch(e){
-        console.warn('activity_events insert failed', e);
-      }
+try {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.user?.id && inserted?.id) {
+    await supabaseClient.from('activity_events').insert({
+      actor_id: session.user.id,
+      verb: 'suggested',
+      subject_type: 'tool_idea',
+      subject_id: inserted.id,
+      summary: `Suggested a new tool: "${inserted.title || payload.title || 'Unnamed idea'}"`
+    });
+  } else {
+    console.warn('Skipped activity_events insert — missing user or idea ID.');
+  }
+} catch (e) {
+  console.warn('activity_events insert failed', e);
+}
 
       els.msg.textContent = 'Idea submitted!'; 
       els.form.reset();
