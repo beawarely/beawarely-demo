@@ -490,9 +490,15 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
       <button id="postSubmit" class="pill">Post</button>
     </div>
 
-    <div id="feedPosts" class="feed-posts">
+        <div id="feedPosts" class="feed-posts">
       <p style="opacity:0.6;">Loading posts...</p>
     </div>
+
+    <!-- 🔹 Global activity (Faith/Work/Suggest) — osobny kontener, żeby feed.js tego nie nadpisywał -->
+    <div id="activityFeed" class="feed-posts">
+      <p style="opacity:0.6;">Loading activity…</p>
+    </div>
+
   </div>
 </section>
 
@@ -611,35 +617,47 @@ body.light-mode .feed-posts .post {
 <!-- 🔹 Global activity feed (Faith, WorkVerify, Suggest) -->
 <script>
 async function loadActivityFeed() {
-  const { data, error } = await supabase
-    .from('activity_events')
-    .select('id, actor_id, summary, created_at')
-    .order('created_at', { ascending: false })
-    .limit(30);
+  try{
+    if(!window.supabase) return;
+    const feed = document.getElementById('activityFeed');
+    if(!feed) return;
 
-  const feed = document.getElementById('feedPosts');
-  if (!feed) return;
-  if (error) {
-    console.warn('activity_events fetch error:', error);
-    return;
+    const { data, error } = await supabase
+      .from('activity_events')
+      .select('summary, created_at')
+      .order('created_at', { ascending:false })
+      .limit(30);
+
+    feed.innerHTML = ''; // 🔸 własny kontener — nic nie nadpisze feed.js
+
+    if (error){
+      feed.innerHTML = `<div class="post">Activity error: ${error.message}</div>`;
+      return;
+    }
+    if (!data || !data.length){
+      feed.innerHTML = `<div class="post">No activity yet.</div>`;
+      return;
+    }
+
+    for (const ev of data){
+      const div = document.createElement('div');
+      div.className = 'post';
+      div.innerHTML = `
+        <div class="post-header">
+          <div class="post-author">Activity</div>
+          <div class="post-time">${new Date(ev.created_at).toLocaleString()}</div>
+        </div>
+        <div>${ev.summary}</div>
+      `;
+      feed.appendChild(div);
+    }
+  }catch(e){
+    console.error('Activity feed load failed:', e);
   }
-
-  data.forEach(ev => {
-    const div = document.createElement('div');
-    div.className = 'post';
-    div.innerHTML = `
-      <div class="post-header">
-        <div class="post-author">Activity</div>
-        <div class="post-time">${new Date(ev.created_at).toLocaleString()}</div>
-      </div>
-      <div>${ev.summary}</div>
-    `;
-    feed.appendChild(div);
-  });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadActivityFeed();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadActivityFeed(); // 🔸 odpal po załadowaniu DOM
 });
 </script>
 
