@@ -509,28 +509,44 @@ document.addEventListener('DOMContentLoaded', ()=>{
   body: JSON.stringify({
     model: localStorage.getItem('ba_model_id') || "llama3",
   prompt: (() => {
-    const m = localStorage.getItem('ba_model_id') || "llama3";
-    if (m.startsWith("mixtral")) {
-      return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
-Answer in English by default, but switch to Polish if the user writes in Polish.
-Provide thoughtful, analytical responses with a calm tone.
+  const m = localStorage.getItem('ba_model_id') || "llama3";
+  if (m.startsWith("mixtral")) {
+    return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
+Speak with calm, analytical tone.  
+Respond in English by default, but naturally switch to Polish if the user writes in Polish.  
+Focus on structured, insightful explanations with balanced reasoning.
 
 User: ${q}
 MattThinker:`;
-    }
-    return `Jesteś MattFast — BeAwarely Core (Llama3).
-Odpowiadaj po polsku, krótko, konkretnie i rzeczowo — bez zbędnych wstępów.
+  }
+  return `Jesteś MattFast — BeAwarely Core (Llama3).
+Mów po polsku, szybko, konkretnie i rzeczowo — bez wstępów ani ozdobników.  
+Bądź precyzyjny, dynamiczny i stanowczy w odpowiedziach.
 
 Użytkownik: ${q}
 MattFast:`;
-  })(),
+})(),
+
         stream: true,
-      options: {
-        temperature: 0.3,
-        top_p: 0.8,
-        num_predict: 120,
-        repeat_penalty: 1.3,
-      },
+      options: (() => {
+        const m = localStorage.getItem('ba_model_id') || "llama3";
+        if (m.startsWith("mixtral")) {
+          // === MattThinker (Mixtral Q6_K) ===
+          return {
+            temperature: 0.7,       
+            top_p: 0.9,             
+            num_predict: 220,       
+            repeat_penalty: 1.2,    
+          };
+        }
+        // === MattFast (Llama3) ===
+        return {
+          temperature: 0.4,         
+          top_p: 0.8,               
+          num_predict: 80,          
+          repeat_penalty: 1.4,      
+        };
+      })(),
 })
 });
 
