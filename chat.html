@@ -507,30 +507,56 @@ document.addEventListener('DOMContentLoaded', ()=>{
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
   body: JSON.stringify({
-    model: localStorage.getItem('ba_model_id') || "llama3",
-  prompt: (() => {
     const m = localStorage.getItem('ba_model_id') || "llama3";
-    if (m.startsWith("mixtral")) {
-      return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
-Answer in English by default, but switch to Polish if the user writes in Polish.
-Provide thoughtful, analytical responses with a calm tone.
+
+const prompt = (() => {
+  if (m.startsWith("mixtral")) {
+    return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
+Answer in English by default; switch to Polish if the user writes in Polish.
+Be concise but thoughtful. Avoid lists unless requested.
 
 User: ${q}
 MattThinker:`;
-    }
-    return `Jesteś MattFast — BeAwarely Core (Llama3).
-Odpowiadaj po polsku, krótko, konkretnie i rzeczowo — bez zbędnych wstępów.
+  }
+  return `Jesteś MattFast — BeAwarely Core (Llama3).
+Odpowiadaj krótko, po polsku, konkretnie i rzeczowo. Bez wstępów i podsumowań.
 
 Użytkownik: ${q}
 MattFast:`;
-  })(),
-        stream: true,
-      options: {
-        temperature: 0.3,
-        top_p: 0.8,
-        num_predict: 120,
-        repeat_penalty: 1.3,
-      },
+})();
+
+const options = (() => {
+  if (m.startsWith("mixtral")) {
+    return {
+      temperature: 0.25,
+      top_p: 0.9,
+      repeat_penalty: 1.1,
+      num_predict: 180,
+      num_ctx: 8192,
+      stop: ["User:", "Użytkownik:", "MattFast:", "MattThinker:"]
+    };
+  }
+  return {
+    temperature: 0.3,
+    top_p: 0.8,
+    repeat_penalty: 1.25,
+    num_predict: 140,
+    num_ctx: 4096,
+    stop: ["User:", "Użytkownik:", "MattFast:", "MattThinker:"]
+  };
+})();
+
+const resp = await fetch("https://ai.beawarely.com/api/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  signal: abortController.signal,
+  body: JSON.stringify({
+    model: m,
+    prompt,
+    stream: true,
+    options
+  })
+});
 })
 });
 
