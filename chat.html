@@ -591,7 +591,13 @@ while (true) {
 // po zakończeniu strumienia — zamknij bąbelek
 window._currentAIbubble = null;
 
-// po zakończeniu — zapisz pełną wiadomość AI do bazy
+// po zakończeniu — usuń tymczasowy bąbelek (unikaj duplikatu)
+if (window._currentAIbubble) {
+  window._currentAIbubble.remove();
+  window._currentAIbubble = null;
+}
+
+// zapisz pełną wiadomość AI do bazy
 if (fullText.trim()) {
   addMsg(fullText, "ai");
 } else {
