@@ -489,7 +489,26 @@ document.addEventListener('DOMContentLoaded', ()=>{
         return;
       }
 
-      const q = input.value.trim();
+      // --- Prompt Injection Sanitizer ---
+function sanitizePrompt(p) {
+  const blockedPatterns = [
+    /ignore previous/gi,
+    /disregard previous/gi,
+    /system:/gi,
+    /assistant:/gi,
+    /jailbreak/gi,
+    /show.*key/gi,
+    /print.*secret/gi,
+    /reveal.*data/gi,
+    /delete.*data/gi,
+    /give me.*password/gi
+  ];
+  let safe = p;
+  blockedPatterns.forEach(r => { safe = safe.replace(r, '[blocked]'); });
+  return safe;
+}
+const q = sanitizePrompt(input.value.trim());
+
       if (!q) return;
       addMsg(q, "user");
       input.value = "";
