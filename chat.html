@@ -591,8 +591,12 @@ while (true) {
 // po zakończeniu strumienia — zamknij bąbelek
 window._currentAIbubble = null;
 
-// po zakończeniu — jeśli nic nie doszło, pokaż placeholder
-if (!fullText.trim()) addMsg("[no response]", "ai");
+// po zakończeniu — zapisz pełną wiadomość AI do bazy
+if (fullText.trim()) {
+  addMsg(fullText, "ai");
+} else {
+  addMsg("[no response]", "ai");
+}
 
       } catch (err) {
         if (err?.name === 'AbortError'){
