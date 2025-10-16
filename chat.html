@@ -588,20 +588,17 @@ while (true) {
     }
   }
 }
-// po zakończeniu strumienia — zamknij bąbelek
-window._currentAIbubble = null;
-
 // po zakończeniu — usuń tymczasowy bąbelek (unikaj duplikatu)
 if (window._currentAIbubble) {
   window._currentAIbubble.remove();
   window._currentAIbubble = null;
 }
 
-// zapisz pełną wiadomość AI do bazy
+// zapisz pełną wiadomość AI do bazy tylko raz
 if (fullText.trim()) {
-  addMsg(fullText, "ai");
+  addMsg(fullText, "ai", true);
 } else {
-  addMsg("[no response]", "ai");
+  addMsg("[no response]", "ai", true);
 }
 
       } catch (err) {
