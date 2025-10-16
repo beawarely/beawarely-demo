@@ -156,13 +156,9 @@ textarea:focus-visible {
     // === Supabase: jeden klient dla całego serwisu (spójnie z index.html) ===
     (function initSupabaseOnce(){
       const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
 if (!window.supabaseClient) {
-  fetch("/config.json")
-    .then(r => r.json())
-    .then(cfg => {
-      window.supabaseClient = window.supabase.createClient(SB_URL, cfg.anon_key);
-    })
-    .catch(err => console.error("Config load failed:", err));
+  window.supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
 }
     })();
 
