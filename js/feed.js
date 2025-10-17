@@ -137,7 +137,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     feedPosts.innerHTML = posts.map(p => {
       const author = profiles?.find(pr => pr.id === p.author_id);
       const name = author?.display_name || "Unknown";
-      const avatar = author?.avatar_url || "https://via.placeholder.com/36?text=👤";
+      let avatar = author?.avatar_url;
+if (avatar && !avatar.startsWith("https")) {
+  avatar = `https://xzwpqyomqjzmiqsszwkg.supabase.co/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+}
+avatar = avatar || "https://via.placeholder.com/36?text=👤";
       const time = new Date(p.created_at).toLocaleString();
       return `
         <div class="post">
