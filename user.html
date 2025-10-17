@@ -40,12 +40,14 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener("DOMContentLoaded", async () => {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      const user = session?.user;
-      if (!user) {
-        location.replace("index.html?login=1");
-        return;
-      }
+      const { data, error } = await supabaseClient.auth.getUser();
+const user = data?.user;
+
+if (error || !user) {
+  console.warn("No active session, redirecting...");
+  location.replace("index.html?login=1");
+  return;
+}
 
       const params = new URLSearchParams(location.search);
       const viewedId = params.get("id");
