@@ -135,27 +135,35 @@ document.addEventListener("DOMContentLoaded", async () => {
       .in("id", ids);
 
     feedPosts.innerHTML = posts.map(p => {
-      const author = profiles?.find(pr => pr.id === p.author_id);
-      const name = author?.display_name || "Unknown";
-      let avatar = author?.avatar_url;
-if (avatar && !avatar.startsWith("https")) {
-  avatar = `https://xzwpqyomqjzmiqsszwkg.supabase.co/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
-}
-avatar = avatar || "https://via.placeholder.com/36?text=👤";
-      const time = new Date(p.created_at).toLocaleString();
-      return `
-        <div class="post">
-          <div class="post-header">
-            <img src="${avatar}" alt="">
-            <div>
-              <div class="post-author">${name}</div>
-              <div class="post-time">${time}</div>
-            </div>
-          </div>
-          <div class="post-content">${p.content}</div>
+  const author = profiles?.find(pr => pr.id === p.author_id);
+  const name = author?.display_name || "Unknown";
+  const uid = author?.id || "";
+  let avatar = author?.avatar_url;
+  if (avatar && !avatar.startsWith("https")) {
+    avatar = `https://xzwpqyomqjzmiqsszwkg.supabase.co/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+  }
+  avatar = avatar || "https://via.placeholder.com/36?text=👤";
+  const time = new Date(p.created_at).toLocaleString();
+
+  const profileLink = uid ? `user.html?id=${uid}` : "#";
+
+  return `
+    <div class="post">
+      <div class="post-header">
+        <a href="${profileLink}" style="text-decoration:none;color:inherit;">
+          <img src="${avatar}" alt="" style="cursor:pointer;">
+        </a>
+        <div>
+          <a href="${profileLink}" style="text-decoration:none;color:inherit;">
+            <div class="post-author" style="cursor:pointer;">${name}</div>
+          </a>
+          <div class="post-time">${time}</div>
         </div>
-      `;
-    }).join("");
+      </div>
+      <div class="post-content">${p.content}</div>
+    </div>
+  `;
+}).join("");
   }
 
   function escapeHtml(str) {
