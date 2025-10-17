@@ -32,7 +32,13 @@
     <div class="posts" id="posts"></div>
   </div>
 
+    <!-- Supabase init -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
   <script>
+    const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     document.addEventListener("DOMContentLoaded", async () => {
       const { data: { session } } = await supabaseClient.auth.getSession();
       const user = session?.user;
@@ -100,9 +106,18 @@
       } else if (rel.status === "accepted") {
         btn.textContent = "Znajomi";
         btn.disabled = true;
-      } else if (rel.status === "rejected") {
-        btn.textContent = "Odrzucono";
-        btn.disabled = true;
+            } else if (rel.status === "rejected") {
+        btn.textContent = "Dodaj do znajomych";
+        btn.disabled = false;
+        btn.onclick = async () => {
+          btn.disabled = true;
+          await supabaseClient.from("friendships").insert({
+            requester_id: user.id,
+            addressee_id: viewedId,
+            status: "pending"
+          });
+          btn.textContent = "Wysłano zaproszenie";
+        };
       }
 
       // load posts
