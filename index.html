@@ -1253,9 +1253,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // logowanie przez Google
   googleLoginBtn.addEventListener("click", async () => {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin }
-    });
+  provider: "google",
+  options: {
+    redirectTo: window.location.origin,
+    queryParams: {
+      prompt: 'select_account' // 🔹 wymusza okno wyboru konta Google
+    }
+  }
+});
     if (error) console.error("Login error:", error.message);
   });
 
