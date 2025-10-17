@@ -1270,8 +1270,23 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const avatarEl = document.getElementById("profileAvatar");
       if (avatarEl) {
-        avatarEl.src = "images/avatar-default.png";
-      }
+  try {
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', user.id)
+      .single();
+
+    let avatarUrl = prof?.avatar_url;
+    if (avatarUrl && !avatarUrl.startsWith('https')) {
+      avatarUrl = `https://xzwpqyomqjzmiqsszwkg.supabase.co/storage/v1/object/public${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
+    }
+    avatarEl.src = avatarUrl || 'images/avatar-default.png';
+  } catch (e) {
+    console.warn('Avatar load failed:', e);
+    avatarEl.src = 'images/avatar-default.png';
+  }
+}
     } catch (e) {
       console.warn("Avatar fetch failed:", e);
     }
