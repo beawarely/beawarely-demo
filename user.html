@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile – BeAwarely</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    body{margin:0;font-family:'Segoe UI',sans-serif;color:#fff;background:radial-gradient(ellipse at top,#0d0d2b 0%,#000 100%);}
+    .wrap{max-width:960px;margin:0 auto;padding:28px;}
+    .profile-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+    .profile-header img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:2px solid #5aa8ff;}
+    .profile-actions button{padding:8px 14px;border:none;border-radius:8px;cursor:pointer;background:#5aa8ff;color:#000;font-weight:600;}
+    .profile-actions button[disabled]{opacity:.6;cursor:default;}
+    .posts{display:flex;flex-direction:column;gap:12px;}
+    .post{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="profile-header">
+      <img id="avatar" src="" alt="Avatar"/>
+      <div>
+        <h2 id="fullname">User</h2>
+        <div id="username" style="opacity:.8;font-size:0.9em"></div>
+        <div class="profile-actions" style="margin-top:8px;">
+          <button id="friend-btn" style="display:none;">Dodaj do znajomych</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="posts" id="posts"></div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const user = session?.user;
+      if (!user) {
+        location.replace("index.html?login=1");
+        return;
+      }
+
+      const params = new URLSearchParams(location.search);
+      const viewedId = params.get("id");
+      if (!viewedId) {
+        location.replace("index.html");
+        return;
+      }
+
+      // fetch profile data
+      const { data: profile } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", viewedId)
+        .single();
+
+      if (!profile) {
+        document.getElementById("fullname").textContent = "Nie znaleziono użytkownika";
+        return;
+      }
+
+      document.getElementById("fullname").textContent = (profile.first_name || "") + " " + (profile.last_name || "");
+      document.getElementById("username").textContent = "@" + (profile.username || "");
+      if (profile.avatar_url) document.getElementById("avatar").src = profile.avatar_url;
+
+      // friendship status
+      const { data: rel } = await supabaseClient
+        .from("friendships")
+        .select("*")
+        .or(`and(requester_id.eq.${user.id},addressee_id.eq.${viewedId}),and(requester_id.eq.${viewedId},addressee_id.eq.${user.id})`)
+        .maybeSingle();
+
+      const btn = document.getElementById("friend-btn");
+      btn.style.display = "inline-block";
+
+      if (!rel) {
+        btn.textContent = "Dodaj do znajomych";
+        btn.onclick = async () => {
+          btn.disabled = true;
+          await supabaseClient.from("friendships").insert({
+            requester_id: user.id,
+            addressee_id: viewedId,
+            status: "pending"
+          });
+          btn.textContent = "Wysłano zaproszenie";
+        };
+      } else if (rel.status === "pending") {
+        if (rel.addressee_id === user.id) {
+          btn.textContent = "Akceptuj zaproszenie";
+          btn.onclick = async () => {
+            await supabaseClient.from("friendships").update({ status: "accepted" }).eq("id", rel.id);
+            btn.textContent = "Znajomi";
+            btn.disabled = true;
+          };
+        } else {
+          btn.textContent = "Wysłano zaproszenie";
+          btn.disabled = true;
+        }
+      } else if (rel.status === "accepted") {
+        btn.textContent = "Znajomi";
+        btn.disabled = true;
+      } else if (rel.status === "rejected") {
+        btn.textContent = "Odrzucono";
+        btn.disabled = true;
+      }
+
+      // load posts
+      const { data: posts } = await supabaseClient
+        .from("user_posts")
+        .select("*")
+        .eq("author_id", viewedId)
+        .order("created_at", { ascending: false });
+
+      const list = document.getElementById("posts");
+      if (!posts?.length) {
+        list.innerHTML = "<div style='opacity:.6;'>Brak postów</div>";
+      } else {
+        for (const p of posts) {
+          if (p.visibility === "public" || (p.visibility === "friends" && rel?.status === "accepted") || viewedId === user.id) {
+            const div = document.createElement("div");
+            div.className = "post";
+            div.textContent = p.content;
+            list.appendChild(div);
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
