@@ -40,11 +40,26 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener("DOMContentLoaded", async () => {
-      const { data, error } = await supabaseClient.auth.getUser();
-const user = data?.user;
+      let { data, error } = await supabaseClient.auth.getUser();
+let user = data?.user;
 
-if (error || !user) {
-  console.warn("No active session, redirecting...");
+if (!user) {
+  console.log("🕓 Waiting for Supabase session...");
+  const { data: waitData } = await new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve({ data: { user: null } }), 1500);
+    const { data: listener } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        clearTimeout(timeout);
+        listener.subscription.unsubscribe();
+        resolve({ data: { user: session.user } });
+      }
+    });
+  });
+  user = waitData?.user;
+}
+
+if (!user) {
+  console.warn("❌ No session detected after wait, redirecting...");
   location.replace("index.html?login=1");
   return;
 }
