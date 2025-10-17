@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (avatar && !avatar.startsWith("https")) {
     avatar = `https://xzwpqyomqjzmiqsszwkg.supabase.co/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
   }
-  avatar = avatar || "https://via.placeholder.com/36?text=👤";
+  avatar = avatar || "images/avatar-default.png";
   const time = new Date(p.created_at).toLocaleString();
 
   const profileLink = uid ? `user.html?id=${uid}` : "#";
