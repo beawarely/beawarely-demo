@@ -51,20 +51,30 @@ if (error || !user) {
 
       const params = new URLSearchParams(location.search);
       const viewedId = params.get("id");
-      if (!viewedId) {
+            if (!viewedId) {
+        console.warn("Brak parametru id – wracam na stronę główną");
         location.replace("index.html");
         return;
       }
 
+      // nie pozwól wejść samemu na siebie przez feed
+      if (viewedId === user.id) {
+        window.location.href = "profile.html";
+        return;
+      }
+
       // fetch profile data
-      const { data: profile } = await supabaseClient
+      const { data: profile, error: profErr } = await supabaseClient
         .from("profiles")
         .select("*")
         .eq("id", viewedId)
-        .single();
+        .maybeSingle();
 
-      if (!profile) {
+      if (profErr || !profile) {
+        console.warn("Profil nie znaleziony:", profErr?.message || "brak danych");
         document.getElementById("fullname").textContent = "Nie znaleziono użytkownika";
+        document.getElementById("username").textContent = "";
+        document.getElementById("friend-btn").style.display = "none";
         return;
       }
 
