@@ -43,24 +43,24 @@
       let { data, error } = await supabaseClient.auth.getUser();
 let user = data?.user;
 
+// 🕓 Czekamy do 3 sekund na odtworzenie sesji z localStorage
 if (!user) {
-  console.log("🕓 Waiting for Supabase session...");
-  const { data: waitData } = await new Promise((resolve) => {
-    const timeout = setTimeout(() => resolve({ data: { user: null } }), 1500);
-    const { data: listener } = supabaseClient.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        clearTimeout(timeout);
-        listener.subscription.unsubscribe();
-        resolve({ data: { user: session.user } });
-      }
-    });
-  });
-  user = waitData?.user;
+  console.log("⌛ Waiting for Supabase session restore...");
+  for (let i = 0; i < 6; i++) {
+    await new Promise(r => setTimeout(r, 500));
+    const { data: check } = await supabaseClient.auth.getUser();
+    if (check?.user) {
+      user = check.user;
+      break;
+    }
+  }
 }
 
 if (!user) {
-  console.warn("❌ No session detected after wait, redirecting...");
-  location.replace("index.html?login=1");
+  console.warn("❌ No session detected after extended wait. Showing login notice instead of redirect.");
+  document.getElementById("fullname").textContent = "Zaloguj się, aby zobaczyć profil.";
+  document.getElementById("username").textContent = "";
+  document.getElementById("friend-btn").style.display = "none";
   return;
 }
 
