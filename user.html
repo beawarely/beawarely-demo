@@ -66,16 +66,19 @@ h2{font-size:2rem;margin:12px 0 6px}
 </style>
 </head>
 <body>
+  <!-- 🔙 Back to Homepage -->
+  <button class="back-btn" onclick="window.location.href='index.html'">← Powrót do strony głównej</button>
+
   <div class="profile-box">
-  <img id="avatar" src="" alt="Avatar" class="profile-pic" />
-  <h2 id="fullname">User</h2>
-  <div id="username" class="username">@user</div>
-  <button id="friend-btn" class="friend-btn" style="display:none;">Dodaj do znajomych</button>
+    <img id="avatar" src="" alt="Avatar" class="profile-pic" />
+    <h2 id="fullname">User</h2>
+    <div id="username" class="username">@user</div>
+    <button id="friend-btn" class="friend-btn" style="display:none;">Dodaj do znajomych</button>
 
-  <div class="posts" id="posts"></div>
-</div>
+    <div class="posts" id="posts"></div>
+  </div>
 
-    <!-- Supabase init -->
+  <!-- Supabase init -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
   <script>
     const SUPABASE_URL = "https://xzwpqyomqjzmiqsszwkg.supabase.co";
@@ -84,27 +87,24 @@ h2{font-size:2rem;margin:12px 0 6px}
 
     document.addEventListener("DOMContentLoaded", async () => {
       let { data, error } = await supabaseClient.auth.getUser();
-let user = data?.user || null;
+      let user = data?.user || null;
 
-// Pobierz ID z URL
-const params = new URLSearchParams(location.search);
-const viewedId = params.get("id");
+      const params = new URLSearchParams(location.search);
+      const viewedId = params.get("id");
 
-// Jeśli brak parametru – tylko komunikat, bez przekierowania
-if (!viewedId) {
-  document.getElementById("fullname").textContent = "Nie znaleziono użytkownika";
-  document.getElementById("username").textContent = "";
-  document.getElementById("friend-btn").style.display = "none";
-  return;
-}
+      if (!viewedId) {
+        document.getElementById("fullname").textContent = "Nie znaleziono użytkownika";
+        document.getElementById("username").textContent = "";
+        document.getElementById("friend-btn").style.display = "none";
+        return;
+      }
 
-// 🚫 Zostawiamy tylko blokadę wejścia na własny profil
-if (user && viewedId === user.id) {
-  window.location.href = "profile.html";
-  return;
-}
+      if (user && viewedId === user.id) {
+        window.location.href = "profile.html";
+        return;
+      }
 
-      // fetch profile data
+      // === Fetch profile ===
       const { data: profile, error: profErr } = await supabaseClient
         .from("profiles")
         .select("*")
@@ -112,23 +112,25 @@ if (user && viewedId === user.id) {
         .maybeSingle();
 
       if (profErr || !profile) {
-        console.warn("Profil nie znaleziony:", profErr?.message || "brak danych");
         document.getElementById("fullname").textContent = "Nie znaleziono użytkownika";
         document.getElementById("username").textContent = "";
         document.getElementById("friend-btn").style.display = "none";
         return;
       }
 
-      document.getElementById("fullname").textContent = (profile.first_name || "") + " " + (profile.last_name || "");
+      document.getElementById("fullname").textContent =
+        (profile.first_name || "") + " " + (profile.last_name || "");
       document.getElementById("username").textContent = "@" + (profile.username || "");
+      
       if (profile.avatar_url) {
-  let avatar = profile.avatar_url;
-  if (!avatar.startsWith("https")) {
-    avatar = `${SUPABASE_URL}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
-  }
-  document.getElementById("avatar").src = avatar;
-}
-      // friendship status
+        let avatar = profile.avatar_url;
+        if (!avatar.startsWith("https")) {
+          avatar = `${SUPABASE_URL}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+        }
+        document.getElementById("avatar").src = avatar;
+      }
+
+      // === Friendship logic ===
       const { data: rel } = await supabaseClient
         .from("friendships")
         .select("*")
@@ -164,7 +166,7 @@ if (user && viewedId === user.id) {
       } else if (rel.status === "accepted") {
         btn.textContent = "Znajomi";
         btn.disabled = true;
-            } else if (rel.status === "rejected") {
+      } else if (rel.status === "rejected") {
         btn.textContent = "Dodaj do znajomych";
         btn.disabled = false;
         btn.onclick = async () => {
@@ -178,7 +180,7 @@ if (user && viewedId === user.id) {
         };
       }
 
-      // load posts
+      // === Posts ===
       const { data: posts } = await supabaseClient
         .from("user_posts")
         .select("*")
