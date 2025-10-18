@@ -130,13 +130,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const ids = [...new Set(posts.map(p => p.author_id).filter(Boolean))];
     const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, display_name, avatar_url")
-      .in("id", ids);
+  .from("profiles")
+  .select("id, username, first_name, last_name, avatar_url")
+  .in("id", ids);
 
     feedPosts.innerHTML = posts.map(p => {
   const author = profiles?.find(pr => pr.id === p.author_id);
-  const name = author?.display_name || "Unknown";
+  const name = author?.username || [author?.first_name, author?.last_name].filter(Boolean).join(" ") || "User";
   const uid = author?.id || "";
   let avatar = author?.avatar_url;
   if (avatar && !avatar.startsWith("https")) {
