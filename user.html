@@ -40,24 +40,18 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener("DOMContentLoaded", async () => {
-      let { data, error } = await supabaseClient.auth.getUser();
-let user = data?.user;
+      let user = null;
 
-// 🕓 Czekamy do 3 sekund na odtworzenie sesji z localStorage
-if (!user) {
-  console.log("⌛ Waiting for Supabase session restore...");
-  for (let i = 0; i < 6; i++) {
-    await new Promise(r => setTimeout(r, 500));
-    const { data: check } = await supabaseClient.auth.getUser();
-    if (check?.user) {
-      user = check.user;
-      break;
-    }
-  }
+// 🔹 stabilne odzyskanie sesji (poczekaj aż Supabase ją odtworzy)
+for (let attempt = 0; attempt < 10; attempt++) {
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (data?.user) { user = data.user; break; }
+  await new Promise(r => setTimeout(r, 400));
 }
 
+// 🔹 jeśli po 4 sekundach dalej brak sesji, NIE przekierowuj — pokaż komunikat
 if (!user) {
-  console.warn("❌ No session detected after extended wait. Showing login notice instead of redirect.");
+  console.warn("⏳ Brak aktywnej sesji – pozostaję na stronie user.html");
   document.getElementById("fullname").textContent = "Zaloguj się, aby zobaczyć profil.";
   document.getElementById("username").textContent = "";
   document.getElementById("friend-btn").style.display = "none";
