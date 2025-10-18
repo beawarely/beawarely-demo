@@ -42,35 +42,27 @@
     document.addEventListener("DOMContentLoaded", async () => {
       let user = null;
 
-// 🔹 stabilne odzyskanie sesji (poczekaj aż Supabase ją odtworzy)
-for (let attempt = 0; attempt < 10; attempt++) {
-  const { data, error } = await supabaseClient.auth.getUser();
-  if (data?.user) { user = data.user; break; }
-  await new Promise(r => setTimeout(r, 400));
-}
+// 🔓 tryb otwarty – bez wymuszenia logowania
+const { data, error } = await supabaseClient.auth.getUser();
+const user = data?.user || null;
 
-// 🔹 jeśli po 4 sekundach dalej brak sesji, NIE przekierowuj — pokaż komunikat
-if (!user) {
-  console.warn("⏳ Brak aktywnej sesji – pozostaję na stronie user.html");
-  document.getElementById("fullname").textContent = "Zaloguj się, aby zobaczyć profil.";
+// Pobierz ID z URL
+const params = new URLSearchParams(location.search);
+const viewedId = params.get("id");
+
+// Jeśli brak parametru – tylko komunikat, bez przekierowania
+if (!viewedId) {
+  document.getElementById("fullname").textContent = "Nie znaleziono użytkownika";
   document.getElementById("username").textContent = "";
   document.getElementById("friend-btn").style.display = "none";
   return;
 }
 
-      const params = new URLSearchParams(location.search);
-      const viewedId = params.get("id");
-            if (!viewedId) {
-        console.warn("Brak parametru id – wracam na stronę główną");
-        location.replace("index.html");
-        return;
-      }
-
-      // nie pozwól wejść samemu na siebie przez feed
-      if (viewedId === user.id) {
-        window.location.href = "profile.html";
-        return;
-      }
+// 🚫 Zostawiamy tylko blokadę wejścia na własny profil
+if (user && viewedId === user.id) {
+  window.location.href = "profile.html";
+  return;
+}
 
       // fetch profile data
       const { data: profile, error: profErr } = await supabaseClient
