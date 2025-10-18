@@ -40,11 +40,8 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener("DOMContentLoaded", async () => {
-      let user = null;
-
-// 🔓 tryb otwarty – bez wymuszenia logowania
-const { data, error } = await supabaseClient.auth.getUser();
-const user = data?.user || null;
+      let { data, error } = await supabaseClient.auth.getUser();
+let user = data?.user || null;
 
 // Pobierz ID z URL
 const params = new URLSearchParams(location.search);
