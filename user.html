@@ -89,8 +89,13 @@ if (!user) {
 
       document.getElementById("fullname").textContent = (profile.first_name || "") + " " + (profile.last_name || "");
       document.getElementById("username").textContent = "@" + (profile.username || "");
-      if (profile.avatar_url) document.getElementById("avatar").src = profile.avatar_url;
-
+      if (profile.avatar_url) {
+  let avatar = profile.avatar_url;
+  if (!avatar.startsWith("https")) {
+    avatar = `${SUPABASE_URL}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+  }
+  document.getElementById("avatar").src = avatar;
+}
       // friendship status
       const { data: rel } = await supabaseClient
         .from("friendships")
