@@ -270,12 +270,6 @@ document.getElementById("user-name").textContent = fullName || "BeAwarely User";
 
 document.getElementById("user-email").textContent = "@" + (p.username || meta.username || "unknown");
 
-const trust = clamp(p.trust_score ?? meta.trust_score ?? 0, 0, 100);
-document.getElementById("trust-val").textContent  = `${trust} / 100`;
-document.getElementById("trust-fill").style.width = `${trust}%`;
-
-document.getElementById("points-val").textContent = (p.points ?? meta.points ?? 0);
-
 const badgeContainer = document.getElementById("badges");
 badgeContainer.innerHTML = "";
 const badges = Array.isArray(p.badges) ? p.badges : (Array.isArray(meta.badges) ? meta.badges : []);
@@ -285,8 +279,7 @@ badges.forEach(text => {
   div.textContent = text;
   badgeContainer.appendChild(div);
 });
-
-
+          
       // Jednorazowe bezpieczne domyślne metadane (opcjonalnie)
       if (meta.role == null || meta.points == null || meta.trust_score == null || meta.badges == null) {
         const updates = {
@@ -394,10 +387,13 @@ badges.forEach(text => {
       let names = {};
       if(rows.length){
         const { data: profs } = await supabaseClient
-          .from('profiles')
-          .select('id, display_name')
-          .in('id', rows);
-        (profs||[]).forEach(p=>{ names[p.id]=p.display_name || 'User'; });
+  .from('profiles')
+  .select('id, first_name, last_name')
+  .in('id', rows);
+(profs||[]).forEach(p=>{
+  const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || 'User';
+  names[p.id] = name;
+});
       }
 
       rows.forEach(otherId=>{
@@ -433,10 +429,13 @@ badges.forEach(text => {
       const ids = data.map(r=>r.requester_id);
       let names = {};
       const { data: profs } = await supabaseClient
-        .from('profiles')
-        .select('id, display_name')
-        .in('id', ids);
-      (profs||[]).forEach(p=>{ names[p.id]=p.display_name || 'User'; });
+  .from('profiles')
+  .select('id, first_name, last_name')
+  .in('id', ids);
+(profs||[]).forEach(p=>{
+  const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || 'User';
+  names[p.id] = name;
+});
 
       data.forEach(req=>{
         const row=document.createElement('div');
@@ -452,22 +451,25 @@ badges.forEach(text => {
     }
 
     async function acceptRequest(requestId){
-      const { error } = await supabaseClient
-        .from('friendships')
-        .update({ status: 'accepted' })
-        .eq('id', requestId);
-      if(error){ alert('Failed: '+error.message); return; }
-      await loadFriends(); await loadFriendRequests();
-    }
+  const { error } = await supabaseClient
+    .from('friendships')
+    .update({ status: 'accepted' })
+    .eq('id', requestId);
+  if(error){ alert('Failed: '+error.message); return; }
+  // natychmiastowe odświeżenie widoku
+  await loadFriendRequests();
+  await loadFriends();
+}
 
-    async function rejectRequest(requestId){
-      const { error } = await supabaseClient
-        .from('friendships')
-        .update({ status: 'rejected' })
-        .eq('id', requestId);
-      if(error){ alert('Failed: '+error.message); return; }
-      await loadFriendRequests();
-    }
+async function rejectRequest(requestId){
+  const { error } = await supabaseClient
+    .from('friendships')
+    .update({ status: 'rejected' })
+    .eq('id', requestId);
+  if(error){ alert('Failed: '+error.message); return; }
+  // natychmiastowe odświeżenie widoku
+  await loadFriendRequests();
+}
 
     async function unfriend(otherUserId){
       const { data: { session } } = await supabaseClient.auth.getSession();
