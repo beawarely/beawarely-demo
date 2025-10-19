@@ -250,12 +250,14 @@ try {
     const profilePic = document.getElementById("profile-pic");
     let url = profile?.avatar_url || meta.avatar_url;
     if (url) {
-      if (!url.startsWith("https")) {
-        url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
-      }
-      const bust = url.includes("?") ? "&" + Date.now() : "?" + Date.now();
-      profilePic.src = url + bust;
-    }
+  if (!url.startsWith("https")) {
+    url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
+  }
+  const bust = url.includes("?") ? "&" + Date.now() : "?" + Date.now();
+  profilePic.src = url + bust;
+} else {
+  profilePic.src = "img/avatar-default.png";
+}
   }
 } catch(e) {
   console.error('profiles query failed:', e);
