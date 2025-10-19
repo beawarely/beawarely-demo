@@ -147,14 +147,15 @@
     document.getElementById("fullname").textContent =
       (profile.first_name || "") + " " + (profile.last_name || "");
     document.getElementById("username").textContent = "@" + (profile.username || "user");
-    if (profile.avatar_url) {
-      let avatar = profile.avatar_url;
-      if (!avatar.startsWith("https")) {
-        avatar = `${SUPABASE_URL}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
-      }
-      document.getElementById("avatar").src = avatar;
-    }
-
+    let avatar = profile.avatar_url;
+if (avatar) {
+  if (!avatar.startsWith("https")) {
+    avatar = `${SUPABASE_URL}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+  }
+  document.getElementById("avatar").src = avatar;
+} else {
+  document.getElementById("avatar").src = "img/avatar-default.png";
+}
     // Relacja znajomości
 const { data: rel } = await supabaseClient
   .from("friendships")
