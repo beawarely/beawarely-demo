@@ -521,7 +521,40 @@ const q = sanitizePrompt(input.value.trim());
       try {
         abortController = new AbortController();
 
+                // === BeAwarely: automatyczne pobieranie danych z proxy (Wikipedia + Open-Meteo) ===
+        const PROXY_URL = "http://localhost:3001/search";
+        const PROXY_COOLDOWN = 10000; // 10 sekund
+        if (!window.lastProxyFetch) window.lastProxyFetch = 0;
+        if (!window.lastProxyData) window.lastProxyData = null;
+
+        let enrichedPrompt = q;
+        const now = Date.now();
+
+        // jeśli minęło >10s od ostatniego pobrania, wykonaj nowe zapytanie do proxy
+        if (now - window.lastProxyFetch > PROXY_COOLDOWN) {
+          try {
+            const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`);
+            if (proxyRes.ok) {
+              const proxyData = await proxyRes.json();
+              if (proxyData && proxyData.text) {
+                window.lastProxyFetch = now;
+                window.lastProxyData = proxyData;
+                enrichedPrompt = `${q}\n\n[Informacje z internetu (${proxyData.source || "wiki"}):]\n${proxyData.text}\n\nOdpowiedz użytkownikowi korzystając z powyższych danych.`;
+              }
+            }
+          } catch (e) {
+            if (window.lastProxyData && window.lastProxyData.text) {
+              enrichedPrompt = `${q}\n\n[Ostatnie znane informacje (${window.lastProxyData.source || "wiki"}):]\n${window.lastProxyData.text}`;
+            }
+          }
+        } else if (window.lastProxyData && window.lastProxyData.text) {
+          // użyj ostatnich danych z poprzedniego fetchu (do 10s)
+          enrichedPrompt = `${q}\n\n[Ostatnie dane (${window.lastProxyData.source || "wiki"}):]\n${window.lastProxyData.text}`;
+        }
+
+        // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
         const resp = await fetch("https://ai.beawarely.com/api/generate", {
+
   method: "POST",
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
