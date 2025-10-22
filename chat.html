@@ -557,14 +557,14 @@ Speak with calm, analytical tone.
 Respond in English by default, but naturally switch to Polish if the user writes in Polish.  
 Focus on structured, insightful explanations with balanced reasoning.
 
-User: ${q}
+User: ${enrichedPrompt}
 MattThinker:`;
   }
   return `Jesteś MattFast — BeAwarely Core (Llama3).
 Mów po polsku, szybko, konkretnie i rzeczowo — bez wstępów ani ozdobników.  
 Bądź precyzyjny, dynamiczny i stanowczy w odpowiedziach.
 
-Użytkownik: ${q}
+Użytkownik: ${enrichedPrompt}
 MattFast:`;
 })(),
 
