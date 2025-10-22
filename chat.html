@@ -522,7 +522,7 @@ const q = sanitizePrompt(input.value.trim());
         abortController = new AbortController();
 
                 // === BeAwarely: automatyczne pobieranie danych z proxy (Wikipedia + Open-Meteo) ===
-        const PROXY_URL = "http://localhost:3001/search";
+        const PROXY_URL = "https://ai.beawarely.com/api/search";
         const PROXY_COOLDOWN = 10000; // 10 sekund
         if (!window.lastProxyFetch) window.lastProxyFetch = 0;
         if (!window.lastProxyData) window.lastProxyData = null;
