@@ -526,7 +526,13 @@ const PROXY_URL = "https://ai.beawarely.com/api/search";
 
 let enrichedPrompt = q;
 try {
-  const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`);
+  const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
+  method: "GET",
+  headers: {
+    "Origin": "https://beawarely.com",
+    "Accept": "application/json"
+  }
+});
   if (proxyRes.ok) {
     const proxyData = await proxyRes.json();
     if (proxyData && proxyData.text) {
