@@ -433,10 +433,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   if (store){
     (async ()=>{
-      // Upewnij się, że mamy aktywną rozmowę
+      // Upewnij się, że mamy aktywną sesję i rozmowę
+      if (!USER_ID) {
+        await ensureSession();
+        if (!USER_ID) {
+          console.warn('Brak USER_ID — nie zapisano wiadomości.');
+          return;
+        }
+      }
+
       let convId = getCurrentId();
-      if (!convId){
-        convId = await newConversation(role==='user' ? text.slice(0,40) : 'New conversation');
+      if (!convId) {
+        convId = await newConversation(role === 'user' ? text.slice(0, 40) : 'New conversation');
       }
       if (!convId) return;
 
