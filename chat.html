@@ -541,12 +541,18 @@ try {
     "Accept": "application/json"
   }
 });
-  if (proxyRes.ok) {
-    const proxyData = await proxyRes.json();
-    if (proxyData && proxyData.text) {
-      enrichedPrompt = `${q}\n\n[Informacje z internetu (${proxyData.source || "wiki"}):]\n${proxyData.text}\n\nOdpowiedz użytkownikowi korzystając z powyższych danych.`;
-    }
-  }
+
+let proxyData = null;
+if (proxyRes.ok) {
+  proxyData = await proxyRes.json();
+} else {
+  proxyData = { source: "none", text: "Brak wyników w darmowych źródłach. Spróbuj później." };
+}
+
+if (proxyData && proxyData.text) {
+  enrichedPrompt = `${q}\n\n[Informacje z internetu (${proxyData.source || "wiki"}):]\n${proxyData.text}\n\nOdpowiedz użytkownikowi korzystając z powyższych danych.`;
+}
+
 } catch (err) {
   console.warn("Proxy fetch error:", err);
 }
