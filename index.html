@@ -1207,7 +1207,44 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("❌ " + error.message);
     } else {
       showProfile(data.user);
-      loginModal.style.display = "none";
+loginModal.style.display = "none";
+
+// === Auto-create profile record if missing ===
+try {
+  const user = data.user;
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!existing) {
+    let base = (user.email || '').split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase() || 'user';
+    let candidate = base;
+    let i = 1;
+    // ensure unique username
+    while (true) {
+      const { data: taken } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', candidate)
+        .maybeSingle();
+      if (!taken) break;
+      candidate = `${base}${i++}`;
+    }
+
+    await supabase.from('profiles').insert({
+      id: user.id,
+      username: candidate,
+      first_name: user.user_metadata?.full_name?.split(' ')[0] || null,
+      last_name: user.user_metadata?.full_name?.split(' ')[1] || null
+    });
+
+    console.log('✅ Profile created with username:', candidate);
+  }
+} catch (e) {
+  console.warn('Profile auto-create failed:', e);
+}
     }
   });
 
