@@ -175,24 +175,11 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
 
 </style>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
   <script>
-    // --- Supabase bootstrap (twarde fallbacki dla bezpośredniego wejścia na stronę) ---
-    const SUPABASE_URL =
-      window.SUPABASE_URL ||
-      localStorage.getItem('BA_SUPABASE_URL') ||
-      'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-
-    const SUPABASE_ANON_KEY =
-      window.SUPABASE_ANON_KEY ||
-      localStorage.getItem('BA_SUPABASE_ANON') ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-
-    // utrwal fallbacki, by kolejne strony miały te same wartości
-    if (!localStorage.getItem('BA_SUPABASE_URL')) localStorage.setItem('BA_SUPABASE_URL', SUPABASE_URL);
-    if (!localStorage.getItem('BA_SUPABASE_ANON')) localStorage.setItem('BA_SUPABASE_ANON', SUPABASE_ANON_KEY);
-
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Używamy centralnego supabase-client.js (zawiera SUPABASE_URL i ANON KEY).
+    const supabaseClient = window.supabaseClient;
 
     async function waitForInitialSession() {
       const { data } = await supabaseClient.auth.getSession();
@@ -205,11 +192,11 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
       });
     }
 
-    // Brama: wymagaj zalogowania
+    // Brama: wymagaj zalogowania (zachowuje dotychczasowe zachowanie)
     (async () => {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) {
-        localStorage.setItem('ba_redirect', 'faith-reason.html');
+        try { localStorage.setItem('ba_redirect', 'faith-reason.html'); } catch {}
         location.replace('index.html?login=1');
         return;
       }
