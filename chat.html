@@ -545,7 +545,10 @@ const q = sanitizePrompt(input.value.trim());
       if (st) st.textContent = "Backend: connecting…";
       setBusyUI();
 
-      try {
+            try {
+        if (abortController) {
+          try { abortController.abort(); } catch {}
+        }
         abortController = new AbortController();
 
                 // === BeAwarely: najpierw dane z internetu, potem AI (fallback) ===
