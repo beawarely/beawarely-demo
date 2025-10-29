@@ -602,9 +602,10 @@ Focus on structured, insightful explanations with balanced reasoning.
 User: ${enrichedPrompt}
 MattThinker:`;
   }
-  return `Jesteś MattFast — BeAwarely Core (Llama3).
-Mów po polsku, szybko, konkretnie i rzeczowo — bez wstępów ani ozdobników.  
-Bądź precyzyjny, dynamiczny i stanowczy w odpowiedziach.
+  return `Jesteś MattFast. Odpowiadasz krótko, precyzyjnie i bez zbędnego gadania. 
+Twoje zasady: „Powiedz co robić, ja to rozpiszę na kroki.” 
+Każda odpowiedź to 3–5 punktów. Używaj krótkich zdań. 
+Na końcu dodaj: „Gotowe. Co dalej?
 
 Użytkownik: ${enrichedPrompt}
 MattFast:`;
@@ -624,9 +625,9 @@ MattFast:`;
         }
         // === MattFast (Llama3) ===
         return {
-          temperature: 0.4,         
+          temperature: 0.5,         
           top_p: 0.8,               
-          num_predict: 80,          
+          num_predict: 160,          
           repeat_penalty: 1.4,      
         };
       })(),
