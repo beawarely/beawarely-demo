@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chat — BeAwarely</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <style>
+    body{margin:0;font-family:'Segoe UI',sans-serif;color:#fff;background:radial-gradient(ellipse at top,#0d0d2b 0%,#000 100%);}
+    .wrap{max-width:960px;margin:0 auto;padding:28px}
+    .chat-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
+    .chat-messages{
+  overflow:auto;padding:10px;border-radius:12px;
+  background:rgba(0,0,0,.18);
+  display:flex;flex-direction:column;gap:10px;
+}
+    .msg{max-width:92%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-wrap:break-word;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+    .msg.user{align-self:flex-end;background:linear-gradient(135deg,#007bff,#66b2ff);color:#fff;border-bottom-right-radius:6px}
+    .msg.ai{align-self:flex-start;background:rgba(255,255,255,.09);color:#eaeaea;border-bottom-left-radius:6px}
+    .controls{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px}
+    textarea{
+  resize:none;border-radius:10px;padding:10px;
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.18);
+  color:#eaeaea;
+}
+.send{
+  border:none;border-radius:10px;padding:10px 14px;
+  background:linear-gradient(135deg,#007bff,#66b2ff);
+  color:#fff;font-weight:600;cursor:pointer;
+  transition: transform .06s ease, opacity .2s ease;
+}
+.send:hover{ transform: translateY(-1px); }
+.send:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
+
+.status-note{
+  opacity:.65;margin-top:8px;font-size:.9rem;
+}
+
+    .topbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+    .badge{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18)}
+    a.back{color:#66b2ff;text-decoration:none}
+
+    :root{
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Chat layout -> kolumna */
+.chat-card{
+  display: flex;
+  flex-direction: column;
+  min-height: min(78dvh, 620px); /* dvh lepiej na mobile */
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+
+/* Messages -> elastyczne wypełnienie */
+.chat-messages{
+  flex: 1 1 auto;
+  max-height: 60dvh;           /* górny limit na małych ekranach */
+  height: auto;                /* zamiast stałej wysokości */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* textarea lepiej „trzyma” się szerokości, bez skoków */
+.controls textarea{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Focus-visible dla dostępności */
+.send:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #66b2ff;
+  outline-offset: 2px;
+}
+
+  .chat-messages{ overscroll-behavior: contain; }
+#chatInput{ line-height: 22px; } /* spójne z autogrow (22px) */
+
+/* ==== Sidebar / History ==== */
+.app{ display:flex; gap:16px; }
+.sidebar{
+  width:260px; flex:0 0 260px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px; padding:12px; height:fit-content;
+  max-height: min(78dvh, 620px); overflow:auto;
+}
+.side-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.mini{
+  padding:6px 10px; border:none; border-radius:8px; cursor:pointer;
+  background:rgba(255,255,255,.12); color:#fff;
+}
+.conv-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.conv-item{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px; border-radius:10px;
+  background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+}
+.conv-item[aria-selected="true"]{ outline:2px solid #66b2ff; }
+.conv-item .title{ flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.conv-item .del{ background:transparent; border:none; color:#bbb; cursor:pointer; }
+.main{ flex:1 1 auto; }
+@media (max-width: 880px){
+  .app{ flex-direction:column; }
+  .sidebar{ width:100%; flex:0 0 auto; order:2; }
+}
+  
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+  <a href="index.html" class="back">← Back</a>
+  <h2 style="margin:0">BeAwarely AI Chat</h2>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+  <select id="modelSelect" class="badge" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;">
+    <option value="llama3">MattFast (Llama3)</option>
+    <option value="mixtral:8x7b-instruct-v0.1-q6_K">MattThinker (Mixtral Q6_K)</option>
+  </select>
+</div>
+</div>
+
+<div class="app">
+  <aside class="sidebar" aria-label="Conversation history">
+    <div class="side-head">
+      <strong>Conversations</strong>
+      <button id="newConvBtn" class="mini">+ New</button>
+    </div>
+    <ul id="convList" class="conv-list" role="listbox" aria-label="Saved conversations"></ul>
+  </aside>
+
+  <div class="main">
+    <div class="chat-card">
+      <div id="chatMessages" class="chat-messages" aria-live="polite" aria-atomic="false" role="log">
+        <div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>
+      </div>
+      <div class="controls">
+        <textarea id="chatInput" aria-label="Message input" rows="2"
+  placeholder="Type and press Enter…"
+  autocomplete="off"
+  autocapitalize="sentences"
+  spellcheck="true"
+  inputmode="text"></textarea>
+
+<button id="sendBtn" class="send" aria-label="Send message">Send</button>
+
+      </div>
+      <div class="status-note" id="backendStatus" aria-live="polite">Not connected to backend yet</div>
+    </div>
+  </div> <!-- .main -->
+</div>   <!-- .app -->
+
+    <script>
+
+    // Ciche domknięcie ewentualnego loginModal (gdy wrócono z index.html)
+    (function closeStrayLoginModal(){
+      const lm = document.getElementById('loginModal');
+      if (lm) lm.classList.remove('open');
+      document.body.style.overflow = '';
+    })();
+
+    // === Helper: poczekaj na bieżącą sesję ===
+    async function waitForInitialSession(){
+      const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+      if (error) console.warn('getSession error:', error.message || error);
+      return session || null;
+    }
+
+    // === Brama: wymagaj zalogowania + ustaw redirect po zalogowaniu ===
+    (async () => {
+      const session = await waitForInitialSession();
+      if (!session) {
+        localStorage.setItem('ba_redirect', 'chat.html');
+        location.replace('index.html?login=1');
+        return;
+      }
+      // UI status
+      const st = document.getElementById('loginStatus');
+      if (st) st.textContent = 'Logged in';
+    })();
+
+    // === Reakcja na wylogowanie z innej karty ===
+    window.supabaseClient.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT') {
+    try {
+      // wyczyść stan rozmowy (po ponownym logowaniu zaczniemy nowy czat)
+      sessionStorage.removeItem('ba_current_conv');
+      localStorage.removeItem('ba_current_conv');   // cleanup starego podejścia
+      localStorage.removeItem('ba_chat_history');   // legacy local cache
+      localStorage.removeItem('ba_last_user');
+    } catch {}
+    location.replace('index.html');
+  }
+});
+
+   // === Model selector (MattFast / MattThinker) ===
+document.addEventListener('DOMContentLoaded', ()=>{
+  const select = document.getElementById('modelSelect');
+  const saved = localStorage.getItem('ba_model_id') || "llama3";
+  select.value = saved;
+  select.addEventListener('change', ()=>{
+    const val = select.value;
+    localStorage.setItem('ba_model_id', val);
+  });
+});
+   
+  </script>
+
+<script>
+// --- Ustaw widoczny „przydomek” modelu (bez zdradzania konkretu) --- //
+(function initModelChip(){
+  const MODEL_DISPLAY_NAME = (localStorage.getItem('ba_model_name') || 'BeAwarely Core').trim();
+  const chip = document.getElementById('modelChip');
+  if (chip && MODEL_DISPLAY_NAME){
+    chip.textContent = MODEL_DISPLAY_NAME;
+    chip.hidden = false;
+  }
+})();
+</script>
+
+<script>
+// ==== Conversation history in Supabase (per-user) ==== //
+const sb = window.supabaseClient;
+const CURRENT_KEY = 'ba_current_conv';
+let USER_ID = null;
+
+// sessionStorage = działa po odświeżeniu, znika po zamknięciu karty/okna
+function getCurrentId(){ return sessionStorage.getItem(CURRENT_KEY); }
+function setCurrentId(id){ sessionStorage.setItem(CURRENT_KEY, id); }
+
+async function ensureSession(){
+  const { data: { session } } = await sb.auth.getSession();
+  USER_ID = session?.user?.id || null;
+
+  // nowy czat po zmianie użytkownika
+  try {
+    const last = localStorage.getItem('ba_last_user');
+    if (USER_ID && last && last !== USER_ID){
+      localStorage.removeItem('ba_current_conv');
+    }
+    if (USER_ID) localStorage.setItem('ba_last_user', USER_ID);
+  } catch {}
+}
+
+async function ensureCurrentConversationValid(){
+  const id = getCurrentId();
+  if (!id || !USER_ID) return;
+  const { data, error } = await sb
+    .from('chat_conversations')
+    .select('id')
+    .eq('id', id)
+    .eq('user_id', USER_ID)
+    .maybeSingle();
+  if (error || !data){
+    localStorage.removeItem('ba_current_conv');
+  }
+}
+
+function resetChatUI(){
+  const msgsBox = document.getElementById('chatMessages');
+  if (msgsBox){
+    msgsBox.innerHTML = '<div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>';
+  }
+  document.getElementById('chatInput')?.focus();
+  updateSendDisabled?.();
+}
+
+async function newConversation(title='New conversation'){
+  const { data, error } = await sb
+    .from('chat_conversations')
+    // startujemy z NULL, tytuł nadamy po 1. wiadomości usera
+    .insert({ title: null, user_id: USER_ID })
+    .select('id')
+    .single();
+
+  if (error) { console.warn('create conv error:', error); return null; }
+  const convId = data.id;
+  setCurrentId(convId);
+  await renderServerHistory(convId);
+  resetChatUI();
+  return convId;
+}
+
+async function renderServerHistory(selectedId){
+  const ul = document.getElementById('convList');
+  if(!ul || !USER_ID) return;
+  const { data, error } = await sb
+    .from('chat_conversations')
+    .select('id,title,updated_at')
+    .eq('user_id', USER_ID)
+    .order('updated_at', { ascending: false })
+    .limit(100);
+  if (error) { console.warn('list conv error:', error); return; }
+
+  const current = selectedId || getCurrentId();
+  ul.innerHTML = '';
+  (data||[]).forEach(c=>{
+    const li = document.createElement('li');
+    li.className='conv-item';
+    li.setAttribute('role','option');
+    li.setAttribute('aria-selected', String(c.id===current));
+    li.dataset.id = c.id;
+
+    const span = document.createElement('span');
+    span.className='title';
+    span.textContent = (c.title && c.title.trim()) ? c.title : 'New conversation';
+
+    const del = document.createElement('button');
+    del.className='del'; del.title='Delete'; del.textContent='×';
+
+    li.appendChild(span); li.appendChild(del);
+    ul.appendChild(li);
+  });
+}
+
+async function selectConversation(id){
+  if(!id) return;
+  setCurrentId(id);
+  await renderServerHistory(id);
+
+  const { data, error } = await sb
+    .from('chat_messages')
+    .select('role,content,created_at')
+    .eq('conversation_id', id)
+    .order('created_at', { ascending: true });
+  if (error) { console.warn('load msgs error:', error); return; }
+
+  const msgsBox = document.getElementById('chatMessages');
+  msgsBox.innerHTML = '';
+  (data||[]).forEach(m=>{
+    addMsg(m.content, m.role==='user' ? 'user' : 'ai', /*store*/false);
+  });
+
+  document.getElementById('chatInput')?.focus();
+  updateSendDisabled?.();
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const newBtn = document.getElementById('newConvBtn');
+  const listEl = document.getElementById('convList');
+
+  newBtn?.addEventListener('click', async ()=>{
+  // nie twórz rekordu dopóki user nie wyśle 1. wiadomości
+  try { sessionStorage.removeItem(CURRENT_KEY); } catch {}
+  resetChatUI();
+  await renderServerHistory();
+});
+
+  listEl?.addEventListener('click', async (e)=>{
+    const target = e.target;
+    const item = target.closest('.conv-item');
+    if(!item) return;
+    const id = item.dataset.id;
+
+    if (target.classList.contains('del')){
+      const { error } = await sb
+        .from('chat_conversations')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', USER_ID);
+      if (error) { console.warn('delete conv error:', error); return; }
+      if (getCurrentId()===id){ localStorage.removeItem('ba_current_conv'); }
+      await renderServerHistory();
+      resetChatUI();
+      return;
+    }
+    await selectConversation(id);
+  });
+
+  (async ()=>{
+  await ensureSession();
+  await ensureCurrentConversationValid();
+  await renderServerHistory();
+  const cur = getCurrentId();
+  if (cur){ await selectConversation(cur); }
+  else { resetChatUI(); } // nie zapisujemy pustych czatów
+})();
+});
+</script>
+
+<script>
+       // Prosty handler UI
+    const msgs = document.getElementById('chatMessages');
+    const input = document.getElementById('chatInput');
+    const send = document.getElementById('sendBtn');
+
+    let isStreaming = false;
+    let abortController = null;
+
+    function setStatus(state){
+  const st = document.getElementById('backendStatus');
+  if (!st) return;
+
+  switch(state){
+    case 'offline':
+      st.textContent = '🛑 Offline';
+      break;
+    case 'connected':
+      st.textContent = '🟢 Connected';
+      break;
+    case 'connecting':
+      st.textContent = '🟡 Connecting…';
+      break;
+    case 'generating':
+      st.textContent = '🟠 Generating…';
+      break;
+    case 'error':
+      st.textContent = '🔴 Error';
+      break;
+    default:
+      st.textContent = state;
+  }
+}
+
+function setBusyUI(){
+  isStreaming = true;
+  send.disabled = false;
+  send.textContent = 'Stop';
+  send.setAttribute('aria-label','Stop generating');
+  send.dataset.mode = 'stop';
+  setStatus('generating');
+}
+
+function setIdleUI(){
+  isStreaming = false;
+  send.dataset.mode = 'send';
+  send.textContent = 'Send';
+  setStatus('connected');
+  updateSendDisabled();
+}
+
+window.addEventListener('offline', () => setStatus('offline'));
+window.addEventListener('online',  () => setStatus('connected'));
+
+    function updateSendDisabled(){
+      // gdy trwa generowanie – przycisk jest aktywny jako STOP
+      send.disabled = isStreaming ? false : !input.value.trim();
+    }
+    input.addEventListener('input', updateSendDisabled);
+    document.addEventListener('DOMContentLoaded', updateSendDisabled);
+
+    function addMsg(text, who, store = true){
+  const role = (who === 'user') ? 'user' : 'assistant';
+  const el = document.createElement('div');
+  el.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+  el.textContent = text;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  if (store){
+    (async ()=>{
+      // Upewnij się, że mamy aktywną sesję i rozmowę
+      if (!USER_ID) {
+        await ensureSession();
+        if (!USER_ID) {
+          console.warn('Brak USER_ID — nie zapisano wiadomości.');
+          return;
+        }
+      }
+
+      let convId = getCurrentId();
+      if (!convId) {
+        convId = await newConversation(role === 'user' ? text.slice(0, 40) : 'New conversation');
+      }
+      if (!convId) return;
+
+      // Insert wiadomości do Supabase
+      const { error: insErr } = await window.supabaseClient
+        .from('chat_messages')
+        .insert({
+          conversation_id: convId,
+          user_id: USER_ID,
+          role,
+          content: text
+        });
+      if (insErr){ console.warn('insert msg error:', insErr); }
+
+      // Ustaw tytuł przy pierwszej wiadomości usera (gdy title jest NULL)
+      if (role === 'user'){
+        await window.supabaseClient
+          .from('chat_conversations')
+          .update({ title: text.slice(0,40) })
+          .eq('id', convId)
+          .eq('user_id', USER_ID)
+          .is('title', null);
+      }
+
+      // Bump updated_at dla sortowania listy
+      await window.supabaseClient
+        .from('chat_conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', convId)
+        .eq('user_id', USER_ID);
+
+      // Odśwież sidebar (zachowaj zaznaczenie)
+      await renderServerHistory(convId);
+    })();
+  }
+}
+
+        input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        if (isStreaming) return; // blokada wysyłki podczas generowania
+        send.click();
+      }
+    });
+
+        send.onclick = async () => {
+      // tryb STOP: przerwij generowanie
+      if (isStreaming && abortController){
+        try { abortController.abort(); } catch {}
+        return;
+      }
+
+      // --- Prompt Injection Sanitizer ---
+function sanitizePrompt(p) {
+  const blockedPatterns = [
+    /ignore previous/gi,
+    /disregard previous/gi,
+    /system:/gi,
+    /assistant:/gi,
+    /jailbreak/gi,
+    /show.*key/gi,
+    /print.*secret/gi,
+    /reveal.*data/gi,
+    /delete.*data/gi,
+    /give me.*password/gi
+  ];
+  let safe = p;
+  blockedPatterns.forEach(r => { safe = safe.replace(r, '[blocked]'); });
+  return safe;
+}
+const q = sanitizePrompt(input.value.trim());
+
+      if (!q) return;
+      addMsg(q, "user");
+      input.value = "";
+      updateSendDisabled();
+
+      const st = document.getElementById("backendStatus");
+      if (st) st.textContent = "Backend: connecting…";
+      setBusyUI();
+
+            try {
+        if (abortController) {
+          try { abortController.abort(); } catch {}
+        }
+        abortController = new AbortController();
+
+                // === BeAwarely: najpierw dane z internetu, potem AI (fallback) ===
+const PROXY_URL = "https://ai.beawarely.com/api/search";
+
+let enrichedPrompt = q;
+try {
+  const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
+  method: "GET",
+  headers: {
+    "Origin": "https://beawarely.com",
+    "Accept": "application/json"
+  }
+});
+
+let proxyData = null;
+if (proxyRes.ok) {
+  proxyData = await proxyRes.json();
+} else {
+  proxyData = { source: "none", text: "Brak wyników w darmowych źródłach. Spróbuj później." };
+}
+
+if (proxyData && proxyData.text) {
+  enrichedPrompt = `${q}\n\n[Informacje z internetu (${proxyData.source || "wiki"}):]\n${proxyData.text}\n\nOdpowiedz użytkownikowi korzystając z powyższych danych.`;
+}
+
+} catch (err) {
+  console.warn("Proxy fetch error:", err);
+}
+
+// jeśli proxy nic nie zwróci — AI odpowiada samodzielnie
+if (!enrichedPrompt) enrichedPrompt = q;
+
+// === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
+
+        const resp = await fetch("https://ai.beawarely.com/api/generate", {
+
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  signal: abortController.signal,
+  body: JSON.stringify({
+    model: localStorage.getItem('ba_model_id') || "llama3",
+  prompt: (() => {
+  const m = localStorage.getItem('ba_model_id') || "llama3";
+  if (m.startsWith("mixtral")) {
+    return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
+Speak with calm, analytical tone.  
+Respond in English by default, but naturally switch to Polish if the user writes in Polish.  
+Focus on structured, insightful explanations with balanced reasoning.
+
+User: ${enrichedPrompt}
+MattThinker:`;
+  }
+  return `Jesteś MattFast — BeAwarely Core (Llama3).
+Mów po polsku, szybko, konkretnie i rzeczowo — bez wstępów ani ozdobników.  
+Bądź precyzyjny, dynamiczny i stanowczy w odpowiedziach.
+
+Użytkownik: ${enrichedPrompt}
+MattFast:`;
+})(),
+
+        stream: true,
+      options: (() => {
+        const m = localStorage.getItem('ba_model_id') || "llama3";
+        if (m.startsWith("mixtral")) {
+          // === MattThinker (Mixtral Q6_K) ===
+          return {
+            temperature: 0.7,       
+            top_p: 0.9,             
+            num_predict: 220,       
+            repeat_penalty: 1.2,    
+          };
+        }
+        // === MattFast (Llama3) ===
+        return {
+          temperature: 0.4,         
+          top_p: 0.8,               
+          num_predict: 80,          
+          repeat_penalty: 1.4,      
+        };
+      })(),
+})
+});
+
+if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+// --- STREAM RESPONSE poprawione ---
+const reader = resp.body.getReader();
+const decoder = new TextDecoder();
+let buffer = "";
+let fullText = "";
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  buffer += decoder.decode(value, { stream: true });
+  const lines = buffer.split("\n");
+  buffer = lines.pop(); // zostaje niedokończona linia
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    try {
+      const obj = JSON.parse(line);
+      if (obj.response) {
+  fullText += obj.response;
+  // jeśli nie ma jeszcze aktywnego dymka AI — utwórz go raz
+  if (!window._currentAIbubble) {
+    const el = document.createElement("div");
+    el.className = "msg ai";
+    el.textContent = "";
+    document.getElementById("chatMessages").appendChild(el);
+    window._currentAIbubble = el;
+  }
+  // dopisuj kolejne tokeny do istniejącego bąbelka
+  window._currentAIbubble.textContent = fullText;
+  window._currentAIbubble.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+    } catch (e) {
+      console.warn("Parse error:", e, line);
+    }
+  }
+}
+// po zakończeniu — usuń tymczasowy bąbelek (unikaj duplikatu)
+if (window._currentAIbubble) {
+  window._currentAIbubble.remove();
+  window._currentAIbubble = null;
+}
+
+// zapisz pełną wiadomość AI do bazy tylko raz
+if (fullText.trim()) {
+  addMsg(fullText, "ai", true);
+} else {
+  addMsg("[no response]", "ai", true);
+}
+
+      } catch (err) {
+        if (err?.name === 'AbortError'){
+          addMsg("[stopped]", "ai");
+          const st2 = document.getElementById("backendStatus");
+          if (st2) st2.textContent = "Generation stopped";
+        } else {
+          console.error("Chat error:", err);
+          addMsg("⚠️ Backend error, try again later.", "ai");
+          const st2 = document.getElementById("backendStatus");
+          if (st2) st2.textContent = "Backend: error";
+        }
+      } finally {
+        abortController = null;
+        setIdleUI();
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', ()=>{ 
+      if(msgs) msgs.scrollTop = msgs.scrollHeight; 
+    });
+  </script>
+
+
+  <script>
+  // --- Autogrow textarea + stabilne przewijanie --- //
+  (function(){
+    const input = document.getElementById('chatInput');
+    const msgs  = document.getElementById('chatMessages');
+    const send  = document.getElementById('sendBtn');
+
+    if (!input || !msgs) return;
+
+    function scrollToBottom(){
+      // requestAnimationFrame = płynny scroll po DOM update
+      requestAnimationFrame(()=>{ msgs.scrollTop = msgs.scrollHeight; });
+    }
+
+    function autoGrow(){
+      input.style.height = 'auto';
+      const max = 6 * 22; // ok. 6 linii (22px line-height)
+      input.style.height = Math.min(input.scrollHeight, max) + 'px';
+    }
+
+    input.addEventListener('input', autoGrow);
+    // pierwsze wyliczenie
+    autoGrow();
+
+    // po każdych 300ms – jeśli coś doszło asynchronicznie, dociągnij dół
+    // (lekki „watcher”; możesz usunąć, jeśli zbędny)
+    let prevCount = 0;
+    setInterval(()=>{
+      const count = msgs.children.length;
+      if (count !== prevCount){
+        prevCount = count;
+        scrollToBottom();
+      }
+    }, 300);
+  })();
+</script>
+
+</body>
+</html>
