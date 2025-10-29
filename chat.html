@@ -46,6 +46,14 @@
   to{ transform:rotate(360deg); }
 }
 
+/* Efekt wejścia/wyjścia */
+#loader {
+  transition: opacity .4s ease;
+}
+.loader-ring {
+  filter: drop-shadow(0 0 6px #66b2ff);
+}
+
 .status-note{
   opacity:.65;margin-top:8px;font-size:.9rem;
 }
@@ -574,7 +582,12 @@ const PROXY_URL = "https://ai.beawarely.com/api/search";
 
 let enrichedPrompt = q;
 const loader = document.getElementById("loader");
-if(loader) loader.style.display = "block"; // pokaż loader
+if (loader) {
+  loader.style.display = "block";
+  loader.style.opacity = "0";
+  loader.style.transition = "opacity 0.4s ease";
+  requestAnimationFrame(() => loader.style.opacity = "1");
+}
 
 try {
   const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
@@ -599,7 +612,10 @@ if (proxyData && proxyData.text) {
 } catch (err) {
     console.warn("Proxy fetch error:", err);
 } finally {
-  if(loader) loader.style.display = "none"; // ukryj loader po zakończeniu
+  if (loader) {
+  loader.style.opacity = "0";
+  setTimeout(() => { loader.style.display = "none"; }, 400);
+}
 }
 
 // jeśli proxy nic nie zwróci — AI odpowiada samodzielnie
