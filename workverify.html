@@ -338,15 +338,10 @@ body.light-mode {
     </main>
 
 <!-- Supabase + funkcjonalność strony -->
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-    // KONFIGURACJA: podmień na swoje wartości lub zdefiniuj globalnie window.__SUPABASE_URL / __SUPABASE_ANON_KEY
-        const SUPABASE_URL = window.__SUPABASE_URL || "https://xzwpqyomqjzmiqsszwkg.supabase.co";
-    const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.sb = sb;
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
+  <script>
+    const sb = window.supabaseClient;
 
         const $ = (sel)=> document.querySelector(sel);
     const companyEl = $('#companyName');
