@@ -390,24 +390,50 @@ document.addEventListener('DOMContentLoaded', ()=>{
     let isStreaming = false;
     let abortController = null;
 
-    function setBusyUI(){
-      isStreaming = true;
-      // w trakcie generowania przycisk pełni rolę STOP
-      send.disabled = false;
-      send.textContent = 'Stop';
-      send.setAttribute('aria-label','Stop generating');
-      send.dataset.mode = 'stop';
-      const st = document.getElementById('backendStatus');
-      if (st) st.textContent = 'Generating…';
-    }
-    function setIdleUI(){
-      isStreaming = false;
-      send.dataset.mode = 'send';
-      send.textContent = 'Send';
-      const st = document.getElementById('backendStatus');
-      if (st) st.textContent = '✅ Connected';
-      updateSendDisabled();
-    }
+    function setStatus(state){
+  const st = document.getElementById('backendStatus');
+  if (!st) return;
+
+  switch(state){
+    case 'offline':
+      st.textContent = '🛑 Offline';
+      break;
+    case 'connected':
+      st.textContent = '🟢 Connected';
+      break;
+    case 'connecting':
+      st.textContent = '🟡 Connecting…';
+      break;
+    case 'generating':
+      st.textContent = '🟠 Generating…';
+      break;
+    case 'error':
+      st.textContent = '🔴 Error';
+      break;
+    default:
+      st.textContent = state;
+  }
+}
+
+function setBusyUI(){
+  isStreaming = true;
+  send.disabled = false;
+  send.textContent = 'Stop';
+  send.setAttribute('aria-label','Stop generating');
+  send.dataset.mode = 'stop';
+  setStatus('generating');
+}
+
+function setIdleUI(){
+  isStreaming = false;
+  send.dataset.mode = 'send';
+  send.textContent = 'Send';
+  setStatus('connected');
+  updateSendDisabled();
+}
+
+window.addEventListener('offline', () => setStatus('offline'));
+window.addEventListener('online',  () => setStatus('connected'));
 
     function updateSendDisabled(){
       // gdy trwa generowanie – przycisk jest aktywny jako STOP
