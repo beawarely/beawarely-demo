@@ -4,7 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI Chat — BeAwarely</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-client.js"></script>
   <style>
     body{margin:0;font-family:'Segoe UI',sans-serif;color:#fff;background:radial-gradient(ellipse at top,#0d0d2b 0%,#000 100%);}
     .wrap{max-width:960px;margin:0 auto;padding:28px}
@@ -153,14 +154,6 @@ textarea:focus-visible {
 </div>   <!-- .app -->
 
     <script>
-    // === Supabase: jeden klient dla całego serwisu (spójnie z index.html) ===
-    (function initSupabaseOnce(){
-      const SB_URL = 'https://xzwpqyomqjzmiqsszwkg.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg';
-if (!window.supabaseClient) {
-  window.supabaseClient = window.supabase.createClient(SB_URL, SB_KEY);
-}
-    })();
 
     // Ciche domknięcie ewentualnego loginModal (gdy wrócono z index.html)
     (function closeStrayLoginModal(){
