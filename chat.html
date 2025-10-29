@@ -34,6 +34,18 @@
 .send:hover{ transform: translateY(-1px); }
 .send:disabled{ opacity:.45; cursor:not-allowed; transform:none; }
 
+/* Stylowy loader (pierścień pulsujący) */
+.loader-ring{
+  width:32px;height:32px;margin:0 auto;
+  border:3px solid rgba(102,178,255,.25);
+  border-top-color:#66b2ff;
+  border-radius:50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin{
+  to{ transform:rotate(360deg); }
+}
+
 .status-note{
   opacity:.65;margin-top:8px;font-size:.9rem;
 }
@@ -138,17 +150,23 @@ textarea:focus-visible {
         <div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>
       </div>
       <div class="controls">
-        <textarea id="chatInput" aria-label="Message input" rows="2"
+  <textarea id="chatInput" aria-label="Message input" rows="2"
   placeholder="Type and press Enter…"
   autocomplete="off"
   autocapitalize="sentences"
   spellcheck="true"
   inputmode="text"></textarea>
 
-<button id="sendBtn" class="send" aria-label="Send message">Send</button>
+  <button id="sendBtn" class="send" aria-label="Send message">Send</button>
+</div>
 
-      </div>
-      <div class="status-note" id="backendStatus" aria-live="polite">Not connected to backend yet</div>
+<!-- Stylowy loader BeAwarely -->
+<div id="loader" style="display:none;margin:10px auto;text-align:center;">
+  <div class="loader-ring"></div>
+  <div style="font-size:.9rem;opacity:.75;margin-top:6px;">Searching the web…</div>
+</div>
+
+<div class="status-note" id="backendStatus" aria-live="polite">Not connected to backend yet</div>
     </div>
   </div> <!-- .main -->
 </div>   <!-- .app -->
@@ -555,6 +573,9 @@ const q = sanitizePrompt(input.value.trim());
 const PROXY_URL = "https://ai.beawarely.com/api/search";
 
 let enrichedPrompt = q;
+const loader = document.getElementById("loader");
+if(loader) loader.style.display = "block"; // pokaż loader
+
 try {
   const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
   method: "GET",
@@ -576,7 +597,9 @@ if (proxyData && proxyData.text) {
 }
 
 } catch (err) {
-  console.warn("Proxy fetch error:", err);
+    console.warn("Proxy fetch error:", err);
+} finally {
+  if(loader) loader.style.display = "none"; // ukryj loader po zakończeniu
 }
 
 // jeśli proxy nic nie zwróci — AI odpowiada samodzielnie
