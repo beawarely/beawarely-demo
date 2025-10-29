@@ -154,8 +154,15 @@ textarea:focus-visible {
 
   <div class="main">
     <div class="chat-card">
-      <div id="chatMessages" class="chat-messages" aria-live="polite" aria-atomic="false" role="log">
+            <div id="chatMessages" class="chat-messages" aria-live="polite" aria-atomic="false" role="log">
         <div class="msg ai">Hello! You’re logged in. Ask me anything. 👋</div>
+
+        <!-- Stylowy loader BeAwarely (teraz w miejscu przyszłej odpowiedzi) -->
+        <div id="loader" style="display:none;text-align:center;margin:8px 0;">
+          <div class="loader-ring"></div>
+          <div style="font-size:.9rem;opacity:.75;margin-top:6px;">Searching the web…</div>
+        </div>
+
       </div>
       <div class="controls">
   <textarea id="chatInput" aria-label="Message input" rows="2"
@@ -166,12 +173,6 @@ textarea:focus-visible {
   inputmode="text"></textarea>
 
   <button id="sendBtn" class="send" aria-label="Send message">Send</button>
-</div>
-
-<!-- Stylowy loader BeAwarely -->
-<div id="loader" style="display:none;margin:10px auto;text-align:center;">
-  <div class="loader-ring"></div>
-  <div style="font-size:.9rem;opacity:.75;margin-top:6px;">Searching the web…</div>
 </div>
 
 <div class="status-note" id="backendStatus" aria-live="polite">Not connected to backend yet</div>
