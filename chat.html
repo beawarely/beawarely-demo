@@ -590,13 +590,7 @@ if (!enrichedPrompt) enrichedPrompt = q;
   method: "POST",
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
-  // Zbuduj kontekst z ostatnich 10 wiadomości w UI
-const allMsgs = Array.from(document.querySelectorAll('.msg'))
-  .slice(-10)
-  .map(m => (m.classList.contains('user') ? 'Użytkownik: ' : 'Asystent: ') + m.textContent)
-  .join('\n');
-
-body: JSON.stringify({
+  body: JSON.stringify({
     model: localStorage.getItem('ba_model_id') || "llama3",
   prompt: (() => {
   const m = localStorage.getItem('ba_model_id') || "llama3";
@@ -606,15 +600,14 @@ Speak with calm, analytical tone.
 Respond in English by default, but naturally switch to Polish if the user writes in Polish.  
 Focus on structured, insightful explanations with balanced reasoning.
 
-${allMsgs}
 User: ${enrichedPrompt}
 MattThinker:`;
   }
   return `Jesteś MattFast. Odpowiadasz krótko, precyzyjnie i bez zbędnego gadania. 
 Twoje zasady: „Powiedz co robić, ja to rozpiszę na kroki.” 
 Każda odpowiedź to 3–5 punktów. Używaj krótkich zdań. 
+Na końcu dodaj: „Gotowe. Co dalej?
 
-${allMsgs}
 Użytkownik: ${enrichedPrompt}
 MattFast:`;
 })(),
