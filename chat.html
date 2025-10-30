@@ -596,28 +596,29 @@ const allMsgs = Array.from(document.querySelectorAll('.msg'))
   method: "POST",
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
-  body: JSON.stringify({
-    model: localStorage.getItem('ba_model_id') || "llama3",
-    
-  prompt: (() => {
-  const m = localStorage.getItem('ba_model_id') || "llama3";
-  if (m.startsWith("mixtral")) {
-    return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
+    body: JSON.stringify({
+    model: localStorage.getItem('ba_model_id') || "llama3-lingyang:latest",
+    prompt: (() => {
+      const m = localStorage.getItem('ba_model_id') || "llama3-lingyang:latest";
+      if (m.startsWith("mixtral")) {
+        return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
 Speak with calm, analytical tone.  
 Respond in English by default, but naturally switch to Polish if the user writes in Polish.  
 Focus on structured, insightful explanations with balanced reasoning.
 
+${allMsgs}
 User: ${enrichedPrompt}
 MattThinker:`;
-  }
-  return `Jesteś MattFast. Odpowiadasz krótko, precyzyjnie i bez zbędnego gadania. 
+      }
+      return `Jesteś MattFast. Odpowiadasz krótko, precyzyjnie i bez zbędnego gadania. 
 Twoje zasady: „Powiedz co robić, ja to rozpiszę na kroki.” 
 Każda odpowiedź to 3–5 punktów. Używaj krótkich zdań. 
 Na końcu dodaj: „Gotowe. Co dalej?
 
+${allMsgs}
 Użytkownik: ${enrichedPrompt}
 MattFast:`;
-})(),
+    })(),
 
         stream: true,
       options: (() => {
