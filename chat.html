@@ -590,8 +590,16 @@ if (!enrichedPrompt) enrichedPrompt = q;
   method: "POST",
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
+
+  // --- budujemy kontekst z ostatnich 10 wiadomości ---
+  const allMsgs = Array.from(document.querySelectorAll('.msg'))
+    .slice(-10)
+    .map(m => (m.classList.contains('user') ? 'Użytkownik: ' : 'Asystent: ') + m.textContent)
+    .join('\n');
+
   body: JSON.stringify({
     model: localStorage.getItem('ba_model_id') || "llama3",
+    
   prompt: (() => {
   const m = localStorage.getItem('ba_model_id') || "llama3";
   if (m.startsWith("mixtral")) {
