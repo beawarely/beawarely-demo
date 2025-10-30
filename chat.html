@@ -117,7 +117,7 @@ textarea:focus-visible {
   <h2 style="margin:0">BeAwarely AI Chat</h2>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
   <select id="modelSelect" class="badge" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;">
-    <option value="llama3">MattFast (Llama3)</option>
+    <option value="llama3-lingyang:latest">MattFast (Llama3 LingYang)</option>
     <option value="mixtral:8x7b-instruct-v0.1-q6_K">MattThinker (Mixtral Q6_K)</option>
   </select>
 </div>
@@ -199,7 +199,8 @@ textarea:focus-visible {
    // === Model selector (MattFast / MattThinker) ===
 document.addEventListener('DOMContentLoaded', ()=>{
   const select = document.getElementById('modelSelect');
-  const saved = localStorage.getItem('ba_model_id') || "llama3";
+  const saved = localStorage.getItem('ba_model_id') || "llama3-lingyang:latest";
+
   select.value = saved;
   select.addEventListener('change', ()=>{
     const val = select.value;
