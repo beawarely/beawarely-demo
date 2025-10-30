@@ -552,37 +552,38 @@ const q = sanitizePrompt(input.value.trim());
         }
         abortController = new AbortController();
 
-                // === BeAwarely: najpierw dane z internetu, potem AI (fallback) ===
+                // === BeAwarely: heurystyka PL+EN — tylko gdy pytanie dotyczy faktów/aktualności ===
+function shouldUseInternet(prompt) {
+  const patterns = [
+    /\b(kiedy|który rok|ile kosztuje|aktualnie|obecnie|najlepszy|ranking|trendy|co nowego|nowości|premiera|wydarzenie|dnia|roku|202\d|203\d)\b/i,
+    /\b(when|how much|current|today|now|latest|recent|best|trending|news|update|release|event|in\s20\d\d)\b/i
+  ];
+  return patterns.some(r => r.test(prompt));
+}
+
 const PROXY_URL = "https://ai.beawarely.com/api/search";
-
 let enrichedPrompt = q;
-try {
-  const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
-  method: "GET",
-  headers: {
-    "Origin": "https://beawarely.com",
-    "Accept": "application/json"
+
+if (shouldUseInternet(q)) {
+  try {
+    const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
+      method: "GET",
+      headers: {
+        "Origin": "https://beawarely.com",
+        "Accept": "application/json"
+      }
+    });
+
+    if (proxyRes.ok) {
+      const proxyData = await proxyRes.json();
+      if (proxyData && proxyData.text) {
+        enrichedPrompt = `${q}\n\n${proxyData.text}`;
+      }
+    }
+  } catch (err) {
+    console.warn("Heurystyka: błąd fetch internetu:", err);
   }
-});
-
-let proxyData = null;
-if (proxyRes.ok) {
-  proxyData = await proxyRes.json();
-} else {
-  proxyData = { source: "none", text: "Brak wyników w darmowych źródłach. Spróbuj później." };
 }
-
-if (proxyData && proxyData.text) {
-  enrichedPrompt = `${q}\n\n[Informacje z internetu (${proxyData.source || "wiki"}):]\n${proxyData.text}\n\nOdpowiedz użytkownikowi korzystając z powyższych danych.`;
-}
-
-} catch (err) {
-  console.warn("Proxy fetch error:", err);
-}
-
-// jeśli proxy nic nie zwróci — AI odpowiada samodzielnie
-if (!enrichedPrompt) enrichedPrompt = q;
-
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
 
 // Zbuduj kontekst z ostatnich 10 wiadomości (AI + user)
