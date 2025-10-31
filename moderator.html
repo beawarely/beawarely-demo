@@ -6,96 +6,224 @@
   <title>Moderator Panel — BeAwarely</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #0d0d2b;
-      color: #fff;
-      padding: 20px;
+    :root{
+      --blue1:#007bff;
+      --blue2:#66b2ff;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Segoe UI',sans-serif;
+      background:#0d0d2b;
+      color:#fff;
+      padding:20px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
+    h1{margin:0 0 16px 0;text-align:center}
+    .tabs{
+      display:flex;justify-content:center;gap:8px;margin:10px auto 18px auto;
     }
-    th, td {
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 10px;
-      text-align: left;
+    .tab-btn{
+      border:none;border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700;
+      background:rgba(255,255,255,.10);color:#fff;transition:background .2s, transform .1s;
     }
-    th {
-      background: rgba(255,255,255,0.1);
+    .tab-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.16); }
+    .tab-btn.active{
+      background:linear-gradient(135deg,var(--blue1),var(--blue2));
+      box-shadow:0 8px 24px rgba(0,0,0,.25);
     }
-    tr:nth-child(even) {
-      background: rgba(255,255,255,0.05);
+    .section{ display:none; }
+    .section.active{ display:block; }
+
+    table{ width:100%; border-collapse: collapse; margin-top: 14px; }
+    th, td{ border:1px solid rgba(255,255,255,0.12); padding:10px; text-align:left; }
+    th{ background:rgba(255,255,255,0.08); }
+    tr:nth-child(even){ background:rgba(255,255,255,0.04); }
+
+    button{ border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-weight:700; }
+    .approve{ background:#28a745; color:#fff; }
+    .reject{ background:#dc3545; color:#fff; }
+    .mini{ background:rgba(255,255,255,.12); color:#fff; }
+    .primary{ background:linear-gradient(135deg,var(--blue1),var(--blue2)); color:#fff; }
+    .danger{ background:#dc3545; color:#fff; }
+
+    .toolbar{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      margin: 8px 0 10px 0;
     }
-    button {
-      margin-right: 8px;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
+    .pill{
+      background: rgba(255,255,255,.10); color:#fff; border-radius:999px; padding:8px 12px; display:inline-flex; gap:8px; align-items:center;
     }
-    .approve {
-      background: #28a745;
-      color: white;
+    .split{
+      display:grid; grid-template-columns: 280px 1fr; gap:14px; align-items:start;
     }
-    .reject {
-      background: #dc3545;
-      color: white;
+    .card{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+    .list-item{
+      padding:10px; border:1px solid rgba(255,255,255,.12); border-radius:10px;
+      background:rgba(0,0,0,.18); display:flex; align-items:center; justify-content:space-between; gap:8px;
+    }
+    .list-item .meta{ opacity:.8; font-size:.9rem; }
+    .muted{ opacity:.7; }
+    .right{ margin-left:auto; display:flex; gap:6px; }
+    .hidden{ display:none !important; }
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center; z-index:9999;
+    }
+    .modal-backdrop.open{ display:flex; }
+    .modal{
+      background:#1e1e2e; color:#fff; width:min(520px,92vw); border-radius:14px; padding:18px; box-shadow:0 18px 60px rgba(0,0,0,.5);
+    }
+    .modal h3{ margin:0 0 8px 0; }
+    .form{ display:flex; flex-direction:column; gap:10px; }
+    input[type="text"], input[type="url"], textarea, select{
+      width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.06); color:#fff;
+    }
+    textarea{ min-height:110px; resize:vertical; }
+
+    @media (max-width: 900px){
+      .split{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <h1>Moderator Panel</h1>
-  <table id="moderationTable">
-    <thead>
-      <tr>
-        <th>Title</th>
-        <th>Details</th>
-        <th>Tags</th>
-        <th>Author</th>
-        <th>Created At</th>
-        <th>Source</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Rows will be injected here -->
-    </tbody>
-  </table>
+
+  <div class="tabs">
+    <button id="tabMgmt" class="tab-btn active">BeAwarely Management</button>
+    <button id="tabRag" class="tab-btn">RAG Memory</button>
+  </div>
+
+  <!-- ====== Zakładka 1: BeAwarely Management (Tool Ideas) ====== -->
+  <section id="secMgmt" class="section active">
+    <div class="toolbar">
+      <span class="pill">Tool Ideas — pending</span>
+      <button id="btnRefreshIdeas" class="mini">🔄 Refresh</button>
+    </div>
+
+    <table id="moderationTable">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Details</th>
+          <th>Tags</th>
+          <th>Author</th>
+          <th>Created At</th>
+          <th>Source</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody><!-- rows injected --></tbody>
+    </table>
+  </section>
+
+  <!-- ====== Zakładka 2: RAG Memory ====== -->
+  <section id="secRag" class="section">
+    <div class="toolbar">
+      <span class="pill">RAG: Categories & Documents</span>
+      <button id="btnRagRefresh" class="mini">🔄 Refresh</button>
+      <button id="btnAddCategory" class="primary">+ Add Category</button>
+      <button id="btnAddDoc" class="mini">+ Add Document</button>
+      <span id="ragStatus" class="muted"></span>
+    </div>
+
+    <div class="split">
+      <!-- Left: Categories -->
+      <div class="card">
+        <strong>Categories</strong>
+        <ul id="ragCatList" class="list" aria-live="polite"><li class="muted">Loading…</li></ul>
+      </div>
+
+      <!-- Right: Documents / Details -->
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <strong id="docsHeader">Documents</strong>
+          <span id="docsCounter" class="muted"></span>
+          <span class="right">
+            <input id="docSearchInput" type="text" placeholder="Search in category…" style="max-width:260px;">
+            <button id="btnDocSearch" class="mini">Search</button>
+          </span>
+        </div>
+        <table id="ragDocsTable">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>URL</th>
+              <th>Updated</th>
+              <th style="width:160px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody><!-- docs injected --></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Modals ====== -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="modalBox" class="modal" role="document">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <h3 id="modalTitle">Modal</h3>
+        <button id="modalClose" class="mini">✖</button>
+      </div>
+      <div id="modalBody"></div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+        <button id="modalCancel" class="mini">Cancel</button>
+        <button id="modalSubmit" class="primary">Save</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const supabase = supabase.createClient(
+    // ===== Supabase (jak w wersji bazowej pliku) =====
+    const supabaseClient = supabase.createClient(
       "https://xzwpqyomqjzmiqsszwkg.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg"
     );
 
+    // ===== Access Control (Moderator only) =====
     async function checkModerator() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      const { data, error } = await supabase
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) { location.href = "index.html"; return null; }
+      const { data, error } = await supabaseClient
         .from("moderators")
         .select("user_id")
         .eq("user_id", user.id)
         .single();
-
-      if (error || !data) {
-        window.location.href = "index.html";
-      }
+      if (error || !data) { location.href = "index.html"; return null; }
+      return user;
     }
 
+    // ===== Tabs =====
+    const tabMgmt = document.getElementById('tabMgmt');
+    const tabRag  = document.getElementById('tabRag');
+    const secMgmt = document.getElementById('secMgmt');
+    const secRag  = document.getElementById('secRag');
+
+    function showTab(which){
+      if (which==='mgmt'){
+        tabMgmt.classList.add('active'); tabRag.classList.remove('active');
+        secMgmt.classList.add('active'); secRag.classList.remove('active');
+      } else {
+        tabRag.classList.add('active'); tabMgmt.classList.remove('active');
+        secRag.classList.add('active'); secMgmt.classList.remove('active');
+      }
+    }
+    tabMgmt.addEventListener('click', ()=>showTab('mgmt'));
+    tabRag.addEventListener('click',  ()=>showTab('rag'));
+
+    // ===== Tool Ideas (Zakładka 1) =====
+    const ideasTableBody = document.querySelector("#moderationTable tbody");
     async function loadPendingIdeas() {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from("tool_ideas")
         .select("*")
         .eq("status", "pending")
@@ -103,48 +231,350 @@
 
       if (error) {
         console.error(error);
+        ideasTableBody.innerHTML = `<tr><td colspan="7">Error: ${error.message}</td></tr>`;
         return;
       }
-
-      const tbody = document.querySelector("#moderationTable tbody");
-      tbody.innerHTML = "";
-
-      data.forEach(row => {
+      ideasTableBody.innerHTML = "";
+      (data||[]).forEach(row => {
         const tr = document.createElement("tr");
-
         tr.innerHTML = `
-          <td>${row.title}</td>
+          <td>${row.title || ''}</td>
           <td>${row.details || ""}</td>
-          <td>${row.tags?.join(", ") || ""}</td>
-          <td>${row.author}</td>
-          <td>${new Date(row.created_at).toLocaleString()}</td>
+          <td>${Array.isArray(row.tags) ? row.tags.join(", ") : (row.tags||"")}</td>
+          <td>${row.author || ''}</td>
+          <td>${row.created_at ? new Date(row.created_at).toLocaleString() : ''}</td>
           <td>Suggest a Tool</td>
           <td>
-            <button class="approve" onclick="updateStatus('${row.id}', 'approved')">Approve</button>
-            <button class="reject" onclick="updateStatus('${row.id}', 'rejected')">Reject</button>
+            <button class="approve" data-id="${row.id}" data-act="approve">Approve</button>
+            <button class="reject"  data-id="${row.id}" data-act="reject">Reject</button>
           </td>
         `;
-
-        tbody.appendChild(tr);
+        ideasTableBody.appendChild(tr);
       });
     }
+    ideasTableBody.addEventListener('click', async (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const id  = btn.getAttribute('data-id');
+      const act = btn.getAttribute('data-act');
+      if (!id || !act) return;
+      const status = (act==='approve') ? 'approved' : 'rejected';
+      const { error } = await supabaseClient.from("tool_ideas").update({ status }).eq("id", id);
+      if (error){ alert("Error: " + error.message); return; }
+      loadPendingIdeas();
+    });
+    document.getElementById('btnRefreshIdeas').addEventListener('click', loadPendingIdeas);
 
-    async function updateStatus(id, status) {
-      const { error } = await supabase
-        .from("tool_ideas")
-        .update({ status })
-        .eq("id", id);
+    // ===== RAG (Zakładka 2) =====
+    const API_BASE = 'https://ai.beawarely.com/api/rag';
+    const ragStatus = document.getElementById('ragStatus');
+    const catList   = document.getElementById('ragCatList');
+    const docsTableBody = document.querySelector('#ragDocsTable tbody');
+    const docsHeader = document.getElementById('docsHeader');
+    const docsCounter = document.getElementById('docsCounter');
+    const docSearchInput = document.getElementById('docSearchInput');
+    const btnDocSearch = document.getElementById('btnDocSearch');
 
-      if (error) {
-        console.error(error);
-        alert("Error updating status");
-      } else {
-        loadPendingIdeas(); // Refresh table
+    let selectedCategory = null; // { id, name, description, docs_count? }
+
+    function setRagStatus(msg){ ragStatus.textContent = msg || ''; }
+
+    async function fetchJson(url, opts={}){
+      setRagStatus('Loading…');
+      try{
+        const res = await fetch(url, { ...opts, headers: { 'Content-Type':'application/json', ...(opts.headers||{}) }});
+        const text = await res.text();
+        let data = null;
+        try { data = text ? JSON.parse(text) : null; } catch { data = { raw:text }; }
+        if(!res.ok){ throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`); }
+        return data;
+      } finally {
+        setRagStatus('');
       }
     }
 
-    // Init
-    checkModerator().then(loadPendingIdeas);
+    // ------- Categories -------
+    async function loadCategories(){
+      catList.innerHTML = `<li class="muted">Loading…</li>`;
+      try{
+        const data = await fetchJson(`${API_BASE}/categories`);
+        const categories = Array.isArray(data) ? data : (data?.categories || []);
+        if (!categories.length){
+          catList.innerHTML = `<li class="muted">No categories yet.</li>`;
+          selectedCategory = null;
+          docsHeader.textContent = 'Documents';
+          docsCounter.textContent = '';
+          docsTableBody.innerHTML = '';
+          return;
+        }
+        catList.innerHTML = '';
+        categories.forEach(cat=>{
+          const id   = cat.id ?? cat.category_id ?? cat.name;
+          const name = cat.name || String(id);
+          const desc = cat.description || '';
+          const count = cat.docs_count ?? cat.documents_count ?? cat.count ?? '';
+
+          const li = document.createElement('li');
+          li.className = 'list-item';
+          li.innerHTML = `
+            <div>
+              <div><strong>${name}</strong></div>
+              <div class="meta">${desc || '<em class="muted">No description</em>'}</div>
+              ${count!=='' ? `<div class="muted">Docs: ${count}</div>` : ''}
+            </div>
+            <div class="right">
+              <button class="mini"   data-act="view"   data-id="${id}" data-name="${encodeURIComponent(name)}">View</button>
+              <button class="mini"   data-act="editCat" data-id="${id}" data-name="${encodeURIComponent(name)}" data-desc="${encodeURIComponent(desc)}">Edit</button>
+              <button class="danger" data-act="delCat" data-id="${id}" data-name="${encodeURIComponent(name)}">Delete</button>
+            </div>
+          `;
+          catList.appendChild(li);
+        });
+      }catch(e){
+        catList.innerHTML = `<li class="muted">Error: ${e.message}</li>`;
+      }
+    }
+
+    catList.addEventListener('click', async (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const act = btn.getAttribute('data-act');
+      const id  = btn.getAttribute('data-id');
+      const name= decodeURIComponent(btn.getAttribute('data-name')||'');
+      if (act==='view'){
+        selectedCategory = { id, name };
+        docsHeader.textContent = `Documents — ${name}`;
+        await loadDocsForCategory(selectedCategory);
+      } else if (act==='delCat'){
+        if (!confirm(`Delete category "${name}"?`)) return;
+        try{
+          // Prefer DELETE /categories/:id
+          let ok = true;
+          try {
+            await fetchJson(`${API_BASE}/categories/${encodeURIComponent(id)}`, { method:'DELETE' });
+          } catch (err){
+            // Fallback: body-based delete
+            await fetchJson(`${API_BASE}/categories`, { method:'DELETE', body: JSON.stringify({ id }) });
+          }
+          if (ok){
+            if (selectedCategory && (selectedCategory.id==id)) { selectedCategory=null; docsHeader.textContent='Documents'; docsCounter.textContent=''; docsTableBody.innerHTML=''; }
+            await loadCategories();
+          }
+        }catch(e){ alert('Delete failed: ' + e.message); }
+      } else if (act==='editCat'){
+        const desc = decodeURIComponent(btn.getAttribute('data-desc')||'');
+        openCategoryModal({ id, name, description: desc });
+      }
+    });
+
+    // ------- Documents -------
+    async function loadDocsForCategory(cat, opts={}){
+      docsTableBody.innerHTML = `<tr><td colspan="4" class="muted">Loading…</td></tr>`;
+      docsCounter.textContent = '';
+      try{
+        let docs = [];
+        // Try explicit endpoint first
+        try{
+          const data = await fetchJson(`${API_BASE}/categories/${encodeURIComponent(cat.id)}/docs`);
+          docs = Array.isArray(data) ? data : (data?.docs || data?.documents || []);
+        }catch(_){
+          // Fallback to search
+          const q = opts.q ? opts.q : `category:${cat.name}`;
+          const data = await fetchJson(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
+          docs = Array.isArray(data) ? data : (data?.results || data?.documents || []);
+        }
+
+        if (!Array.isArray(docs) || !docs.length){
+          docsTableBody.innerHTML = `<tr><td colspan="4" class="muted">No documents.</td></tr>`;
+          docsCounter.textContent = '(0)';
+          return;
+        }
+        docsCounter.textContent = `(${docs.length})`;
+        docsTableBody.innerHTML = '';
+        docs.forEach(d=>{
+          const id = d.id ?? d.doc_id ?? d.uuid ?? '';
+          const title = d.title || d.name || '(untitled)';
+          const url = d.url || d.source || '';
+          const updated = d.updated_at || d.modified_at || d.created_at || '';
+          const updatedFmt = updated ? new Date(updated).toLocaleString() : '';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${title}</td>
+            <td>${url ? `<a href="${url}" target="_blank" rel="noopener">link</a>` : ''}</td>
+            <td>${updatedFmt}</td>
+            <td>
+              <button class="mini" data-doc="${id}" data-act="viewDoc">View</button>
+              <button class="mini" data-doc="${id}" data-act="editDoc">Edit</button>
+              <button class="danger" data-doc="${id}" data-act="delDoc">Delete</button>
+            </td>
+          `;
+          docsTableBody.appendChild(tr);
+        });
+      }catch(e){
+        docsTableBody.innerHTML = `<tr><td colspan="4" class="muted">Error: ${e.message}</td></tr>`;
+      }
+    }
+
+    document.getElementById('btnRagRefresh').addEventListener('click', async ()=>{
+      await loadCategories();
+      if (selectedCategory){ await loadDocsForCategory(selectedCategory); }
+    });
+
+    btnDocSearch.addEventListener('click', async ()=>{
+      const q = (docSearchInput.value||'').trim();
+      if (!selectedCategory){ alert('Select a category first.'); return; }
+      await loadDocsForCategory(selectedCategory, { q: q ? `${q} category:${selectedCategory.name}` : undefined });
+    });
+
+    document.querySelector('#ragDocsTable').addEventListener('click', async (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const act = btn.getAttribute('data-act');
+      const id  = btn.getAttribute('data-doc');
+      if (!id) return;
+
+      if (act==='viewDoc'){
+        try{
+          const doc = await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`);
+          openDocModal('View Document', doc, { readOnly:true });
+        }catch(e){ alert('View failed: ' + e.message); }
+      } else if (act==='editDoc'){
+        try{
+          const doc = await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`);
+          openDocModal('Edit Document', doc, { saveHandler: async (payload)=>{
+            await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`, { method:'PUT', body: JSON.stringify(payload) });
+            await loadDocsForCategory(selectedCategory);
+          }});
+        }catch(e){ alert('Load failed: ' + e.message); }
+      } else if (act==='delDoc'){
+        if (!confirm('Delete this document?')) return;
+        try{
+          await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`, { method:'DELETE' });
+          await loadDocsForCategory(selectedCategory);
+        }catch(e){ alert('Delete failed: ' + e.message); }
+      }
+    });
+
+    // ------- Modals: Category -------
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalBody     = document.getElementById('modalBody');
+    const modalTitle    = document.getElementById('modalTitle');
+    const modalClose    = document.getElementById('modalClose');
+    const modalCancel   = document.getElementById('modalCancel');
+    const modalSubmit   = document.getElementById('modalSubmit');
+
+    function openModal(){ modalBackdrop.classList.add('open'); modalBackdrop.setAttribute('aria-hidden','false'); }
+    function closeModal(){ modalBackdrop.classList.remove('open'); modalBackdrop.setAttribute('aria-hidden','true'); modalBody.innerHTML=''; modalSubmit.onclick = null; }
+
+    modalClose.addEventListener('click', closeModal);
+    modalCancel.addEventListener('click', closeModal);
+
+    function openCategoryModal(cat){
+      const isEdit = !!(cat && cat.id);
+      modalTitle.textContent = isEdit ? 'Edit Category' : 'Add Category';
+      modalBody.innerHTML = `
+        <form id="catForm" class="form">
+          <label>Name
+            <input type="text" id="catName" required value="${(cat?.name||'').replace(/"/g,'&quot;')}">
+          </label>
+          <label>Description
+            <textarea id="catDesc" placeholder="Optional">${(cat?.description||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+          </label>
+        </form>
+      `;
+      modalSubmit.textContent = isEdit ? 'Save' : 'Create';
+      modalSubmit.onclick = async ()=>{
+        const name = document.getElementById('catName').value.trim();
+        const description = document.getElementById('catDesc').value.trim();
+        if (!name){ alert('Name is required'); return; }
+        try{
+          if (isEdit){
+            // Prefer PUT /categories/:id
+            try{
+              await fetchJson(`${API_BASE}/categories/${encodeURIComponent(cat.id)}`, {
+                method:'PUT', body: JSON.stringify({ name, description })
+              });
+            }catch(_){
+              await fetchJson(`${API_BASE}/categories`, {
+                method:'PUT', body: JSON.stringify({ id: cat.id, name, description })
+              });
+            }
+          } else {
+            await fetchJson(`${API_BASE}/categories`, {
+              method:'POST', body: JSON.stringify({ name, description })
+            });
+          }
+          closeModal();
+          await loadCategories();
+        }catch(e){ alert('Save failed: ' + e.message); }
+      };
+      openModal();
+    }
+
+    document.getElementById('btnAddCategory').addEventListener('click', ()=> openCategoryModal(null));
+
+    // ------- Modals: Document -------
+    function openDocModal(title, doc, opts={}){
+      const readOnly = !!opts.readOnly;
+      modalTitle.textContent = title || (readOnly ? 'View Document' : 'Add Document');
+      const safe = (v)=> (v==null?'':String(v));
+      const fTitle = safe(doc?.title || doc?.name);
+      const fUrl   = safe(doc?.url || doc?.source);
+      const fCatId = safe(doc?.category_id || selectedCategory?.id || '');
+      const fCatName = safe(doc?.category || selectedCategory?.name || '');
+
+      modalBody.innerHTML = `
+        <form id="docForm" class="form">
+          <label>Title
+            <input type="text" id="docTitle" ${readOnly?'disabled':''} value="${fTitle.replace(/"/g,'&quot;')}" required>
+          </label>
+          <label>URL
+            <input type="url" id="docUrl" ${readOnly?'disabled':''} value="${fUrl.replace(/"/g,'&quot;')}" placeholder="https://…">
+          </label>
+          <label>Category
+            <input type="text" id="docCategory" ${readOnly?'disabled':''} value="${fCatName.replace(/"/g,'&quot;')}" placeholder="Category name">
+          </label>
+          <label>Content
+            <textarea id="docContent" ${readOnly?'disabled':''} placeholder="Optional raw text / summary">${safe(doc?.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+          </label>
+        </form>
+      `;
+      modalSubmit.textContent = readOnly ? 'Close' : 'Save';
+      modalSubmit.onclick = async ()=>{
+        if (readOnly){ closeModal(); return; }
+        const payload = {
+          title: document.getElementById('docTitle').value.trim(),
+          url:   document.getElementById('docUrl').value.trim() || null,
+          category: document.getElementById('docCategory').value.trim() || selectedCategory?.name || null,
+          content:  document.getElementById('docContent').value
+        };
+        if (!payload.title){ alert('Title is required'); return; }
+        try{
+          if (opts.saveHandler){
+            await opts.saveHandler(payload);
+          } else {
+            // Create new document
+            await fetchJson(`${API_BASE}/docs`, { method:'POST', body: JSON.stringify(payload) });
+            if (selectedCategory){ await loadDocsForCategory(selectedCategory); }
+          }
+          closeModal();
+        }catch(e){ alert('Save failed: ' + e.message); }
+      };
+      openModal();
+    }
+
+    document.getElementById('btnAddDoc').addEventListener('click', ()=>{
+      if (!selectedCategory){
+        // pozwól dodać także bez wyboru — przez wpisanie nazwy kategorii
+      }
+      openDocModal('Add Document', null, {});
+    });
+
+    // ===== Init =====
+    (async ()=>{
+      const user = await checkModerator();
+      if (!user) return;
+      await loadPendingIdeas();      // mgmt
+      await loadCategories();        // rag
+    })();
   </script>
 </body>
 </html>
