@@ -403,8 +403,9 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
 </div>
 
-  <div class="topbar-right">
+    <div class="topbar-right">
     <button id="modeIcon" type="button" class="pill" aria-label="Toggle light/dark mode">🌛</button>
+    <div id="moderatorRedirect" title="Moderator Panel" style="display:none;"></div>
     <button id="loginBtn" type="button" class="pill">Log In</button>
 
 <!-- Modal logowania -->
@@ -1461,6 +1462,50 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const modButton = document.getElementById("moderatorRedirect");
+  if (!modButton) return;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("moderators")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    console.log("Moderator check →", user?.id, data, error);
+
+    if (data && !error) {
+      modButton.style.display = "inline-block";
+      modButton.addEventListener("click", () => {
+        window.location.href = "moderator.html";
+      });
+    }
+  } catch (e) {
+    console.warn("Moderator check failed:", e);
+  }
+});
+</script>
+
+<style>
+#moderatorRedirect {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  margin-left: 8px;
+  background: radial-gradient(circle at 40% 40%, #000 0%, #0a0a0a 60%, #111 100%);
+  box-shadow: 0 0 8px 2px rgba(0, 0, 0, 0.7), 0 0 16px rgba(100, 100, 255, 0.15);
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+}
+#moderatorRedirect:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 18px 4px rgba(80, 80, 255, 0.25);
+}
+</style>
 
 </body>
 </html>
