@@ -567,7 +567,7 @@ const RAG_INSERT = `${API_BASE}/api/rag/insert`;
 const PROXY_SEARCH = `${API_BASE}/api/search`;
 let enrichedPrompt = q;
 
-// === 1) Najpierw pamięć RAG ===
+// === 1) Próba pobrania kontekstu z pamięci RAG ===
 let hadRag = false;
 try {
   const ragRes = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
@@ -576,16 +576,17 @@ try {
   });
   if (ragRes.ok) {
     const ragData = await ragRes.json();
-    if (ragData && ragData.context && ragData.context.trim().length > 60) {
+    if (ragData?.context?.trim()?.length > 60) {
       enrichedPrompt = `${q}\n\n${ragData.context}`;
       hadRag = true;
+      console.log("📚 Kontekst z RAG użyty.");
     }
   }
 } catch (e) {
-  console.warn("RAG search error:", e);
+  console.warn("⚠️ Błąd RAG search:", e);
 }
 
-// === 2) Jeśli RAG nic sensownego nie zwrócił → Internet + zapis do RAG + ponowne wzbogacenie ===
+// === 2) Brak trafień w RAG → sięgnij po Internet ===
 if (!hadRag) {
   try {
     const proxyRes = await fetch(`${PROXY_SEARCH}?q=${encodeURIComponent(q)}`, {
@@ -597,13 +598,12 @@ if (!hadRag) {
     });
     if (proxyRes.ok) {
       const proxyData = await proxyRes.json();
-      if (proxyData && proxyData.text) {
-        // heurystyka kategorii
-        const src = (proxyData.source || "").toLowerCase();
-        const category =
-          src.includes("meteo") ? "weather" :
-          src.includes("wiki")  ? "wikipedia" :
-          "general";
+      if (proxyData?.text) {
+        const category = proxyData.source?.includes("meteo")
+          ? "weather"
+          : proxyData.source?.includes("wiki")
+          ? "wikipedia"
+          : "general";
         const title = q.length > 80 ? q.slice(0, 80) + "…" : q;
 
         // zapis do lokalnej pamięci RAG
@@ -615,36 +615,19 @@ if (!hadRag) {
               category,
               title,
               content: proxyData.text.slice(0, 4000),
-              source: "chat-auto"
+              source: "proxy-auto"
             })
           });
-        } catch (e) {
-          console.warn("RAG insert error:", e);
+          console.log("🧠 Zapisano nową wiedzę do RAG:", category);
+        } catch (err) {
+          console.warn("RAG insert error:", err);
         }
 
-        // spróbuj ponownie pobrać kontekst już z RAG
-        try {
-          const ragAgain = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
-            method: "GET",
-            headers: { "Accept": "application/json" }
-          });
-          if (ragAgain.ok) {
-            const r = await ragAgain.json();
-            if (r && r.context && r.context.trim().length > 30) {
-              enrichedPrompt = `${q}\n\n${r.context}`;
-            } else {
-              enrichedPrompt = `${q}\n\n${proxyData.text}`;
-            }
-          } else {
-            enrichedPrompt = `${q}\n\n${proxyData.text}`;
-          }
-        } catch {
-          enrichedPrompt = `${q}\n\n${proxyData.text}`;
-        }
+        enrichedPrompt = `${q}\n\n${proxyData.text}`;
       }
     }
   } catch (err) {
-    console.warn("🌐 Internet fetch error:", err);
+    console.warn("🌐 Błąd przy pobieraniu z Internetu:", err);
   }
 }
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
