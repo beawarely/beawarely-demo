@@ -561,48 +561,90 @@ function shouldUseInternet(prompt) {
   return patterns.some(r => r.test(prompt));
 }
 
-const PROXY_URL = "https://ai.beawarely.com/api/search";
-const RAG_URL = "https://ai.beawarely.com/api/rag/search";
+const API_BASE = "https://ai.beawarely.com";
+const RAG_SEARCH = `${API_BASE}/api/rag/search`;
+const RAG_INSERT = `${API_BASE}/api/rag/insert`;
+const PROXY_SEARCH = `${API_BASE}/api/search`;
 let enrichedPrompt = q;
 
-// === Najpierw spróbuj pamięci RAG ===
+// === 1) Najpierw pamięć RAG ===
+let hadRag = false;
 try {
-  const ragRes = await fetch(`${RAG_URL}?q=${encodeURIComponent(q)}`, {
+  const ragRes = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
     method: "GET",
     headers: { "Accept": "application/json" }
   });
   if (ragRes.ok) {
     const ragData = await ragRes.json();
-    if (ragData && ragData.context && ragData.context.trim().length > 30) {
-      console.log("📚 Kontekst z RAG:", ragData.sources || []);
-      enrichedPrompt = `${q}\n\n(Pamięć BeAwarely RAG)\n${ragData.context}`;
-        } else {
-      console.log("🔍 Brak trafnych danych w RAG — sprawdzam Internet…");
-      throw new Error("no_rag_data");
+    if (ragData && ragData.context && ragData.context.trim().length > 60) {
+      enrichedPrompt = `${q}\n\n${ragData.context}`;
+      hadRag = true;
     }
-  } else {
-    throw new Error("rag_fail");
   }
 } catch (e) {
-  console.log("🌐 RAG nic nie zwrócił, przechodzę do Internetu:", e.message);
+  console.warn("RAG search error:", e);
+}
+
+// === 2) Jeśli RAG nic sensownego nie zwrócił → Internet + zapis do RAG + ponowne wzbogacenie ===
+if (!hadRag) {
   try {
-    const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
+    const proxyRes = await fetch(`${PROXY_SEARCH}?q=${encodeURIComponent(q)}`, {
       method: "GET",
       headers: {
         "Origin": "https://beawarely.com",
         "Accept": "application/json"
       }
     });
-    if (!proxyRes.ok) throw new Error(`proxy status ${proxyRes.status}`);
-    const proxyData = await proxyRes.json();
-    if (proxyData && proxyData.text) {
-      enrichedPrompt = `${q}\n\n(Dane z Internetu)\n${proxyData.text}`;
-      console.log("🌐 Dane z Internetu dodane do prompta.");
-    } else {
-      console.warn("🌐 Internet nie zwrócił danych (brak text).");
+    if (proxyRes.ok) {
+      const proxyData = await proxyRes.json();
+      if (proxyData && proxyData.text) {
+        // heurystyka kategorii
+        const src = (proxyData.source || "").toLowerCase();
+        const category =
+          src.includes("meteo") ? "weather" :
+          src.includes("wiki")  ? "wikipedia" :
+          "general";
+        const title = q.length > 80 ? q.slice(0, 80) + "…" : q;
+
+        // zapis do lokalnej pamięci RAG
+        try {
+          await fetch(RAG_INSERT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              category,
+              title,
+              content: proxyData.text.slice(0, 4000),
+              source: "chat-auto"
+            })
+          });
+        } catch (e) {
+          console.warn("RAG insert error:", e);
+        }
+
+        // spróbuj ponownie pobrać kontekst już z RAG
+        try {
+          const ragAgain = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+          });
+          if (ragAgain.ok) {
+            const r = await ragAgain.json();
+            if (r && r.context && r.context.trim().length > 30) {
+              enrichedPrompt = `${q}\n\n${r.context}`;
+            } else {
+              enrichedPrompt = `${q}\n\n${proxyData.text}`;
+            }
+          } else {
+            enrichedPrompt = `${q}\n\n${proxyData.text}`;
+          }
+        } catch {
+          enrichedPrompt = `${q}\n\n${proxyData.text}`;
+        }
+      }
     }
   } catch (err) {
-    console.warn("🌐 Błąd pobierania z Internetu:", err);
+    console.warn("🌐 Internet fetch error:", err);
   }
 }
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
