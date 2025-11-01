@@ -562,9 +562,29 @@ function shouldUseInternet(prompt) {
 }
 
 const PROXY_URL = "https://ai.beawarely.com/api/search";
+const RAG_URL = "https://ai.beawarely.com/api/rag/search";
 let enrichedPrompt = q;
 
-if (shouldUseInternet(q)) {
+// === Najpierw spróbuj pamięci RAG ===
+try {
+  const ragRes = await fetch(`${RAG_URL}?q=${encodeURIComponent(q)}`, {
+    method: "GET",
+    headers: { "Accept": "application/json" }
+  });
+  if (ragRes.ok) {
+    const ragData = await ragRes.json();
+    if (ragData && ragData.context && ragData.context.trim().length > 30) {
+      console.log("📚 Kontekst z RAG:", ragData.sources || []);
+      enrichedPrompt = `${q}\n\n(Pamięć BeAwarely RAG)\n${ragData.context}`;
+    } else {
+      console.log("🔍 Brak trafnych danych w RAG — sprawdzam Internet…");
+      throw new Error("no_rag_data");
+    }
+  } else {
+    throw new Error("rag_fail");
+  }
+} catch (e) {
+  // === Jeśli RAG nie dał wyniku → zapytaj Internet ===
   try {
     const proxyRes = await fetch(`${PROXY_URL}?q=${encodeURIComponent(q)}`, {
       method: "GET",
@@ -573,15 +593,14 @@ if (shouldUseInternet(q)) {
         "Accept": "application/json"
       }
     });
-
     if (proxyRes.ok) {
       const proxyData = await proxyRes.json();
       if (proxyData && proxyData.text) {
-        enrichedPrompt = `${q}\n\n${proxyData.text}`;
+        enrichedPrompt = `${q}\n\n(Dane z Internetu)\n${proxyData.text}`;
       }
     }
   } catch (err) {
-    console.warn("Heurystyka: błąd fetch internetu:", err);
+    console.warn("🌐 Błąd pobierania z Internetu:", err);
   }
 }
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
