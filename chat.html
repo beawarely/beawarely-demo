@@ -567,25 +567,30 @@ const RAG_INSERT = `${API_BASE}/api/rag/insert`;
 const PROXY_SEARCH = `${API_BASE}/api/search`;
 let enrichedPrompt = q;
 
-// === 1) Próba pobrania kontekstu z pamięci RAG ===
+// === 1) Próba pobrania kontekstu z pamięci RAG (pomijamy przy kreatywnych pytaniach) ===
+const creativePattern = /\b(napisz|stwórz|opowiedz|wymyśl|bajk[aeę]|histori[ae]|poemat|piosenk[ae]|żart|dialog|story|create|imagine|write|compose)\b/i;
 let hadRag = false;
-try {
-  const ragRes = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
-    method: "GET",
-    headers: { "Accept": "application/json" }
-  });
-  if (ragRes.ok) {
-    const ragData = await ragRes.json();
-    if (ragData?.context?.trim()?.length > 60) {
-      enrichedPrompt = `${q}\n\n${ragData.context}`;
-      hadRag = true;
-      console.log("📚 Kontekst z RAG użyty.");
-    }
-  }
-} catch (e) {
-  console.warn("⚠️ Błąd RAG search:", e);
-}
 
+if (!creativePattern.test(q)) {
+  try {
+    const ragRes = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
+      method: "GET",
+      headers: { "Accept": "application/json" }
+    });
+    if (ragRes.ok) {
+      const ragData = await ragRes.json();
+      if (ragData?.context?.trim()?.length > 60) {
+        enrichedPrompt = `${q}\n\n${ragData.context}`;
+        hadRag = true;
+        console.log("📚 Kontekst z RAG użyty.");
+      }
+    }
+  } catch (e) {
+    console.warn("⚠️ Błąd RAG search:", e);
+  }
+} else {
+  console.log("🎨 Pomijam RAG — kreatywne zapytanie:", q);
+}
 // === 2) Brak trafień w RAG → sięgnij po Internet ===
 if (!hadRag) {
   try {
