@@ -590,6 +590,7 @@ if (!creativePattern.test(q)) {
   }
 } else {
   console.log("🎨 Pomijam RAG — kreatywne zapytanie:", q);
+  addMsg("🧠 To kreatywne pytanie — pomijam bazę RAG i Internet. Tworzę oryginalną odpowiedź.", "ai", true);
 }
 // === 2) Brak trafień w RAG → sięgnij po Internet ===
 if (!hadRag) {
