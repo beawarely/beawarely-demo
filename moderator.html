@@ -130,7 +130,8 @@
     <div class="toolbar">
       <span class="pill">RAG: Categories & Documents</span>
       <button id="btnRagRefresh" class="mini">🔄 Refresh</button>
-      <button id="btnAddCategory" class="primary">+ Add Category</button>
+<button id="btnRagReindex" class="mini">♻️ Reindex All</button>
+<button id="btnAddCategory" class="primary">+ Add Category</button>
       <button id="btnAddDoc" class="mini">+ Add Document</button>
       <span id="ragStatus" class="muted"></span>
     </div>
@@ -415,9 +416,22 @@
     }
 
     document.getElementById('btnRagRefresh').addEventListener('click', async ()=>{
-      await loadCategories();
-      if (selectedCategory){ await loadDocsForCategory(selectedCategory); }
-    });
+  await loadCategories();
+  if (selectedCategory){ await loadDocsForCategory(selectedCategory); }
+});
+
+document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
+  if (!confirm("Rebuild all RAG embeddings? This may take a while.")) return;
+  setRagStatus("Reindexing…");
+  try {
+    const res = await fetch(`${API_BASE}/reindex`, { method:'POST' });
+    const data = await res.json();
+    setRagStatus(`Reindex done (${data.count||0} docs)`);
+  } catch (err) {
+    console.error(err);
+    setRagStatus("Reindex failed.");
+  }
+});
 
     btnDocSearch.addEventListener('click', async ()=>{
       const q = (docSearchInput.value||'').trim();
