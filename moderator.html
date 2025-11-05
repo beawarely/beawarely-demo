@@ -298,7 +298,7 @@
       catList.innerHTML = `<li class="muted">Loading…</li>`;
       try{
         const data = await fetchJson(`${API_BASE}/categories`);
-        const categories = Array.isArray(data) ? data : (data?.categories || []);
+                const categories = Array.isArray(data) ? data : (data?.categories || []);
         if (!categories.length){
           catList.innerHTML = `<li class="muted">No categories yet.</li>`;
           selectedCategory = null;
@@ -309,8 +309,6 @@
         }
         catList.innerHTML = '';
         categories.forEach(cat=>{
-          const id   = cat.id ?? cat.category_id ?? cat.name;
-          const name = cat.name || String(id);
           const desc = cat.description || '';
           const count = cat.docs_count ?? cat.documents_count ?? cat.count ?? '';
 
@@ -376,9 +374,9 @@
         try{
           const data = await fetchJson(`${API_BASE}/categories/${encodeURIComponent(cat.id)}/docs`);
           docs = Array.isArray(data) ? data : (data?.docs || data?.documents || []);
-        }catch(_){
+                }catch(_){
           // Fallback to search
-          const q = opts.q ? opts.q : `category:${cat.name}`;
+          const baseCat = cat.name || cat.category || cat.id;
           const data = await fetchJson(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
           docs = Array.isArray(data) ? data : (data?.results || data?.documents || []);
         }
@@ -433,10 +431,10 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
   }
 });
 
-    btnDocSearch.addEventListener('click', async ()=>{
+        btnDocSearch.addEventListener('click', async ()=>{
       const q = (docSearchInput.value||'').trim();
       if (!selectedCategory){ alert('Select a category first.'); return; }
-      await loadDocsForCategory(selectedCategory, { q: q ? `${q} category:${selectedCategory.name}` : undefined });
+      const catLabel = selectedCategory.name || selectedCategory.category || selectedCategory.id;
     });
 
     document.querySelector('#ragDocsTable').addEventListener('click', async (e)=>{
