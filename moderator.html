@@ -377,11 +377,12 @@
           const data = await fetchJson(`${API_BASE}/categories/${encodeURIComponent(cat.id)}/docs`);
           docs = Array.isArray(data) ? data : (data?.docs || data?.documents || []);
                 }catch(_){
-          // Fallback to search
-          const baseCat = cat.name || cat.category || cat.id;
-          const data = await fetchJson(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
-          docs = Array.isArray(data) ? data : (data?.results || data?.documents || []);
-        }
+  // Fallback to search
+  const baseCat = cat.name || cat.category || cat.id;
+  const q = opts.q ? opts.q : `category:${baseCat}`;
+  const data = await fetchJson(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
+  docs = Array.isArray(data) ? data : (data?.results || data?.documents || []);
+}
 
         if (!Array.isArray(docs) || !docs.length){
           docsTableBody.innerHTML = `<tr><td colspan="4" class="muted">No documents.</td></tr>`;
