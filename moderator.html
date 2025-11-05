@@ -309,25 +309,27 @@
         }
         catList.innerHTML = '';
         categories.forEach(cat=>{
-          const desc = cat.description || '';
-          const count = cat.docs_count ?? cat.documents_count ?? cat.count ?? '';
+  const id = cat.id ?? cat.category_id ?? cat.category ?? '';
+  const name = cat.name || cat.category || String(id || 'Unnamed');
+  const desc = cat.description || '';
+  const count = cat.docs_count ?? cat.documents_count ?? cat.count ?? '';
 
-          const li = document.createElement('li');
-          li.className = 'list-item';
-          li.innerHTML = `
-            <div>
-              <div><strong>${name}</strong></div>
-              <div class="meta">${desc || '<em class="muted">No description</em>'}</div>
-              ${count!=='' ? `<div class="muted">Docs: ${count}</div>` : ''}
-            </div>
-            <div class="right">
-              <button class="mini"   data-act="view"   data-id="${id}" data-name="${encodeURIComponent(name)}">View</button>
-              <button class="mini"   data-act="editCat" data-id="${id}" data-name="${encodeURIComponent(name)}" data-desc="${encodeURIComponent(desc)}">Edit</button>
-              <button class="danger" data-act="delCat" data-id="${id}" data-name="${encodeURIComponent(name)}">Delete</button>
-            </div>
-          `;
-          catList.appendChild(li);
-        });
+  const li = document.createElement('li');
+  li.className = 'list-item';
+  li.innerHTML = `
+    <div>
+      <div><strong>${name}</strong></div>
+      <div class="meta">${desc || '<em class="muted">No description</em>'}</div>
+      ${count!=='' ? `<div class="muted">Docs: ${count}</div>` : ''}
+    </div>
+    <div class="right">
+      <button class="mini"   data-act="view"   data-id="${id}" data-name="${encodeURIComponent(name)}">View</button>
+      <button class="mini"   data-act="editCat" data-id="${id}" data-name="${encodeURIComponent(name)}" data-desc="${encodeURIComponent(desc)}">Edit</button>
+      <button class="danger" data-act="delCat" data-id="${id}" data-name="${encodeURIComponent(name)}">Delete</button>
+    </div>
+  `;
+  catList.appendChild(li);
+});
       }catch(e){
         catList.innerHTML = `<li class="muted">Error: ${e.message}</li>`;
       }
