@@ -298,7 +298,7 @@
       catList.innerHTML = `<li class="muted">Loading…</li>`;
       try{
         const data = await fetchJson(`${API_BASE}/categories`);
-                const categories = Array.isArray(data) ? data : (data?.categories || []);
+const categories = (data?.categories || []).map(name => ({ id: name, name }));
         if (!categories.length){
           catList.innerHTML = `<li class="muted">No categories yet.</li>`;
           selectedCategory = null;
