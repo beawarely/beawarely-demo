@@ -374,11 +374,12 @@
         let docs = [];
         // Try explicit endpoint first
         try{
-          if (cat.id){
-  const data = await fetchJson(`${API_BASE}/categories/${encodeURIComponent(cat.id)}/docs`);
+          if (cat.name || cat.category){
+  const catName = encodeURIComponent(cat.name || cat.category);
+  const data = await fetchJson(`${API_BASE}/categories/${catName}/docs`);
   docs = Array.isArray(data) ? data : (data?.docs || data?.documents || []);
 } else {
-  throw new Error("no-id");
+  throw new Error("no-category");
 }
                 }catch(_){
   // Fallback to search
