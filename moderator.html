@@ -467,7 +467,7 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
       } else if (act==='delDoc'){
         if (!confirm('Delete this document?')) return;
         try{
-          await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`, { method:'DELETE' });
+          await fetchJson(`${API_BASE}/delete/${encodeURIComponent(id)}`, { method:'DELETE' });
           await loadDocsForCategory(selectedCategory);
         }catch(e){ alert('Delete failed: ' + e.message); }
       }
