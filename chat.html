@@ -592,52 +592,28 @@ if (!creativePattern.test(q)) {
   console.log("🎨 Pomijam RAG — kreatywne zapytanie:", q);
   addMsg("🧠 To kreatywne pytanie — pomijam bazę RAG i Internet. Tworzę oryginalną odpowiedź.", "ai", true);
 }
-// === 2) Brak trafień w RAG → sięgnij po Internet ===
-if (!hadRag) {
+// === 2) Brak trafień w RAG → sięgnij po Internet (tylko lokalnie) ===
+if (
+  !hadRag &&
+  (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+) {
   try {
     const proxyRes = await fetch(`${PROXY_SEARCH}?q=${encodeURIComponent(q)}`, {
       method: "GET",
-      headers: {
-        "Origin": "https://beawarely.com",
-        "Accept": "application/json"
-      }
+      headers: { "Accept": "application/json" }
     });
     if (proxyRes.ok) {
       const proxyData = await proxyRes.json();
       if (proxyData?.text) {
-        const category = proxyData.source?.includes("meteo")
-          ? "weather"
-          : proxyData.source?.includes("wiki")
-          ? "wikipedia"
-          : "general";
-        const title = q.length > 80 ? q.slice(0, 80) + "…" : q;
-
-        // zapis do lokalnej pamięci RAG
-        try {
-          await fetch(RAG_INSERT, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              category,
-              title,
-              content: proxyData.text.slice(0, 4000),
-              source: "proxy-auto"
-            })
-          });
-          console.log("🧠 Zapisano nową wiedzę do RAG:", category);
-        } catch (err) {
-          console.warn("RAG insert error:", err);
-        }
-
+        console.log("🌐 Internet result received (local).");
         enrichedPrompt = `${q}\n\n${proxyData.text}`;
       }
     }
   } catch (err) {
-    console.warn("🌐 Błąd przy pobieraniu z Internetu:", err);
+    console.error("⚠️ Błąd przy pobieraniu z Internetu (local):", err);
   }
 }
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
-
 // Zbuduj kontekst z ostatnich 10 wiadomości (AI + user)
 const allMsgs = Array.from(document.querySelectorAll('.msg'))
   .slice(-10)
