@@ -117,7 +117,7 @@ textarea:focus-visible {
   <h2 style="margin:0">BeAwarely AI Chat</h2>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
   <select id="modelSelect" class="badge" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;">
-    <option value="llama3-lingyang:latest">MattFast (Llama3 LingYang)</option>
+    <option value="qwen2.5:14b-instruct-q6_K">MattFast (Qwen2.5 14B Q6_K)</option>
     <option value="mixtral:8x7b-instruct-v0.1-q6_K">MattThinker (Mixtral Q6_K)</option>
   </select>
 </div>
@@ -199,7 +199,7 @@ textarea:focus-visible {
    // === Model selector (MattFast / MattThinker) ===
 document.addEventListener('DOMContentLoaded', ()=>{
   const select = document.getElementById('modelSelect');
-  const saved = localStorage.getItem('ba_model_id') || "llama3-lingyang:latest";
+  const saved = localStorage.getItem('ba_model_id') || "qwen2.5:14b-instruct-q6_K";
 
   select.value = saved;
   select.addEventListener('change', ()=>{
@@ -626,9 +626,9 @@ const allMsgs = Array.from(document.querySelectorAll('.msg'))
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
     body: JSON.stringify({
-    model: localStorage.getItem('ba_model_id') || "llama3-lingyang:latest",
+    model: localStorage.getItem('ba_model_id') || "qwen2.5:14b-instruct-q6_K",
     prompt: (() => {
-      const m = localStorage.getItem('ba_model_id') || "llama3-lingyang:latest";
+      const m = localStorage.getItem('ba_model_id') || "qwen2.5:14b-instruct-q6_K";
       if (m.startsWith("mixtral")) {
         return `You are MattThinker — BeAwarely Core (Mixtral Q6_K).
 Speak with calm, analytical tone.  
@@ -657,7 +657,7 @@ MattFast:`;
         stream: true,
       options: (() => {
 
-        const m = localStorage.getItem('ba_model_id') || "llama3";
+        const m = localStorage.getItem('ba_model_id') || "qwen2.5";
         if (m.startsWith("mixtral")) {
           // === MattThinker (Mixtral Q6_K) ===
           return {
@@ -667,7 +667,7 @@ MattFast:`;
             repeat_penalty: 1.2,    
           };
         }
-        // === MattFast (Llama3) ===
+        // === MattFast (qwen2.5) ===
         return {
           temperature: 0.5,         
           top_p: 0.8,               
