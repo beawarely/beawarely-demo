@@ -563,55 +563,31 @@ function shouldUseInternet(prompt) {
 
 const API_BASE = "https://ai.beawarely.com";
 const RAG_SEARCH = `${API_BASE}/api/rag/search`;
-const RAG_INSERT = `${API_BASE}/api/rag/insert`;
-const PROXY_SEARCH = `${API_BASE}/api/search`;
 let enrichedPrompt = q;
 
-// === 1) Próba pobrania kontekstu z pamięci RAG (pomijamy przy kreatywnych pytaniach) ===
-const creativePattern = /\b(napisz|stwórz|opowiedz|wymyśl|bajk[aeę]|histori[ae]|poemat|piosenk[ae]|żart|dialog|story|create|imagine|write|compose)\b/i;
+// === 1) Próba pobrania kontekstu z pamięci RAG ===
 let hadRag = false;
 
-if (!creativePattern.test(q)) {
-  try {
-    const ragRes = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
-      method: "GET",
-      headers: { "Accept": "application/json" }
-    });
-    if (ragRes.ok) {
-      const ragData = await ragRes.json();
-      if (ragData?.context?.trim()?.length > 60) {
-        enrichedPrompt = `${q}\n\n${ragData.context}`;
-        hadRag = true;
-        console.log("📚 Kontekst z RAG użyty.");
-      }
+try {
+  const ragRes = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
+    method: "GET",
+    headers: { "Accept": "application/json" }
+  });
+  if (ragRes.ok) {
+    const ragData = await ragRes.json();
+
+    if (ragData?.context?.trim()?.length > 0) {
+      enrichedPrompt = `${q}\n\n${ragData.context}`;
+      hadRag = true;
+      console.log("📚 Kontekst z RAG użyty.");
+    } else {
+      console.log("📚 RAG nie zwrócił kontekstu — używam czystego pytania.");
     }
-  } catch (e) {
-    console.warn("⚠️ Błąd RAG search:", e);
+  } else {
+    console.warn("⚠️ RAG search błąd HTTP:", ragRes.status);
   }
-} else {
-  console.log("🎨 Pomijam RAG — kreatywne zapytanie:", q);
-  addMsg("🧠 To kreatywne pytanie — pomijam bazę RAG i Internet. Tworzę oryginalną odpowiedź.", "ai", true);
-}
-// === 2) Brak trafień w RAG → sięgnij po Internet (tylko lokalnie) ===
-if (
-  !hadRag &&
-  (location.hostname === "localhost" || location.hostname === "127.0.0.1")
-) {
-  try {
-    const proxyRes = await fetch(`${PROXY_SEARCH}?q=${encodeURIComponent(q)}`, {
-      method: "GET",
-      headers: { "Accept": "application/json" }
-    });
-    if (proxyRes.ok) {
-      const proxyData = await proxyRes.json();
-      if (proxyData?.text) {
-        console.log("🌐 Internet result received (local).");
-        enrichedPrompt = `${q}\n\n${proxyData.text}`;
-      }
-    }
-  } catch (err) {
-    console.error("⚠️ Błąd przy pobieraniu z Internetu (local):", err);
-  }
+} catch (e) {
+  console.warn("⚠️ Błąd RAG search:", e);
 }
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
 // Zbuduj kontekst z ostatnich 10 wiadomości (AI + user)
