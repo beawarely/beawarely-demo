@@ -552,15 +552,7 @@ const q = sanitizePrompt(input.value.trim());
         }
         abortController = new AbortController();
 
-                // === BeAwarely: heurystyka PL+EN — tylko gdy pytanie dotyczy faktów/aktualności ===
-function shouldUseInternet(prompt) {
-  const patterns = [
-    /\b(kiedy|który rok|ile kosztuje|aktualnie|obecnie|najlepszy|ranking|trendy|co nowego|nowości|premiera|wydarzenie|dnia|roku|202\d|203\d)\b/i,
-    /\b(when|how much|current|today|now|latest|recent|best|trending|news|update|release|event|in\s20\d\d)\b/i
-  ];
-  return patterns.some(r => r.test(prompt));
-}
-
+  // === BeAwarely: heurystyka PL+EN — tylko gdy pytanie dotyczy faktów/aktualności ===
 const API_BASE = "https://ai.beawarely.com";
 const RAG_SEARCH = `${API_BASE}/api/rag/search`;
 let enrichedPrompt = q;
