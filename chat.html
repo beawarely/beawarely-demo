@@ -584,7 +584,7 @@ try {
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
 // Zbuduj kontekst z ostatnich 10 wiadomości (AI + user)
 const allMsgs = Array.from(document.querySelectorAll('.msg'))
-  .slice(-10)
+  .slice(-6)
   .map(m => (m.classList.contains('user') ? 'Użytkownik: ' : 'Asystent: ') + m.textContent)
   .join('\n');
 
