@@ -581,7 +581,7 @@ try {
 // Zbuduj kontekst z ostatnich 10 wiadomości (AI + user)
 const allMsgs = Array.from(document.querySelectorAll('.msg'))
   .slice(-6)
-  .map(m => (m.classList.contains('user') ? 'Użytkownik: ' : 'Asystent: ') + m.textContent)
+  .map(m => (m.classList.contains('user') ? 'User: ' : 'Assistant: ') + m.textContent)
   .join('\n');
 
         const resp = await fetch("https://ai.beawarely.com/api/generate", {
