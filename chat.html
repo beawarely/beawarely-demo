@@ -552,34 +552,30 @@ const q = sanitizePrompt(input.value.trim());
         }
         abortController = new AbortController();
 
-  // === BeAwarely: heurystyka PL+EN — tylko gdy pytanie dotyczy faktów/aktualności ===
+  // --- Minimalne pobranie kontekstu RAG (bez heurystyk, bez kreatywności, bez internetu) ---
 const API_BASE = "https://ai.beawarely.com";
 const RAG_SEARCH = `${API_BASE}/api/rag/search`;
 let enrichedPrompt = q;
-
-// === 1) Próba pobrania kontekstu z pamięci RAG ===
-let hadRag = false;
 
 try {
   const ragRes = await fetch(`${RAG_SEARCH}?q=${encodeURIComponent(q)}`, {
     method: "GET",
     headers: { "Accept": "application/json" }
   });
+
   if (ragRes.ok) {
     const ragData = await ragRes.json();
-
-    if (ragData?.context?.trim()?.length > 0) {
+    if (ragData?.context && ragData.context.trim().length > 0) {
       enrichedPrompt = `${q}\n\n${ragData.context}`;
-      hadRag = true;
-      console.log("📚 Kontekst z RAG użyty.");
+      console.log("📚 RAG context used");
     } else {
-      console.log("📚 RAG nie zwrócił kontekstu — używam czystego pytania.");
+      console.log("📚 RAG empty — using raw prompt");
     }
   } else {
-    console.warn("⚠️ RAG search błąd HTTP:", ragRes.status);
+    console.warn("⚠️ RAG HTTP error:", ragRes.status);
   }
 } catch (e) {
-  console.warn("⚠️ Błąd RAG search:", e);
+  console.warn("⚠️ RAG fetch error:", e);
 }
 // === Właściwe zapytanie do AI (Ollama/BeAwarely Core) ===
 // Zbuduj kontekst z ostatnich 10 wiadomości (AI + user)
