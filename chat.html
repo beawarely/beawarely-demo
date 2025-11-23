@@ -117,7 +117,7 @@ textarea:focus-visible {
   <h2 style="margin:0">BeAwarely AI Chat</h2>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
   <select id="modelSelect" class="badge" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;">
-    <option value="qwen2.5:14b-instruct-q6_K">MattFast (Qwen2.5 14B Q6_K)</option>
+        <option value="freerainboxbox/phi4:14b-q6_K">MattFast (freerainboxbox/phi4:14b-q6_K)</option>
     <option value="mixtral:8x7b-instruct-v0.1-q6_K">MattThinker (Mixtral Q6_K)</option>
   </select>
 </div>
@@ -199,7 +199,7 @@ textarea:focus-visible {
    // === Model selector (MattFast / MattThinker) ===
 document.addEventListener('DOMContentLoaded', ()=>{
   const select = document.getElementById('modelSelect');
-  const saved = localStorage.getItem('ba_model_id') || "qwen2.5:14b-instruct-q6_K";
+  const saved = localStorage.getItem('ba_model_id') || "freerainboxbox/phi4:14b-q6_K";
 
   select.value = saved;
   select.addEventListener('change', ()=>{
@@ -590,9 +590,9 @@ const allMsgs = Array.from(document.querySelectorAll('.msg'))
   headers: { "Content-Type": "application/json" },
   signal: abortController.signal,
     body: JSON.stringify({
-    model: localStorage.getItem('ba_model_id') || "qwen2.5:14b-instruct-q6_K",
+    model: localStorage.getItem('ba_model_id') || "freerainboxbox/phi4:14b-q6_K",
     prompt: (() => {
-      const m = localStorage.getItem('ba_model_id') || "qwen2.5:14b-instruct-q6_K";
+      const m = localStorage.getItem('ba_model_id') || "freerainboxbox/phi4:14b-q6_K";
       if (m.startsWith("mixtral")) {
         return `You are MattThinker — the analytical, calm, and insightful AI of BeAwarely.
 Always answer in English unless the user clearly writes in another language.
@@ -633,7 +633,7 @@ MattFast:`;
         stream: true,
       options: (() => {
 
-        const m = localStorage.getItem('ba_model_id') || "qwen2.5";
+        const m = localStorage.getItem('ba_model_id') || "freerainboxbox/phi4:14b-q6_K";
         if (m.startsWith("mixtral")) {
           // === MattThinker (Mixtral Q6_K) ===
           return {
