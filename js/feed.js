@@ -131,10 +131,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const ids = [...new Set(posts.map(p => p.author_id).filter(Boolean))];
-    const { data: profiles } = await supabase
-  .from("profiles")
-  .select("id, username, first_name, last_name, avatar_url")
-  .in("id", ids);
+        const supabaseClient = window.supabaseClient || window.supabase;
+    const { data: profiles } = await supabaseClient
+      .from("profiles")
+      .select("id, username, first_name, last_name, avatar_url")
+      .in("id", ids);
 
     feedPosts.innerHTML = posts.map(p => {
   const author = profiles?.find(pr => pr.id === p.author_id);
