@@ -273,19 +273,63 @@ document.addEventListener("DOMContentLoaded", () => {
     
   svg.call(zoom);
 
+    svg.call(zoom);
+
+  const API_BASE = "https://ai.beawarely.com";
+  const RAG_BASE = `${API_BASE}/api/rag`;
+
   let data = {
     name: "Knowledge Tree",
-    children: [
-      { name: "Technology", children: [
-        { name: "AI" },
-        { name: "Web" }
-      ]},
-      { name: "Science", children: [
-        { name: "Physics" },
-        { name: "Biology" }
-      ]}
-    ]
+    children: []
   };
+
+  async function loadRagTree() {
+    try {
+      const res = await fetch(`${RAG_BASE}/categories`);
+      if (!res.ok) throw new Error('categories_failed');
+      const json = await res.json();
+      const categories = Array.isArray(json.categories) ? json.categories : [];
+
+      const children = [];
+
+      for (const cat of categories) {
+        try {
+          const docsRes = await fetch(`${RAG_BASE}/categories/${encodeURIComponent(cat)}/docs`);
+          if (!docsRes.ok) throw new Error('docs_failed');
+          const docs = await docsRes.json();
+
+          children.push({
+            name: cat,
+            children: (Array.isArray(docs) ? docs : []).map(d => {
+              const content = typeof d.content === 'string' ? d.content : '';
+              const label = content.length > 60 ? content.slice(0, 60) + '…' : content || `doc ${d.id}`;
+              return {
+                name: label,
+                docId: d.id
+              };
+            })
+          });
+        } catch (err) {
+          console.warn('RAG docs failed for category', cat, err);
+          children.push({ name: cat });
+        }
+      }
+
+      data = {
+        name: "Knowledge Tree",
+        children: children
+      };
+    } catch (err) {
+      console.error('RAG tree load failed:', err);
+      data = {
+        name: "Knowledge Tree",
+        children: [
+          { name: "Error loading RAG" }
+        ]
+      };
+    }
+    update();
+  }
 
   const treeLayout = d3.tree().size([height - 80, width - 160]);
 
@@ -337,8 +381,8 @@ document.addEventListener("DOMContentLoaded", () => {
     nodes.exit().remove();
   }
 
-  // Initial drawing
-  update();
+      // Initial drawing
+  loadRagTree();
 
   // Control buttons
   document.getElementById("zoomInBtn").addEventListener("click", () => {
