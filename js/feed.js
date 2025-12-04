@@ -129,9 +129,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       feedPosts.innerHTML = "<p style='opacity:.6;'>No posts yet.</p>";
       return;
     }
-
     const ids = [...new Set(posts.map(p => p.author_id).filter(Boolean))];
-        const supabaseClient = window.supabaseClient || window.supabase;
     const { data: profiles } = await supabaseClient
       .from("profiles")
       .select("id, username, first_name, last_name, avatar_url")
