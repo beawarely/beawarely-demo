@@ -8,13 +8,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const postInput = document.getElementById("postContent");
   const loginRedirect = document.getElementById("feedLoginRedirect");
 
-  const supabaseClient = window.supabaseClient || window.supabase;
-
   let currentTab = "public";
   let user = null;
 
-  const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
-  user = currentUser || null;
+  const { data: session } = await supabase.auth.getUser();
+  user = session?.user || null;
 
   if (!user) {
     overlay.style.display = "flex";
@@ -42,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   postBtn.addEventListener("click", async () => {
     const text = postInput.value.trim();
     if (!text) return alert("Write something first.");
-        const { error } = await supabaseClient.from("user_posts").insert([
+    const { error } = await supabase.from("user_posts").insert([
       { author_id: user.id, content: text, visibility: currentTab }
     ]);
     if (error) return alert("❌ " + error.message);
@@ -50,7 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadPosts();
   });
 
-    supabaseClient
+  supabase
     .channel("feed_updates")
     .on("postgres_changes", { event: "*", schema: "public", table: "user_posts" }, loadPosts)
     .on("postgres_changes", { event: "*", schema: "public", table: "tool_ideas" }, loadPosts)
@@ -65,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // USER POSTS
     if (user) {
-            let queryPosts = supabaseClient
+      let queryPosts = supabase
         .from("user_posts")
         .select("id, author_id, content, created_at, visibility")
         .order("created_at", { ascending: false });
@@ -85,10 +83,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-        // TOOL IDEAS
-    const { data: tools } = await supabaseClient
+    // TOOL IDEAS
+    const { data: tools } = await supabase
       .from("tool_ideas")
-      .select("id, author, idea, created_at, status")
+      .select("id, author, title, details, created_at, status")
       .order("created_at", { ascending: false });
 
     if (tools?.length) {
@@ -104,8 +102,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
     }
 
-        // WORK EXPERIENCES
-    const { data: works } = await supabaseClient
+    // WORK EXPERIENCES
+    const { data: works } = await supabase
       .from("work_experiences")
       .select("id, author, company, role, content, created_at, status")
       .order("created_at", { ascending: false });
@@ -129,11 +127,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       feedPosts.innerHTML = "<p style='opacity:.6;'>No posts yet.</p>";
       return;
     }
+
     const ids = [...new Set(posts.map(p => p.author_id).filter(Boolean))];
-    const { data: profiles } = await supabaseClient
-      .from("profiles")
-      .select("id, username, first_name, last_name, avatar_url")
-      .in("id", ids);
+    const { data: profiles } = await supabase
+  .from("profiles")
+  .select("id, username, first_name, last_name, avatar_url")
+  .in("id", ids);
 
     feedPosts.innerHTML = posts.map(p => {
   const author = profiles?.find(pr => pr.id === p.author_id);
