@@ -333,16 +333,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const treeLayout = d3.tree().size([height - 80, width - 160]);
 
-  function update() {
+    function update() {
     const root = d3.hierarchy(data);
     treeLayout(root);
 
     const isLightMode = document.body.classList.contains('light-mode');
-    const nodeColor = isLightMode ? "#007bff" : "#3a63ff";
-    const textColor = isLightMode ? "#333" : "white";
-    const linkColor = isLightMode ? "#ccc" : "#888";
+    const palette = {
+      rootFill:      isLightMode ? "#ffb300" : "#ff9800",  // root: złoty
+      categoryFill:  isLightMode ? "#1976d2" : "#3a63ff",  // kategorie
+      docFill:       isLightMode ? "#7b1fa2" : "#b388ff",  // dokumenty
+      text:          isLightMode ? "#111111" : "#f5f5f5",
+      link:          isLightMode ? "#b0bec5" : "#546e7a"
+    };
 
-    // Update links
+    // Update links (gałęzie)
     const links = g.selectAll("line").data(root.links(), d => d.target.data.name);
     
     links.enter()
@@ -353,11 +357,13 @@ document.addEventListener("DOMContentLoaded", () => {
       .attr("y1", d => d.source.x)
       .attr("x2", d => d.target.y)
       .attr("y2", d => d.target.x)
-      .attr("stroke", linkColor);
+      .attr("stroke", palette.link)
+      .attr("stroke-width", d => d.target.depth === 1 ? 2 : 1.4)
+      .attr("stroke-opacity", 0.85);
 
     links.exit().remove();
 
-    // Update nodes
+    // Update nodes (węzły)
     const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
 
     const nodeEnter = nodes.enter()
@@ -365,14 +371,41 @@ document.addEventListener("DOMContentLoaded", () => {
       .attr("class", "node")
       .attr("transform", d => `translate(${d.y},${d.x})`);
 
+    // kółka z rozmiarem i kolorem zależnym od głębokości
     nodeEnter.append("circle")
-      .attr("r", 20)
-      .attr("fill", nodeColor);
+      .attr("r", d => {
+        if (d.depth === 0) return 28;   // root
+        if (d.depth === 1) return 20;   // kategorie
+        return 14;                      // dokumenty / liście
+      })
+      .attr("fill", d => {
+        if (d.depth === 0) return palette.rootFill;
+        if (d.depth === 1) return palette.categoryFill;
+        return palette.docFill;
+      })
+      .attr("stroke", "#000000")
+      .attr("stroke-opacity", isLightMode ? 0.08 : 0.35)
+      .attr("stroke-width", 1.5);
 
+    // tekst obok kółka, root na środku
     nodeEnter.append("text")
-      .attr("dy", "-1.5em")
-      .attr("text-anchor", "middle")
-      .attr("fill", textColor)
+      .attr("dy", "0.35em")
+      .attr("x", d => {
+        if (d.depth === 0) return 0; // root – tekst na środku
+        const hasChildren = d.children && d.children.length > 0;
+        return hasChildren ? -32 : 32; // rodzic po lewej, liść po prawej
+      })
+      .attr("text-anchor", d => {
+        if (d.depth === 0) return "middle";
+        const hasChildren = d.children && d.children.length > 0;
+        return hasChildren ? "end" : "start";
+      })
+      .attr("fill", palette.text)
+      .style("font-size", d => {
+        if (d.depth === 0) return "16px";
+        if (d.depth === 1) return "14px";
+        return "12px";
+      })
       .text(d => d.data.name);
     
     nodes.transition().duration(500)
