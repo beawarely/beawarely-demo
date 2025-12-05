@@ -446,7 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .attr("x", d => {
           if (d.depth === 0) return 0; // root – napis pod logo
           const hasChildren = d.children && d.children.length > 0;
-          return hasChildren ? -32 : 32; // rodzic po lewej, liść po prawej
+          return hasChildren ? -26 : 26; // rodzic po lewej, liść po prawej
         })
         .attr("text-anchor", d => {
           if (d.depth === 0) return "middle";
