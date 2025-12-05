@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
             name: cat,
             children: (Array.isArray(docs) ? docs : []).map(d => {
               const content = typeof d.content === 'string' ? d.content : '';
-              const label = content.length > 60 ? content.slice(0, 60) + '…' : content || `doc ${d.id}`;
+              const label = content.length > 40 ? content.slice(0, 40) + '…' : content || `doc ${d.id}`;
               return {
                 name: label,
                 docId: d.id
