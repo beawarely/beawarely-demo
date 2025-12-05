@@ -331,11 +331,14 @@ document.addEventListener("DOMContentLoaded", () => {
     update();
   }
 
-  const treeLayout = d3.tree().size([height - 80, width - 160]);
+    const treeLayout = d3.tree().size([width - 160, height - 160]);
 
-        function update() {
+            function update() {
       const root = d3.hierarchy(data);
       treeLayout(root);
+
+      const xOffset = 80;          // odsunięcie w poziomie
+      const yBottom = height - 80; // „linia ziemi” na dole kontenera
 
       const isLightMode = document.body.classList.contains('light-mode');
 
@@ -369,10 +372,10 @@ document.addEventListener("DOMContentLoaded", () => {
         .append("line")
         .merge(links)
         .transition().duration(500)
-        .attr("x1", d => d.source.y)
-        .attr("y1", d => d.source.x)
-        .attr("x2", d => d.target.y)
-        .attr("y2", d => d.target.x)
+        .attr("x1", d => d.source.x + xOffset)
+        .attr("y1", d => yBottom - d.source.y)
+        .attr("x2", d => d.target.x + xOffset)
+        .attr("y2", d => yBottom - d.target.y)
         .attr("stroke", palette.link)
         .attr("stroke-width", d => d.target.depth === 1 ? 2.4 : 1.6)
         .attr("stroke-opacity", 0.9);
@@ -382,10 +385,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // węzły
       const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
 
-      const nodeEnter = nodes.enter()
+            const nodeEnter = nodes.enter()
         .append("g")
         .attr("class", "node")
-        .attr("transform", d => `translate(${d.y},${d.x})`);
+        .attr("transform", d => `translate(${d.x + xOffset},${yBottom - d.y})`);
 
             // root = logo, reszta = „bańki”
       nodeEnter.each(function(d) {
@@ -437,8 +440,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .style("font-weight", d => (d.depth <= 1 ? 600 : 400))
         .text(d => d.data.name);
 
-      nodes.transition().duration(500)
-        .attr("transform", d => `translate(${d.y},${d.x})`);
+            nodes.transition().duration(500)
+        .attr("transform", d => `translate(${d.x + xOffset},${yBottom - d.y})`);
 
       nodes.exit().remove();
     }
