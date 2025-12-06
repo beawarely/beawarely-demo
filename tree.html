@@ -165,8 +165,50 @@
     filter: url(#linkGlow);
   }
 
-  .link-pulse {
+    .link-pulse {
     pointer-events: none;
+  }
+
+  .rag-details {
+    max-width: 1000px;
+    margin: 20px auto 0;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: rgba(10, 10, 10, 0.85);
+    border: 1px solid #333;
+    text-align: left;
+    box-shadow: 0 0 16px rgba(0,0,0,0.35);
+  }
+
+  .rag-details h2 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+  }
+
+  .rag-details p {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+
+  .rag-details pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: "SF Mono","Consolas",monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #eaeaea;
+  }
+
+  body.light-mode .rag-details {
+    background: rgba(255,255,255,0.95);
+    border-color: #ccc;
+  }
+
+  body.light-mode .rag-details p {
+    color: #555;
   }
 </style>
 
@@ -189,13 +231,19 @@
     Explore categories, zoom in on specific topics, and help the world grow smarter — together.
   </p>
 
-  <div id="d3tree">
+    <div id="d3tree">
     <div class="tree-controls">
       <button id="zoomInBtn" class="control-btn">+</button>
       <button id="zoomOutBtn" class="control-btn">-</button>
       <button id="resetBtn" class="control-btn">Reset</button>
       <button id="addNodeBtn" class="control-btn">Add Branch</button>
     </div>
+  </div>
+
+  <div id="ragDetails" class="rag-details" hidden>
+    <h2 id="ragTitle">Selected knowledge</h2>
+    <p id="ragMeta"></p>
+    <pre id="ragContent"></pre>
   </div>
 
   <br>
@@ -267,6 +315,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const d3treeContainer = document.getElementById("d3tree");
   const width = d3treeContainer.clientWidth;
   const height = d3treeContainer.clientHeight;
+
+  const ragPanel = document.getElementById("ragDetails");
+  const ragTitleEl = document.getElementById("ragTitle");
+  const ragMetaEl = document.getElementById("ragMeta");
+  const ragContentEl = document.getElementById("ragContent");
   
     const svg = d3.select(d3treeContainer)
     .append("svg")
@@ -300,8 +353,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
     svg.call(zoom);
 
-  const API_BASE = "https://ai.beawarely.com";
+    const API_BASE = "https://ai.beawarely.com";
   const RAG_BASE = `${API_BASE}/api/rag`;
+
+  async function fetchDocAndShow(docId) {
+    if (!docId) return;
+    if (ragPanel) {
+      ragPanel.hidden = false;
+      if (ragTitleEl) ragTitleEl.textContent = "Loading knowledge…";
+      if (ragMetaEl) ragMetaEl.textContent = "";
+      if (ragContentEl) ragContentEl.textContent = "";
+    }
+    try {
+      const res = await fetch(`${RAG_BASE}/docs/${encodeURIComponent(docId)}`);
+      if (!res.ok) throw new Error("doc_failed");
+      const doc = await res.json();
+      if (ragPanel) {
+        ragPanel.hidden = false;
+        if (ragTitleEl) ragTitleEl.textContent = doc.title || "Knowledge entry";
+        if (ragMetaEl) {
+          const parts = [];
+          if (doc.category) parts.push(`Category: ${doc.category}`);
+          if (doc.source) parts.push(`Source: ${doc.source}`);
+          ragMetaEl.textContent = parts.join(" • ");
+        }
+        if (ragContentEl) ragContentEl.textContent = doc.content || "";
+      }
+    } catch (err) {
+      console.error("RAG doc fetch error", err);
+      if (ragPanel && ragTitleEl && ragContentEl) {
+        ragPanel.hidden = false;
+        ragTitleEl.textContent = "Error loading knowledge";
+        if (ragMetaEl) ragMetaEl.textContent = "";
+        ragContentEl.textContent = "Could not fetch full content for this entry.";
+      }
+    }
+  }
 
   let data = {
     name: "Knowledge Tree",
@@ -356,7 +443,13 @@ document.addEventListener("DOMContentLoaded", () => {
     update();
   }
 
-    const treeLayout = d3.tree().size([width - 160, height - 160]);
+        const treeLayout = d3.tree().size([width - 160, height - 160]);
+
+    function handleNodeClick(event, d) {
+      const docId = d.data && d.data.docId;
+      if (!docId) return;
+      fetchDocAndShow(docId);
+    }
 
             function update() {
       const root = d3.hierarchy(data);
@@ -460,7 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .attr("transform", d => `translate(${d.x + xOffset},${yBottom - d.y})`);
 
             // root = logo, reszta = „bańki”
-      nodeEnter.each(function(d) {
+            nodeEnter.each(function(d) {
         const node = d3.select(this);
 
         if (d.depth === 0) {
@@ -486,6 +579,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("stroke-width", 1.6);
         }
       });
+
+      nodeEnter.on("click", handleNodeClick);
+      nodes.on("click", handleNodeClick);
 
             // napisy
       nodeEnter.append("text")
