@@ -159,10 +159,14 @@
     opacity: 1;
   }
 
-    /* Impulsowe połączenia w drzewie — świecące, bez „mrówek” */
+      /* Impulsowe połączenia w drzewie — świecące, plus ruchome impulsy */
   .link-impulse {
     stroke-linecap: round;
     filter: url(#linkGlow);
+  }
+
+  .link-pulse {
+    pointer-events: none;
   }
 </style>
 
@@ -386,12 +390,13 @@ document.addEventListener("DOMContentLoaded", () => {
           "#c51162"  // magenta
         ]);
 
-            // gałęzie jako zakrzywione ścieżki z „impulsami”
+                  // gałęzie jako zakrzywione ścieżki z impulsami
       const links = g.selectAll("path.link").data(root.links(), d => d.target.data.name);
 
       links.enter()
         .append("path")
         .attr("class", "link link-impulse")
+        .attr("data-id", d => d.target.data.name)
         .merge(links)
         .transition().duration(500)
         .attr("d", d => {
@@ -411,6 +416,40 @@ document.addEventListener("DOMContentLoaded", () => {
         .attr("fill", "none");
 
       links.exit().remove();
+
+      // ruchome impulsy poruszające się po każdej ścieżce
+      const pulses = g.selectAll("circle.link-pulse").data(root.links(), d => d.target.data.name);
+
+      const pulseEnter = pulses.enter()
+        .append("circle")
+        .attr("class", "link-pulse")
+        .attr("r", 3);
+
+      function animatePulse(selection, d) {
+        const path = g.select(`path.link[data-id="${d.target.data.name}"]`).node();
+        if (!path) return;
+
+        const totalLength = path.getTotalLength();
+
+        selection
+          .interrupt()
+          .attr("fill", "#ffffff")
+          .transition()
+          .duration(1200)
+          .ease(d3.easeLinear)
+          .attrTween("transform", () => t => {
+            const p = path.getPointAtLength(t * totalLength);
+            return `translate(${p.x},${p.y})`;
+          })
+          .on("end", () => animatePulse(selection, d)); // pętla: po dojściu do końca leci od nowa
+      }
+
+      pulseEnter.merge(pulses)
+        .each(function(d) {
+          animatePulse(d3.select(this), d);
+        });
+
+      pulses.exit().remove();
 
       // węzły
       const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
