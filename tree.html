@@ -544,16 +544,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       pulses.exit().remove();
 
-      // węzły
+            // węzły
       const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
 
-            const nodeEnter = nodes.enter()
+      const nodeEnter = nodes.enter()
         .append("g")
         .attr("class", "node")
         .attr("transform", d => `translate(${d.x + xOffset},${yBottom - d.y})`);
 
-            // root = logo, reszta = „bańki”
-            nodeEnter.each(function(d) {
+      // root = logo, kategorie + liście = kolorowe prostokąty
+      nodeEnter.each(function(d) {
         const node = d3.select(this);
 
         if (d.depth === 0) {
@@ -565,36 +565,40 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("x", -size / 2)
             .attr("y", -size / 2);
         } else {
-          node.append("circle")
-            .attr("r", () => {
-              if (d.depth === 1) return 22;   // kategorie
-              return 14;                      // dokumenty / liście
-            })
+          const isCategory = d.depth === 1;
+          const boxWidth  = isCategory ? 140 : 220;
+          const boxHeight = isCategory ? 34  : 30;
+
+          node.append("rect")
+            .attr("x", -boxWidth / 2)
+            .attr("y", -boxHeight / 2)
+            .attr("width", boxWidth)
+            .attr("height", boxHeight)
+            .attr("rx", boxHeight / 2)
+            .attr("ry", boxHeight / 2)
             .attr("fill", () => {
-              if (d.depth === 1) return catColorScale(d.data.name);
+              if (isCategory) return catColorScale(d.data.name);
               const parentName = d.parent && d.parent.data && d.parent.data.name;
               return parentName ? catColorScale(parentName) : palette.docFill;
             })
-            .attr("stroke", isLightMode ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.65)")
-            .attr("stroke-width", 1.6);
+            .attr("stroke", isCategory
+              ? (isLightMode ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.8)")
+              : (isLightMode ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.65)")
+            )
+            .attr("stroke-width", isCategory ? 2 : 1.4);
         }
       });
 
-      nodeEnter.on("click", handleNodeClick);
-      nodes.on("click", handleNodeClick);
-
-            // napisy
+      // napisy
       nodeEnter.append("text")
         .attr("dy", d => d.depth === 0 ? "3em" : "0.35em")
         .attr("x", d => {
           if (d.depth === 0) return 0; // root – napis pod logo
-          const hasChildren = d.children && d.children.length > 0;
-          return hasChildren ? -26 : 26; // rodzic po lewej, liść po prawej
+          return 0;                    // kategorie + liście: tekst w środku prostokąta
         })
         .attr("text-anchor", d => {
           if (d.depth === 0) return "middle";
-          const hasChildren = d.children && d.children.length > 0;
-          return hasChildren ? "end" : "start";
+          return "middle";
         })
         .attr("fill", d => (d.depth === 0 ? palette.textRoot : palette.textNode))
         .style("font-size", d => {
