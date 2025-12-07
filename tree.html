@@ -414,7 +414,8 @@ document.addEventListener("DOMContentLoaded", () => {
             name: cat,
             children: (Array.isArray(docs) ? docs : []).map(d => {
               const content = typeof d.content === 'string' ? d.content : '';
-              const label = content.length > 40 ? content.slice(0, 40) + '…' : content || `doc ${d.id}`;
+              const maxLen = 30; // krótszy tekst, żeby nie wychodził poza prostokąt
+              const label = content.length > maxLen ? content.slice(0, maxLen) + '…' : content || `doc ${d.id}`;
               return {
                 name: label,
                 docId: d.id
@@ -612,7 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      // napisy
+            // napisy
       nodeEnter.append("text")
         .attr("dy", d => d.depth === 0 ? "3em" : "0.35em")
         .attr("x", d => {
@@ -630,6 +631,13 @@ document.addEventListener("DOMContentLoaded", () => {
           return "12px";
         })
         .style("font-weight", d => (d.depth <= 1 ? 600 : 400))
+        // ściśnij tekst, żeby mieścił się w prostokącie
+        .attr("textLength", d => {
+          if (d.depth === 0) return null;
+          // trochę mniejsza szerokość niż box, żeby był margines
+          return d.depth === 1 ? 110 : 190;
+        })
+        .attr("lengthAdjust", d => (d.depth === 0 ? null : "spacingAndGlyphs"))
         .text(d => d.data.name);
 
                         nodes.transition().duration(500)
