@@ -453,12 +453,31 @@ document.addEventListener("DOMContentLoaded", () => {
       fetchDocAndShow(docId);
     }
 
-            function update() {
+                        function update() {
       const root = d3.hierarchy(data);
       treeLayout(root);
 
       const xOffset = 80;          // odsunięcie w poziomie
       const yBottom = height - 80; // „linia ziemi” na dole kontenera
+
+      // inteligentne rozmieszczenie liści: rozsunie je w górę/dół względem siebie
+      function getNodePosition(d) {
+        const baseX = d.x + xOffset;
+        const baseY = yBottom - d.y;
+
+        // root + kategorie bez przesuwania
+        if (!d.parent || d.depth <= 1) {
+          return { x: baseX, y: baseY };
+        }
+
+        const siblings = d.parent.children || [];
+        const idx = siblings.indexOf(d);
+        const spread = 26; // odległość pionowa między liśćmi
+        const center = (siblings.length - 1) / 2;
+        const offsetY = (idx - center) * spread;
+
+        return { x: baseX, y: baseY + offsetY };
+      }
 
       const isLightMode = document.body.classList.contains('light-mode');
 
@@ -494,17 +513,16 @@ document.addEventListener("DOMContentLoaded", () => {
         .attr("data-id", d => d.target.data.name)
         .merge(links)
         .transition().duration(500)
-        .attr("d", d => {
-          const x1 = d.source.x + xOffset;
-          const y1 = yBottom - d.source.y;
-          const x2 = d.target.x + xOffset;
-          const y2 = yBottom - d.target.y;
-          const mx = (x1 + x2) / 2;
-          const ctrlY = y1 - 40; // lekkie wygięcie do góry
+                .attr("d", d => {
+          const p1 = getNodePosition(d.source);
+          const p2 = getNodePosition(d.target);
+          const mx = (p1.x + p2.x) / 2;
+          const ctrlY = p1.y - 40; // lekkie wygięcie do góry
 
           // krzywa Q: start -> punkt kontrolny -> koniec
-          return `M${x1},${y1} Q${mx},${ctrlY} ${x2},${y2}`;
+          return `M${p1.x},${p1.y} Q${mx},${ctrlY} ${p2.x},${p2.y}`;
         })
+
         .attr("stroke", palette.link)
         .attr("stroke-width", d => d.target.depth === 1 ? 2.4 : 1.6)
         .attr("stroke-opacity", 0.9)
@@ -549,10 +567,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // węzły
       const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
 
-      const nodeEnter = nodes.enter()
+            const nodeEnter = nodes.enter()
         .append("g")
         .attr("class", "node")
-        .attr("transform", d => `translate(${d.x + xOffset},${yBottom - d.y})`);
+        .attr("transform", d => {
+          const p = getNodePosition(d);
+          return `translate(${p.x},${p.y})`;
+        });
 
       // root = logo, kategorie + liście = kolorowe prostokąty
       nodeEnter.each(function(d) {
@@ -611,8 +632,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .style("font-weight", d => (d.depth <= 1 ? 600 : 400))
         .text(d => d.data.name);
 
-            nodes.transition().duration(500)
-        .attr("transform", d => `translate(${d.x + xOffset},${yBottom - d.y})`);
+                        nodes.transition().duration(500)
+        .attr("transform", d => {
+          const p = getNodePosition(d);
+          return `translate(${p.x},${p.y})`;
+        });
 
       nodes.exit().remove();
     }
