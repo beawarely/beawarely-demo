@@ -444,8 +444,8 @@ document.addEventListener("DOMContentLoaded", () => {
     update();
   }
 
-      const treeLayout = d3.tree()
-      nodeSize([260, 120])
+       const treeLayout = d3.tree()
+      .nodeSize([260, 90])
       .separation((a, b) => (a.parent === b.parent ? 1.2 : 1.6));
 
     function handleNodeClick(event, d) {
