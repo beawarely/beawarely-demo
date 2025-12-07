@@ -565,10 +565,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       pulses.exit().remove();
 
-            // węzły
+                  // węzły
       const nodes = g.selectAll("g.node").data(root.descendants(), d => d.data.name);
 
-            const nodeEnter = nodes.enter()
+      const nodeEnter = nodes.enter()
         .append("g")
         .attr("class", "node")
         .attr("transform", d => {
@@ -613,7 +613,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-                  // napisy
+      // klik w węzeł → pobierz i pokaż pełny tekst RAG (tylko liście mają docId)
+      nodeEnter.on("click", handleNodeClick);
+      nodes.on("click", handleNodeClick);
+
+      // napisy
       nodeEnter.append("text")
         .attr("dy", d => d.depth === 0 ? "3em" : "0.35em")
         .attr("x", d => {
