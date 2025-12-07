@@ -443,7 +443,9 @@ document.addEventListener("DOMContentLoaded", () => {
     update();
   }
 
-        const treeLayout = d3.tree().size([width - 160, height - 160]);
+            const treeLayout = d3.tree()
+      .nodeSize([80, 90])
+      .separation((a, b) => (a.parent === b.parent ? 1.4 : 1.8));
 
     function handleNodeClick(event, d) {
       const docId = d.data && d.data.docId;
