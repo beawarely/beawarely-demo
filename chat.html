@@ -80,6 +80,7 @@ textarea:focus-visible {
 
 /* ==== Sidebar / History ==== */
 .app{ display:flex; gap:16px; }
+.app.app-sidebar-hidden .sidebar{ display:none; }
 .sidebar{
   width:260px; flex:0 0 260px;
   background:rgba(255,255,255,.05);
@@ -87,6 +88,7 @@ textarea:focus-visible {
   border-radius:16px; padding:12px; height:fit-content;
   max-height: min(78dvh, 620px); overflow:auto;
 }
+
 .side-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 .mini{
   padding:6px 10px; border:none; border-radius:8px; cursor:pointer;
@@ -113,17 +115,18 @@ textarea:focus-visible {
 <body>
   <div class="wrap">
     <div class="topbar">
+  <button id="historyToggle" class="badge" aria-label="Toggle chat history" style="margin-right:8px;">☰</button>
   <a href="index.html" class="back">← Back</a>
   <h2 style="margin:0">BeAwarely AI Chat</h2>
   <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-  <select id="modelSelect" class="badge" style="background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;">
+  <select id="modelSelect" class="badge" style="background:rgba(...;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;">
         <option value="freerainboxbox/phi4:14b-q6_K">MattFast (freerainboxbox/phi4:14b-q6_K)</option>
     <option value="mixtral:8x7b-instruct-v0.1-q6_K">MattThinker (Mixtral Q6_K)</option>
   </select>
 </div>
 </div>
 
-<div class="app">
+<div class="app app-sidebar-hidden">
   <aside class="sidebar" aria-label="Conversation history">
     <div class="side-head">
       <strong>Conversations</strong>
@@ -220,6 +223,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
     chip.hidden = false;
   }
 })();
+</script>
+
+<script>
+// Toggle chat history sidebar (hamburger in topbar)
+document.addEventListener('DOMContentLoaded', ()=>{
+  const app = document.querySelector('.app');
+  const btn  = document.getElementById('historyToggle');
+  if (!app || !btn) return;
+  btn.addEventListener('click', ()=>{
+    app.classList.toggle('app-sidebar-hidden');
+  });
+});
 </script>
 
 <script>
