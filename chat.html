@@ -28,6 +28,65 @@
     background-position:600px 800px,-500px 600px,400px -600px;
   }
 }
+
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  top:0;
+  left:0;
+  width:2px;
+  height:160px;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(to bottom, rgba(255,255,255,.95), rgba(255,255,255,0));
+  filter:drop-shadow(0 0 6px rgba(255,255,255,.9));
+}
+
+body::before{
+  animation:shootingStar1 14s linear infinite;
+}
+
+body::after{
+  animation:shootingStar2 18s linear infinite;
+  animation-delay:4s;
+}
+
+@keyframes shootingStar1{
+  0%,65%{
+    opacity:0;
+    transform:translate3d(-10vw,-10vh,0) rotate(35deg);
+  }
+  70%{
+    opacity:1;
+  }
+  85%{
+    opacity:1;
+    transform:translate3d(40vw,40vh,0) rotate(35deg);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(65vw,65vh,0) rotate(35deg);
+  }
+}
+
+@keyframes shootingStar2{
+  0%,60%{
+    opacity:0;
+    transform:translate3d(100vw,-20vh,0) rotate(35deg);
+  }
+  65%{
+    opacity:1;
+  }
+  80%{
+    opacity:1;
+    transform:translate3d(40vw,40vh,0) rotate(35deg);
+  }
+  100%{
+    opacity:0;
+    transform:translate3d(10vw,80vh,0) rotate(35deg);
+  }
+}
     
     .wrap{max-width:960px;margin:0 auto;padding:28px}
     .chat-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
