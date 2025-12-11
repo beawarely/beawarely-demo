@@ -261,8 +261,13 @@ body.light-mode {
   <div class="toolbar">
     <button id="aiUseDraftBtn" class="btn secondary" type="button">Use my draft</button>
     <button id="aiReviewBtn" class="btn" type="button">Review draft</button>
+    <button id="aiLawBtn" class="btn secondary" type="button">Ask about law</button>
     <button id="aiAddNoteBtn" class="btn secondary" type="button">Add note</button>
     <button id="aiClearNotesBtn" class="btn secondary" type="button">Clear notes</button>
+  </div>
+  <div class="muted" style="font-size:12px; margin-top:6px;">
+    Country for law info (optional): 
+    <input id="aiCountry" type="text" placeholder="e.g. Netherlands, Poland" style="background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:6px; padding:3px 6px; color:inherit; font-size:12px; max-width:220px;">
   </div>
   <div id="aiNotes" class="muted" style="font-size:13px; margin-top:8px;"></div>
   <div id="aiResult" class="muted" style="font-size:13px; margin-top:8px; white-space:pre-wrap;"></div>
@@ -356,13 +361,15 @@ body.light-mode {
     const saveDraftBtn = $('#saveDraftBtn');
     const loadDraftBtn = $('#loadDraftBtn');
     const clearDraftBtn = $('#clearDraftBtn');
-        const aiInputEl = $('#aiInput');
+            const aiInputEl = $('#aiInput');
     const aiUseDraftBtn = $('#aiUseDraftBtn');
     const aiReviewBtn = $('#aiReviewBtn');
+    const aiLawBtn = $('#aiLawBtn');
     const aiAddNoteBtn = $('#aiAddNoteBtn');
     const aiClearNotesBtn = $('#aiClearNotesBtn');
     const aiNotesEl = $('#aiNotes');
     const aiResultEl = $('#aiResult');
+    const aiCountryEl = $('#aiCountry');
 
     // helper: per-user draft key
     let _lastUserId = 'anon';
@@ -524,12 +531,24 @@ ${content || '(no text yet)'}
 Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral wording without personal data.'}`;
     }
 
+        function detectLanguage(text){
+      const t = (text || '').toLowerCase();
+      if(/[ąćęłńóśźż]/.test(t)) return 'pl';
+      if(/\bż[eę]\b/.test(t) || /\bnie\b/.test(t) || /\bsię\b/.test(t)) return 'pl';
+      return 'en';
+    }
+
     async function runWorkVerifyAI(){
       const ctx = buildAIContext();
       if(!ctx || !aiResultEl){
         alert('Please write a draft first.');
         return;
       }
+
+      const lang = detectLanguage(ctx);
+      const langRule = lang === 'pl'
+        ? 'Respond ONLY in Polish.'
+        : 'Respond ONLY in English.';
 
       const systemPrompt = `You are WorkVerify AI inside the BeAwarely platform.
 
@@ -540,7 +559,7 @@ Your job:
 - Help the user see both red and green flags in the story (what went wrong vs what they did well).
 
 Rules:
-- Answer in the same language the user uses (Polish or English).
+- ${langRule}
 - Never invent facts. If something is unclear, say that you are unsure and suggest what details to add.
 - Never encourage doxxing, revenge, mobbing, or public shaming.
 - Do not give legal advice; you can only suggest that the user contacts a local lawyer or union if needed.
@@ -613,6 +632,109 @@ ${ctx}`;
       }catch(err){
         console.error('WorkVerify AI error:', err);
         aiResultEl.textContent = 'Error: unable to contact WorkVerify AI.';
+      }
+    }
+
+    async function runLawAI(){
+      const ctx = buildAIContext();
+      if(!ctx || !aiResultEl){
+        alert('Please write a draft first.');
+        return;
+      }
+
+      const country = (aiCountryEl && aiCountryEl.value || '').trim();
+      const extraQuestion = (aiInputEl && aiInputEl.value || '').trim();
+      const combined = `${ctx}
+
+Country: ${country || 'not specified'}
+User question (optional): ${extraQuestion || 'no additional question'}`;
+
+      const lang = detectLanguage(ctx + ' ' + extraQuestion);
+      const langRule = lang === 'pl'
+        ? 'Respond ONLY in Polish.'
+        : 'Respond ONLY in English.';
+
+      const systemPrompt = `You are an informational assistant about employment law and workplace rights.
+You are not a lawyer and you do not give legal advice.
+
+Your job:
+- Give high-level, general information about typical employment-law principles for the specified country, based on your training data.
+- Help the user understand what kind of legal topics *might* be relevant (e.g. discrimination, harassment, notice periods, contracts).
+- Always emphasize uncertainty: laws change, details matter, and your information can be incomplete or outdated.
+
+Hard rules:
+- ${langRule}
+- Do NOT give definitive statements like "this is illegal" or "this is definitely allowed".
+- Do NOT tell the user what exact legal claim they have.
+- Never encourage lawsuits, public shaming, or any kind of revenge.
+- Always recommend that the user checks official sources (government labour portal, inspectorate) and consults a qualified local lawyer or union before making decisions.
+
+When you respond, use this structure:
+1) General context for employment law in the specified country (very short).
+2) Possible legal topics that *might* be relevant to this situation (high level).
+3) Questions the user should ask a local lawyer / union.
+4) Official or typical places to look for up-to-date information (government sites, labour inspectorate, unions).
+5) Strong disclaimer that this is NOT legal advice and may be incomplete or outdated.`;
+
+      const fullPrompt = `${systemPrompt}
+
+${combined}`;
+
+      aiResultEl.textContent = 'Asking about law (not legal advice)…';
+
+      try{
+        const resp = await fetch('https://ai.beawarely.com/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'mixtral:8x7b-instruct-v0.1-q6_K',
+            prompt: fullPrompt,
+            stream: true,
+            options: {
+              temperature: 0.25,
+              top_p: 0.9,
+              num_predict: 640,
+              repeat_penalty: 1.2
+            }
+          })
+        });
+
+        if(!resp.ok || !resp.body){
+          aiResultEl.textContent = 'Error: backend unavailable.';
+          return;
+        }
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        while(true){
+          const { done, value } = await reader.read();
+          if(done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for(const line of lines){
+            if(!line.trim()) continue;
+            try{
+              const obj = JSON.parse(line);
+              if(obj.response){
+                fullText += obj.response;
+                aiResultEl.textContent = fullText;
+              }
+            }catch(e){
+              console.warn('WorkVerify law AI parse error:', e, line);
+            }
+          }
+        }
+
+        if(!fullText.trim()){
+          aiResultEl.textContent = '[no response]';
+        }
+      }catch(err){
+        console.error('WorkVerify law AI error:', err);
+        aiResultEl.textContent = 'Error: unable to contact law info AI.';
       }
     }
 
@@ -804,12 +926,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         companyEl.value=''; roleEl.value=''; textEl.value='';
       };
 
-                 // AI dock buttons (local)
+                      // AI dock buttons (local)
       if(aiUseDraftBtn) aiUseDraftBtn.onclick = ()=>{
         const ctx = buildAIContext();
         aiInputEl.value = ctx;
       };
       if(aiReviewBtn) aiReviewBtn.onclick = runWorkVerifyAI;
+      if(aiLawBtn) aiLawBtn.onclick = runLawAI;
       if(aiAddNoteBtn) aiAddNoteBtn.onclick = ()=> {
         const v = (aiInputEl.value||'').trim();
         if(!v) return alert('Type a note first.');
