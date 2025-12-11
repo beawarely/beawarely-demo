@@ -87,6 +87,48 @@ body::after{
     transform:translate3d(-20vw,30vh,0);
   }
 }
+
+.blink-stars{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+}
+
+.blink-star{
+  position:absolute;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:rgba(255,255,255,.7);
+  box-shadow:0 0 8px rgba(255,255,255,.9);
+  opacity:.3;
+  animation:blinkStar 4s ease-in-out infinite alternate;
+}
+
+.blink-star:nth-child(1){ top:12%; left:18%; animation-delay:.4s;}
+.blink-star:nth-child(2){ top:28%; left:72%; animation-delay:1.1s;}
+.blink-star:nth-child(3){ top:45%; left:35%; animation-delay:2.0s;}
+.blink-star:nth-child(4){ top:18%; left:52%; animation-delay:2.8s;}
+.blink-star:nth-child(5){ top:60%; left:15%; animation-delay:3.4s;}
+.blink-star:nth-child(6){ top:68%; left:68%; animation-delay:.9s;}
+.blink-star:nth-child(7){ top:32%; left:8%;  animation-delay:1.8s;}
+.blink-star:nth-child(8){ top:75%; left:85%; animation-delay:2.5s;}
+
+@keyframes blinkStar{
+  0%{
+    opacity:.2;
+    transform:scale(1);
+  }
+  50%{
+    opacity:1;
+    transform:scale(1.6);
+  }
+  100%{
+    opacity:.2;
+    transform:scale(1);
+  }
+}
     
     .wrap{max-width:960px;margin:0 auto;padding:28px}
     .chat-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
@@ -210,6 +252,16 @@ textarea:focus-visible {
   </style>
 </head>
 <body>
+  <div class="blink-stars" aria-hidden="true">
+    <span class="blink-star"></span>
+    <span class="blink-star"></span>
+    <span class="blink-star"></span>
+    <span class="blink-star"></span>
+    <span class="blink-star"></span>
+    <span class="blink-star"></span>
+    <span class="blink-star"></span>
+    <span class="blink-star"></span>
+  </div>
   <div class="wrap">
     <div class="topbar">
   <button id="historyToggle" class="badge" aria-label="Toggle chat history" style="margin-right:8px;">☰</button>
