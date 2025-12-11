@@ -265,6 +265,7 @@ body.light-mode {
     <button id="aiClearNotesBtn" class="btn secondary" type="button">Clear notes</button>
   </div>
   <div id="aiNotes" class="muted" style="font-size:13px; margin-top:8px;"></div>
+  <div id="aiResult" class="muted" style="font-size:13px; margin-top:8px; white-space:pre-wrap;"></div>
 </section>
 
     <!-- Quick submit (placeholder) -->
@@ -355,12 +356,13 @@ body.light-mode {
     const saveDraftBtn = $('#saveDraftBtn');
     const loadDraftBtn = $('#loadDraftBtn');
     const clearDraftBtn = $('#clearDraftBtn');
-    const aiInputEl = $('#aiInput');
+        const aiInputEl = $('#aiInput');
     const aiUseDraftBtn = $('#aiUseDraftBtn');
     const aiReviewBtn = $('#aiReviewBtn');
     const aiAddNoteBtn = $('#aiAddNoteBtn');
     const aiClearNotesBtn = $('#aiClearNotesBtn');
     const aiNotesEl = $('#aiNotes');
+    const aiResultEl = $('#aiResult');
 
     // helper: per-user draft key
     let _lastUserId = 'anon';
@@ -520,6 +522,98 @@ Draft:
 ${content || '(no text yet)'}
 ---
 Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral wording without personal data.'}`;
+    }
+
+    async function runWorkVerifyAI(){
+      const ctx = buildAIContext();
+      if(!ctx || !aiResultEl){
+        alert('Please write a draft first.');
+        return;
+      }
+
+      const systemPrompt = `You are WorkVerify AI inside the BeAwarely platform.
+
+Your job:
+- Help users describe real work situations in a calm, neutral and legally safe way.
+- Point out sensitive personal data and suggest how to anonymize it.
+- Highlight potential defamation risk and encourage fact-based descriptions.
+- Help the user see both red and green flags in the story (what went wrong vs what they did well).
+
+Rules:
+- Answer in the same language the user uses (Polish or English).
+- Never invent facts. If something is unclear, say that you are unsure and suggest what details to add.
+- Never encourage doxxing, revenge, mobbing, or public shaming.
+- Do not give legal advice; you can only suggest that the user contacts a local lawyer or union if needed.
+- Always prefer neutral, factual wording over emotional or insulting language.
+- If the user attacks specific people or companies with insults, help them rewrite it into neutral description of behaviours and decisions.
+
+When you respond, use this structure:
+1) Short summary of the situation.
+2) Red flags (risks, problematic behaviour, possible issues).
+3) Green flags (what the user did well, their professionalism, good decisions).
+4) Safety/data check (what personal data or details should be removed or generalized).
+5) Suggested rewrite of the draft in a safe, neutral and clear form.`;
+
+      const fullPrompt = `${systemPrompt}
+
+${ctx}`;
+
+      aiResultEl.textContent = 'Asking WorkVerify AI…';
+
+      try{
+        const resp = await fetch('https://ai.beawarely.com/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'mixtral:8x7b-instruct-v0.1-q6_K',
+            prompt: fullPrompt,
+            stream: true,
+            options: {
+              temperature: 0.25,
+              top_p: 0.9,
+              num_predict: 512,
+              repeat_penalty: 1.2
+            }
+          })
+        });
+
+        if(!resp.ok || !resp.body){
+          aiResultEl.textContent = 'Error: backend unavailable.';
+          return;
+        }
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        while(true){
+          const { done, value } = await reader.read();
+          if(done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+          for(const line of lines){
+            if(!line.trim()) continue;
+            try{
+              const obj = JSON.parse(line);
+              if(obj.response){
+                fullText += obj.response;
+                aiResultEl.textContent = fullText;
+              }
+            }catch(e){
+              console.warn('WorkVerify AI parse error:', e, line);
+            }
+          }
+        }
+
+        if(!fullText.trim()){
+          aiResultEl.textContent = '[no response]';
+        }
+      }catch(err){
+        console.error('WorkVerify AI error:', err);
+        aiResultEl.textContent = 'Error: unable to contact WorkVerify AI.';
+      }
     }
 
     // Lightweight local checker (heuristics – no network)
@@ -710,12 +804,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         companyEl.value=''; roleEl.value=''; textEl.value='';
       };
 
-           // AI dock buttons (local)
+                 // AI dock buttons (local)
       if(aiUseDraftBtn) aiUseDraftBtn.onclick = ()=>{
         const ctx = buildAIContext();
         aiInputEl.value = ctx;
       };
-      if(aiReviewBtn) aiReviewBtn.onclick = reviewDraftLocally;
+      if(aiReviewBtn) aiReviewBtn.onclick = runWorkVerifyAI;
       if(aiAddNoteBtn) aiAddNoteBtn.onclick = ()=> {
         const v = (aiInputEl.value||'').trim();
         if(!v) return alert('Type a note first.');
