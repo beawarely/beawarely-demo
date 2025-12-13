@@ -754,48 +754,17 @@ ${(ctx.evidence||[]).length ? ctx.evidence.map(x=>'- '+x).join('\n') : '(none)'}
 Task: ${(document.getElementById('aiInputFR')?.value || 'Review neutrality and bias, suggest missing evidence, and provide a concise neutral rewrite.').trim()}`;
 }
 
-// Lokalny „review” (bez sieci) – heurystyki dopasowane do tej karty
-function reviewDraftLocallyFR(){
-  const ctx = getFaithContext();
-  const issues = [];
-
-  if ((ctx.summary||'').length < 60) issues.push('Summary is short — add who/what/when/where and outcome.');
-  if (!(ctx.evidence||[]).length) issues.push('No evidence links — add at least one reputable source.');
-  if ((ctx.title||'').length > 90) issues.push('Title is long — aim for under ~80 characters.');
-
-  const generalizations = /\b(always|never|all|everyone|nobody|every|wszyscy|zawsze|nigdy)\b/i;
-  if (generalizations.test(ctx.summary)) issues.push('Avoid blanket generalizations (“always/never/all”). Be specific and contextual.');
-
-  const flagged = ['idiot','debil','stupid','sekta','heretic','infidel','nienawi','hate','idiota','oszust'];
-  const found = flagged.filter(w => new RegExp(`\\b${w}\\w*\\b`, 'i').test(ctx.summary));
-  if (found.length) issues.push(`Inflammatory language detected (${found.join(', ')}) — use neutral wording.`);
-
-  if (!issues.length) addNoteFR('No obvious tone/privacy issues found. Ensure fairness and cite sources.');
-  else issues.forEach(addNoteFR);
-
-  const aiIn = document.getElementById('aiInputFR');
-  if (aiIn) aiIn.value = 'Please help me rewrite my draft to be neutral and respectful. Keep facts, avoid generalizations, and list suggested evidence types.';
-  alert('Draft reviewed. See notes in the dock.');
-}
-
-async function askAI_FR(){
-  const input = document.getElementById('aiInputFR');
-  const btn = document.getElementById('aiAskBtnFR');
-  if(!input) return;
-
-  const prompt = (input.value||'').trim();
-  if(!prompt){ input.focus(); return; }
-
+async function callMixtralFR(userPrompt, btn, busyLabel){
   const oldLabel = btn ? btn.textContent : '';
-  if(btn){ btn.disabled = true; btn.textContent = 'Asking…'; }
+  if(btn){ btn.disabled = true; btn.textContent = busyLabel || 'Working…'; }
 
   try{
-    const context = getFaithContext();
+    const ctx = getFaithContext();
 
     const systemPrompt = `You are the Faith & Reason AI inside the BeAwarely platform.
 
 Your job:
-- Help the user present a religion-related case in a neutral, respectful, evidence-based way.
+- Help the user present religion-related content neutrally, respectfully, and evidence-based.
 - Separate claims, evidence, assumptions, and interpretations.
 - Detect bias, loaded language, and unfair generalizations; suggest neutral alternatives.
 - Suggest what evidence would strengthen the case (reputable sources, primary texts, dates, quotes, context).
@@ -815,10 +784,16 @@ When you respond, use this structure:
     const fullPrompt = `${systemPrompt}
 
 USER PROMPT:
-${prompt}
+${(userPrompt || '').trim()}
 
-PAGE CONTEXT:
-${context || '[no context]'}
+PAGE CONTEXT (draft fields):
+Religion: ${ctx.religion || '—'}
+Category: ${ctx.category || '—'}
+Title: ${ctx.title || '—'}
+Summary:
+${ctx.summary || '(no summary)'}
+Evidence:
+${(ctx.evidence||[]).length ? ctx.evidence.map(x=>'- '+x).join('\n') : '(none)'}
 `;
 
     const resp = await fetch('https://ai.beawarely.com/api/generate', {
@@ -841,34 +816,84 @@ ${context || '[no context]'}
 
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
+
     let buffer = '';
     let fullText = '';
 
     while(true){
-      const { done, value } = await reader.read();
+      let chunk;
+      try{
+        chunk = await reader.read();
+      }catch(_e){
+        break; // nie wyświetlaj "input stream" jeśli coś już przyszło
+      }
+
+      const { done, value } = chunk;
       if(done) break;
+
       buffer += decoder.decode(value, { stream: true });
 
       const lines = buffer.split('\n');
       buffer = lines.pop();
 
-      for(const line of lines){
-        if(!line.trim()) continue;
+      for(const raw of lines){
+        const line = (raw || '').trim();
+        if(!line) continue;
+
+        const jsonLine = line.startsWith('data:') ? line.slice(5).trim() : line;
+
         try{
-          const obj = JSON.parse(line);
-          if(obj.response) fullText += obj.response;
-        }catch(e){
-          console.warn('Faith & Reason AI parse error:', e, line);
+          const obj = JSON.parse(jsonLine);
+          if(obj && obj.response) fullText += obj.response;
+        }catch(_e){
+          // ignoruj pojedyncze śmieci/urwany JSON — bez spamowania błędami
         }
       }
     }
 
-    addNoteFR('AI: ' + (fullText.trim() || '[no response]'));
+    // spróbuj jeszcze dokończyć ostatnią linię (jeśli jest kompletnym JSON-em)
+    const tail = (buffer || '').trim();
+    if(tail){
+      try{
+        const obj = JSON.parse(tail.startsWith('data:') ? tail.slice(5).trim() : tail);
+        if(obj && obj.response) fullText += obj.response;
+      }catch(_e){}
+    }
+
+    return (fullText || '').trim();
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = oldLabel || 'Ask AI'; }
+  }
+}
+
+async function reviewDraftWithMixtralFR(){
+  const btn = document.getElementById('aiReviewBtnFR');
+  try{
+    const reply = await callMixtralFR(
+      'Review my draft (fields on the page). Focus on neutrality, tone risks, missing evidence, best counterpoint, and a concise neutral rewrite.',
+      btn,
+      'Reviewing…'
+    );
+    addNoteFR('AI: ' + (reply || '[no response]'));
+  }catch(e){
+    addNoteFR('AI error: ' + (e?.message || e));
+  }
+}
+
+async function askAI_FR(){
+  const input = document.getElementById('aiInputFR');
+  const btn = document.getElementById('aiAskBtnFR');
+  if(!input) return;
+
+  const prompt = (input.value||'').trim();
+  if(!prompt){ input.focus(); return; }
+
+  try{
+    const reply = await callMixtralFR(prompt, btn, 'Asking…');
+    addNoteFR('AI: ' + (reply || '[no response]'));
     input.value = '';
   }catch(e){
     addNoteFR('AI error: ' + (e?.message || e));
-  }finally{
-    if(btn){ btn.disabled = false; btn.textContent = oldLabel || 'Ask AI'; }
   }
 }
 
@@ -883,7 +908,7 @@ function initAIDockFR(){
   renderNotesFR();
 
   if(useDraft) useDraft.onclick = ()=>{ input.value = buildFRContext(); input.focus(); };
-  if(review)   review.onclick   = reviewDraftLocallyFR;
+  if(review)   review.onclick   = reviewDraftWithMixtralFR;
   if(addBtn)   addBtn.onclick   = ()=>{ const v=(input.value||'').trim(); if(!v) return alert('Type a note first.'); addNoteFR(v); input.value=''; };
   if(clearBtn) clearBtn.onclick = ()=>{ writeNotesFR([]); renderNotesFR(); };
   if(askBtn)   askBtn.onclick   = askAI_FR;
