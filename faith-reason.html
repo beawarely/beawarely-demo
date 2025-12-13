@@ -4,7 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex, nofollow"/>
-  <title>Faith & Reason — BeAwarely</title>
+    <title>Faith & Reason — BeAwarely</title>
+  <link rel="icon" href="data:," />
   <link rel="stylesheet" href="css/style.css"/>
 
   <style>
@@ -520,11 +521,10 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
 
   // 🔹 Zarejestruj aktywność użytkownika w globalnym feedzie
   try {
-    await supabaseClient.from('activity_events').insert({
+        await supabaseClient.from('activity_events').insert({
       actor_id: sess.user.id,
       verb: 'added',
       subject_type: 'faith_item',
-      subject_id: ins.id,
       summary: `Added new Faith & Reason entry: "${title}"`
     });
   } catch(e){
@@ -688,8 +688,9 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
       container.appendChild(tpl);
 
       // fetch aggregates
-      fetchAggVotes(item.id).then(agg=>{
+            fetchAggVotes(item.id).then(agg=>{
         const aggBox = container.querySelector('.__agg');
+        if (!aggBox) return;
         const parts = [];
         Object.entries(agg).forEach(([k,v])=> { if (v>0) parts.push(`${k}:${v}`); });
         aggBox.textContent = parts.length ? `Votes — ${parts.join(' · ')}` : 'No votes yet';
