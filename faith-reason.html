@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex, nofollow"/>
     <title>Faith & Reason — BeAwarely</title>
-  <link rel="icon" href="data:," />
+    <link rel="icon" href="data:," />
+  <link rel="shortcut icon" href="data:," />
   <link rel="stylesheet" href="css/style.css"/>
 
   <style>
@@ -519,7 +520,7 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
     out.textContent = 'Save error: '+ (insErr.message || insErr); btn.disabled = false; return;
   }
 
-  // 🔹 Zarejestruj aktywność użytkownika w globalnym feedzie
+    // 🔹 Zarejestruj aktywność użytkownika w globalnym feedzie
   try {
         await supabaseClient.from('activity_events').insert({
       actor_id: sess.user.id,
@@ -688,13 +689,12 @@ html.light .ai-dock textarea{ background: rgba(14,23,48,.025); border-color: rgb
       container.appendChild(tpl);
 
       // fetch aggregates
-            fetchAggVotes(item.id).then(agg=>{
+                  fetchAggVotes(item.id).then(agg=>{
         const aggBox = container.querySelector('.__agg');
-        if (!aggBox) return;
         const parts = [];
-        Object.entries(agg).forEach(([k,v])=> { if (v>0) parts.push(`${k}:${v}`); });
-        aggBox.textContent = parts.length ? `Votes — ${parts.join(' · ')}` : 'No votes yet';
-      });
+        Object.entries(agg || {}).forEach(([k,v])=> { if (v>0) parts.push(`${k}:${v}`); });
+        if (aggBox) aggBox.textContent = parts.length ? `Votes — ${parts.join(' · ')}` : 'No votes yet';
+      }).catch(()=>{});
 
       return container.firstElementChild;
     }
