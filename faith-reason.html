@@ -778,27 +778,93 @@ function reviewDraftLocallyFR(){
   alert('Draft reviewed. See notes in the dock.');
 }
 
-// Połączenie z Edge Function (opcjonalnie — „Ask AI”)
+// Ask AI (local Mixtral)
 async function askAI_FR(){
   const input = document.getElementById('aiInputFR');
   const btn = document.getElementById('aiAskBtnFR');
   if(!input) return;
+
   const prompt = (input.value||'').trim();
   if(!prompt){ input.focus(); return; }
-  btn && (btn.disabled = true);
+
+  const oldLabel = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Asking…'; }
+
   try{
-    const context = getFaithContext();
-    const { data, error } = await supabaseClient.functions.invoke('faith-chat', {
-      body: { prompt, context, page: 'faith-reason' }
+    const systemPrompt = `You are the Faith & Reason AI inside the BeAwarely platform.
+
+Your job:
+- Help the user present a religion-related case in a neutral, respectful, evidence-based way.
+- Separate claims, evidence, assumptions, and interpretations.
+- Detect bias, loaded language, and unfair generalizations; suggest neutral alternatives.
+- Suggest what evidence would strengthen the case (reputable sources, primary texts, dates, quotes, context).
+
+Rules:
+- Do NOT preach or promote a religion. Stay neutral.
+- Do NOT attack groups or individuals; avoid hate or dehumanizing language.
+- Never invent facts. If info is missing, ask for what’s needed.
+
+When you respond, use this structure:
+1) Neutral summary (very short).
+2) Bias / tone risks (what to fix).
+3) Missing evidence / what to add.
+4) Strongest counterpoint (steelman).
+5) Neutral rewrite (concise).`;
+
+    const ctx = buildFRContext();
+    const fullPrompt = `${systemPrompt}
+
+${ctx}`;
+
+    const resp = await fetch('https://ai.beawarely.com/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'mixtral:8x7b-instruct-v0.1-q6_K',
+        prompt: fullPrompt,
+        stream: true,
+        options: {
+          temperature: 0.25,
+          top_p: 0.9,
+          num_predict: 560,
+          repeat_penalty: 1.2
+        }
+      })
     });
-    if (error) throw error;
-    const reply = (data && (data.reply || data.text)) || 'No reply';
-    addNoteFR('AI: ' + reply);
+
+    if(!resp.ok || !resp.body){
+      addNoteFR('AI error: backend unavailable.');
+      return;
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullText = '';
+
+    while(true){
+      const { done, value } = await reader.read();
+      if(done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for(const line of lines){
+        if(!line.trim()) continue;
+        try{
+          const obj = JSON.parse(line);
+          if(obj.response) fullText += obj.response;
+        }catch(e){
+          console.warn('Faith & Reason AI parse error:', e, line);
+        }
+      }
+    }
+
+    addNoteFR('AI: ' + (fullText.trim() || '[no response]'));
     input.value = '';
   }catch(e){
     addNoteFR('AI error: ' + (e?.message || e));
   }finally{
-    btn && (btn.disabled = false);
+    if(btn){ btn.disabled = false; btn.textContent = oldLabel || 'Ask AI'; }
   }
 }
 
