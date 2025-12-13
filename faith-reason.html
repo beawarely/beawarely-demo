@@ -778,7 +778,6 @@ function reviewDraftLocallyFR(){
   alert('Draft reviewed. See notes in the dock.');
 }
 
-// Ask AI (local Mixtral)
 async function askAI_FR(){
   const input = document.getElementById('aiInputFR');
   const btn = document.getElementById('aiAskBtnFR');
@@ -791,6 +790,8 @@ async function askAI_FR(){
   if(btn){ btn.disabled = true; btn.textContent = 'Asking…'; }
 
   try{
+    const context = getFaithContext();
+
     const systemPrompt = `You are the Faith & Reason AI inside the BeAwarely platform.
 
 Your job:
@@ -811,10 +812,14 @@ When you respond, use this structure:
 4) Strongest counterpoint (steelman).
 5) Neutral rewrite (concise).`;
 
-    const ctx = buildFRContext();
     const fullPrompt = `${systemPrompt}
 
-${ctx}`;
+USER PROMPT:
+${prompt}
+
+PAGE CONTEXT:
+${context || '[no context]'}
+`;
 
     const resp = await fetch('https://ai.beawarely.com/api/generate', {
       method: 'POST',
@@ -832,10 +837,7 @@ ${ctx}`;
       })
     });
 
-    if(!resp.ok || !resp.body){
-      addNoteFR('AI error: backend unavailable.');
-      return;
-    }
+    if(!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
 
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
@@ -846,8 +848,10 @@ ${ctx}`;
       const { done, value } = await reader.read();
       if(done) break;
       buffer += decoder.decode(value, { stream: true });
+
       const lines = buffer.split('\n');
       buffer = lines.pop();
+
       for(const line of lines){
         if(!line.trim()) continue;
         try{
