@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentTab = "public";
   let user = null;
 
-  const { data: session } = await supabase.auth.getUser();
-  user = session?.user || null;
+    const { data: { user: u } } = await supabase.auth.getUser();
+  user = u || null;
 
   if (!user) {
     overlay.style.display = "flex";
@@ -138,9 +138,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const author = profiles?.find(pr => pr.id === p.author_id);
   const name = author?.username || [author?.first_name, author?.last_name].filter(Boolean).join(" ") || "User";
   const uid = author?.id || "";
-  let avatar = author?.avatar_url;
-  if (avatar && !avatar.startsWith("https")) {
-    avatar = `https://xzwpqyomqjzmiqsszwkg.supabase.co/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
+    let avatar = author?.avatar_url;
+  if (avatar && !/^https?:\/\//i.test(avatar)) {
+    avatar = `${window.SUPABASE_URL}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
   }
   avatar = avatar || "images/avatar-default.png";
   const time = new Date(p.created_at).toLocaleString();
