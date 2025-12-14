@@ -11,8 +11,7 @@
   }
 
   try {
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.supabase = client;
+        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     window.supabaseClient = client;
     console.log('[supabase-client] Supabase client initialized.');
   } catch (e) {
