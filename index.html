@@ -1378,9 +1378,9 @@ try {
       .eq('id', user.id)
       .single();
 
-    let avatarUrl = prof?.avatar_url;
-    if (avatarUrl && !avatarUrl.startsWith('https')) {
-      avatarUrl = `https://xzwpqyomqjzmiqsszwkg.supabase.co/storage/v1/object/public${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
+        let avatarUrl = prof?.avatar_url;
+    if (avatarUrl && !/^https?:\/\//i.test(avatarUrl)) {
+      avatarUrl = `${window.SUPABASE_URL}/storage/v1/object/public${avatarUrl.startsWith('/') ? '' : '/'}${avatarUrl}`;
     }
     avatarEl.src = avatarUrl || 'images/avatar-default.png';
   } catch (e) {
