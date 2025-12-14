@@ -548,11 +548,13 @@
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
 
-  <script>
+    <script>
+    (function(){
     // ===== Setup / client detection =====
     let supabaseClient = window.supabaseClient || null;
-    if (!supabaseClient && window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
-      try { supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch(e) {}
+    if (!supabaseClient) {
+      console.error('[suggest] Supabase client not initialized.');
+      return;
     }
 
     const els = {
@@ -875,7 +877,8 @@ try {
   }
 });
 
-    init();
+        init();
+    })();
   </script>
 </body>
 </html>
