@@ -867,6 +867,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     height: 26px;
     vertical-align: middle;
     transition: transform 0.3s ease;
+
+    /* Jeśli gdzieś globalnie masz filtr na ikony (np. w css/style.css),
+       to on robi je “czarne”. Tu to twardo wyłączamy. */
+    filter: none !important;
+    -webkit-filter: none !important;
   }
   .discord-icon:hover {
     transform: rotate(10deg) scale(1.1);
