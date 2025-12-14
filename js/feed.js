@@ -8,10 +8,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const postInput = document.getElementById("postContent");
   const loginRedirect = document.getElementById("feedLoginRedirect");
 
-  let currentTab = "public";
+    let currentTab = "public";
   let user = null;
 
-    const { data: { user: u } } = await supabase.auth.getUser();
+  const supabase = window.supabaseClient;
+  if (!supabase) {
+    console.error("[feed] Supabase client not initialized.");
+    return;
+  }
+
+  const { data: { user: u } } = await supabase.auth.getUser();
   user = u || null;
 
   if (!user) {
