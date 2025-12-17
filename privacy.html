@@ -21,12 +21,23 @@
       border:1px solid rgba(122,149,202,.18);
       border-radius:16px;
       padding:22px 18px;
+      line-height:1.55;
     }
     a{color:#9ad0ff;text-decoration:none}
+    a:hover{text-decoration:underline}
     .muted{color:#a7b4d9}
     ul{margin:10px 0 0 18px}
     li{margin:6px 0}
     code{background:rgba(0,0,0,.25); padding:2px 6px; border-radius:8px;}
+    h1{margin:0 0 6px}
+    h2{margin:18px 0 8px; font-size:1.1rem}
+    .note{
+      margin:12px 0 0;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(122,149,202,.18);
+      background:rgba(0,0,0,.18);
+    }
   </style>
 </head>
 <body>
@@ -35,26 +46,50 @@
 
     <div class="card">
       <h1>Privacy Policy</h1>
-      <p class="muted">Last updated: 2025-12-12</p>
+      <p class="muted">Last updated: 2025-12-17</p>
+
+      <div class="note">
+        This is a demo. Don’t post sensitive personal data. Content you submit may be visible to other users depending on where you post it.
+      </div>
 
       <h2>What this demo is</h2>
-      <p>This is a demo version of BeAwarely. Features and data handling may change.</p>
+      <p>BeAwarely is an experimental demo. Features, storage and moderation rules may change as development continues.</p>
 
-      <h2>What data may be collected</h2>
+      <h2>Data we may process</h2>
       <ul>
-        <li>Account data you provide (e.g. email, profile fields).</li>
-        <li>Content you create on the platform (e.g. posts, comments, messages where applicable).</li>
-        <li>Technical data necessary to run the site (e.g. basic logs, errors).</li>
+        <li><b>Account data</b> you provide (e.g. email, username, profile fields).</li>
+        <li><b>User content</b> you submit (e.g. posts, tool ideas, WorkVerify entries, Faith & Reason items, chat messages where applicable).</li>
+        <li><b>Technical data</b> needed to run and secure the service (e.g. basic logs, error reports, timestamps, abuse-prevention signals).</li>
+      </ul>
+
+      <h2>Why we process data</h2>
+      <ul>
+        <li>To provide login and core features of the platform.</li>
+        <li>To display your content inside the app where relevant.</li>
+        <li>To prevent abuse/spam and keep the service stable and secure.</li>
+        <li>To debug issues and improve reliability.</li>
       </ul>
 
       <h2>Where data is stored</h2>
-      <p>BeAwarely uses Supabase for authentication and database storage.</p>
+      <p>BeAwarely uses <b>Supabase</b> for authentication and database storage.</p>
 
       <h2>Cookies / local storage</h2>
-      <p>The site may use browser storage (e.g. <code>localStorage</code> / <code>sessionStorage</code>) to keep you logged in or to remember basic UI state.</p>
+      <p>
+        The site may use browser storage (e.g. <code>localStorage</code> / <code>sessionStorage</code>) to keep you logged in
+        or remember basic UI state (for example theme or redirects).
+      </p>
+
+      <h2>Data retention</h2>
+      <p>Demo data may be removed, reset, or migrated at any time during development.</p>
+
+      <h2>Your choices</h2>
+      <ul>
+        <li>You can stop using the service at any time.</li>
+        <li>If you want your data removed, contact the admin email below and include your account email/username.</li>
+      </ul>
 
       <h2>Contact</h2>
-      <p>If you have questions or want data removal, contact: <a href="mailto:admin@beawarely.com">admin@beawarely.com</a></p>
+      <p>Questions or data removal requests: <a href="mailto:admin@beawarely.com">admin@beawarely.com</a></p>
     </div>
   </div>
 </body>
