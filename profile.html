@@ -557,34 +557,71 @@
 
       const meta = user.user_metadata || {};
 
-     // Pobierz dane profilu z tabeli `profiles`
+     // Pobierz dane profilu z tabeli `profiles` (a jak nie ma — utwórz)
 let profile = null;
+
 try {
-  const { data, error } = await supabaseClient
+  const { data: existing, error: selErr } = await supabaseClient
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (error) {
-    console.warn('profiles fetch error:', error.message);
+  if (selErr) console.warn('profiles fetch error:', selErr.message);
+
+  if (!existing) {
+    const email = String(user.email || '');
+    const base =
+      (email.split('@')[0] || 'user')
+        .replace(/[^a-zA-Z0-9_]/g, '')
+        .toLowerCase() || 'user';
+
+    let candidate = base;
+
+    // 1) spróbuj wstawić
+    let ins = await supabaseClient.from('profiles').insert({
+      id: user.id,
+      username: candidate,
+      first_name: meta.first_name || null,
+      last_name: meta.last_name || null
+    });
+
+    // 2) jeśli username zajęty (unique) — spróbuj raz jeszcze z sufiksem
+    if (ins?.error) {
+      candidate = `${base}${Math.floor(Date.now() % 10000)}`;
+      ins = await supabaseClient.from('profiles').insert({
+        id: user.id,
+        username: candidate,
+        first_name: meta.first_name || null,
+        last_name: meta.last_name || null
+      });
+      if (ins?.error) console.warn('profiles insert error:', ins.error.message);
+    }
+
+    const { data: created } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    profile = created || null;
   } else {
-    profile = data;
+    profile = existing;
+  }
 
-    // Avatar (cache-busting)
-    const profilePic = document.getElementById("profile-pic");
-    let url = profile?.avatar_url || meta.avatar_url;
-    if (url) {
-  if (!url.startsWith("https")) {
-    url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
+  // Avatar (cache-busting)
+  const profilePic = document.getElementById("profile-pic");
+  let url = profile?.avatar_url || meta.avatar_url;
+  if (url) {
+    if (!url.startsWith("https")) {
+      url = `${SUPABASE_URL}/storage/v1/object/public${url.startsWith('/') ? '' : '/'}${url}`;
+    }
+    const bust = url.includes("?") ? "&" + Date.now() : "?" + Date.now();
+    profilePic.src = url + bust;
+  } else {
+    profilePic.src = "images/avatar-default.png";
   }
-  const bust = url.includes("?") ? "&" + Date.now() : "?" + Date.now();
-  profilePic.src = url + bust;
-} else {
-  profilePic.src = "images/avatar-default.png";
-}
-  }
-} catch(e) {
+} catch (e) {
   console.error('profiles query failed:', e);
 }
 
