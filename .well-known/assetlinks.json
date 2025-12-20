@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.beawarely.app",
+      "sha256_cert_fingerprints": ["TU_WKLEJ_TUTAJ_SHA256_Z_RELEASE"]
+    }
+  }
+]
