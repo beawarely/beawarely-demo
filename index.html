@@ -385,46 +385,57 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
 
-<!-- Capacitor bridge (w apce plik jest dostępny automatycznie) -->
-<script src="capacitor.js"></script>
+<!-- Capacitor bridge: MUSI BYĆ ABSOLUTNIE, bo masz <base href="https://beawarely.com/"> -->
+<script src="capacitor://localhost/capacitor.js"></script>
+<script src="http://localhost/capacitor.js"></script>
 
 <script>
   const supabase = window.supabaseClient;
 
-  // Deep link handler: https://beawarely.com/auth-callback.html?code=...
+  async function handleOAuthUrl(incomingUrl){
+    try{
+      const incoming = incomingUrl || '';
+      if (!incoming) return;
+
+      const u = new URL(incoming);
+      const code = u.searchParams.get('code');
+      const err = u.searchParams.get('error_description') || u.searchParams.get('error');
+
+      if (err) {
+        console.error('[deep-link] OAuth error:', err);
+        return;
+      }
+
+      if (!code) return;
+
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error) {
+        console.error('[deep-link] exchangeCodeForSession failed:', error.message);
+        return;
+      }
+
+      try { history.replaceState(null, '', '/index.html'); } catch {}
+      window.location.replace('/index.html');
+    } catch (e) {
+      console.error('[deep-link] handler crashed:', e);
+    }
+  }
+
   (function initCapacitorDeepLinkAuth(){
     try{
-      if (!window.Capacitor || !window.Capacitor.Plugins || !window.Capacitor.Plugins.App) return;
-      const App = window.Capacitor.Plugins.App;
+      const App = window.Capacitor?.Plugins?.App;
+      if (!App) return;
 
-      App.addListener('appUrlOpen', async (event) => {
-        try{
-          const incoming = event?.url || '';
-          if (!incoming) return;
+      // cold start (gdy apka była zamknięta i otwarta linkiem)
+      if (typeof App.getLaunchUrl === 'function') {
+        App.getLaunchUrl()
+          .then((res) => handleOAuthUrl(res?.url))
+          .catch(() => {});
+      }
 
-          const u = new URL(incoming);
-          const code = u.searchParams.get('code');
-          const err = u.searchParams.get('error_description') || u.searchParams.get('error');
-
-          if (err) {
-            console.error('[deep-link] OAuth error:', err);
-            return;
-          }
-
-          if (code) {
-            const { error } = await supabase.auth.exchangeCodeForSession(code);
-            if (error) {
-              console.error('[deep-link] exchangeCodeForSession failed:', error.message);
-              return;
-            }
-
-            // Wyczyść URL i odśwież UI
-            try { history.replaceState(null, '', '/index.html'); } catch {}
-            window.location.href = '/index.html';
-          }
-        } catch (e) {
-          console.error('[deep-link] handler crashed:', e);
-        }
+      // gdy apka już działa
+      App.addListener('appUrlOpen', (event) => {
+        handleOAuthUrl(event?.url);
       });
     } catch (e) {
       console.error('[deep-link] init failed:', e);
