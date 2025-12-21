@@ -387,8 +387,6 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
 <!-- Capacitor bridge: MUSI BYĆ ABSOLUTNIE, bo masz <base href="https://beawarely.com/"> -->
 <script src="capacitor://localhost/capacitor.js"></script>
-<script src="http://localhost/capacitor.js"></script>
-
 <script>
   const supabase = window.supabaseClient;
 
@@ -398,20 +396,39 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
       if (!incoming) return;
 
       const u = new URL(incoming);
-      const code = u.searchParams.get('code');
-      const err = u.searchParams.get('error_description') || u.searchParams.get('error');
 
+      const errQ = u.searchParams.get('error_description') || u.searchParams.get('error');
+      const hash = (u.hash && u.hash.startsWith('#')) ? u.hash.slice(1) : '';
+      const hp = new URLSearchParams(hash);
+      const errH = hp.get('error_description') || hp.get('error');
+
+      const err = errQ || errH;
       if (err) {
         console.error('[deep-link] OAuth error:', err);
         return;
       }
 
-      if (!code) return;
-
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
-      if (error) {
-        console.error('[deep-link] exchangeCodeForSession failed:', error.message);
-        return;
+      // 1) PKCE: ?code=...
+      const code = u.searchParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          console.error('[deep-link] exchangeCodeForSession failed:', error.message);
+          return;
+        }
+      } else {
+        // 2) Implicit: #access_token=...&refresh_token=...
+        const access_token = hp.get('access_token');
+        const refresh_token = hp.get('refresh_token');
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (error) {
+            console.error('[deep-link] setSession failed:', error.message);
+            return;
+          }
+        } else {
+          return; // nie ma ani code ani tokenów
+        }
       }
 
       try { history.replaceState(null, '', '/index.html'); } catch {}
@@ -426,14 +443,12 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
       const App = window.Capacitor?.Plugins?.App;
       if (!App) return;
 
-      // cold start (gdy apka była zamknięta i otwarta linkiem)
       if (typeof App.getLaunchUrl === 'function') {
         App.getLaunchUrl()
           .then((res) => handleOAuthUrl(res?.url))
           .catch(() => {});
       }
 
-      // gdy apka już działa
       App.addListener('appUrlOpen', (event) => {
         handleOAuthUrl(event?.url);
       });
@@ -604,6 +619,7 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
 
 <style>
 .feed-container {
+  position: relative;
   max-width: 700px;
   margin: 40px auto;
   background: rgba(255,255,255,0.05);
@@ -762,12 +778,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 </script>
 
 <script>
-// 🔒 Blokada wejścia w karty dla niezalogowanych
 document.addEventListener("DOMContentLoaded", async () => {
-  const { data } = await supabase.auth.getUser();
-  const user = data?.user || null;
-
-  // Lista stron, które mają być dostępne tylko dla zalogowanych
   const protectedLinks = [
     "chat.html",
     "workverify.html",
@@ -776,20 +787,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     "faith-reason.html"
   ];
 
-  // Szukamy linków w sidebarze
-  const sidebarLinks = document.querySelectorAll("a[href]");
-  sidebarLinks.forEach(link => {
-    const href = link.getAttribute("href");
-    if (protectedLinks.includes(href)) {
-      if (!user) {
-        link.addEventListener("click", (e) => {
-          e.preventDefault();
-          alert("🔒 Zaloguj się, aby uzyskać dostęp do tej sekcji.");
-        });
+  const sidebarLinks = Array.from(document.querySelectorAll("a[href]"))
+    .filter(link => protectedLinks.includes(link.getAttribute("href")));
+
+  let currentUser = null;
+
+  const updateLinkStyles = () => {
+    sidebarLinks.forEach(link => {
+      if (currentUser) {
+        link.style.opacity = "1";
+      } else {
         link.style.opacity = "0.5";
-        link.style.pointerEvents = "auto"; // by klik był aktywny, ale zablokowany JS-em
       }
-    }
+      link.style.pointerEvents = "auto";
+    });
+  };
+
+  // jeden stały handler (nie „doklejany” tylko gdy user==null)
+  sidebarLinks.forEach(link => {
+    if (link.dataset.authGuard === "1") return;
+    link.dataset.authGuard = "1";
+
+    link.addEventListener("click", (e) => {
+      if (!currentUser) {
+        e.preventDefault();
+        alert("🔒 Zaloguj się, aby uzyskać dostęp do tej sekcji.");
+      }
+    });
+  });
+
+  const { data } = await supabase.auth.getUser();
+  currentUser = data?.user || null;
+  updateLinkStyles();
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    currentUser = session?.user || null;
+    updateLinkStyles();
   });
 });
 </script>
@@ -1256,13 +1289,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const profileName = document.getElementById("profileName");
   const yourProfileBtn = document.getElementById("yourProfileBtn");
 
-  // sprawdź bieżącą sesję
-  supabase.auth.getUser().then(({ data }) => {
-    if (data?.user) {
-      showProfile(data.user);
-    } else {
-      showLoggedOut();
-    }
+    // sprawdź bieżącą sesję + reaguj na zmiany (OAuth wraca do apki i wtedy sesja wpada asynchronicznie)
+  const syncAuthUi = async () => {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) showProfile(data.user);
+    else showLoggedOut();
+  };
+
+  syncAuthUi();
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) showProfile(session.user);
+    else showLoggedOut();
   });
 
   // Handle password recovery redirect (hash contains type=recovery)
@@ -1425,12 +1463,17 @@ try {
     if (error) console.error("Login error:", error.message);
   });
 
-  async function showProfile(user) {
+    async function showProfile(user) {
     loginBtn.textContent = "Log Out";
     loginBtn.dataset.state = "loggedin";
     profileChip.style.display = "flex";
     if (yourProfileBtn) yourProfileBtn.style.display = "inline-flex";
+
+    const feedOverlay = document.getElementById('feed-login-overlay');
+    if (feedOverlay) feedOverlay.style.display = 'none';
+
     try {
+
   const { data: prof } = await supabase
     .from('profiles')
     .select('username')
@@ -1468,12 +1511,16 @@ try {
     }
   }
 
-  function showLoggedOut() {
+    function showLoggedOut() {
     loginBtn.textContent = "Log In";
     loginBtn.dataset.state = "loggedout";
     profileChip.style.display = "none";
     if (yourProfileBtn) yourProfileBtn.style.display = "none";
+
+    const feedOverlay = document.getElementById('feed-login-overlay');
+    if (feedOverlay) feedOverlay.style.display = 'flex';
   }
+
 });
 </script>
 
