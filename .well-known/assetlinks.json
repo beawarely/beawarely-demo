@@ -4,7 +4,9 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.beawarely.app",
-      "sha256_cert_fingerprints": ["TU_WKLEJ_TUTAJ_SHA256_Z_RELEASE"]
+      "sha256_cert_fingerprints": [
+        "DD:0A:CE:2D:CC:A0:DD:63:6C:88:16:05:03:22:CF:13:F2:68:8F:BF:67:68:36:88:66:A5:1B:7A:88:86:F6:F6"
+      ]
     }
   }
 ]
