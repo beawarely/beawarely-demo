@@ -53,6 +53,25 @@ The frontend talks to:
 
 ---
 
+## Android app (Capacitor)
+
+A simple Android wrapper (Capacitor) for testing — **release APK**, not a Play Store release.
+
+**Download APK:** https://beawarely.com/downloads/app-release.apk  
+(Repo path: `downloads/app-release.apk`)
+
+**Status:** test/demo build — not fully tested across many devices yet.
+
+**What works:**
+- Opens `beawarely.com` inside an Android WebView.
+- Basic Supabase login flow.
+- App/Deep Link callback for auth (`https://beawarely.com/auth-callback.html`) returns back into the app.
+
+**Not fully verified / needs testing:**
+- No full QA on multiple devices/Android versions yet (there may be edge-case bugs).
+
+---
+
 ## Frontend pages
 
 ### `index.html` – Landing page & app shell
