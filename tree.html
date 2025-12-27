@@ -316,10 +316,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const width = d3treeContainer.clientWidth;
   const height = d3treeContainer.clientHeight;
 
-  const ragPanel = document.getElementById("ragDetails");
+    const ragPanel = document.getElementById("ragDetails");
   const ragTitleEl = document.getElementById("ragTitle");
   const ragMetaEl = document.getElementById("ragMeta");
   const ragContentEl = document.getElementById("ragContent");
+
+  const toast = window.baToast || ((msg) => alert(msg));
   
     const svg = d3.select(d3treeContainer)
     .append("svg")
@@ -379,8 +381,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (ragContentEl) ragContentEl.textContent = doc.content || "";
       }
-    } catch (err) {
+        } catch (err) {
       console.error("RAG doc fetch error", err);
+      toast("❌ Error loading knowledge.", "error");
       if (ragPanel && ragTitleEl && ragContentEl) {
         ragPanel.hidden = false;
         ragTitleEl.textContent = "Error loading knowledge";
@@ -432,8 +435,9 @@ document.addEventListener("DOMContentLoaded", () => {
         name: "Knowledge Tree",
         children: children
       };
-    } catch (err) {
+        } catch (err) {
       console.error('RAG tree load failed:', err);
+      toast("❌ Error loading Knowledge Tree.", "error");
       data = {
         name: "Knowledge Tree",
         children: [
