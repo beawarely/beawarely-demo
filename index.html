@@ -479,6 +479,110 @@ body.dark-mode { background-color: rgba(0,0,0,0.85) !important; color:#fff; }
     }
   </script>
 
+  <style>
+    /* BeAwarely: unified toasts */
+    #baToastHost{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 100000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: min(560px, calc(100vw - 24px));
+      pointer-events: none;
+    }
+    .ba-toast{
+      pointer-events: auto;
+      background: rgba(10, 14, 25, 0.92);
+      border: 1px solid rgba(102,178,255,0.45);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      color: #fff;
+      font-size: 0.95rem;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .ba-toast button{
+      pointer-events: auto;
+      background: transparent;
+      border: 0;
+      color: var(--blue2);
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 8px;
+    }
+    .ba-toast.ba-error{ border-color: rgba(255,80,80,0.45); }
+    .ba-toast.ba-success{ border-color: rgba(0,204,102,0.45); }
+  </style>
+
+  <script>
+    // BeAwarely: unified UX helpers (toast + busy + safe async wrapper)
+    window.baToast = function(message, type = "info", timeout = 3500) {
+      try {
+        let host = document.getElementById("baToastHost");
+        if (!host) {
+          host = document.createElement("div");
+          host.id = "baToastHost";
+          (document.body || document.documentElement).appendChild(host);
+        }
+
+        const el = document.createElement("div");
+        el.className = "ba-toast" + (type ? (" ba-" + type) : "");
+
+        const msg = document.createElement("span");
+        msg.textContent = message;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "OK";
+
+        const remove = () => { try { el.remove(); } catch {} };
+        btn.addEventListener("click", remove);
+
+        el.appendChild(msg);
+        el.appendChild(btn);
+        host.appendChild(el);
+
+        if (timeout) setTimeout(remove, timeout);
+      } catch (e) {
+        console.error("baToast failed:", e);
+        alert(message);
+      }
+    };
+
+    window.baSetBusy = function(btn, busy, busyText) {
+      if (!btn) return;
+      if (busy) {
+        if (!btn.dataset.baOldText) btn.dataset.baOldText = btn.textContent;
+        btn.textContent = busyText || "Loading…";
+        btn.disabled = true;
+        btn.dataset.baBusy = "1";
+      } else {
+        btn.disabled = false;
+        if (btn.dataset.baOldText) btn.textContent = btn.dataset.baOldText;
+        delete btn.dataset.baBusy;
+      }
+    };
+
+    window.baRunWithBusy = async function(btn, busyText, fn) {
+      if (btn && btn.dataset.baBusy === "1") return;
+      baSetBusy(btn, true, busyText);
+      try {
+        return await fn();
+      } catch (e) {
+        console.error("Action failed:", e);
+        baToast("❌ " + (e?.message || String(e)), "error");
+      } finally {
+        baSetBusy(btn, false);
+      }
+    };
+  </script>
 </head>
 <body>
 <script>
@@ -811,7 +915,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     link.addEventListener("click", (e) => {
       if (!currentUser) {
         e.preventDefault();
-        alert("🔒 Zaloguj się, aby uzyskać dostęp do tej sekcji.");
+        baToast("🔒 Zaloguj się, aby uzyskać dostęp do tej sekcji.", "error");
       }
     });
   });
@@ -1126,7 +1230,7 @@ body.light-mode .tool-badge{background: rgba(0,0,0,.06); border-color: rgba(0,0,
   });
 
   function toggleGalaxyMode() {
-    alert("Galaxy brightness toggle coming soon!");
+    baToast("Galaxy brightness toggle coming soon!");
   }
 </script>
 
@@ -1352,85 +1456,93 @@ document.addEventListener("DOMContentLoaded", () => {
   if (closeForgotModal) closeForgotModal.addEventListener("click", () => {
     forgotModal.style.display = "none";
   });
-  if (forgotEmailForm) forgotEmailForm.addEventListener("submit", async (e) => {
+    if (forgotEmailForm) forgotEmailForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = forgotEmail.value.trim();
-    if (!email) { alert("Please enter your email."); return; }
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
-    if (error) { alert("❌ " + error.message); }
-    else { alert("✅ Reset link sent. Please check your email."); forgotModal.style.display = "none"; }
+    if (!email) { baToast("Please enter your email.", "error"); return; }
+
+    const btn = e.submitter || forgotEmailForm.querySelector('button[type="submit"]');
+    await baRunWithBusy(btn, "Sending…", async () => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+      if (error) { baToast("❌ " + error.message, "error"); return; }
+      baToast("✅ Reset link sent. Please check your email.", "success");
+      forgotModal.style.display = "none";
+    });
   });
 
   // logowanie emailem+hasłem
   emailLoginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email: loginEmail.value.trim(),
-      password: loginPassword.value
-    });
-    if (error) {
-      alert("❌ " + error.message);
-    } else {
+    const btn = e.submitter || emailLoginForm.querySelector('button[type="submit"]');
+
+    await baRunWithBusy(btn, "Signing in…", async () => {
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email: loginEmail.value.trim(),
+        password: loginPassword.value
+      });
+
+      if (error) { baToast("❌ " + error.message, "error"); return; }
+
       showProfile(data.user);
-loginModal.style.display = "none";
+      loginModal.style.display = "none";
 
-// === Auto-create profile record if missing ===
-try {
-  const user = data.user;
-  const { data: existing } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', user.id)
-    .maybeSingle();
+      // === Auto-create profile record if missing ===
+      try {
+        const user = data.user;
+        const { data: existing } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle();
 
-  if (!existing) {
-    let base = (user.email || '').split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase() || 'user';
-    let candidate = base;
-    let i = 1;
-    // ensure unique username
-    while (true) {
-      const { data: taken } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('username', candidate)
-        .maybeSingle();
-      if (!taken) break;
-      candidate = `${base}${i++}`;
-    }
+        if (!existing) {
+          let base = (user.email || '').split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').toLowerCase() || 'user';
+          let candidate = base;
+          let i = 1;
+          // ensure unique username
+          while (true) {
+            const { data: taken } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('username', candidate)
+              .maybeSingle();
+            if (!taken) break;
+            candidate = `${base}${i++}`;
+          }
 
-    await supabase.from('profiles').insert({
-      id: user.id,
-      username: candidate,
-      first_name: user.user_metadata?.full_name?.split(' ')[0] || null,
-      last_name: user.user_metadata?.full_name?.split(' ')[1] || null
+          await supabase.from('profiles').insert({
+            id: user.id,
+            username: candidate,
+            first_name: user.user_metadata?.full_name?.split(' ')[0] || null,
+            last_name: user.user_metadata?.full_name?.split(' ')[1] || null
+          });
+
+          console.log('✅ Profile created with username:', candidate);
+        }
+      } catch (e) {
+        console.warn('Profile auto-create failed:', e);
+      }
     });
-
-    console.log('✅ Profile created with username:', candidate);
-  }
-} catch (e) {
-  console.warn('Profile auto-create failed:', e);
-}
-    }
   });
 
   // rejestracja (sign up)
   emailSignupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (signupPassword.value.length < 8) { alert("❌ Password must be at least 8 characters."); return; }
-    if (signupPassword.value !== signupPasswordConfirm.value) {
-      alert("❌ Passwords do not match!");
-      return;
-    }
-    const { error, data } = await supabase.auth.signUp({
-      email: signupEmail.value.trim(),
-      password: signupPassword.value
-    });
-    if (error) {
-      alert("❌ " + error.message);
-    } else {
-      alert("✅ Account created! Please check your email.");
+    if (signupPassword.value.length < 8) { baToast("❌ Password must be at least 8 characters.", "error"); return; }
+    if (signupPassword.value !== signupPasswordConfirm.value) { baToast("❌ Passwords do not match!", "error"); return; }
+
+    const btn = e.submitter || emailSignupForm.querySelector('button[type="submit"]');
+    await baRunWithBusy(btn, "Creating…", async () => {
+      const { error } = await supabase.auth.signUp({
+        email: signupEmail.value.trim(),
+        password: signupPassword.value
+      });
+
+      if (error) { baToast("❌ " + error.message, "error"); return; }
+
+      baToast("✅ Account created! Please check your email.", "success");
       switchToLogin();
-    }
+    });
   });
 
   // Set new password (after recovery)
@@ -1438,21 +1550,27 @@ try {
     e.preventDefault();
     const p = resetPassword.value;
     const c = resetPasswordConfirm.value;
-    if (p.length < 8) { alert("❌ Password must be at least 8 characters."); return; }
-    if (p !== c) { alert("❌ Passwords do not match."); return; }
-    const { data, error } = await supabase.auth.updateUser({ password: p });
-    if (error) { alert("❌ " + error.message); return; }
-    alert("✅ Password updated successfully.");
-    resetModal.style.display = "none";
-    // clear hash from URL
-    try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch {}
-    // refresh profile UI
-    const { data: userData } = await supabase.auth.getUser();
-    if (userData?.user) { showProfile(userData.user); }
+
+    if (p.length < 8) { baToast("❌ Password must be at least 8 characters.", "error"); return; }
+    if (p !== c) { baToast("❌ Passwords do not match.", "error"); return; }
+
+    const btn = e.submitter || resetPasswordForm.querySelector('button[type="submit"]');
+    await baRunWithBusy(btn, "Saving…", async () => {
+      const { error } = await supabase.auth.updateUser({ password: p });
+      if (error) { baToast("❌ " + error.message, "error"); return; }
+
+      baToast("✅ Password updated successfully.", "success");
+      resetModal.style.display = "none";
+
+      try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch {}
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) { showProfile(userData.user); }
+    });
   });
 
   // logowanie przez Google
-  googleLoginBtn.addEventListener("click", async () => {
+    googleLoginBtn.addEventListener("click", async () => {
+  await baRunWithBusy(googleLoginBtn, "Redirecting…", async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -1462,9 +1580,13 @@ try {
         }
       }
     });
-    if (error) console.error("Login error:", error.message);
-  });
 
+    if (error) {
+      console.error("Login error:", error.message);
+      baToast("❌ " + error.message, "error");
+    }
+  });
+});
     async function showProfile(user) {
     loginBtn.textContent = "Log Out";
     loginBtn.dataset.state = "loggedin";
