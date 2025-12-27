@@ -392,6 +392,9 @@ const sb = window.supabaseClient;
 const CURRENT_KEY = 'ba_current_conv';
 let USER_ID = null;
 
+const toast = window.baToast || ((msg) => alert(msg));
+const runWithBusy = window.baRunWithBusy || (async (_btn, _busyText, fn) => fn());
+
 // sessionStorage = działa po odświeżeniu, znika po zamknięciu karty/okna
 function getCurrentId(){ return sessionStorage.getItem(CURRENT_KEY); }
 function setCurrentId(id){ sessionStorage.setItem(CURRENT_KEY, id); }
@@ -441,7 +444,7 @@ async function newConversation(title='New conversation'){
     .select('id')
     .single();
 
-  if (error) { console.warn('create conv error:', error); return null; }
+    if (error) { console.warn('create conv error:', error); toast("❌ " + (error.message || "Create conversation failed"), "error"); return null; }
   const convId = data.id;
   setCurrentId(convId);
   await renderServerHistory(convId);
@@ -458,7 +461,7 @@ async function renderServerHistory(selectedId){
     .eq('user_id', USER_ID)
     .order('updated_at', { ascending: false })
     .limit(100);
-  if (error) { console.warn('list conv error:', error); return; }
+    if (error) { console.warn('list conv error:', error); toast("❌ " + (error.message || "Failed to load conversations"), "error"); return; }
 
   const current = selectedId || getCurrentId();
   ul.innerHTML = '';
@@ -491,7 +494,7 @@ async function selectConversation(id){
     .select('role,content,created_at')
     .eq('conversation_id', id)
     .order('created_at', { ascending: true });
-  if (error) { console.warn('load msgs error:', error); return; }
+    if (error) { console.warn('load msgs error:', error); toast("❌ " + (error.message || "Failed to load messages"), "error"); return; }
 
   const msgsBox = document.getElementById('chatMessages');
   msgsBox.innerHTML = '';
@@ -520,16 +523,24 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(!item) return;
     const id = item.dataset.id;
 
-    if (target.classList.contains('del')){
-      const { error } = await sb
-        .from('chat_conversations')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', USER_ID);
-      if (error) { console.warn('delete conv error:', error); return; }
-      if (getCurrentId()===id){ localStorage.removeItem('ba_current_conv'); }
-      await renderServerHistory();
-      resetChatUI();
+        if (target.classList.contains('del')){
+      await runWithBusy(target, "Deleting…", async () => {
+        const { error } = await sb
+          .from('chat_conversations')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', USER_ID);
+
+        if (error) {
+          console.warn('delete conv error:', error);
+          toast("❌ " + (error.message || "Delete failed"), "error");
+          return;
+        }
+
+        if (getCurrentId()===id){ localStorage.removeItem('ba_current_conv'); }
+        await renderServerHistory();
+        resetChatUI();
+      });
       return;
     }
     await selectConversation(id);
