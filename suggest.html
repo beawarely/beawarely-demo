@@ -551,11 +551,14 @@
     <script>
     (function(){
     // ===== Setup / client detection =====
-    let supabaseClient = window.supabaseClient || null;
+       let supabaseClient = window.supabaseClient || null;
     if (!supabaseClient) {
       console.error('[suggest] Supabase client not initialized.');
       return;
     }
+
+    const toast = window.baToast || ((msg) => alert(msg));
+    const runWithBusy = window.baRunWithBusy || (async (_btn, _busyText, fn) => fn());
 
     const els = {
       guest: document.getElementById('guestCard'),
@@ -823,59 +826,82 @@ applyFilters();
       }
     }
 
-    // Submit (backend)
-els.form?.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  if (!supabaseClient) { els.msg.textContent = 'Backend not configured yet.'; return; }
-  els.submit.disabled = true; els.msg.textContent = 'Saving…';
-  try {
-    const { data:{ session } } = await supabaseClient.auth.getSession();
-    if(!session){ els.msg.textContent='Please sign in first.'; els.submit.disabled=false; return; }
+        // Submit (backend)
+    els.form?.addEventListener('submit', async (e)=>{
+      e.preventDefault();
 
-    const payload = {
-      title: document.getElementById('title').value.trim(),
-      details: document.getElementById('details').value.trim(),
-      tags: (document.getElementById('tags').value||'').split(/[\s,]+/).map(t=>t.trim()).filter(Boolean),
-      author: session.user.id, // FK -> profiles.id
-      status: 'pending'
-    };
+      if (!supabaseClient) {
+        els.msg.textContent = 'Backend not configured yet.';
+        toast('Backend not configured yet.', 'error');
+        return;
+      }
 
-    const { data: inserted, error } = await supabaseClient
-  .from('tool_ideas')
-  .insert(payload)
-  .select('id, title')
-  .maybeSingle();
+      const title = document.getElementById('title').value.trim();
+      if (!title) {
+        els.msg.textContent = 'Title is required.';
+        toast('Title is required.', 'error');
+        return;
+      }
 
-    if (error) {
-      els.msg.textContent = 'Save error: ' + (error.message || error);
-    } else {
-      // 🔹 Rejestruj aktywność w globalnym feedzie
-try {
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session?.user?.id && inserted?.id) {
-    await supabaseClient.from('activity_events').insert({
-      actor_id: session.user.id,
-      verb: 'suggested',
-      subject_type: 'tool_idea',
-      summary: `Suggested a new tool: "${inserted.title || payload.title || 'Unnamed idea'}"`
+      await runWithBusy(els.submit, "Saving…", async () => {
+        els.msg.textContent = 'Saving…';
+
+        const { data:{ session }, error: sessionErr } = await supabaseClient.auth.getSession();
+        if (sessionErr) {
+          console.warn('Session error:', sessionErr);
+          els.msg.textContent = 'Session error: ' + (sessionErr.message || sessionErr);
+          toast('❌ ' + (sessionErr.message || 'Session error'), 'error');
+          return;
+        }
+        if(!session){
+          els.msg.textContent = 'Please sign in first.';
+          toast('Please sign in first.', 'error');
+          return;
+        }
+
+        const payload = {
+          title,
+          details: document.getElementById('details').value.trim(),
+          tags: (document.getElementById('tags').value||'').split(/[\s,]+/).map(t=>t.trim()).filter(Boolean),
+          author: session.user.id, // FK -> profiles.id
+          status: 'pending'
+        };
+
+        const { data: inserted, error } = await supabaseClient
+          .from('tool_ideas')
+          .insert(payload)
+          .select('id, title')
+          .maybeSingle();
+
+        if (error) {
+          els.msg.textContent = 'Save error: ' + (error.message || error);
+          toast('❌ ' + (error.message || 'Save error'), 'error');
+          return;
+        }
+
+        // 🔹 Rejestruj aktywność w globalnym feedzie
+        try {
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          if (session?.user?.id && inserted?.id) {
+            await supabaseClient.from('activity_events').insert({
+              actor_id: session.user.id,
+              verb: 'suggested',
+              subject_type: 'tool_idea',
+              summary: `Suggested a new tool: "${inserted.title || payload.title || 'Unnamed idea'}"`
+            });
+          } else {
+            console.warn('Skipped activity_events insert — missing user or idea ID.');
+          }
+        } catch (e) {
+          console.warn('activity_events insert failed', e);
+        }
+
+        els.msg.textContent = 'Idea submitted!';
+        toast('✅ Idea submitted!', 'success');
+        els.form.reset();
+        if (typeof applyFilters === 'function') applyFilters();
+      });
     });
-  } else {
-    console.warn('Skipped activity_events insert — missing user or idea ID.');
-  }
-} catch (e) {
-  console.warn('activity_events insert failed', e);
-}
-
-      els.msg.textContent = 'Idea submitted!'; 
-      els.form.reset();
-      if (typeof applyFilters === 'function') applyFilters();
-    }
-  } catch(err){
-    els.msg.textContent = 'Error: '+(err?.message||'unknown');
-  } finally {
-    els.submit.disabled = false;
-  }
-});
 
         init();
     })();
