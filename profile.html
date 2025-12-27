@@ -495,7 +495,7 @@
 
     <div class="btn-group">
       <button class="btn secondary" onclick="window.location.href='profile-edit.html'">Edit Profile</button>
-      <button class="btn secondary" onclick="alert('Report – coming soon')">Report Issue</button>
+            <button class="btn secondary" onclick="baToast('Report – coming soon')">Report Issue</button>
       <button class="btn" onclick="logoutUser()">Log Out</button>
     </div>
 
@@ -509,7 +509,7 @@
       <option value="friends">👥 Friends</option>
       <option value="private">🔒 Private</option>
     </select>
-    <button class="btn" onclick="createPost()">Post</button>
+        <button class="btn" onclick="createPost(this)">Post</button>
   </div>
 </div>
 
@@ -540,8 +540,11 @@
 
   <script>
 
-    // Small helpers
+        // Small helpers
     const clamp = (n, min, max) => Math.max(min, Math.min(max, n|0));
+
+    const toast = window.baToast || ((msg) => alert(msg));
+    const runWithBusy = window.baRunWithBusy || (async (_btn, _busyText, fn) => fn());
 
         document.addEventListener('DOMContentLoaded', async () => {
       // ✅ Stabilna sesja (spójnie z index.html)
@@ -765,7 +768,7 @@ badges.forEach(text => {
         row.className='friend-row';
         row.innerHTML=`<span>${names[otherId]||'User'}</span>
           <div class="row-actions">
-            <button class="btn secondary" onclick="unfriend('${otherId}')">Unfriend</button>
+                        <button class="btn secondary" onclick="unfriend('${otherId}', this)">Unfriend</button>
           </div>`;
         list.appendChild(row);
       });
@@ -806,50 +809,62 @@ badges.forEach(text => {
         row.className='friend-row';
         row.innerHTML=`<span>${names[req.requester_id]||'User'}</span>
           <div class="row-actions">
-            <button class="btn" onclick="acceptRequest('${req.id}')">Accept</button>
-            <button class="btn secondary" onclick="rejectRequest('${req.id}')">Reject</button>
+                        <button class="btn" onclick="acceptRequest('${req.id}', this)">Accept</button>
+            <button class="btn secondary" onclick="rejectRequest('${req.id}', this)">Reject</button>
           </div>`;
         list.appendChild(row);
       });
       count.textContent = String(data.length);
     }
 
-    async function acceptRequest(requestId){
-  const { error } = await supabaseClient
-    .from('friendships')
-    .update({ status: 'accepted' })
-    .eq('id', requestId);
-  if(error){ alert('Failed: '+error.message); return; }
-  // natychmiastowe odświeżenie widoku
-  await loadFriendRequests();
-  await loadFriends();
-}
+        async function acceptRequest(requestId, btn){
+      await runWithBusy(btn, "Accepting…", async () => {
+        const { error } = await supabaseClient
+          .from('friendships')
+          .update({ status: 'accepted' })
+          .eq('id', requestId);
 
-async function rejectRequest(requestId){
-  const { error } = await supabaseClient
-    .from('friendships')
-    .update({ status: 'rejected' })
-    .eq('id', requestId);
-  if(error){ alert('Failed: '+error.message); return; }
-  // natychmiastowe odświeżenie widoku
-  await loadFriendRequests();
-}
+        if (error) { toast("❌ " + error.message, "error"); return; }
 
-    async function unfriend(otherUserId){
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      const uid = session?.user?.id;
-      if(!uid) return;
-
-      // usuń rekord (dowolna strona może usunąć)
-      const { error } = await supabaseClient
-        .from('friendships')
-        .delete()
-        .or(`and(requester_id.eq.${uid},addressee_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},addressee_id.eq.${uid})`);
-      if(error){ alert('Failed: '+error.message); return; }
-      await loadFriends();
+        toast("✅ Request accepted.", "success");
+        await loadFriendRequests();
+        await loadFriends();
+      });
     }
 
-        function subscribeRealtimeFeed(){
+    async function rejectRequest(requestId, btn){
+      await runWithBusy(btn, "Rejecting…", async () => {
+        const { error } = await supabaseClient
+          .from('friendships')
+          .update({ status: 'rejected' })
+          .eq('id', requestId);
+
+        if (error) { toast("❌ " + error.message, "error"); return; }
+
+        toast("✅ Request rejected.", "success");
+        await loadFriendRequests();
+      });
+    }
+
+    async function unfriend(otherUserId, btn){
+      await runWithBusy(btn, "Unfriending…", async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const uid = session?.user?.id;
+        if(!uid) { toast("Session expired, please log in again.", "error"); return; }
+
+        const { error } = await supabaseClient
+          .from('friendships')
+          .delete()
+          .or(`and(requester_id.eq.${uid},addressee_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},addressee_id.eq.${uid})`);
+
+        if (error) { toast("❌ " + error.message, "error"); return; }
+
+        toast("✅ Unfriended.", "success");
+        await loadFriends();
+      });
+    }
+
+    function subscribeRealtimeFeed(){
       try{
         supabaseClient
           .channel('realtime-activity')
@@ -862,30 +877,30 @@ async function rejectRequest(requestId){
     }
 
     // 📝 Create user post
-    async function createPost(){
+    async function createPost(btn){
       const { data: { session } } = await supabaseClient.auth.getSession();
       const user = session?.user;
-      if(!user) return alert("Session expired, please log in again.");
+      if(!user) { toast("Session expired, please log in again.", "error"); return; }
 
-      const content = document.getElementById('new-post-content').value.trim();
+      const contentEl = document.getElementById('new-post-content');
+      const content = contentEl.value.trim();
       const visibility = document.getElementById('post-visibility').value;
 
-      if(!content){ alert("Post cannot be empty."); return; }
+      if(!content){ toast("Post cannot be empty.", "error"); return; }
 
-      const { error } = await supabaseClient.from('user_posts').insert({
-        author_id: user.id,
-        content,
-        visibility
+      await runWithBusy(btn, "Posting…", async () => {
+        const { error } = await supabaseClient.from('user_posts').insert({
+          author_id: user.id,
+          content,
+          visibility
+        });
+
+        if(error){ toast("❌ Failed to publish: " + error.message, "error"); return; }
+
+        contentEl.value = "";
+        toast("✅ Post published!", "success");
+        await loadMyPosts();
       });
-
-      if(error){
-        alert("❌ Failed to publish: " + error.message);
-        return;
-      }
-
-      document.getElementById('new-post-content').value = "";
-      alert("✅ Post published!");
-      await loadMyPosts();
     }
 
     // 📥 Load posts
