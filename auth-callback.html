@@ -26,7 +26,7 @@
       const supabase = window.supabaseClient;
 
       if (!supabase) {
-        alert("Supabase client not loaded.");
+                (window.baToast ? window.baToast("Supabase client not loaded.", "error") : alert("Supabase client not loaded."));
         return;
       }
 
@@ -43,7 +43,7 @@
 
       if (error) {
         console.error("exchangeCodeForSession error:", error);
-        alert("Login failed: " + error.message);
+                (window.baToast ? window.baToast("❌ Login failed: " + error.message, "error") : alert("Login failed: " + error.message));
         return;
       }
 
