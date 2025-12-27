@@ -4,7 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Privacy Policy — BeAwarely</title>
-  <style>
+    <style>
+    :root{ --safe-top: env(safe-area-inset-top, 0px); }
+
     body{
       margin:0;
       font-family:'Segoe UI',sans-serif;
@@ -15,7 +17,31 @@
         radial-gradient(1000px 700px at 120% 0%, rgba(0,204,153,.10), transparent 55%),
         linear-gradient(180deg, #0b1220, #060912);
     }
-    .wrap{max-width:900px;margin:0 auto;padding:48px 18px;}
+    body.light-mode{
+      color:#0E1730;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(88,130,255,.16), transparent 60%),
+        radial-gradient(1000px 700px at 120% 0%, rgba(0,204,153,.10), transparent 55%),
+        linear-gradient(180deg, #b5e0ff, #ffffff);
+    }
+
+    /* Topbar */
+    #topbar{
+      position:fixed; top:calc(14px + var(--safe-top)); left:20px; right:20px; z-index:10000;
+      display:flex; justify-content:space-between; align-items:center; pointer-events:none;
+    }
+    #topbar .grp{ display:flex; gap:12px; align-items:center; pointer-events:auto; }
+    .pill{
+      background:rgba(255,255,255,.08); color:inherit; font-weight:700; text-decoration:none;
+      padding:7px 14px; border-radius:12px; border:1px solid rgba(122,149,202,.18);
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+      backdrop-filter: saturate(160%) blur(4px);
+      transition: background .2s ease, transform .15s ease, border-color .2s ease;
+    }
+    .pill:hover{ background:rgba(255,255,255,.14); transform: translateY(-1px); }
+
+    .wrap{max-width:900px;margin:0 auto;padding:calc(96px + var(--safe-top)) 18px 48px;}
+
     .card{
       background:rgba(18,22,35,.86);
       border:1px solid rgba(122,149,202,.18);
@@ -38,11 +64,37 @@
       border:1px solid rgba(122,149,202,.18);
       background:rgba(0,0,0,.18);
     }
-  </style>
+    </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const saved = localStorage.getItem('mode');
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      const isLight = saved ? (saved === 'light') : prefersLight;
+      document.body.classList.toggle('light-mode', isLight);
+      document.body.classList.toggle('dark-mode', !isLight);
+    });
+
+    function toggleLightDarkMode(){
+      const isLight = document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode', !isLight);
+      localStorage.setItem('mode', isLight ? 'light' : 'dark');
+    }
+  </script>
 </head>
 <body>
+    <!-- Topbar -->
+  <div id="topbar">
+    <div class="grp">
+      <a href="index.html" class="pill">← Back</a>
+    </div>
+    <div class="grp">
+      <button class="pill" onclick="toggleLightDarkMode()">🌓</button>
+      <a href="profile.html" class="pill">Your Profile</a>
+    </div>
+  </div>
+
   <div class="wrap">
-    <p><a href="index.html">← Back</a></p>
 
     <div class="card">
       <h1>Privacy Policy</h1>
