@@ -258,7 +258,7 @@
       if (!id || !act) return;
       const status = (act==='approve') ? 'approved' : 'rejected';
       const { error } = await supabaseClient.from("tool_ideas").update({ status }).eq("id", id);
-      if (error){ alert("Error: " + error.message); return; }
+            if (error){ baToast("❌ " + error.message, "error"); return; }
       loadPendingIdeas();
     });
     document.getElementById('btnRefreshIdeas').addEventListener('click', loadPendingIdeas);
@@ -357,7 +357,7 @@ const categories = (data?.categories || []).map(name => ({ id: name, name }));
             if (selectedCategory && (selectedCategory.id==id)) { selectedCategory=null; docsHeader.textContent='Documents'; docsCounter.textContent=''; docsTableBody.innerHTML=''; }
             await loadCategories();
           }
-        }catch(e){ alert('Delete failed: ' + e.message); }
+                }catch(e){ baToast('❌ Delete failed: ' + e.message, "error"); }
       } else if (act==='editCat'){
         const desc = decodeURIComponent(btn.getAttribute('data-desc')||'');
         openCategoryModal({ id, name, description: desc });
@@ -439,7 +439,7 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
 
         btnDocSearch.addEventListener('click', async ()=>{
       const q = (docSearchInput.value||'').trim();
-      if (!selectedCategory){ alert('Select a category first.'); return; }
+            if (!selectedCategory){ baToast('Select a category first.', "error"); return; }
       const catLabel = selectedCategory.name || selectedCategory.category || selectedCategory.id;
     });
 
@@ -453,7 +453,7 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
         try{
           const doc = await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`);
           openDocModal('View Document', doc, { readOnly:true });
-        }catch(e){ alert('View failed: ' + e.message); }
+                }catch(e){ baToast('❌ View failed: ' + e.message, "error"); }
       } else if (act==='editDoc'){
         try{
           const doc = await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`);
@@ -461,13 +461,13 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
             await fetchJson(`${API_BASE}/docs/${encodeURIComponent(id)}`, { method:'PUT', body: JSON.stringify(payload) });
             await loadDocsForCategory(selectedCategory);
           }});
-        }catch(e){ alert('Load failed: ' + e.message); }
+                }catch(e){ baToast('❌ Load failed: ' + e.message, "error"); }
       } else if (act==='delDoc'){
         if (!confirm('Delete this document?')) return;
         try{
           await fetchJson(`${API_BASE}/delete/${encodeURIComponent(id)}`, { method:'DELETE' });
           await loadDocsForCategory(selectedCategory);
-        }catch(e){ alert('Delete failed: ' + e.message); }
+                }catch(e){ baToast('❌ Delete failed: ' + e.message, "error"); }
       }
     });
 
@@ -502,7 +502,7 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
       modalSubmit.onclick = async ()=>{
         const name = document.getElementById('catName').value.trim();
         const description = document.getElementById('catDesc').value.trim();
-        if (!name){ alert('Name is required'); return; }
+                if (!name){ baToast('Name is required', "error"); return; }
         try{
           if (isEdit){
             // Prefer PUT /categories/:id
@@ -522,7 +522,7 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
           }
           closeModal();
           await loadCategories();
-        }catch(e){ alert('Save failed: ' + e.message); }
+                }catch(e){ baToast('❌ Save failed: ' + e.message, "error"); }
       };
       openModal();
     }
@@ -564,7 +564,7 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
           category: document.getElementById('docCategory').value.trim() || selectedCategory?.name || null,
           content:  document.getElementById('docContent').value
         };
-        if (!payload.title){ alert('Title is required'); return; }
+                if (!payload.title){ baToast('Title is required', "error"); return; }
         try{
           if (opts.saveHandler){
             await opts.saveHandler(payload);
@@ -574,7 +574,7 @@ document.getElementById('btnRagReindex').addEventListener('click', async ()=>{
             if (selectedCategory){ await loadDocsForCategory(selectedCategory); }
           }
           closeModal();
-        }catch(e){ alert('Save failed: ' + e.message); }
+                }catch(e){ baToast('❌ Save failed: ' + e.message, "error"); }
       };
       openModal();
     }
