@@ -6,7 +6,7 @@
   <title>Edit Profile – BeAwarely</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
-  <style>
+    <style>
     body{
       font-family:'Segoe UI',sans-serif;
       margin:0;padding:56px 16px 80px;
@@ -27,6 +27,46 @@
       background:#3f86ff;color:#fff;font-size:1rem;cursor:pointer}
     .btn:hover{filter:brightness(1.1)}
     .helper{font-size:.85rem;color:#a7b4d9;margin-top:6px}
+
+    /* BeAwarely: unified toasts */
+    #baToastHost{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 100000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: min(560px, calc(100vw - 24px));
+      pointer-events: none;
+    }
+    .ba-toast{
+      pointer-events: auto;
+      background: rgba(10, 14, 25, 0.92);
+      border: 1px solid rgba(102,178,255,0.45);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      color: #fff;
+      font-size: 0.95rem;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .ba-toast button{
+      pointer-events: auto;
+      background: transparent;
+      border: 0;
+      color: #66b2ff;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 6px 8px;
+    }
+    .ba-toast.ba-error{ border-color: rgba(255,80,80,0.45); }
+    .ba-toast.ba-success{ border-color: rgba(0,204,102,0.45); }
   </style>
 </head>
 <body>
@@ -62,15 +102,76 @@
     </form>
   </div>
 
-  <script>
+    <script>
     const supabaseClient = window.supabaseClient;
+
+    // BeAwarely: unified UX helpers (toast + busy + safe async wrapper)
+    window.baToast = function(message, type = "info", timeout = 3500) {
+      try {
+        let host = document.getElementById("baToastHost");
+        if (!host) {
+          host = document.createElement("div");
+          host.id = "baToastHost";
+          (document.body || document.documentElement).appendChild(host);
+        }
+
+        const el = document.createElement("div");
+        el.className = "ba-toast" + (type ? (" ba-" + type) : "");
+
+        const msg = document.createElement("span");
+        msg.textContent = message;
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "OK";
+
+        const remove = () => { try { el.remove(); } catch {} };
+        btn.addEventListener("click", remove);
+
+        el.appendChild(msg);
+        el.appendChild(btn);
+        host.appendChild(el);
+
+        if (timeout) setTimeout(remove, timeout);
+      } catch (e) {
+        console.error("baToast failed:", e);
+        alert(message);
+      }
+    };
+
+    window.baSetBusy = function(btn, busy, busyText) {
+      if (!btn) return;
+      if (busy) {
+        if (!btn.dataset.baOldText) btn.dataset.baOldText = btn.textContent;
+        btn.textContent = busyText || "Loading…";
+        btn.disabled = true;
+        btn.dataset.baBusy = "1";
+      } else {
+        btn.disabled = false;
+        if (btn.dataset.baOldText) btn.textContent = btn.dataset.baOldText;
+        delete btn.dataset.baBusy;
+      }
+    };
+
+    window.baRunWithBusy = async function(btn, busyText, fn) {
+      if (btn && btn.dataset.baBusy === "1") return;
+      baSetBusy(btn, true, busyText);
+      try {
+        return await fn();
+      } catch (e) {
+        console.error("Action failed:", e);
+        baToast("❌ " + (e?.message || String(e)), "error");
+      } finally {
+        baSetBusy(btn, false);
+      }
+    };
     
     document.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabaseClient.auth.getSession();
 const user = session?.user;
 
 if (!user) {
-  alert("Sesja wygasła. Zaloguj się ponownie.");
+    baToast("Sesja wygasła. Zaloguj się ponownie.", "error");
   location.replace('index.html?login=1');
   return;
 }
@@ -79,7 +180,7 @@ if (!user) {
 const { data: refreshedSession, error: refreshError } = await supabaseClient.auth.getSession();
 if (refreshError || !refreshedSession?.session) {
   console.error("❌ Błąd sesji Supabase:", refreshError);
-  alert("Nie można zweryfikować sesji. Zaloguj się ponownie.");
+    baToast("Nie można zweryfikować sesji. Zaloguj się ponownie.", "error");
   await supabaseClient.auth.signOut();
   location.replace('index.html?login=1');
   return;
@@ -99,126 +200,121 @@ if (refreshError || !refreshedSession?.session) {
         document.getElementById('email').value = user.email || "";
       }
 
-      document.getElementById('edit-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
+            document.getElementById('edit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-  const saveBtn = document.querySelector('.btn');
-  saveBtn.disabled = true;
-  const originalText = saveBtn.textContent;
-  saveBtn.textContent = "Saving...";
+        const saveBtn = document.querySelector('.btn');
 
-  // --- Walidacja nazwy użytkownika ---
-  const usernameInput = document.getElementById('username').value.trim();
-  const usernameRegex = /^[a-zA-Z0-9_]+$/;
-  if (!usernameRegex.test(usernameInput)) {
-    alert("Username może zawierać tylko litery, cyfry i podkreślenia (_).");
-    return;
-  }
-
-  const updates = {
-  first_name: document.getElementById('first').value.trim(),
-  last_name: document.getElementById('last').value.trim(),
-  username: usernameInput
-};
-
-// Pobierz aktualne dane profilu do porównania
-const { data: currentProfile } = await supabaseClient
-  .from('profiles')
-  .select('first_name, last_name, username')
-  .eq('id', user.id)
-  .single();
-
-// Sprawdź, czy coś faktycznie się zmieniło
-const hasChanges =
-  updates.first_name !== currentProfile.first_name ||
-  updates.last_name !== currentProfile.last_name ||
-  updates.username !== currentProfile.username;
-
-if (!hasChanges) {
-  alert("Brak zmian – nic nie zapisano.");
-  saveBtn.disabled = false;
-  saveBtn.textContent = originalText;
-  return;
-}
-
-  const summary = [];
-
-  // --- Aktualizacja danych profilu ---
-  const { error: updateError } = await supabaseClient
-    .from('profiles')
-    .update(updates)
-    .eq('id', user.id);
-
-  if (updateError) {
-    alert("❌ Nie udało się zaktualizować profilu: " + updateError.message);
-    return;
-  } else {
-    summary.push("✅ Dane profilu zapisane.");
-  }
-
-  // --- Zmiana hasła (opcjonalna) ---
-  const newPassword = document.getElementById('password').value;
-  if (newPassword) {
-    const { error: pwdError } = await supabaseClient.auth.updateUser({ password: newPassword });
-    if (pwdError) {
-      summary.push("⚠️ Hasło NIE zostało zmienione: " + pwdError.message);
-    } else {
-      summary.push("✅ Hasło zaktualizowane.");
-    }
-  }
-
-  // --- Upload avatara (opcjonalny) ---
-  const file = document.getElementById('avatar').files[0];
-  if (file) {
-    if (!file.type.startsWith('image/')) {
-      alert("Plik musi być obrazem (jpg, png, gif itp.)");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) { // 2 MB
-      alert("Plik jest za duży. Maksymalny rozmiar to 2 MB.");
-      return;
-    }
-
-    const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
-    const filePath = `${user.id}/avatar.${fileExt}`;
-    const { error: uploadError } = await supabaseClient.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      summary.push("⚠️ Błąd przy uploadzie avatara: " + uploadError.message);
-    } else {
-      const { data: publicData } = supabaseClient.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      if (publicData?.publicUrl) {
-        const avatarUrl = publicData.publicUrl;
-        const { error: avatarUrlErr } = await supabaseClient
-          .from('profiles')
-          .update({ avatar_url: avatarUrl })
-          .eq('id', user.id);
-
-        if (avatarUrlErr) {
-          summary.push("⚠️ Avatar wgrany, ale nie zapisano URL w profilu: " + avatarUrlErr.message);
-        } else {
-          summary.push("✅ Avatar zaktualizowany.");
+        // --- Walidacja (PRZED busy) ---
+        const usernameInput = document.getElementById('username').value.trim();
+        const usernameRegex = /^[a-zA-Z0-9_]+$/;
+        if (!usernameRegex.test(usernameInput)) {
+          baToast("Username może zawierać tylko litery, cyfry i podkreślenia (_).", "error");
+          return;
         }
-      } else {
-        summary.push("⚠️ Avatar wgrany, ale nie uzyskano publicznego URL.");
-      }
-    }
-  }
 
-  alert(summary.join("\n"));
-saveBtn.disabled = false;
-saveBtn.textContent = originalText;
+        const file = document.getElementById('avatar').files[0];
+        if (file) {
+          if (!file.type.startsWith('image/')) {
+            baToast("Plik musi być obrazem (jpg, png, gif itp.)", "error");
+            return;
+          }
+          if (file.size > 2 * 1024 * 1024) {
+            baToast("Plik jest za duży. Maksymalny rozmiar to 2 MB.", "error");
+            return;
+          }
+        }
 
-// Krótkie opóźnienie dla pełnej propagacji zmian w bazie
-setTimeout(() => {
-  location.href = "profile.html";
-}, 500);
-});
+        await baRunWithBusy(saveBtn, "Saving...", async () => {
+          const updates = {
+            first_name: document.getElementById('first').value.trim(),
+            last_name: document.getElementById('last').value.trim(),
+            username: usernameInput
+          };
+
+          // Pobierz aktualne dane profilu do porównania
+          const { data: currentProfile, error: currentErr } = await supabaseClient
+            .from('profiles')
+            .select('first_name, last_name, username')
+            .eq('id', user.id)
+            .single();
+
+          if (currentErr) throw new Error("Nie można pobrać aktualnego profilu: " + currentErr.message);
+
+          const hasChanges =
+            updates.first_name !== currentProfile.first_name ||
+            updates.last_name !== currentProfile.last_name ||
+            updates.username !== currentProfile.username;
+
+          if (!hasChanges) {
+            baToast("Brak zmian – nic nie zapisano.", "success");
+            return;
+          }
+
+          const summary = [];
+
+          // --- Aktualizacja danych profilu ---
+          const { error: updateError } = await supabaseClient
+            .from('profiles')
+            .update(updates)
+            .eq('id', user.id);
+
+          if (updateError) throw new Error("Nie udało się zaktualizować profilu: " + updateError.message);
+          summary.push("✅ Dane profilu zapisane.");
+
+          // --- Zmiana hasła (opcjonalna) ---
+          const newPassword = document.getElementById('password').value;
+          if (newPassword) {
+            const { error: pwdError } = await supabaseClient.auth.updateUser({ password: newPassword });
+            if (pwdError) {
+              summary.push("⚠️ Hasło NIE zostało zmienione: " + pwdError.message);
+            } else {
+              summary.push("✅ Hasło zaktualizowane.");
+            }
+          }
+
+          // --- Upload avatara (opcjonalny) ---
+          if (file) {
+            const fileExt = (file.name.split('.').pop() || 'png').toLowerCase();
+            const filePath = `${user.id}/avatar.${fileExt}`;
+
+            const { error: uploadError } = await supabaseClient.storage
+              .from('avatars')
+              .upload(filePath, file, { upsert: true });
+
+            if (uploadError) {
+              summary.push("⚠️ Błąd przy uploadzie avatara: " + uploadError.message);
+            } else {
+              const { data: publicData } = supabaseClient.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+              if (publicData?.publicUrl) {
+                const avatarUrl = publicData.publicUrl;
+                const { error: avatarUrlErr } = await supabaseClient
+                  .from('profiles')
+                  .update({ avatar_url: avatarUrl })
+                  .eq('id', user.id);
+
+                if (avatarUrlErr) {
+                  summary.push("⚠️ Avatar wgrany, ale nie zapisano URL w profilu: " + avatarUrlErr.message);
+                } else {
+                  summary.push("✅ Avatar zaktualizowany.");
+                }
+              } else {
+                summary.push("⚠️ Avatar wgrany, ale nie uzyskano publicznego URL.");
+              }
+            }
+          }
+
+          baToast(summary.join(" "), "success", 6000);
+
+          setTimeout(() => {
+            location.href = "profile.html";
+          }, 500);
+        });
+      });
+
     });
   </script>
 </body>
