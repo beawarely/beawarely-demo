@@ -256,7 +256,10 @@
 
     const SUPABASE_URL = window.__SUPABASE_URL || "https://xzwpqyomqjzmiqsszwkg.supabase.co";
     const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh6d3BxeW9tcWp6bWlxc3N6d2tnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjIxMTYsImV4cCI6MjA2OTk5ODExNn0.QbjDO1xifFkDuIAZZ9WHfGomgxwhanP9BQtgMrFqDgg";
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const toast = window.baToast || ((msg) => alert(msg));
+    const runWithBusy = window.baRunWithBusy || (async (_btn, _busyText, fn) => fn());
 
     const $ = sel => document.querySelector(sel);
     function escapeHTML(s){ return s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
@@ -340,9 +343,8 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
       else issues.forEach(i=> addNote(i));
 
       aiInputEl.value = "Please help me rewrite my satire draft to be privacy-safe, but keep style sharp.";
-      alert("Satire draft reviewed. See notes below.");
+            toast("Satire draft reviewed. See notes below.", "success");
     }
-
 
     async function init(){
       if(!expId){ previewBox.textContent = "No experience selected."; return; }
@@ -354,9 +356,10 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
 
       // AI Assist buttons
       if(aiReviewBtn) aiReviewBtn.addEventListener("click", reviewDraftLocally);
-      if(aiAddNoteBtn) aiAddNoteBtn.addEventListener("click", () => {
+            if(aiAddNoteBtn) aiAddNoteBtn.addEventListener("click", () => {
         const note = prompt("Add a note:");
         if(note && note.trim()) addNote(note.trim());
+        else toast("Type a note first.", "error");
       });
       if(aiClearNotesBtn) aiClearNotesBtn.addEventListener("click", () => {
         localStorage.removeItem(NOTES_KEY());
@@ -418,18 +421,24 @@ if (user && user.id && fact.author && String(user.id) === String(fact.author)) {
         satireBox.disabled = false;
         previewBox.textContent = "";
         $("#publishBtn").disabled = false;
-        $("#publishBtn").onclick = async () => {
-
+                $("#publishBtn").onclick = async () => {
+          const btn = $("#publishBtn");
           const txt = (satireBox.value || "").trim();
-          if (txt.length < 20) { alert("Satyra jest za krótka (min 20 znaków)."); return; }
-          const { error } = await sb.from("work_experiences_satire").insert({
-            original_id: fact.id,
-            author: user.id,
-            content: txt
+
+          if (txt.length < 20) { toast("Satyra jest za krótka (min 20 znaków).", "error"); return; }
+
+          await runWithBusy(btn, "Saving…", async () => {
+            const { error } = await sb.from("work_experiences_satire").insert({
+              original_id: fact.id,
+              author: user.id,
+              content: txt
+            });
+
+            if (error) { toast("❌ Zapis nie powiódł się: " + (error.message || error), "error"); return; }
+
+            toast("✅ Satyra zapisana.", "success");
+            location.reload();
           });
-          if (error) { alert("❌ Zapis nie powiódł się: " + (error.message || error)); return; }
-          alert("✅ Satyra zapisana.");
-          location.reload();
         };
       } else {
         // 3) brak satyry + user ≠ autor → komunikat
