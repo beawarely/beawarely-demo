@@ -228,9 +228,9 @@ body.light-mode {
 }
 
     /* wrapper – prawdziwa implementacja w module poniżej */
-    function submitExperience(){
+        function submitExperience(){
       if (window._submitExperienceImpl) return window._submitExperienceImpl();
-      alert('Loading…');
+      (window.baToast ? window.baToast('Loading…') : alert('Loading…'));
     }
   </script>
 </head>
@@ -347,7 +347,10 @@ body.light-mode {
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.44.4/dist/umd/supabase.min.js"></script>
   <script src="js/supabase-client.js"></script>
   <script>
-    const sb = window.supabaseClient;
+        const sb = window.supabaseClient;
+
+    const toast = window.baToast || ((msg) => alert(msg));
+    const runWithBusy = window.baRunWithBusy || (async (_btn, _busyText, fn) => fn());
 
         const $ = (sel)=> document.querySelector(sel);
     const companyEl = $('#companyName');
@@ -417,14 +420,14 @@ const draftKey = () => `${draftBaseKey()}_${Date.now()}`;
     function loadDraftByKey(key){
       try{
         const d = JSON.parse(localStorage.getItem(key) || 'null');
-        if(!d) return alert('Draft not found.');
+                if(!d) { toast('Draft not found.', 'error'); return; }
         companyEl.value = d.company || '';
         roleEl.value = d.role || '';
         textEl.value = d.content || '';
         if (typeof validateContentLength === 'function') validateContentLength();
-        alert('Draft loaded.');
+                toast('Draft loaded.', 'success');
       }catch(_){
-        alert('Cannot load this draft.');
+                toast('Cannot load this draft.', 'error');
       }
     }
 
@@ -475,12 +478,12 @@ window.deleteDraftKey = deleteDraftKey;
 
     function loadDraftIntoForm(){
       const d = readDraft();
-      if(!d){ alert('No saved draft.'); return; }
+            if(!d){ toast('No saved draft.', 'error'); return; }
       companyEl.value = d.company || '';
       roleEl.value = d.role || '';
       textEl.value = d.content || '';
       if (typeof validateContentLength === 'function') validateContentLength();
-      alert('Draft loaded.');
+            toast('Draft loaded.', 'success');
     }
 
     function saveDraftFromForm(){
@@ -490,10 +493,10 @@ window.deleteDraftKey = deleteDraftKey;
         content: (textEl.value||'').trim()
       };
       if(!payload.company && !payload.role && !payload.content){
-        alert('Draft is empty. Type something first.'); return;
+                toast('Draft is empty. Type something first.', 'error'); return;
       }
       writeDraft(payload);
-      alert('Draft saved locally.');
+            toast('Draft saved locally.', 'success');
     }
 
         /* ------- Mini AI (local helper + notes) ------- */
@@ -541,7 +544,7 @@ Task: ${question || 'Review tone/legality, spot red/green flags, suggest neutral
     async function runWorkVerifyAI(){
       const ctx = buildAIContext();
       if(!ctx || !aiResultEl){
-        alert('Please write a draft first.');
+                toast('Please write a draft first.', 'error');
         return;
       }
 
@@ -638,7 +641,7 @@ ${ctx}`;
     async function runLawAI(){
       const ctx = buildAIContext();
       if(!ctx || !aiResultEl){
-        alert('Please write a draft first.');
+                toast('Please write a draft first.', 'error');
         return;
       }
 
@@ -775,7 +778,7 @@ ${combined}`;
       else issues.forEach(i=> addNote(i));
 
       aiInputEl.value = 'Please help me rewrite my draft to be factual, neutral, and privacy-safe. Keep details, remove personal data and insults. Suggest red/green flags summary.';
-      alert('Draft reviewed. See notes below the dock.');
+            toast('Draft reviewed. See notes below the dock.', 'success');
     }
 
        async function getSession(){
@@ -851,7 +854,7 @@ ${combined}`;
 
 // Implementacja wysyłki – wołana przez wrapper w <head>
 
-    window._submitExperienceImpl = async function(){
+        window._submitExperienceImpl = async function(){
       // auto-save current form into draft before publishing
       writeDraft({
         company: (companyEl.value||'').trim(),
@@ -860,51 +863,52 @@ ${combined}`;
       });
 
       const session = await getSession();
-      if(!session){ alert('Please log in first.'); return; }
+      if(!session){ toast('Please log in first.', 'error'); return; }
 
       const company = (companyEl.value||'').trim();
       const role = (roleEl.value||'').trim();
       const content = (textEl.value||'').trim();
 
       if(content.length < 40){
-        alert('Please provide at least ~40 characters describing the situation.');
-        return;
-      }
-            if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Saving…'; }
-      reviewDraftLocally(); // 🔧 lokalna walidacja przed wysłaniem
-
-      const payload = {
-        author: session.user.id,
-        company: company || null,
-        role: role || null,
-        content
-        // status = 'pending' (domyślnie po stronie SQL)
-      };
-
-      const { data: ins, error } = await sb.from('work_experiences').insert(payload).select().single();
-      if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Publish'; }
-
-      if(error){
-        alert('Save failed: ' + error.message);
+        toast('Please provide at least ~40 characters describing the situation.', 'error');
         return;
       }
 
-      // 🔹 Rejestracja aktywności w globalnym feedzie
-      try{
-        await sb.from('activity_events').insert({
-          actor_id: session.user.id,
-          verb: 'added',
-          subject_type: 'work_experience',
-          subject_id: ins.id,
-          summary: `Added new WorkVerify entry: "${payload.role || 'Experience'}" at "${payload.company || 'unknown company'}"`
-        });
-      }catch(e){
-        console.warn('activity_events insert failed', e);
-      }
+      await runWithBusy(submitBtn, 'Saving…', async () => {
+        reviewDraftLocally(); // 🔧 lokalna walidacja przed wysłaniem
 
-      companyEl.value = ''; roleEl.value = ''; textEl.value = '';
-      alert('Thanks! Your experience was submitted and is pending moderation.');
-      loadRecent();
+        const payload = {
+          author: session.user.id,
+          company: company || null,
+          role: role || null,
+          content
+          // status = 'pending' (domyślnie po stronie SQL)
+        };
+
+        const { data: ins, error } = await sb.from('work_experiences').insert(payload).select().single();
+
+        if(error){
+          toast('Save failed: ' + error.message, 'error');
+          return;
+        }
+
+        // 🔹 Rejestracja aktywności w globalnym feedzie
+        try{
+          await sb.from('activity_events').insert({
+            actor_id: session.user.id,
+            verb: 'added',
+            subject_type: 'work_experience',
+            subject_id: ins.id,
+            summary: `Added new WorkVerify entry: "${payload.role || 'Experience'}" at "${payload.company || 'unknown company'}"`
+          });
+        }catch(e){
+          console.warn('activity_events insert failed', e);
+        }
+
+        companyEl.value = ''; roleEl.value = ''; textEl.value = '';
+        toast('Thanks! Your experience was submitted and is pending moderation.', 'success', 6000);
+        loadRecent();
+      });
     };
 
         // Init
@@ -935,7 +939,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       if(aiLawBtn) aiLawBtn.onclick = runLawAI;
       if(aiAddNoteBtn) aiAddNoteBtn.onclick = ()=> {
         const v = (aiInputEl.value||'').trim();
-        if(!v) return alert('Type a note first.');
+                if(!v) return toast('Type a note first.', 'error');
         addNote(v);
         aiInputEl.value = '';
       };
