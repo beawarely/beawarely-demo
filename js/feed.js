@@ -11,11 +11,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     let currentTab = "public";
   let user = null;
 
-  const supabase = window.supabaseClient;
+    const supabase = window.supabaseClient;
   if (!supabase) {
     console.error("[feed] Supabase client not initialized.");
     return;
   }
+
+  const toast = window.baToast || ((msg) => alert(msg));
+  const runWithBusy = window.baRunWithBusy || (async (_btn, _busyText, fn) => fn());
 
   const { data: { user: u } } = await supabase.auth.getUser();
   user = u || null;
@@ -43,15 +46,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadPosts();
   }
 
-  postBtn.addEventListener("click", async () => {
+    postBtn.addEventListener("click", async () => {
     const text = postInput.value.trim();
-    if (!text) return alert("Write something first.");
-    const { error } = await supabase.from("user_posts").insert([
-      { author_id: user.id, content: text, visibility: currentTab }
-    ]);
-    if (error) return alert("❌ " + error.message);
-    postInput.value = "";
-    await loadPosts();
+    if (!text) { toast("Write something first.", "error"); return; }
+
+    await runWithBusy(postBtn, "Posting…", async () => {
+      const { error } = await supabase.from("user_posts").insert([
+        { author_id: user.id, content: text, visibility: currentTab }
+      ]);
+      if (error) { toast("❌ " + error.message, "error"); return; }
+
+      postInput.value = "";
+      await loadPosts();
+    });
   });
 
   supabase
@@ -61,99 +68,112 @@ document.addEventListener("DOMContentLoaded", async () => {
     .on("postgres_changes", { event: "*", schema: "public", table: "work_experiences" }, loadPosts)
     .subscribe();
 
-  async function loadPosts() {
+    async function loadPosts() {
     if (!feedPosts) return;
     feedPosts.innerHTML = "<p style='opacity:.6;'>Loading...</p>";
 
-    const posts = [];
+    try {
+      const posts = [];
 
-    // USER POSTS
-    if (user) {
-      let queryPosts = supabase
-        .from("user_posts")
-        .select("id, author_id, content, created_at, visibility")
+      // USER POSTS
+      if (user) {
+        let queryPosts = supabase
+          .from("user_posts")
+          .select("id, author_id, content, created_at, visibility")
+          .order("created_at", { ascending: false });
+
+        queryPosts = currentTab === "friends"
+          ? queryPosts.eq("visibility", "friends")
+          : queryPosts.eq("visibility", "public");
+
+        const { data: userPosts, error: userPostsErr } = await queryPosts;
+
+        if (userPostsErr) {
+          toast("❌ " + userPostsErr.message, "error");
+        } else if (userPosts?.length) {
+          userPosts.forEach(p => posts.push({
+            type: "user_post",
+            author_id: p.author_id,
+            content: p.content,
+            created_at: p.created_at
+          }));
+        }
+      }
+
+      // TOOL IDEAS
+      const { data: tools, error: toolsErr } = await supabase
+        .from("tool_ideas")
+        .select("id, author, title, details, created_at, status")
         .order("created_at", { ascending: false });
 
-      queryPosts = currentTab === "friends"
-        ? queryPosts.eq("visibility", "friends")
-        : queryPosts.eq("visibility", "public");
-
-      const { data: userPosts } = await queryPosts;
-      if (userPosts?.length) {
-        userPosts.forEach(p => posts.push({
-          type: "user_post",
-          author_id: p.author_id,
-          content: p.content,
-          created_at: p.created_at
-        }));
+      if (toolsErr) {
+        toast("❌ " + toolsErr.message, "error");
+      } else if (tools?.length) {
+        tools.forEach(t => {
+          if (t.status === "approved" || (user && t.author === user.id)) {
+            posts.push({
+              type: "tool_idea",
+              author_id: t.author,
+              content: `<b>💡 ${escapeHtml(t.title || "Untitled")}</b><br>${escapeHtml(t.details || "")}`,
+              created_at: t.created_at
+            });
+          }
+        });
       }
-    }
 
-    // TOOL IDEAS
-    const { data: tools } = await supabase
-      .from("tool_ideas")
-      .select("id, author, title, details, created_at, status")
-      .order("created_at", { ascending: false });
+      // WORK EXPERIENCES
+      const { data: works, error: worksErr } = await supabase
+        .from("work_experiences")
+        .select("id, author, company, role, content, created_at, status")
+        .order("created_at", { ascending: false });
 
-    if (tools?.length) {
-      tools.forEach(t => {
-        if (t.status === "approved" || (user && t.author === user.id)) {
-          posts.push({
-            type: "tool_idea",
-            author_id: t.author,
-            content: `<b>💡 ${escapeHtml(t.title || "Untitled")}</b><br>${escapeHtml(t.details || "")}`,
-            created_at: t.created_at
-          });
+      if (worksErr) {
+        toast("❌ " + worksErr.message, "error");
+      } else if (works?.length) {
+        works.forEach(w => {
+          if (w.status === "approved" || (user && w.author === user.id)) {
+            posts.push({
+              type: "work_exp",
+              author_id: w.author,
+              content: `<b>⚖️ ${escapeHtml(w.role || "")}</b> at <i>${escapeHtml(w.company || "")}</i><br>${escapeHtml(w.content || "")}`,
+              created_at: w.created_at
+            });
+          }
+        });
+      }
+
+      posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      if (!posts.length) {
+        feedPosts.innerHTML = "<p style='opacity:.6;'>No posts yet.</p>";
+        return;
+      }
+
+      const ids = [...new Set(posts.map(p => p.author_id).filter(Boolean))];
+      const { data: profiles, error: profilesErr } = await supabase
+        .from("profiles")
+        .select("id, username, first_name, last_name, avatar_url")
+        .in("id", ids);
+
+      if (profilesErr) toast("❌ " + profilesErr.message, "error");
+
+      const supabaseUrl = window.SUPABASE_URL || "";
+
+      feedPosts.innerHTML = posts.map(p => {
+        const author = profiles?.find(pr => pr.id === p.author_id);
+        const name = author?.username || [author?.first_name, author?.last_name].filter(Boolean).join(" ") || "User";
+        const uid = author?.id || "";
+        let avatar = author?.avatar_url;
+
+        if (avatar && !/^https?:\/\//i.test(avatar)) {
+          avatar = `${supabaseUrl}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
         }
-      });
-    }
 
-    // WORK EXPERIENCES
-    const { data: works } = await supabase
-      .from("work_experiences")
-      .select("id, author, company, role, content, created_at, status")
-      .order("created_at", { ascending: false });
+        avatar = avatar || "images/avatar-default.png";
+        const time = new Date(p.created_at).toLocaleString();
+        const profileLink = uid ? `user.html?id=${uid}` : "#";
 
-    if (works?.length) {
-      works.forEach(w => {
-        if (w.status === "approved" || (user && w.author === user.id)) {
-          posts.push({
-            type: "work_exp",
-            author_id: w.author,
-            content: `<b>⚖️ ${escapeHtml(w.role || "")}</b> at <i>${escapeHtml(w.company || "")}</i><br>${escapeHtml(w.content || "")}`,
-            created_at: w.created_at
-          });
-        }
-      });
-    }
-
-    posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    if (!posts.length) {
-      feedPosts.innerHTML = "<p style='opacity:.6;'>No posts yet.</p>";
-      return;
-    }
-
-    const ids = [...new Set(posts.map(p => p.author_id).filter(Boolean))];
-    const { data: profiles } = await supabase
-  .from("profiles")
-  .select("id, username, first_name, last_name, avatar_url")
-  .in("id", ids);
-
-    feedPosts.innerHTML = posts.map(p => {
-  const author = profiles?.find(pr => pr.id === p.author_id);
-  const name = author?.username || [author?.first_name, author?.last_name].filter(Boolean).join(" ") || "User";
-  const uid = author?.id || "";
-    let avatar = author?.avatar_url;
-  if (avatar && !/^https?:\/\//i.test(avatar)) {
-    avatar = `${window.SUPABASE_URL}/storage/v1/object/public${avatar.startsWith('/') ? '' : '/'}${avatar}`;
-  }
-  avatar = avatar || "images/avatar-default.png";
-  const time = new Date(p.created_at).toLocaleString();
-
-  const profileLink = uid ? `user.html?id=${uid}` : "#";
-
-  return `
+        return `
     <div class="post">
       <div class="post-header">
         <a href="${profileLink}" style="text-decoration:none;color:inherit;">
@@ -169,7 +189,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="post-content">${p.content}</div>
     </div>
   `;
-}).join("");
+      }).join("");
+    } catch (e) {
+      console.error("[feed] loadPosts failed:", e);
+      feedPosts.innerHTML = "<p style='opacity:.6;'>Failed to load posts.</p>";
+      toast("❌ " + (e?.message || String(e)), "error");
+    }
   }
 
   function escapeHtml(str) {
