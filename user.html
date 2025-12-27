@@ -277,7 +277,10 @@
     <div class="posts" id="posts"></div>
   </div>
 
-  <script>
+    <script>
+
+  const toast = window.baToast || ((msg) => alert(msg));
+  const runWithBusy = window.baRunWithBusy || (async (_btn, _busyText, fn) => fn());
 
   document.addEventListener("DOMContentLoaded", async () => {
     const { data } = await supabaseClient.auth.getUser();
@@ -315,55 +318,88 @@ if (avatar) {
 } else {
   document.getElementById("avatar").src = "images/avatar-default.png";
 }
-    // Relacja znajomości
-const { data: rel } = await supabaseClient
-  .from("friendships")
-  .select("*")
-  .or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${viewedId}),and(requester_id.eq.${viewedId},addressee_id.eq.${currentUser.id})`)
-  .maybeSingle();
+        // Relacja znajomości
+    const btn = document.getElementById("friend-btn");
 
-const btn = document.getElementById("friend-btn");
-btn.style.display = "inline-block";
+    let rel = null;
 
-if (!rel) {
-  btn.textContent = "Dodaj do znajomych";
-  btn.onclick = async () => {
-    btn.disabled = true;
-    const { error } = await supabaseClient.from("friendships").insert({
-      requester_id: currentUser.id,
-      addressee_id: viewedId,
-      status: "pending"
-    });
-    if (error) {
-      btn.textContent = "Błąd";
-      console.warn(error.message);
+    // jeśli nie jesteś zalogowany: nie pokazuj akcji znajomych (żeby nie było crasha na currentUser.id)
+    if (!currentUser) {
+      btn.style.display = "none";
     } else {
-      btn.textContent = "Wysłano zaproszenie";
-    }
-  };
-} else if (rel.status === "pending") {
-  if (rel.addressee_id === currentUser.id) {
-    btn.textContent = "Akceptuj zaproszenie";
-    btn.onclick = async () => {
-      const { error } = await supabaseClient
+      btn.style.display = "inline-block";
+
+      const { data: relData, error: relErr } = await supabaseClient
         .from("friendships")
-        .update({ status: "accepted" })
-        .eq("id", rel.id);
-      if (error) {
-        btn.textContent = "Błąd";
+        .select("*")
+        .or(`and(requester_id.eq.${currentUser.id},addressee_id.eq.${viewedId}),and(requester_id.eq.${viewedId},addressee_id.eq.${currentUser.id})`)
+        .maybeSingle();
+
+      if (relErr) {
+        console.warn(relErr.message);
+        toast("❌ " + relErr.message, "error");
       } else {
+        rel = relData || null;
+      }
+
+      if (!rel) {
+        btn.textContent = "Dodaj do znajomych";
+        btn.onclick = async () => {
+          let ok = false;
+
+          await runWithBusy(btn, "Wysyłam…", async () => {
+            const { error } = await supabaseClient.from("friendships").insert({
+              requester_id: currentUser.id,
+              addressee_id: viewedId,
+              status: "pending"
+            });
+            if (error) {
+              console.warn(error.message);
+              toast("❌ " + error.message, "error");
+              return;
+            }
+            ok = true;
+          });
+
+          if (ok) {
+            btn.textContent = "Wysłano zaproszenie";
+            btn.disabled = true;
+          }
+        };
+      } else if (rel.status === "pending") {
+        if (rel.addressee_id === currentUser.id) {
+          btn.textContent = "Akceptuj zaproszenie";
+          btn.onclick = async () => {
+            let ok = false;
+
+            await runWithBusy(btn, "Akceptuję…", async () => {
+              const { error } = await supabaseClient
+                .from("friendships")
+                .update({ status: "accepted" })
+                .eq("id", rel.id);
+
+              if (error) {
+                toast("❌ " + error.message, "error");
+                return;
+              }
+
+              ok = true;
+            });
+
+            if (ok) {
+              btn.textContent = "Znajomi";
+              btn.disabled = true;
+            }
+          };
+        } else {
+          btn.textContent = "Wysłano zaproszenie";
+          btn.disabled = true;
+        }
+      } else if (rel.status === "accepted") {
         btn.textContent = "Znajomi";
         btn.disabled = true;
       }
-    };
-  } else {
-    btn.textContent = "Wysłano zaproszenie";
-    btn.disabled = true;
-  }
-} else if (rel.status === "accepted") {
-  btn.textContent = "Znajomi";
-  btn.disabled = true;
-}
+    }
 
     const { data: posts } = await supabaseClient
       .from("user_posts")
@@ -378,10 +414,10 @@ if (!rel) {
     }
 
     for (const p of posts) {
-  const visible =
+    const visible =
     p.visibility === "public" ||
     (p.visibility === "friends" && rel?.status === "accepted") ||
-    viewedId === currentUser.id;
+    (currentUser && viewedId === currentUser.id);
 
   if (!visible) continue;
 
