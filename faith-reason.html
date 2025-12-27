@@ -585,11 +585,13 @@
   </template>
 
   <script>
-    const PRESET_RELIGIONS = [
+        const PRESET_RELIGIONS = [
       "Christianity/Catholic","Christianity/Protestant","Christianity/Orthodox",
       "Islam/Sunni","Islam/Shia","Judaism","Hinduism","Buddhism",
       "Taoism","Confucianism","Indigenous/Folk","New Religious Movements","Other"
     ];
+
+    const toast = window.baToast || ((msg) => alert(msg));
 
     function el(tag, cls){ const n = document.createElement(tag); if (cls) n.className = cls; return n; }
 
@@ -721,14 +723,14 @@
 
     async function castVote(itemId, verdict){
       const { data: sess } = await supabaseClient.auth.getSession();
-      if (!sess?.session){ alert('Login required'); return; }
+            if (!sess?.session){ toast('Login required', 'error'); return; }
 
       // upsert by UNIQUE(item_id, voter)
       const { error } = await supabaseClient.from('faith_votes').upsert({
         item_id: itemId, voter: sess.session.user.id, verdict
       }, { onConflict: 'item_id,voter' });
 
-      if (error){ alert('Vote error: '+error.message); }
+            if (error){ toast('Vote error: ' + error.message, 'error'); }
       await refreshList();
     }
 
@@ -1055,7 +1057,7 @@ function initAIDockFR(){
 
   if(useDraft) useDraft.onclick = ()=>{ input.value = buildFRContext(); input.focus(); };
   if(review)   review.onclick   = reviewDraftWithMixtralFR;
-  if(addBtn)   addBtn.onclick   = ()=>{ const v=(input.value||'').trim(); if(!v) return alert('Type a note first.'); addNoteFR(v); input.value=''; };
+    if(addBtn)   addBtn.onclick   = ()=>{ const v=(input.value||'').trim(); if(!v) return toast('Type a note first.', 'error'); addNoteFR(v); input.value=''; };
   if(clearBtn) clearBtn.onclick = ()=>{ writeNotesFR([]); renderNotesFR(); };
   if(askBtn)   askBtn.onclick   = askAI_FR;
 }
